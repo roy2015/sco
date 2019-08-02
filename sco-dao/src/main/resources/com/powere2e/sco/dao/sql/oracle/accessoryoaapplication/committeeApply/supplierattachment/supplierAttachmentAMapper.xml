@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.powere2e.sco.interfaces.dao.accessoryoaapplication.committeeApply.supplierattachment.SupplierAttachmentADao">
+	<resultMap type="com.powere2e.sco.model.accessoryoaapplication.supplierattachment.SupplierAttachmentA" id="supplierAttachmentAMap">
+		<result property="applicationCode" column="applicationCode" />
+		<result property="intentionCode" column="intentionCode" />
+		<result property="intentionName" column="intentionName" />
+		<result property="intentionSupplierCode" column="intentionSupplierCode" />
+		<result property="intentionSupplierName" column="intentionSupplierName" />
+		<result property="accessoryCode" column="accessoryCode" />
+		<result property="supplierCode" column="supplierCode" />
+		<result property="supplierName" column="supplierName" />
+		<result property="enquiryCode" column="enquiryCode" />
+		<result property="enquiryCreated" column="enquiryCreated" />
+		<result property="enquiryCreateby" column="enquiryCreateby" />
+		<result property="quotedCode" column="quotedCode" />
+		<result property="quotedDate" column="quotedDate" />
+		<result property="quotedCreated" column="quotedCreated" />
+		<result property="fileType" column="fileType" />
+		<result property="elseType" column="elseType" />
+		<result property="fileName" column="fileName" />
+		<result property="path" column="path" />
+		<result property="createDate" column="createDate" />
+		<result property="createby" column="createby" />
+		<result property="updateDate" column="updateDate" />
+		<result property="updateby" column="updateby" />
+		<result property="createUserName" column="createUserName" />
+		<result property="updateUserName" column="updateUserName" />
+		<result property="recordCount" column="record_count" />
+	</resultMap>
+	<!-- 查询供应商证件 ——辅料OA(可分页) -->
+	<select id="searchSupplierAttachmentA" resultMap="supplierAttachmentAMap">
+		SELECT
+		<if test="page_count == null">
+			saa.application_code applicationCode,
+			saa.intention_code intentionCode,
+			ai.intention_name intentionName,
+			ais.intention_supplier_name intentionSupplierName,
+			saa.supplier_code supplierCode,
+			s.supplier_name supplierName,
+			ae.enquiry_code enquiryCode,
+			to_char(ae.created,'yyyy-mm-dd') enquiryCreated,(select
+			u.real_name from pub_user u where
+			u.user_id=ae.createby) enquiryCreateby,
+			aqe.quoted_code quotedCode,
+			to_char(aqe.quoted_date,'yyyy-mm-dd') quotedDate,
+			to_char(aqe.created,'yyyy-mm-dd') quotedCreated,
+			saa.path,
+      		saa.file_type fileType,
+      		saa.else_type elseType,
+     		saa.file_name fileName
+		</if>
+		<if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		from SUPPLIER_ATTACHMENT_A saa
+		inner join ACCESSORY_INTENTION ai on saa.intention_code=ai.intention_code
+		left join ACCESSORY_INTENTION_SUPPLIER ais on saa.supplier_code=ais.intention_supplier_code
+		left join supplier s on saa.supplier_code=s.supplier_code
+		left join ACCESSORY_ENQUIRY ae on saa.enquiry_code=ae.enquiry_code
+		left join ACCESSORY_QUOTED_ELECTRONIC aqe on saa.quoted_code=aqe.quoted_code
+		<where>
+			1=1
+			<if test="applicationCode != null and applicationCode!=''">
+				AND saa.application_code = #{applicationCode}
+			</if>
+			<if test="intentionCode != null and intentionCode!=''">
+				and saa.intention_code = #{intentionCode}
+			</if>
+			<if test="accessoryCode != null and accessoryCode!=''">
+				and saa.accessory_code= #{accessoryCode}
+			</if>
+			<if test="supplierCode != null and supplierCode!=''">
+				and saa.supplier_code= #{supplierCode}
+			</if>
+			<if test="enquiryCode != null and enquiryCode!=''">
+				and saa.enquiry_code= #{enquiryCode}
+			</if>
+			<if test="quotedCode != null and quotedCode!=''">
+				and saa.quoted_code= #{quotedCode}
+			</if>
+			<if test="fileType != null and fileType!=''">
+				and saa.file_type= #{fileType}
+			</if>
+			<if test="elseType != null and elseType!=''">
+				and saa.else_type= #{elseType}
+			</if>
+			<if test="fileName != null and fileName!=''">
+				and saa.file_name= #{fileName}
+			</if>
+			<if test="path != null and path!=''">
+				and saa.path = #{path}
+			</if>
+			<if test="created != null and created!=''">
+				and convert(varchar,saa.created,120) = #{created}
+			</if>
+			<if test="createby != null and createby!=''">
+				and saa.createby= #{createby}
+			</if>
+			<if test="updated != null and updated!=''">
+				and convert(varchar,saa.updated,120) = #{updated}
+			</if>
+			<if test="updateby != null and updateby!=''">
+				and saa.updateby= #{updateby}
+			</if>
+		</where>
+		<if test="page_count == null">
+			<if test="app_orderby !=null">
+				ORDER BY ${app_orderby}
+			</if>
+			<if test="app_orderby ==null">
+				ORDER BY saa.created DESC
+			</if>
+		</if>
+	</select>
+	<!-- 查询报价列表 -->
+	<select id="searchQuotedRecord" resultMap="supplierAttachmentAMap">
+		SELECT
+		<if test="page_count == null">
+			aqe.intention_code intentionCode,
+			ai.intention_name intentionName,
+			aqe.intention_supplier_code intentionSupplierCode,
+			ais.intention_supplier_name intentionSupplierName,
+			s.supplier_code supplierCode,
+			s.supplier_name supplierName,
+			aqe.enquiry_code enquiryCode,(select
+			u.real_name from pub_user u where
+			u.user_id=ae.createby) enquiryCreateby,
+			to_char(ae.created,'yyyy-mm-dd') enquiryCreated,
+			aqe.quoted_code quotedCode,
+			to_char(aqe.quoted_date,'yyyy-mm-dd') quotedDate,
+			to_char(aqe.created,'yyyy-mm-dd') quotedCreated
+		</if>
+		<if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		from ACCESSORY_QUOTED_ELECTRONIC aqe
+		left join ACCESSORY_ENQUIRY ae  on ae.enquiry_code=aqe.enquiry_code
+		left join  ACCESSORY_INTENTION ai  on ae.intention_code=ai.intention_code
+		left join ACCESSORY_INTENTION_SUPPLIER ais on aqe.intention_supplier_code=ais.intention_supplier_code
+		left join supplier s on aqe.intention_supplier_code=s.supplier_code
+		<where>
+			1=1
+			<if test="intentionCode != null and intentionCode !=''">
+				AND ai.intention_code = #{intentionCode}
+			</if>
+			<if test="supplierCode != null and supplierCode !=''">
+				AND aqe.intention_supplier_code=#{supplierCode} or aqe.supplier_code=#{supplierCode}
+			</if>
+			<if test="enquiryCode != null and enquiryCode !=''">
+				AND ae.enquiry_code=#{enquiryCode}
+			</if>
+			<if test="quotedCode != null and quotedCode !=''">
+				AND aqe.quoted_code  in 
+				<foreach collection="quotedCode" separator="," open="(" close=")" item="quotedCode">
+				    #{quotedCode}
+				</foreach>
+			</if>
+		</where>
+		<if test="page_count == null">
+			<if test="app_orderby !=null">
+				ORDER BY ${app_orderby}
+			</if>
+			<if test="app_orderby ==null">
+				ORDER BY aqe.created DESC
+			</if>
+		</if>
+	</select>
+	<!-- 根据主键查询某个供应商证件——辅料OA(可分页) -->
+	<select id="loadSupplierAttachmentA" resultMap="supplierAttachmentAMap">
+		SELECT
+		<if test="page_count == null">
+			t.application_code applicationCode,
+			t.intention_code intentionCode,
+			t.accessory_code accessoryCode,
+			t.supplier_code supplierCode,
+			t.enquiry_code enquiryCode,
+			t.quoted_code quotedCode,
+			t.file_type fileType,
+			t.else_type elseType,
+			t.file_name fileName,
+			t.path path,
+			to_char(t.created,'yyyy-mm-dd') createDate,
+			to_char(t.updated,'yyyy-mm-dd') updateDate,
+			(select u.real_name from pub_user u where u.user_id=t.createby) as createUserName,
+			(select u.real_name from pub_user u where u.user_id=t.updateby) as updateUserName
+		</if>
+		<if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		FROM supplier_attachment_a t
+		<where>
+			1=1
+			<if test="applicationCode != null and applicationCode!=''">
+				AND t.APPLICATION_CODE = #{applicationCode}
+			</if>
+		</where>
+		<if test="page_count == null">
+			<if test="app_orderby !=null">
+				ORDER BY ${app_orderby}
+			</if>
+			<if test="app_orderby ==null">
+				ORDER BY t.created DESC
+			</if>
+		</if>
+	</select>
+
+	<!-- 增加供应商证件——辅料OA -->
+	<insert id="saveSupplierAttachmentA" parameterType="hashmap">
+		INSERT INTO
+		supplier_attachment_a(application_code,intention_code,supplier_code,enquiry_code,quoted_code,file_type,else_type,file_name,path,created,createby)
+		VALUES(#{applicationCode},#{intentionCode},#{supplierCode},#{enquiryCode},#{quotedCode},#{fileType},#{elseType},#{fileName},#{path},#{app_created},#{app_create_by})
+	</insert>
+	<!-- 删除供应商证件——辅料OA -->
+	<delete id="deleteSupplierAttachmentA" parameterType="hashmap">
+		DELETE FROM
+		supplier_attachment_a
+		<where>
+	        <foreach collection="list" item="item" separator="OR" index="index">
+				(
+				application_code=#{item.applicationCode} 
+				and supplier_code=#{item.supplierCode} 
+				and intention_code=#{item.intentionCode}
+				and file_type=#{item.fileType}
+				and else_type=#{item.elseType}
+				)
+			</foreach>
+		</where>
+	</delete>
+	<!-- 删除供应商证件——辅料OA 根据oa申请单号-->
+	<delete id="deleteSupplierAttachmentAByCode" parameterType="hashmap">
+		DELETE FROM supplier_attachment_a
+		<where>
+	        application_code=#{applicationCode} 
+		</where>
+	</delete>
+</mapper>

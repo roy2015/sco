@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.powere2e.sco.interfaces.dao.masterdata.MerchandiseDao">
+	 <resultMap type="com.powere2e.sco.model.datamaintenance.purchaserdata.signedquantity.SignedQuantity" id="signedQty">
+		<result property="merchandiseCode" column="merchandiseCode"/>
+		<result property="merchandiseName" column="merchandiseName"/>
+		<result property="qlCode" column="qlCode"/>
+		<result property="qlCreated" column="qlCreated"/>
+		<result property="qlStartDate" column="qlStartDate"/>
+		<result property="qlPrice" column="qlPrice"/>
+		<result property="qlCount" column="qlCount"/>
+		<result property="qlStatus" column="qlStatus"/>
+		<result property="isSatisfyBeforeQl" column="isSatisfyBeforeQl"/>
+		<result property="gqCode" column="gqCode"/>
+		<result property="qlCreateby" column="qlCreateby"/>
+		<result property="remarks" column="remarks"/>
+		<result property="proCount" column="proCount" />
+		<result property="proPercent" column="proPercent" />
+		<result property="finshDate" column="finshDate" />
+		<result property="beyondCount" column="beyondCount" />
+		<result property="supplierCode" column="supplierCode" />
+		<result property="supplierName" column="supplierName" />
+		<result property="dxRoleName" column="dxRoleName" />
+		<result property="dlRoleName" column="dlRoleName" />
+		<result property="centreName" column="centreName" />
+		<result property="smallName" column="smallName" />
+		<result property="detailName" column="detailName" />
+		<result property="fineName" column="fineName" />
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    
+	<!-- 商品主数据查询 -->
+	<select id="listMerchandise" resultMap="signedQty">
+		SELECT
+			<if test="page_count == null">
+				m.merchandise_code merchandiseCode, m.merchandise_name merchandiseName,	
+				mp.purchase_price xPrice,
+				s.supplier_code supplierCode,s.supplier_name supplierName,
+				dx.role_name dxRoleName,dl.role_name dlRoleName, 
+				ct.centre_type_name centreName, sm.small_type_name smallName, 
+				dt.detail_type_name detailName, ft.fine_type_name fineName 
+			 </if>
+	    	 <if test="page_count != null">
+	       		count(1) AS record_count 
+	    	 </if>
+		FROM
+			merchandise m
+			LEFT JOIN supplier s ON m.supplier_code = s.supplier_code  <!-- 供应商表 -->
+			LEFT JOIN 				<!-- 如有重复数据,则视为数据不规范 -->
+			(		
+				 SELECT 
+					b.merchandise_code,b.supplier_code,
+					b.price_date,  b.purchase_price 
+				  FROM
+				  (
+				    SELECT 
+						pp.merchandise_code,
+						pp.supplier_code,
+						MAX(price_date) price_date 
+				    FROM 	
+				      	merchandise_purchase_price pp
+				    WHERE 
+				      	pp.warehouse_code = 'X001' <!-- 商品进货价格信息 -->
+				    GROUP BY merchandise_code, supplier_code 
+				  ) a 
+				  LEFT JOIN merchandise_purchase_price b ON a.merchandise_code = b.merchandise_code 
+				  	AND a.supplier_code = b.supplier_code 
+				  	AND a.price_date = b.price_date and b.warehouse_code = 'X001'
+			)mp ON m.merchandise_code = mp.merchandise_code 
+				AND m.supplier_code = mp.supplier_code
+			LEFT JOIN merchandise_role mr on mr.merchandise_code = m.merchandise_code <!-- 商品角色中间表 -->
+			LEFT JOIN merchandise_dx_role dx ON mr.dx_role_code = dx.role_code  <!-- 定性角色表 -->
+			LEFT JOIN merchandise_dl_role dl ON mr.dl_role_code = dl.role_code  <!-- 定量角色表 -->
+			LEFT JOIN merchandise_centre_type ct ON m.centre_type_code = ct.centre_type_code <!-- 中分类 -->
+			LEFT JOIN merchandise_small_type sm ON m.small_type_code = sm.small_type_code <!-- 小分类 -->
+			LEFT JOIN merchandise_detail_type dt ON m.detail_type_code = dt.detail_type_code <!-- 明细类 -->
+			
+			<!-- 查询细分类需关联意向品 -->
+		    LEFT JOIN intention_supplier_merchandise ism ON ism.merchandise_code = m.merchandise_code 
+           		AND ism.supplier_code = m.supplier_code											
+			LEFT JOIN merchandise_intention mi ON ism.intention_code = mi.intention_code
+    
+			LEFT JOIN merchandise_fine_type ft ON dt.detail_type_code = ft.detail_type_code 
+				AND mi.fine_type_code = ft.fine_type_code <!-- 细分类 -->
+				
+			WHERE 1=1 
+			<if test="supplierCode != null and supplierCode != ''">
+				AND UPPER(s.supplier_code) like UPPER('%'||#{supplierCode}||'%') 
+			</if>
+			<if test="supplierName != null and supplierName != ''">
+				AND UPPER(s.supplier_name) like UPPER('%'||#{supplierName}||'%') 
+			</if>
+			<if test="merchandiseCode != null and merchandiseCode != ''">
+				AND UPPER(m.merchandise_code) like UPPER('%'||#{merchandiseCode}||'%') 
+			</if>
+			<!-- 多个merchandiseCode查询时 -->
+			<if test="merchandiseCodes != null and merchandiseCodes != ''">
+				AND m.merchandise_code in (${merchandiseCodes}) 
+			</if>
+			<!-- 多个supplierCodes查询时 -->
+			<if test="supplierCodes != null and supplierCodes != ''">
+				AND s.supplier_code in (${supplierCodes}) 
+			</if>
+			<if test="merchandiseName != null and merchandiseName != ''">
+				AND UPPER(m.merchandise_name) like UPPER('%'||#{merchandiseName}||'%') 
+			</if>
+			<if test="centreType != null and centreType != ''">
+				AND UPPER(m.centre_type_code) like UPPER(#{centreType}) 
+			</if>
+			<if test="smallType != null and smallType != ''">
+				AND UPPER(m.small_type_code) like UPPER(#{smallType}) 
+			</if>
+			<if test="detailType != null and detailType != ''">
+				AND UPPER(m.detail_type_code) like UPPER(#{detailType}) 
+			</if>
+			<if test="fineType != null and fineType != ''">
+				AND UPPER(ft.fine_type_code) like UPPER(#{fineType}) 
+			</if>
+			<if test="dxRoleCode != null and dxRoleCode != ''">
+				AND UPPER(dx.role_code) like UPPER(#{dxRoleCode}) 
+			</if>
+			<if test="dlRoleCode != null and dlRoleCode != ''">
+				AND UPPER(dl.role_code) like UPPER(#{dlRoleCode}) 
+			</if>
+		<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY m.merchandise_code DESC
+    		</if>
+    	</if>
+	</select>
+	
+	<!-- 根据一个商品id查询主数据 -->
+	<select id="loadMerchandise" resultMap="signedQty">
+		SELECT
+			<if test="page_count == null">
+				m.merchandise_code merchandiseCode, m.merchandise_name merchandiseName,
+				s.supplier_code supplierCode,s.supplier_name supplierName,
+				dx.role_name dxRoleName,dl.role_name dlRoleName, 
+				ct.centre_type_name centreName, sm.small_type_name smallName, 
+				dt.detail_type_name detailName, ft.fine_type_name fineName 
+			 </if>
+	    	 <if test="page_count != null">
+	       		count(1) AS record_count 
+	    	 </if>
+		FROM
+			merchandise m 
+			LEFT JOIN supplier s ON m.supplier_code = s.supplier_code  <!-- 供应商表 -->
+			left join merchandise_role mr ON mr.merchandise_code = m.merchandise_code <!-- 商品角色中间表 -->
+			LEFT JOIN merchandise_dx_role dx ON mr.dx_role_code = dx.role_code  <!-- 定性角色表 -->
+			LEFT JOIN merchandise_dl_role dl ON mr.dl_role_code = dl.role_code  <!-- 定量角色表 -->
+			LEFT JOIN merchandise_centre_type ct ON m.centre_type_code = ct.centre_type_code <!-- 中分类 -->
+			LEFT JOIN merchandise_small_type sm ON m.small_type_code = sm.small_type_code <!-- 小分类 -->
+			LEFT JOIN merchandise_detail_type dt ON m.detail_type_code = dt.detail_type_code <!-- 明细类 -->
+			
+			<!-- 查询细分类需关联意向品 -->
+		    LEFT JOIN intention_supplier_merchandise ism ON ism.merchandise_code = m.merchandise_code 
+           		AND ism.supplier_code = m.supplier_code											
+			LEFT JOIN merchandise_intention mi ON ism.intention_code = mi.intention_code
+    
+			LEFT JOIN merchandise_fine_type ft ON dt.detail_type_code = ft.detail_type_code 
+				AND mi.fine_type_code = ft.fine_type_code <!-- 细分类 -->
+		WHERE 1=1 
+			<if test= "roleCode != null and roleCode!=''">
+				AND  m.merchandise_code = #{roleCode}
+			</if>
+			<if test= "supplierCode != null and supplierCode!=''">
+				AND  m.supplier_code = #{supplierCode}
+			</if>
+		<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY m.sync_date DESC
+    		</if>
+    	</if>
+	</select>
+	<!-- 商品销售方式查询 -->
+	<select id="listMerchandiseStorageForm" resultType="String">
+		SELECT
+			distinct m.storage_form storageForm
+		FROM
+			merchandise m 
+		ORDER BY storage_form 
+	</select>
+	
+	<!-- 查询商品的编号 -->
+	<select id="listMerchandiseCode" resultType="String">
+		SELECT 
+			distinct merchandise_code merchandiseCode
+		FROM 
+			merchandise 
+		WHERE   1=1 
+			<!-- 多个merchandiseCode查询时 -->
+			<if test="merchandiseCodes != null and merchandiseCodes != ''">
+				AND m.merchandise_code in (${merchandiseCodes}) 
+			</if>
+			<if test="merchandiseName != null and merchandiseName != ''">
+				AND UPPER(m.merchandise_name) like UPPER('%'||#{merchandiseName}||'%') 
+			</if>
+			<if test="centreType != null and centreType != ''">
+				AND UPPER(m.centre_type_code) like UPPER(#{centreType}) 
+			</if>
+			<if test="smallType != null and smallType != ''">
+				AND UPPER(m.small_type_code) like UPPER(#{smallType}) 
+			</if>
+			<if test="detailType != null and detailType != ''">
+				AND UPPER(m.detail_type_code) like UPPER(#{detailType}) 
+			</if>
+	</select>
+	 
+</mapper>

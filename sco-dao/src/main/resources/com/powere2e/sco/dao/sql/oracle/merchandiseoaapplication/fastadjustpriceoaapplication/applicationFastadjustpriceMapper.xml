@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.merchandiseoaapplication.fastadjustpriceoaapplication.ApplicationFastadjustpriceDao">
+	<resultMap type="com.powere2e.sco.model.merchandiseoaapplication.fastadjustpriceoaapplication.ApplicationFastadjustprice" id="applicationFastadjustpriceMap">
+		<result property="reportCode" column="reportCode"/>
+		<result property="applicationCode" column="applicationCode"/>
+		<result property="merchandiseCode" column="merchandiseCode"/>
+		<result property="merchandiseName" column="merchandiseName"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="supplierName" column="supplierName"/>
+		<result property="reportFileName" column="reportFileName"/>
+		<result property="path" column="path"/>
+		<result property="uploadDate" column="uploadDate"/>
+		<result property="created" column="created"/>
+		<result property="createby" column="createby"/>
+		<result property="updated" column="updated"/>
+		<result property="updateby" column="updateby"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    
+     <!--缺失文件说明的resultMap-->
+    <resultMap type="com.powere2e.sco.model.merchandiseoaapplication.ApplicationLackFileM" id="applicationLackFileMMap">
+		<result property="applicationCode" column="applicationCode"/>
+		<result property="merchandiseCode" column="merchandiseCode"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="lackFileName" column="lackFileName"/>
+		<result property="lackFileVersions" column="lackFileVersions"/>
+		<result property="lackFileCause" column="lackFileCause"/>
+    </resultMap>
+    
+   	 <!-- 查询新品引进OA申请列表(可分页)-->
+     <select id="queryNotHaveReportMerchandiseFastadjustprice" resultMap="applicationLackFileMMap">
+     	
+			
+			SELECT t3.application_code   applicationCode,
+			       t3.merchandise_code   merchandiseCode,
+			       t3.supplier_code      supplierCode
+			FROM   application_fastadjustprice t3
+			WHERE  t3.application_code=#{applicationCode}
+     </select>
+    
+    <!-- 查询申请报告(快速调价)(可分页)-->
+    <select id="searchApplicationFastadjustprice" resultMap="applicationFastadjustpriceMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.application_code applicationCode,t.merchandise_code merchandiseCode,t.supplier_code supplierCode,t.report_file_name reportFileName,t.path path,t.upload_date uploadDate
+       		,t.created,	t.updated ,(mi.INTENTION_NAME||m.merchandise_name)  merchandiseName,(s.supplier_name||mis.intention_supplier_name) supplierName
+			,(select u.login_name from pub_user u where u.user_id=t.createby) as createUserName,
+           	(select u.login_name from pub_user u where u.user_id=t.updateby) as updateUserName
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM application_fastadjustprice t
+      		left join MERCHANDISE_INTENTION mi on mi.INTENTION_CODE=t.merchandise_code
+      		left join MERCHANDISE m on m.merchandise_code=t.merchandise_code
+      		left join MERCHANDISE_INTENTION_SUPPLIER mis on mis.INTENTION_SUPPLIER_CODE=t.supplier_code
+      		left join SUPPLIER s on s.supplier_code=t.supplier_code
+    	<where>
+    		1=1
+	    	<if test= "applicationCode != null and applicationCode!=''">
+			AND t.application_code = #{applicationCode}
+			</if>
+	    	<if test= "merchandiseCode != null and merchandiseCode!=''">
+			AND UPPER(t.merchandise_code) LIKE UPPER('%'||#{merchandiseCode}||'%')
+			</if>
+	    	<if test= "supplierCode != null and supplierCode!=''">
+			AND UPPER(t.supplier_code) LIKE UPPER('%'||#{supplierCode}||'%')
+			</if>
+	    	<if test= "reportFileName != null and reportFileName!=''">
+			AND UPPER(t.report_file_name) LIKE UPPER('%'||#{reportFileName}||'%')
+			</if>
+	    	<if test= "path != null and path!=''">
+			AND UPPER(t.path) LIKE UPPER('%'||#{path}||'%')
+			</if>
+	    	<if test= "uploadDate != null and uploadDate!=''">
+			AND	convert(varchar,t.upload_date,120) LIKE (#{uploadDate})
+			</if>
+	    	<if test= "created != null and created!=''">
+			AND	convert(varchar,t.created,120) LIKE (#{created})
+			</if>
+	    	<if test= "createby != null and createby!=''">
+			AND UPPER(t.createby) LIKE UPPER('%'||#{createby}||'%')
+			</if>
+	    	<if test= "updated != null and updated!=''">
+			AND	convert(varchar,t.updated,120) LIKE (#{updated})
+			</if>
+	    	<if test= "updateby != null and updateby!=''">
+			AND UPPER(t.updateby) LIKE UPPER('%'||#{updateby}||'%')
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.created DESC
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 根据主键查询某个申请报告(快速调价)(可分页)-->
+    <select id="loadApplicationFastadjustprice" resultMap="applicationFastadjustpriceMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.application_code applicationCode,t.merchandise_code merchandiseCode,t.supplier_code supplierCode,t.report_file_name reportFileName,t.path path,t.upload_date uploadDate
+       		,t.created,	t.updated 
+		   ,(select u.login_name from pub_user u where u.user_id=t.createby) as createUserName,
+           	(select u.login_name from pub_user u where u.user_id=t.updateby) as updateUserName
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM application_fastadjustprice t
+    	<where>
+    		1=1
+	    	<if test= "applicationCode != null and applicationCode!=''">
+			AND  t.APPLICATION_CODE = #{applicationCode}
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.created DESC
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 增加申请报告(快速调价) --> 
+	<insert id="saveApplicationFastadjustprice" parameterType="hashmap">
+		INSERT INTO application_fastadjustprice(report_code,application_code,merchandise_code,supplier_code,report_file_name,path,upload_date,created,createby) 
+			 VALUES(s_application_fastadjustprice.nextval,#{applicationCode},#{merchandiseCode},#{supplierCode},#{reportFileName},#{path},#{uploadDate},#{app_created},#{app_create_by})
+    </insert>
+    
+    <!-- 删除申请报告(快速调价) -->
+    <delete id="deleteApplicationFastadjustprice" parameterType="hashmap">
+        DELETE FROM 
+        			application_fastadjustprice 
+        WHERE 
+        			application_code=#{applicationCode}
+		AND        merchandise_code=#{merchandiseCode}
+		AND        supplier_code=#{supplierCode}
+		AND        report_file_name=#{reportFileName}
+    </delete>
+    
+    
+    <!-- 查询申请文件的商品-->
+     <select id="listApplicationFileMerchandise" resultMap="applicationFastadjustpriceMap">
+     	SELECT  
+    	<if test="page_count == null">
+       		d1.*
+	   	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      	FROM 
+	     	(SELECT 
+	     		   t1.merchandise_code merchandiseCode,
+			       t1.merchandise_name merchandiseName,
+			       t2.supplier_code supplierCode,
+			       t2.supplier_name supplierName
+			       
+			
+			  FROM  merchandise t1,supplier t2
+			  WHERE t1.supplier_code = t2.supplier_code
+			  AND 
+		       (	<foreach collection="list"  item="item" index="index" separator="OR">
+		       		(t1.merchandise_code = #{item.merchandiseCode}	 
+		       AND
+		       		t1.supplier_code = #{item.supplierCode})
+		       		</foreach> 	
+		       	) 
+			 )d1
+		<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    	</if>
+	</select>	
+	
+	 <!-- 查询申请文件的商品-->
+     <select id="listApplicationFiles" resultMap="applicationFastadjustpriceMap">
+     	SELECT  
+    	<if test="page_count == null">
+	     		t1.report_code reportCode,
+	     		t1.report_file_name reportFileName,
+			    t1.upload_date uploadDate,
+			    t1.path	path
+			    
+	   	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      	FROM 
+	     		application_fastadjustprice t1
+			  WHERE 1=1
+			  <if test= "applicationCode != null and applicationCode !=''">
+				AND  t1.application_code = #{applicationCode}
+			 </if>
+			  AND 
+		       (	<foreach collection="list"  item="item" index="index" separator="OR">
+		       		(t1.merchandise_code = #{item.merchandiseCode}	 
+		       AND
+		       		t1.supplier_code = #{item.supplierCode})
+		       		</foreach> 	
+		       	) 
+		     <if test= "reportCodes != null and reportCodes !=''">
+				AND  t1.report_code IN (${reportCodes})
+			</if>  	
+	</select>
+	
+	 <!-- 根据申请单号删除报告 -->
+    <delete id="deleteFastadjustpriceByApplicationCode" parameterType="hashmap">
+        DELETE FROM 
+        			application_fastadjustprice 
+        WHERE 
+        			application_code IN (${applicationCodes})
+    </delete>
+    
+     <!-- 根据报告编号删除申请文件 -->
+    <delete id="deleteApplicationFiles" parameterType="hashmap">
+        DELETE FROM 
+        			application_fastadjustprice 
+        WHERE 
+        			report_code IN (${reportCodes})
+    </delete>			 		 
+		 
+</mapper>

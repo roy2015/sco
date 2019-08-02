@@ -1,0 +1,26 @@
+table {
+	border-collapse: collapse;
+	border: none;
+	widtd: 1800px;
+	font-family: "微软雅黑";
+	font-size: 13px;
+	white-space: nowrap;
+	max-width: 100%;
+	background-color: transparent;
+	border-spacing: 2px;
+	border-color: gray;
+}
+
+td,th {
+	border: solid #ddd 1px;
+	padding: 4px;
+	font-size: 12px;
+}
+
+th {
+	background-color: #EEEEEE;
+}
+label {
+	padding: 4px;
+	font-size: 12px;
+}

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.datamaintenance.gradecontroldata.suppliercomplaints.SupplierComplaintsDao">
+	<resultMap type="com.powere2e.sco.model.datamaintenance.gradecontroldata.suppliercomplaints.SupplierComplaints" id="supplierComplaintsMap">
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="supplierName" column="supplierName"/>
+		<result property="complaintsYear" column="complaintsYear"/>
+		<result property="complaintsCount" column="complaintsCount"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <!-- 查询供应商年度千万元客诉(可分页)-->
+    <select id="searchSupplierComplaints" resultMap="supplierComplaintsMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		s.supplier_code supplierCode,
+       		s.supplier_name supplierName,
+       		t.complaints_year complaintsYear,
+       		t.complaints_count complaintsCount
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM supplier_complaints t
+      		LEFT JOIN supplier s ON t.supplier_code = s.supplier_code  <!-- 供应商表 -->
+    	<where>
+    		1=1
+	    	<if test= "supplierCode != null and supplierCode!=''">
+			AND UPPER(s.supplier_code) LIKE UPPER('%'||#{supplierCode}||'%')
+			</if>
+	    	<if test= "supplierName != null and supplierName!=''">
+			AND UPPER(s.supplier_name) LIKE UPPER('%'||#{supplierName}||'%')
+			</if>
+			<if test="marStartDate != null">
+			AND t.complaints_year >= #{marStartDate}
+			</if>
+			<if test="marEndDate != null">
+			AND t.complaints_year <![CDATA[<]]>(#{marEndDate}+1)
+			</if>
+			<if test="searchSupplierCode!= null and searchSupplierCode!=''">
+			AND s.supplier_code = #{searchSupplierCode}
+			</if>
+			<if test="searchComplaintsYear != null">
+			AND t.complaints_year = #{searchComplaintsYear}
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    	    <if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby == null">
+			    ORDER BY s.supplier_code ASC,t.complaints_year DESC
+			</if>
+    	</if>
+    </select>
+    
+    
+    <!-- 增加供应商年度千万元客诉 --> 
+	<insert id="saveSupplierComplaints" parameterType="hashmap">
+		INSERT INTO supplier_complaints(supplier_code,supplier_name,complaints_year,complaints_count,created,createby) 
+		  <foreach collection="insertList" item="item" separator="union all">
+			(
+			SELECT
+			#{item.supplierCode},#{item.supplierName},#{item.complaintsYear},#{item.complaintsCount},#{app_created},#{app_create_by}
+			FROM
+			dual
+			)
+		  </foreach>
+    </insert>
+    
+    <!-- 修改供应商年度千万元客诉  -->
+    <update id="updateSupplierComplaints" parameterType="hashmap">
+			UPDATE
+			    supplier_complaints	
+			<set>
+				supplier_code=#{supplierCode},
+		   		supplier_name=#{supplierName},
+		   		complaints_year=#{complaintsYear},
+		   		complaints_count=#{complaintsCount},
+		   		updated=#{app_updated},
+	   		    updateby=#{app_user_id}
+			</set>
+			<where>
+				supplier_code=#{supplierCode}
+		 		AND complaints_year = #{complaintsYear}
+			</where>
+    </update>
+</mapper>

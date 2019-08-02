@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.powere2e.sco.interfaces.dao.common.MaterialPropertiesDao">
+
+	<!-- 查询大分类 -->
+	<select id="listMaterialBigType" resultType="com.powere2e.security.model.Option">
+		SELECT
+			material_big_type_code id, material_big_type_name text
+		FROM
+			material_big_type
+		<where>
+			<if test="materialBigTypeCode != '' and materialBigTypeCode != null ">
+				material_big_type_code in (${materialBigTypeCode})
+			</if>
+		</where>
+		ORDER BY material_big_type_name 
+	</select>
+
+	<!-- 查询小分类 -->
+	<select id="listMaterialSmallType" resultType="com.powere2e.security.model.Option">
+		SELECT
+			material_small_type_code id, material_small_type_name text
+		FROM
+			material_small_type
+		<where>
+			<if test="materialBigTypeCode != '' and materialBigTypeCode != null ">
+				material_big_type_code in (${materialBigTypeCode})
+			</if>
+		</where>
+		ORDER BY material_small_type_name 
+	</select>
+
+	<!-- 查询公示网站原料名称 -->
+	<select id="listWebsiteMaterialName" resultType="com.powere2e.security.model.Option">
+		SELECT
+			material_code id, material_name text
+		FROM
+			material 
+		<where>
+			<if test="materialSmallTypeCode != '' and materialSmallTypeCode != null ">
+				material_small_type_code in (${materialSmallTypeCode})
+			</if>
+		</where>
+		ORDER BY material_name 
+	</select>
+	<!-- 查询仓位名称 -->
+	<select id="listWebsiteMaterialSiteName" resultType="com.powere2e.security.model.Option">
+		SELECT
+			WAREHOUSE_SITE_CODE id, WAREHOUSE_SITE_NAME text
+		FROM
+			WAREHOUSE_SITE 
+		ORDER BY WAREHOUSE_SITE_NAME 
+	</select>
+	
+</mapper>

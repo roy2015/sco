@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.remind.GtasksRemindDao">
+	<resultMap type="com.powere2e.sco.model.remind.GtasksRemind" id="gtasksRemindMap">
+		<result property="recordCount" column="record_count" />
+		<result />
+    </resultMap>
+	<!-- 查询待办事项 -->
+	<select id="listGtasksRemind" resultMap="gtasksRemindMap">
+		SELECT
+		<if test="page_count == null">
+		*
+		</if>
+		<if test="page_count != null">
+			count(applicationCode) AS record_count
+		</if>
+		FROM
+		(
+			SELECT
+			    DISTINCT
+				gr.application_code applicationCode,
+				gr.application_type applicationType,
+				(SELECT
+				cmc.value_string FROM common_mapping_config cmc WHERE
+				cmc.key_type='APPLICATION_TYPE' AND cmc.code_string = gr.application_type
+				) applicationTypeString,
+				(select u.real_name from pub_user u where u.user_id=gr.application_person) applicationPerson,
+				gr.approval_date,
+				TO_CHAR(gr.approval_date,'yyyy-mm-dd hh24:mi:ss') approvalDate
+	
+			FROM gtasks_remind gr
+			INNER JOIN oa_application oa ON oa.application_code = gr.application_code
+			WHERE
+			EXISTS
+			(
+			   SELECT
+		       *
+		       FROM
+		       (
+			        SELECT
+			        a.user_id,
+			        t.name,
+			        DECODE(t.name, '商品采购部门经理','MERCHANDISE','辅料采购部门经理','ACCESSORY') application_type
+			        FROM pub_role t,pub_user_role a
+			        WHERE t.role_id = a.role_id
+		       ) p
+		       WHERE p.application_type IS NOT NULL
+		       AND p.user_id = #{app_create_by}
+		       AND gr.application_type LIKE p.application_type||'%'
+			)
+			OR
+			gr.application_person = 
+			CASE
+		      WHEN 
+		        (
+			        SELECT
+			         COUNT(1)
+			        FROM pub_role t,pub_user_role a
+				    WHERE t.role_id = a.role_id
+				    AND a.user_id = #{app_create_by}
+				    AND (t.name = '商品采购员' OR t.name = '辅料采购员')
+			    )>0
+		      THEN #{app_create_by}
+	        END
+        )
+		<if test="page_count == null">
+			<if test="app_orderby !=null">
+				ORDER BY #{app_orderby}
+			</if>
+			<if test="app_orderby ==null">
+				ORDER BY approval_date DESC
+			</if>
+		</if>
+	</select>
+    
+    <!-- 清空待办事项 -->
+    <delete id="deleteGtasksRemind">
+    	DELETE FROM gtasks_remind
+    </delete>
+
+    <!-- 把待办的新品引进、老品新上、正常调价的商品OA信息插入到待办事项表里 -->
+    <select id="insertGtasksRemindMerchandiseInfo">
+    	INSERT INTO gtasks_remind(remind_code,application_code,application_type,application_person,approval_date)
+		SELECT 
+        S_GTASKS_REMIND.NEXTVAL,
+        oa.application_code,
+        oa.application_type,
+        oa.createby,
+        oa.oa_approve_date
+	    FROM oa_application oa
+	    RIGHT JOIN
+	      (
+	    SELECT 
+	          mp.application_code　
+	      FROM 
+	               (
+	                 SELECT 
+	                    o.application_code
+	                 FROM
+	                    oa_application o
+	                    left join merchandise_contract_price p on p.application_code = o.application_code
+	                 WHERE 1=1
+	                 AND p.price IS NULL  
+	                 GROUP BY o.application_code
+	               ) mp
+	           INNER JOIN  
+	              (
+	                SELECT 
+	                   o.application_code    
+	              FROM 
+	                 oa_application o
+	                 left join intention_merchandise_sap p on p.application_code = o.application_code
+	              WHERE 1=1 AND
+	              (
+	                p.merchandise_code IS NULL 
+	                OR p.supplier_code  IS NULL
+	                )
+	                GROUP BY o.application_code
+	              )sap 
+	              ON mp.application_code = sap.application_code
+	    ) t ON t.application_code = oa.application_code
+	    WHERE oa.application_status='SPTG' AND oa.application_type LIKE 'MERCHANDISE%' AND oa.application_type != 'MERCHANDISE_FASTADJUSTPRICE'
+    </select>
+
+	<!-- 把待办的快速调价的商品OA信息插入到待办事项表里 -->
+	<select id="insertGtasksRemindMerchandiseFastadjustpriceInfo">
+		INSERT INTO
+		gtasks_remind(remind_code,application_code,application_type,application_person,approval_date)
+		SELECT
+		S_GTASKS_REMIND.NEXTVAL,
+		oa.application_code,
+		oa.application_type,
+		oa.createby,
+		oa.oa_approve_date
+		FROM oa_application oa
+		INNER JOIN
+		(
+		SELECT
+		ims.application_code,
+		COUNT(1) contract_price_count
+		FROM intention_merchandise_sap ims
+		INNER JOIN merchandise_contract_price mcp ON ims.application_code =
+		mcp.application_code AND ims.merchandise_code = mcp.merchandise_code
+		AND ims.supplier_code = mcp.supplier_code
+		GROUP BY ims.application_code
+		) t ON t.application_code = oa.application_code
+		WHERE oa.application_type = 'MERCHANDISE_FASTADJUSTPRICE' AND oa.application_status='SPTG' AND
+		t.contract_price_count = 0
+	</select>
+
+	<!-- 辅料已审批通过、但未完善SCO申请单中物料信息界面的SCO申请单信息 -->
+	<insert id="insertGtasksRemindAccessoryInfo">
+		INSERT INTO
+		gtasks_remind(remind_code,application_code,application_type,application_person,approval_date)
+	    SELECT
+	    S_GTASKS_REMIND.NEXTVAL,
+	    f.*
+	    FROM
+		    (
+		      SELECT
+		     oa.*
+		     FROM
+		     (
+		      SELECT
+		      DISTINCT
+		      aq.application_code,
+		      o.application_type,
+		      o.createby,
+		      o.oa_approve_date 
+		      FROM application_quoted aq
+		      LEFT JOIN oa_application o ON o.application_code = aq.application_code
+		      WHERE o.application_status = 'SPTG'
+		      ) oa
+		      LEFT JOIN
+		      (
+		      SELECT
+		      z.application_code
+		      FROM
+		      (
+		      SELECT 
+		      aq.application_code,
+		      aq.intention_code,
+		      aq.supplier_code,
+		      wl.purchase_count,
+		      wl.contract_price,
+		      wl.purchase_money
+		      FROM application_quoted aq
+		      LEFT JOIN wl_info wl ON wl.application_code = aq.application_code
+		      ) z
+		      WHERE z.purchase_count IS NOT NULL 
+		      AND z.contract_price IS NOT NULL 
+		      AND z.purchase_money IS NOT NULL
+		      GROUP BY z.application_code
+		      ) fz ON fz.application_code = oa.application_code
+		      WHERE fz.application_code IS NULL
+     ) f
+	</insert>
+	
+	<!-- 辅料已审批通过、但未完善SCO申请单中大货信息界面的SCO申请单信息 -->
+	<insert id="insertGtasksRemindDHInfo">
+		INSERT INTO
+		gtasks_remind(remind_code,application_code,application_type,application_person,approval_date)
+		SELECT
+		S_GTASKS_REMIND.NEXTVAL,
+		oa.application_code,
+		oa.application_type,
+		oa.createby,
+		oa.oa_approve_date
+		FROM (
+		SELECT z.application_code
+	    FROM
+	    (
+          SELECT
+          z1.application_code,
+          (
+            SELECT
+            count(1)
+            FROM
+            (
+              SELECT
+              aq.application_code,
+              aq.intention_code,
+              aq.supplier_code,
+              dh.file_type
+              FROM application_quoted aq
+              LEFT JOIN wl_info wl ON wl.application_code = aq.application_code AND aq.quoted_code = wl.quoted_code AND aq.enquiry_code = wl.enquiry_code
+              LEFT JOIN dh_info dh ON dh.application_code = aq.application_code
+              AND dh.intention_code = aq.intention_code AND dh.supplier_code = aq.supplier_code
+            ) a1
+            WHERE a1.application_code = z1.application_code AND a1.intention_code = z1.intention_code AND a1.supplier_code = z1.supplier_code
+            AND a1.file_type = '物资ID卡'
+          ) wz,
+          (
+            SELECT
+            count(1)
+            FROM
+            (
+              SELECT
+              aq.application_code,
+              aq.intention_code,
+              aq.supplier_code,
+              dh.file_type
+              FROM application_quoted aq
+              LEFT JOIN wl_info wl ON wl.application_code = aq.application_code AND aq.quoted_code = wl.quoted_code AND aq.enquiry_code = wl.enquiry_code
+              LEFT JOIN dh_info dh ON dh.application_code = aq.application_code
+              AND dh.intention_code = aq.intention_code AND dh.supplier_code = aq.supplier_code
+            ) a2
+            WHERE a2.application_code = z1.application_code AND a2.intention_code = z1.intention_code AND a2.supplier_code = z1.supplier_code
+            AND a2.file_type = '封样产品图片'
+          ) fy
+          FROM application_quoted z1
+      ) z
+      WHERE z.wz = 0 OR z.fy = 0
+      GROUP BY z.application_code
+	  ) dh
+	  INNER JOIN oa_application oa ON oa.application_code = dh.application_code
+      WHERE oa.application_status = 'SPTG'
+	</insert>
+
+	<!-- 把关联商品原料与公示网站原料”模块中“是否已关联公示网站原料”状态为空的原料所属的商品编号对应的审批通过日期最晚的SCO申请单信息插入到待办事项表里 -->
+	<insert id="insertIsNotWebSiteInfo">
+		INSERT INTO
+		gtasks_remind(remind_code,application_code,application_type,application_person,approval_date)
+		SELECT
+		S_GTASKS_REMIND.NEXTVAL,
+	    ff.*
+	    FROM
+	    (
+			SELECT
+				DISTINCT
+				voa.application_code,
+				voa.application_type,
+				oa.createby,
+				fii.ingredient_code,
+				voa.oa_approve_date
+			FROM
+			(
+				SELECT
+				z.*
+				FROM
+				(
+					SELECT 
+							i.ingredient_code,
+							i.merchandise_code,
+							i.supplier_code,
+							i.intention_code,
+							i.intention_supplier_code,
+							DECODE(t.material_code,NULL,DECODE(ii.relation_status, 'Y', 'NOT', 'N'), 'Y') ifRelevanced
+					FROM ingredient i
+					LEFT JOIN ingredient_item ii ON i.ingredient_code = ii.ingredient_code 
+					LEFT JOIN merchandise_relevance_material t ON ii.material_code = t.merchandise_material_code
+				) z where z.ifRelevanced = 'N'
+			) fii
+			INNER JOIN cost_analysis_merchandise cam ON cam.accounting_code = fii.ingredient_code 
+			AND ((cam.merchandise_code = fii.merchandise_code AND cam.supplier_code = fii.supplier_code) OR (cam.merchandise_code = fii.intention_code AND cam.supplier_code = fii.intention_supplier_code))
+			INNER JOIN analysis_reports_m arm ON arm.reports_code = cam.reports_code
+			INNER JOIN oa_application oa ON oa.application_code = arm.application_code
+			INNER JOIN v_merchandise_last_oa voa ON voa.application_code = oa.application_code
+			AND cam.merchandise_code = voa.merchandise_code AND cam.supplier_code = voa.supplier_code
+			WHERE voa.application_type != 'MERCHANDISE_FASTADJUSTPRICE'
+		) ff
+	</insert>
+    
+</mapper>

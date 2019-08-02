@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.masterdata.MerchandiseReceiptDao">
+	<resultMap type="com.powere2e.sco.model.masterdata.MerchandiseReceipt" id="merchandiseReceiptMap">
+		<result property="regionCode" column="regionCode"/>
+		<result property="warehouseCode" column="warehouseCode"/>
+		<result property="warehouseSiteCode" column="warehouseSiteCode"/>
+		<result property="merchandiseCode" column="merchandiseCode"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="orderDate" column="orderDate"/>
+		<result property="orderCode" column="orderCode"/>
+		<result property="receiptRationed" column="receiptRationed"/>
+		<result property="receiptTotalPrice" column="receiptTotalPrice"/>
+		<result property="realityReceiptDate" column="realityReceiptDate"/>
+		
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    
+    <!-- 查询(可分页)-->
+    <select id="listMerchandiseReceipt" resultMap="merchandiseReceiptMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.region_code regionCode,t.warehouse_code warehouseCode,t.warehouse_site_code warehouseSiteCode,
+       		t.merchandise_code merchandiseCode,t.supplier_code supplierCode,t.order_date orderDate,
+       		t.order_code orderCode,t.receipt_rationed receiptRationed,t.receipt_total_price receiptTotalPrice,
+       		t.reality_receipt_date realityReceiptDate 
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM merchandise_receipt t
+    	<where>
+    		1=1
+	    	<if test= "regionCode != null and regionCode!=''">
+				AND UPPER(t.region_code) LIKE UPPER('%'||#{regionCode}||'%')
+			</if>
+	    	<if test= "warehouseCode != null and warehouseCode!=''">
+				AND UPPER(t.warehouse_code) LIKE UPPER('%'||#{warehouseCode}||'%')
+			</if>
+	    	<if test= "warehouseSiteCode != null and warehouseSiteCode!=''">
+				AND UPPER(t.warehouse_site_code) LIKE UPPER('%'||#{warehouseSiteCode}||'%')
+			</if>
+	    	<if test= "merchandiseCode != null and merchandiseCode!=''">
+				AND UPPER(t.merchandise_code) LIKE UPPER('%'||#{merchandiseCode}||'%')
+			</if>
+	    	<if test= "supplierCode != null and supplierCode!=''">
+				AND UPPER(t.supplier_code) LIKE UPPER('%'||#{supplierCode}||'%')
+			</if>
+	    	<if test= "orderDate != null and orderDate!=''">
+				AND	convert(varchar,t.order_date,120) LIKE (#{orderDate})
+			</if>
+	    	<if test= "orderCode != null and orderCode!=''">
+				AND UPPER(t.order_code) LIKE UPPER('%'||#{orderCode}||'%')
+			</if>
+	    	<if test= "receiptRationed != null and receiptRationed!=''">
+				AND t.receipt_rationed = #{receiptRationed}
+			</if>
+	    	<if test= "receiptTotalPrice != null and receiptTotalPrice!=''">
+				AND t.receipt_total_price = #{receiptTotalPrice}
+			</if>
+			<if test="realityReceiptDate != null">
+				AND t.reality_receipt_date >=  #{realityReceiptDate}
+			</if>
+			<if test="realityReceiptDate != null">
+				AND t.reality_receipt_date <![CDATA[<]]> (#{realityReceiptDate}+1)
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.merchandise_code DESC,t.reality_receipt_date DESC 
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 查询今天各商品收货总数 -->
+    <select id="listSumTodayMerchandiseReceipt" resultMap="merchandiseReceiptMap">
+    	SELECT 
+	       t.merchandise_code merchandiseCode,t.supplier_code supplierCode,
+	       TO_DATE(TO_CHAR(t.reality_receipt_date, 'yyyy-MM-dd'), 'yyyy-MM-dd') realityReceiptDate, 
+	       NVL(SUM(t.receipt_rationed), 0) receiptRationed 
+		FROM 
+			merchandise_receipt t 
+		WHERE 1 = 1
+			<if test="realityReceiptDate != null">
+				AND t.reality_receipt_date >=  #{realityReceiptDate}
+			</if>
+			<if test="realityReceiptDate != null">
+				AND t.reality_receipt_date <![CDATA[<]]> (#{realityReceiptDate}+1)
+			</if>
+			<if test="merchandiseCodes != null and merchandiseCodes != ''">
+				AND UPPER(t.merchandise_code) IN (${merchandiseCodes}) 
+			</if>			
+			<if test="supplierCodes != null and supplierCodes != ''">
+				AND UPPER(t.supplier_code) IN (${supplierCodes}) 
+			</if>		
+			<if test="ifQty != null and ifQty != ''">
+				AND receipt_rationed >= 0
+			</if>		
+		GROUP BY t.merchandise_code,t.supplier_code,TO_DATE(TO_CHAR(t.reality_receipt_date, 'yyyy-MM-dd'), 'yyyy-MM-dd') 
+		ORDER BY t.merchandise_code,t.supplier_code,TO_DATE(TO_CHAR(t.reality_receipt_date, 'yyyy-MM-dd'), 'yyyy-MM-dd')  
+    </select>
+    
+    <!-- 增加 --> 
+	<insert id="insertMerchandiseReceipt" parameterType="hashmap">
+		INSERT INTO merchandise_receipt(region_code,warehouse_code,warehouse_site_code,merchandise_code,supplier_code,order_date,order_code,receipt_rationed,receipt_total_price,reality_receipt_date,created,createby,client_id) 
+			 VALUES(#{regionCode},#{warehouseCode},#{warehouseSiteCode},#{merchandiseCode},#{supplierCode},#{orderDate},#{orderCode},#{receiptRationed},#{receiptTotalPrice},#{realityReceiptDate},#{app_created},#{app_create_by},#{app_user_clientID})
+    </insert>
+    
+    <!-- 删除 -->
+    <delete id="deleteMerchandiseReceipt" parameterType="hashmap">
+        DELETE FROM 
+        			merchandise_receipt 
+        WHERE 
+        			merchandise_code = #{merchandiseCode} 
+    </delete>
+</mapper>

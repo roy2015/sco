@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.security.dao.UserDao">
+	<resultMap type="com.powere2e.security.model.User" id="userMap">
+		<id property="userId" column="userId "/>
+		<result property="objectId" column="objectId "/>
+		<result property="objectTyp" column="objectTyp"/>
+		<result property="objectName" column="objectName "/>
+		<result property="loginName" column="loginName "/>
+		<result property="realName" column="realName "/>
+		<result property="sex" column="sex "/>
+		<result property="salt" column="salt "/>
+		<result property="passwd" column="passwd "/>
+		<result property="email" column="email "/>
+		<result property="phone" column="phone "/>
+		<result property="mobile" column="mobile "/>
+		<result property="description" column="description "/>
+		<result property="active" column="active "/>
+		<result property="lastlogin" column="lastlogin "/>
+		<result property="created" column="created "/>
+		<result property="createby" column="createby "/>
+		<result property="updated" column="updated "/>
+		<result property="updateby" column="updateby "/>
+		<result property="clientId" column="clientId "/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="master" column="master"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    
+    <!-- 查询用户基础信息(可分页)-->
+    <select id="listUser" resultMap="userMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.userId userId,t.objectId objectId,t.loginName loginName,
+       		t.realName realName,t.sex sex,t.salt salt,t.passwd passwd,
+       		t.email email,t.phone phone,t.mobile mobile,
+       		t.description description,t.active active,t.lastlogin lastlogin,
+       		t.master master,
+       		t.created,t.updated,
+       		(select u.login_name from pub_user u where u.user_id=t.createby) as createUserName,
+           	(select u.login_name from pub_user u where u.user_id=t.updateby) as updateUserName
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM 
+      			(<include refid="userWithOrgName" />) t
+    	<where>
+    		t.userId <![CDATA[<>]]> 'admin'
+    		<!-- 是用户列表调用时，条件成立 -->
+    		<if test= "isUserList != null and isUserList !='' and dataPower == 'true'">
+			AND t.createby = #{app_user_id}
+			</if>
+	    	<if test= "userId != null and userId!=''">
+			AND t.userId = #{userId}
+			</if>
+			<if test= "onLineUserIds != null and onLineUserIds !=''">
+			AND t.userId in (${onLineUserIds})
+			</if>
+	    	<if test= "objectId != null and objectId!=''">
+			AND t.objectId=#{objectId}
+			</if>
+			<if test= "objectName != null and objectName !=''">
+			AND UPPER(t.objectName) LIKE UPPER('%'||#{objectName}||'%')
+			</if>
+			<if test= "objectTyp != null and objectTyp !=''">
+			AND t.objectTyp = #{objectTyp}
+			</if>
+	    	<if test= "loginName != null and loginName!=''">
+			AND UPPER(t.loginName) LIKE UPPER('%'||#{loginName}||'%')
+			</if>
+	    	<if test= "realName != null and realName!=''">
+			AND UPPER(t.realName) LIKE UPPER('%'||#{realName}||'%')
+			</if>
+	    	<if test= "sex != null and sex!=''">
+			AND t.sex=#{sex}
+			</if>
+	    	<if test= "passwd != null and passwd!=''">
+			AND UPPER(t.passwd) LIKE UPPER('%'||#{passwd}||'%')
+			</if>
+	    	<if test= "email != null and email!=''">
+			AND UPPER(t.email) LIKE UPPER('%'||#{email}||'%')
+			</if>
+	    	<if test= "phone != null and phone!=''">
+			AND UPPER(t.phone) LIKE UPPER('%'||#{phone}||'%')
+			</if>
+	    	<if test= "mobile != null and mobile!=''">
+			AND UPPER(t.mobile) LIKE UPPER('%'||#{mobile}||'%')
+			</if>
+	    	<if test= "description != null and description!=''">
+			AND UPPER(t.description) LIKE UPPER('%'||#{description}||'%')
+			</if>
+	    	<if test= "active != null and active!=''">
+			AND t.active=#{active}
+			</if>
+	    	<if test= "lastlogin != null and lastlogin!=''">
+			AND	to_char(t.lastlogin,'YYYY-MM-DD HH24:MI:SS') LIKE (#{lastlogin})
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.created DESC
+    		</if>
+    	</if>
+    </select>
+    
+     <select id="findByUsername" resultMap="userMap">
+    	SELECT  
+       		t.user_id userId,t.object_typ objectTyp,t.object_id objectId,t.login_name loginName,
+       		t.real_name realName,t.sex sex,t.salt salt,t.passwd passwd,
+       		t.email email,t.phone phone,t.mobile mobile,
+       		t.description description,t.active active,t.lastlogin lastlogin,
+       		t.master master,
+       		t.created,t.updated,t.client_id as clientId,
+       		(select u.login_name from pub_user u where u.user_id=t.createby) as createUserName,
+           	(select u.login_name from pub_user u where u.user_id=t.updateby) as updateUserName
+   		FROM pub_user t 
+   		WHERE login_name=#{loginName} 
+    </select>
+    
+    <!-- 查询除我之外的所有用户-->
+    <select id="listUserNoSelf" resultMap="userMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.user_id userId,t.login_name loginName,t.real_name realName
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM pub_user t 
+    	<where>
+    		t.client_id = #{app_user_clientID} 
+			AND t.user_id <![CDATA[<>]]> #{userId}
+	    	<if test= "loginName != null and loginName!=''">
+			AND UPPER(t.login_name) LIKE UPPER('%'||#{loginName}||'%')
+			</if>
+	    	<if test= "realName != null and realName!=''">
+			AND UPPER(t.real_name) LIKE UPPER('%'||#{realName}||'%')
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.created DESC
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 增加用户基础信息 --> 
+	<insert id="insertUser" parameterType="hashmap">
+		INSERT INTO pub_user(user_id,object_id,object_typ,login_name,real_name,sex,
+				salt,passwd,email,phone,mobile,description,active,
+				client_id,created,createby)
+			 VALUES(#{userId},#{objectId},#{objectTyp},#{loginName},#{realName},#{sex},
+			 	#{salt},#{passwd},#{email},#{phone},#{mobile},#{description},'Y',
+			 	#{app_user_clientID},#{app_created},#{app_user_id})
+    </insert>
+    
+    <!-- 修改用户基础信息  -->
+    <update id="updateUser" parameterType="hashmap">
+		UPDATE	
+				pub_user	
+		   SET	
+		   		object_id=#{objectId},
+		   		object_typ=#{objectTyp},
+		   		real_name=#{realName},
+		   		sex=#{sex},
+		   		email=#{email},
+		   		phone=#{phone},
+		   		mobile=#{mobile},
+		   		description=#{description},
+		   		updated=#{app_updated},
+		   		updateby=#{app_user_id}
+		 WHERE	
+		 		user_id=#{userId} 
+		 		AND client_id = #{app_user_clientID}
+    </update>
+    <!-- 修改用户最后登陆时间  -->
+    <update id="updateLastLoginTime" parameterType="hashmap">
+		UPDATE	
+				pub_user	
+		   SET	
+		   		lastLogin=#{lastlogin}
+		 WHERE	
+		 		user_id=#{userId} 
+    </update>
+    <!-- 修改用户基础信息  -->
+    <update id="updateLoggedUserInfo" parameterType="hashmap">
+		UPDATE	
+				pub_user	
+		   SET	
+		   		real_name=#{realName},
+		   		sex=#{sex},
+		   		email=#{email},
+		   		phone=#{phone},
+		   		mobile=#{mobile},
+		   		description=#{description}
+		 WHERE	
+		 		user_id=#{userId} 
+    </update>
+    <!-- 修改激活状态  -->
+    <update id="updateActive" parameterType="hashmap">
+		UPDATE	
+			pub_user	
+		SET	
+		   	active=#{active}
+		 WHERE	
+		 	user_id=#{userId} 
+		 	AND client_id = #{app_user_clientID} 
+    </update>
+    
+    <!-- 重置密码 -->
+    <update id="resetPassword" parameterType="hashmap">
+   		UPDATE
+    		pub_user
+    	SET
+   	   		salt=#{salt},
+   	   		passwd=#{passwd}
+    	 WHERE	
+	 		user_id=#{userId} 
+	 		AND client_id = #{app_user_clientID} 
+    </update>
+    
+     <!-- 复制用户功能权限 -->
+    <insert id="copyFuncPower">
+    	MERGE INTO pub_user_role T1
+	      USING (
+				SELECT 
+					DISTINCT role_id, 
+					#{toUserId} as user_id, 
+					#{app_created} appCreated, 
+					#{app_create_by} appBy, 
+					#{app_user_clientID} appId 
+				FROM pub_user_role
+				WHERE 
+	      			user_id IN 
+	  	    		<foreach collection="fromUserIds" open="(" separator="," close=")" item="userId">
+	  	    			  ${userId}
+	  	    		</foreach>
+	           		AND client_id = #{app_user_clientID} 
+	         ) T2
+			ON (T1.role_id = T2.role_id and T1.user_id = T2.user_id)
+			WHEN MATCHED THEN
+			     UPDATE SET 
+			       T1.updated = #{app_updated} 
+			WHEN NOT MATCHED THEN 
+			      INSERT (role_id, user_id, created, createby, client_id) 
+			        VALUES(T2.role_id,T2.user_id,T2.appCreated,T2.appBy,T2.appId)
+    </insert>
+    
+    <!-- 带用户所属组织名称的用户信息 -->
+    <sql id="userWithOrgName">
+    	<foreach collection="userOrgMappingList" item="item" separator="UNION ALL">
+			SELECT  
+	       		t.user_id userId,t.object_id objectId,t.object_typ objectTyp,t.login_name loginName,
+	       		t.real_name realName,t.sex sex,t.salt salt,t.passwd passwd,
+	       		t.email email,t.phone phone,t.mobile mobile,
+	       		t.description description,t.active active,t.lastlogin lastlogin,
+	       		t.master master,${item.orgType}.${item.orgNameColName} objectName,
+	       		t.created,t.updated,t.createby,t.updateby 
+			FROM 
+				pub_user t, ${item.tableName} ${item.orgType} 
+			WHERE 
+				t.object_typ=#{item.orgType} 
+				AND t.object_id=${item.orgType}.${item.orgIdColName} 
+				AND t.client_id = #{app_user_clientID} 
+				AND ${item.orgType}.client_id = #{app_user_clientID} 
+		</foreach>
+    </sql>
+
+	<!-- 用户批量导入时查询orgId -->
+	<select id="listOrgIdByObjectTyp" resultType="string">
+    	SELECT  
+    		t.${orgIdColName} orgId
+      	FROM 
+      		${tableName} t
+    	WHERE 
+    		t.client_id = #{app_user_clientID} 
+    </select>
+</mapper>

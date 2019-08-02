@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.security.dao.RoleDao">
+	<resultMap type="com.powere2e.security.model.Role" id="roleMap">
+		<id property="roleId" column="roleId"/>
+		<result property="name" column="name"/>
+		<result property="description" column="description"/>
+		<result property="active" column="active"/>
+		
+		<result property="created" column="created"/>
+		<result property="createby" column="createby"/>
+		<result property="updated" column="updated"/>
+		<result property="updateby" column="updateby"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+		<!-- <associationproperty="supervisor"
+			resultMap="com.abc.mapper.TeacherMapper.supervisorResultMap"
+			select="com.abc.mapper.TeacherMapper.getById"column="supervisor_id">
+		</associationproperty> -->
+    </resultMap>
+    
+    <!-- 查询角色基础信息(可分页)-->
+    <select id="listRole" resultMap="roleMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.role_id roleId,t.name name,t.description description,t.active active,
+       		t.created,	t.updated,
+       		(select u.login_name from pub_user u where u.user_id=t.createby and client_id = #{app_user_clientID}) as createUserName,
+           	(select u.login_name from pub_user u where u.user_id=t.updateby and client_id = #{app_user_clientID}) as updateUserName
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM pub_role t
+    	<where>
+    		t.client_id = #{app_user_clientID}
+    		AND t.role_id <![CDATA[<>]]> 'admin'
+    		<if test= "dataPower == 'true'">
+    		AND t.createby = #{app_user_id}
+			</if>
+	    	<if test= "roleId != null and roleId!=''">
+			AND t.role_id = #{roleId}
+			</if>
+	    	<if test= "name != null and name!=''">
+			AND UPPER(t.name) LIKE UPPER('%'||#{name}||'%')
+			</if>
+	    	<if test= "description != null and description!=''">
+			AND UPPER(t.description) LIKE UPPER('%'||#{description}||'%')
+			</if>
+	    	<if test= "active != null and active!=''">
+			AND UPPER(t.active) LIKE UPPER('%'||#{active}||'%')
+			</if>
+	    	<if test= "created != null and created!=''">
+			AND to_char(t.created,'YYYY-MM-DD HH24:MI:SS') LIKE (#{created})
+			</if>
+	    	<if test= "createby != null and createby!=''">
+			AND UPPER(t.createby) LIKE UPPER('%'||#{createby}||'%')
+			</if>
+	    	<if test= "updated != null and updated!=''">
+			AND	to_char(t.updated,'YYYY-MM-DD HH24:MI:SS') LIKE (#{updated})
+			</if>
+	    	<if test= "updateby != null and updateby!=''">
+			AND UPPER(t.updateby) LIKE UPPER('%'||#{updateby}||'%')
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.created DESC
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 根据用户ID查询角色 -->
+    <select id="listRoleByUserId" resultMap="roleMap">
+    	SELECT 
+   			t.role_id roleId,t.name name 
+    	FROM   
+    		pub_role t,pub_user_role a
+    	WHERE  
+    		t.role_id = a.role_id
+    		AND a.user_id = #{userId}
+    		AND t.client_id = #{app_user_clientID} 
+    		AND a.client_id = #{app_user_clientID} 
+    </select>
+      
+    <!-- 添加用户和角色的相关信息 -->
+    <insert id="insertUserRole">
+    	INSERT INTO pub_user_role(role_id,user_id,created,createby,client_id)
+   			VALUES (${roleId},#{userId},#{app_created},#{app_create_by},#{app_user_clientID})
+   </insert>
+    
+    <!-- 增加角色基础信息 --> 
+	<insert id="insertRole" parameterType="hashmap">
+		INSERT INTO pub_role(datapower,role_id,name,description,active,client_id,created,createby)
+			VALUES(#{datapower},#{roleId},#{name},#{description},'Y',#{app_user_clientID},#{app_created},#{app_create_by})
+   </insert>
+    
+    <!-- 修改角色基础信息  -->
+    <update id="updateRole" parameterType="hashmap">
+		UPDATE	
+				pub_role	
+		   SET	
+		   		datapower=#{datapower},
+		   		name=#{name},
+		   		description=#{description},
+		   		updated=#{app_updated},
+		   		updateby=#{app_user_id}		   		
+		 WHERE	
+		 		role_id=#{roleId} 
+		 		AND client_id = #{app_user_clientID} 
+    </update>
+    
+    <!-- 删除角色基础信息 -->
+    <delete id="deleteRole" parameterType="hashmap">
+        DELETE FROM 
+   			pub_role 
+       	WHERE 
+   			role_id = #{roleId} 
+   			AND client_id = #{app_user_clientID} 
+    </delete>
+    
+    <!-- 删除角色的所有功能 -->
+    <delete id="deleteRoleFunc">
+    	DELETE FROM
+			pub_role_func 
+    	WHERE
+			role_id=#{roleId} 
+			AND client_id = #{app_user_clientID} 
+    </delete>
+    
+    <!-- 添加角色的功能 -->
+    <insert id="insertRoleFunc">
+    	INSERT INTO pub_role_func(role_id,func_id,created,createby,client_id)
+    		VALUES (#{roleId},#{funcId},#{app_created},#{app_create_by},#{app_user_clientID})
+     </insert>
+    
+    <!-- 切换角色状态 -->
+    <update id="toggleActive">
+    	UPDATE
+    			pub_role
+    	   SET
+    	   		active = #{active}
+    	 WHERE
+    	 		role_id = #{roleId} 
+    	 		AND client_id = #{app_user_clientID} 
+    </update>
+    
+    <!-- 查询不包含自己的所有角色，不分页 -->
+    <select id="listRoleNoSelf" resultMap="roleMap">
+    	SELECT 	
+    		t.role_id roleId,t.name name,t.description description
+    	FROM 
+    		pub_role t
+     	WHERE 
+			role_id <![CDATA[<>]]> #{roleId}
+			AND t.client_id = #{app_user_clientID} 
+		    <if test= "name != null and name!=''">
+		    AND UPPER(t.name) LIKE UPPER('%'||#{name}||'%')
+		    </if>
+		    <if test= "description != null and description!=''">
+		    AND UPPER(t.description) LIKE UPPER('%'||#{description}||'%')
+		    </if>
+    </select>
+    
+    <!-- copy权限 -->
+    <insert id="copyRolePower">
+		INSERT INTO 
+			pub_role_func (role_id,func_id,created,createby,client_id)
+		SELECT 
+			DISTINCT #{toRoleId},func_id,#{app_created},#{app_create_by},#{app_user_clientID}
+		FROM
+			pub_role_func 
+		WHERE 
+			client_id = #{app_user_clientID} 
+			AND role_id IN (${fromRoleIds}) 
+			AND func_id NOT IN (
+				SELECT func_id
+				FROM
+				pub_role_func t 
+				WHERE
+				role_id=#{toRoleId} 
+				AND client_id = #{app_user_clientID} 
+			)
+    </insert>
+    
+    <!-- 通过角色id删除角色用户关联信息 -->
+    <delete id="deleteUserRoleByRole">
+  		DELETE FROM
+			pub_user_role 
+		WHERE 
+			role_id=#{roleId} 
+			AND client_id = #{app_user_clientID} 
+    </delete>
+    
+    <!-- 通过用户id删除角色用户关联信息 -->
+    <delete id="deleteUserRoleByUser">
+   		DELETE FROM
+			pub_user_role 
+    	WHERE 
+			user_id=#{userId} 
+			AND client_id = #{app_user_clientID} 
+    </delete>
+    
+</mapper>

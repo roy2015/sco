@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.peripheral.webservice.ApplicationVisitFactoryDao">
+	<resultMap type="com.powere2e.sco.model.peripheral.webservice.ApplicationVisitFactory" id="applicationVisitFactoryMap">
+		<result property="applicationVfCode" column="applicationVfCode"/>
+		<result property="applicationLink" column="applicationLink"/>
+		<result property="applicationStatus" column="applicationStatus"/>
+		<result property="applicationStatusDate" column="applicationStatusDate"/>
+		<result property="oaApplicationCode" column="oaApplicationCode"/>
+		<result property="oaInitiateDate" column="oaInitiateDate"/>
+		<result property="oaApproveDate" column="oaApproveDate"/>
+		<result property="oaApplicationUrl" column="oaApplicationUrl"/>
+		<result property="remarks" column="remarks"/>
+		<result property="created" column="created"/>
+		<result property="createby" column="createby"/>
+		<result property="updated" column="updated"/>
+		<result property="updateby" column="updateby"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <!-- 查询商品巡厂申请单(可分页)-->
+    <select id="searchApplicationVisitFactory" resultMap="applicationVisitFactoryMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.application_vf_code applicationVfCode,t.application_link applicationLink,t.application_status applicationStatus,t.oa_application_code oaApplicationCode,t.oa_initiate_date oaInitiateDate,t.oa_approve_date oaApproveDate,t.oa_application_url oaApplicationUrl,t.remarks remarks
+       		
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM application_visit_factory t
+    	<where>
+    		1=1
+	    	<if test= "applicationVfCode != null and applicationVfCode!=''">
+			AND t.application_vf_code = #{applicationVfCode}
+			</if>
+	    	<if test= "applicationLink != null and applicationLink!=''">
+			AND UPPER(t.application_link) LIKE UPPER('%'||#{applicationLink}||'%')
+			</if>
+	    	<if test= "applicationStatus != null and applicationStatus!=''">
+			AND UPPER(t.application_status) LIKE UPPER('%'||#{applicationStatus}||'%')
+			</if>
+	    	<if test= "oaApplicationCode != null and oaApplicationCode!=''">
+			AND UPPER(t.oa_application_code) LIKE UPPER('%'||#{oaApplicationCode}||'%')
+			</if>
+	    	<if test= "oaInitiateDate != null and oaInitiateDate!=''">
+			AND	convert(varchar,t.oa_initiate_date,120) LIKE (#{oaInitiateDate})
+			</if>
+	    	<if test= "oaApproveDate != null and oaApproveDate!=''">
+			AND	convert(varchar,t.oa_approve_date,120) LIKE (#{oaApproveDate})
+			</if>
+	    	<if test= "oaApplicationUrl != null and oaApplicationUrl!=''">
+			AND UPPER(t.oa_application_url) LIKE UPPER('%'||#{oaApplicationUrl}||'%')
+			</if>
+	    	<if test= "remarks != null and remarks!=''">
+			AND UPPER(t.remarks) LIKE UPPER('%'||#{remarks}||'%')
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 根据主键查询某个商品巡厂申请单(可分页)-->
+    <select id="loadApplicationVisitFactory" resultMap="applicationVisitFactoryMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.application_vf_code applicationVfCode,t.application_link applicationLink,t.application_status applicationStatus,t.oa_application_code oaApplicationCode,t.oa_initiate_date oaInitiateDate,t.oa_approve_date oaApproveDate,t.oa_application_url oaApplicationUrl,t.remarks remarks
+       		
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM application_visit_factory t
+    	<where>
+    		1=1
+	    	<if test= "applicationVfCode != null and applicationVfCode!=''">
+			AND  t.APPLICATION_VF_CODE = #{applicationVfCode}
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 增加商品巡厂申请单 --> 
+	<insert id="saveApplicationVisitFactory" parameterType="hashmap">
+		INSERT INTO application_visit_factory(application_vf_code,application_link,application_status,oa_application_code,oa_initiate_date,oa_approve_date,oa_application_url,remarks) 
+			 VALUES(#{applicationVfCode},#{applicationLink},#{applicationStatus},#{oaApplicationCode},#{oaInitiateDate},#{oaApproveDate},#{oaApplicationUrl},#{remarks})
+    </insert>
+    <!-- 修改商品巡厂申请单  -->
+    <update id="updateApplicationVisitFactory" parameterType="hashmap">
+		UPDATE	
+				application_visit_factory	
+		   SET	
+		   		application_link=#{applicationLink},
+		   		application_status=#{applicationStatus},
+		   		application_status_date=#{applicationStatusDate},
+		   		oa_application_code=#{oaApplicationCode},
+		   		oa_initiate_date=#{oaInitiateDate},
+		   		oa_approve_date=#{oaApproveDate},
+		   		oa_application_url=#{oaApplicationUrl},
+		   		remarks=#{remarks}		   		
+		 WHERE	
+		 		APPLICATION_VF_CODE=#{applicationVfCode}
+    </update>
+    <!-- 删除商品巡厂申请单 -->
+    <delete id="deleteApplicationVisitFactory" parameterType="hashmap">
+        DELETE FROM 
+        			application_visit_factory 
+        WHERE 
+        			APPLICATION_VF_CODE=#{applicationVfCode} <!--AND client_id=#{app_user_clientID}-->
+    </delete>
+</mapper>

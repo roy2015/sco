@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.sharefunctionanalysis.supplieranalysis.supplierevaluatetemplate.SupplierEvaluateTemplateDao">
+	<resultMap type="com.powere2e.sco.model.sharefunctionanalysis.supplieranalysis.supplierevaluatetemplate.SupplierEvaluateTemplate" id="supplierEvaluateTemplateMap">
+		<result property="templateCode" column="templateCode"/>
+		<result property="templateName" column="templateName"/>
+		<result property="templateType" column="templateType"/>
+		<result property="evaluateStartDate" column="evaluateStartDate"/>
+		<result property="evaluateDate" column="evaluateDate"/>
+		<result property="evaluateEndDate" column="evaluateEndDate"/>
+		<result property="status" column="status"/>
+		<result property="created" column="created"/>
+		<result property="createby" column="createby"/>
+		<result property="updated" column="updated"/>
+		<result property="updateby" column="updateby"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+		<result property="publishDate" column="publishDate" />
+		<result property="minCreated" column="minCreated" />
+		<result property="maxCreated" column="maxCreated" />
+		<result property="minPublishDate" column="minPublishDate" />
+		<result property="maxPublishDate" column="maxPublishDate" />
+		
+		<result property="evaluateItemCode" column="evaluateItemCode" />
+		<result property="evaluateFullScore" column="evaluateFullScore" />
+		<result property="evaluateItemName" column="evaluateItemName" />
+		<result property="score" column="score" />
+		<result property="departments" column="departments" />
+		<result property="according" column="according" />
+		<result property="standard" column="standard" />
+		<result property="weight" column="weight" />
+    </resultMap>
+    <resultMap type="com.powere2e.sco.model.sharefunctionanalysis.supplieranalysis.supplierevaluatetemplate.SupplierEvaluateItem" id="supplierEvaluateItemMap">
+		<result property="created" column="created" />
+		<result property="createdby" column="createdby" />
+		<result property="updated" column="updated" />
+		<result property="updatedby" column="updatedby" />
+    </resultMap>
+    <!-- 查询供应商考评表模板(可分页)-->
+    <select id="searchSupplierEvaluateTemplate" resultMap="supplierEvaluateTemplateMap">
+    	SELECT 
+    	<if test="page_count == null">
+       		*
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+    	from(
+    		select 
+    	    t.template_code templateCode,
+       		t.template_name templateName,
+       		to_char(t.evaluate_start_date,'yyyy-mm-dd')||'~'||to_char(t.evaluate_end_date,'yyyy-mm-dd') evaluateDate,
+       		t.publish_date publishDate,
+       		t.status status
+      		FROM supplier_evaluate_template t
+    	<where>
+    		1=1
+	    	<if test= "templateCode != null and templateCode != ''">
+			AND UPPER(t.template_code) LIKE UPPER('%'||#{templateCode}||'%')
+			</if>
+	    	<if test= "templateName != null and templateName != ''">
+			AND UPPER(t.template_name) LIKE UPPER('%'||#{templateName}||'%')
+			</if>
+	    	<if test= "status != null and status != ''">
+			AND UPPER(t.status) LIKE UPPER('%'||#{status}||'%')
+			</if>
+	    	<if test= "minCreated != null and minCreated != ''">
+			AND	(t.created between TO_DATE(#{minCreated},'YYYY-MM-DD') and TO_DATE(#{maxCreated},'YYYY-MM-DD')+1)
+			</if>
+	    	<if test= "minPublishDate != null and minPublishDate != ''">
+			AND	(t.publish_date between TO_DATE(#{minPublishDate},'YYYY-MM-DD') and TO_DATE(#{maxPublishDate},'YYYY-MM-DD')+1)
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.created DESC
+    		</if>
+    	</if>)
+    </select>
+    <!-- 根据'templateCode'查看供应商考评表-->
+    <select id="seeSupplierEvaluateItem" resultMap="supplierEvaluateTemplateMap">
+    	SELECT 
+    	<if test="page_count == null">
+    		t.template_code templateCode,
+			t.template_name templateName,
+			t.evaluate_full_score evaluateFullScore,
+			s.weight weight,
+			s.evaluate_item_name evaluateItemName,
+			s.score score,
+			s.departments departments,
+			s.according according,
+			s.standard standard,
+			t.evaluate_start_date evaluateStartDate,
+			t.evaluate_end_date evaluateEndDate,
+			t.template_type templateType
+		 </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM supplier_evaluate_item s
+      		JOIN supplier_evaluate_template t
+      		ON t.template_code=s.template_code
+    	<where>
+    		1=1
+	    	<if test= "templateCode != null and templateCode != ''">
+			AND UPPER(t.template_code) = #{templateCode}
+			</if>
+    	</where>
+    		<if test="app_orderby ==null">
+    			order by s.evaluate_item_code
+    		</if>
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		
+    	
+    </select>
+    <select id="selectTemplateCode" resultType="String">
+    	select template_code from supplier_evaluate_template where template_name = #{templateName}
+    </select>
+    <!-- 增加供应商考评表模板-商品 --> 
+	<insert id="saveSupplierEvaluateTemplate" parameterType="hashmap">
+	INSERT INTO supplier_evaluate_template
+	(template_code,template_name,template_type,evaluate_start_date,evaluate_end_date,evaluate_full_score,status,created,createby,updated,updateby) 
+		<foreach collection="template" item="item" index="index" separator="union all">
+			<if test="index != null and index == 0">
+				(
+				SELECT
+				#{item.templateCode},#{item.templateName},'SP',#{item.evaluateStartDate},#{item.evaluateEndDate},#{item.evaluateFullScore},'CG',SYSDATE,#{app_create_by},SYSDATE,#{app_create_by}
+				FROM DUAL
+				)
+			</if>
+    	</foreach>
+    </insert>
+    
+    <!-- 增加供应商考评表模板-辅料 --> 
+	<insert id="saveAccessorySupplierEvaluateTemplate" parameterType="hashmap">
+	    INSERT INTO supplier_evaluate_template
+	    (template_code,template_name,template_type,evaluate_start_date,evaluate_end_date,evaluate_full_score,status,created,createby,updated,updateby) 
+	    <foreach collection="template" item="item" index="index" separator="union all">
+	    	<if test="index != null and index == 0">
+				(
+				SELECT
+				#{item.templateCode},#{item.templateName},'FL',#{item.evaluateStartDate},#{item.evaluateEndDate},#{item.evaluateFullScore},'CG',SYSDATE,#{app_create_by},SYSDATE,#{app_create_by}
+				FROM DUAL
+				)
+			</if>
+    	</foreach>
+    </insert>
+    <!-- 修改供应商考评表模板  -->
+    <update id="updateSupplierEvaluateTemplate" parameterType="hashmap">
+    	
+     	<foreach collection="template" item="item" index="index" separator=";" open="begin" close=";end;">
+			UPDATE	supplier_evaluate_template	
+			   set	
+			   		template_name=#{item.templateName}
+			   ,
+			   		evaluate_start_date=#{item.evaluateStartDate}
+			   ,
+			   		evaluate_end_date=#{item.evaluateEndDate}
+			   ,
+			   		evaluate_full_score=#{item.evaluateFullScore}
+			   ,
+			   		updated=sysdate
+			   ,
+			   		updateby=#{app_create_by}
+			   	   		
+			WHERE	
+			 		template_code=#{item.templateCode}
+		</foreach>
+		
+    </update>
+    <delete id="deleteSupplierEvaluateTemplateItemByTemplateCode" parameterType="hashmap">
+    	DELETE FROM supplier_evaluate_item 
+    	 WHERE template_code in (
+            <foreach collection="template" item="item" index="index" separator="," >
+            	#{item.templateCode}
+            </foreach>
+            )
+    </delete>
+    <insert id="saveSupplierEvaluateTemplateItems" parameterType="hashmap">
+    		INSERT INTO supplier_evaluate_item
+    			(template_code,evaluate_item_code,evaluate_item_name,weight,score,departments,according,standard,created,createby,updated,updateby)
+    	<foreach collection="template" item="item" index="index" separator="union all">
+				(
+				SELECT
+				#{item.templateCode},#{item.evaluateItemCode},#{item.evaluateItemName},#{item.weight},#{item.score},#{item.departments},#{item.according},#{item.standard},SYSDATE,#{app_create_by},SYSDATE,#{app_create_by}
+				FROM DUAL
+				)
+    	</foreach>
+    </insert>
+    
+    <!-- 发布供应商考评表模板 -->
+    <update id="publishSupplierEvaluateTemplate" parameterType="hashmap">
+    	UPDATE supplier_evaluate_template
+    	<set>
+    		status = 'YFB',
+            publish_date=SYSDATE,
+    	</set>
+    	 WHERE template_code in (
+            <foreach collection="templateCode" item="item" index="index" separator="," >
+            	#{item}
+            </foreach>
+            )
+    	
+    </update>
+    <!-- 关闭供应商考评表模板 -->
+    <update id="closeSupplierEvaluateTemplate" parameterType="hashMap">
+         UPDATE supplier_evaluate_template
+            <set>
+                status = 'YGB'
+            </set>
+            WHERE template_code in (
+            <foreach collection="templateCode" item="item" index="index" separator="," >
+            	#{item}
+            </foreach>
+            )
+            
+    </update>
+    <!-- 删除供应商考评项,用于更新考评表模板-->
+    <delete id="deleteSupplierEvaluateTemplateItem" parameterType="hashmap">
+    	 DELETE FROM
+    	 	supplier_evaluate_item
+    	 WHERE template_code=#{templateCode}
+    </delete>
+    <!-- 删除供应商考评表模板-->
+    <delete id="deleteSupplierEvaluateTemplate" parameterType="hashmap">
+		  DELETE FROM supplier_evaluate_template
+		  WHERE template_code in (
+            <foreach collection="template" item="item" index="index" separator="," >
+            	#{item}
+            </foreach>
+            )
+  	</delete>
+  	<delete id="deleteSupplierEvaluateTemplateItems" parameterType="hashmap">
+    	DELETE FROM supplier_evaluate_item 
+    	 WHERE template_code in (
+            <foreach collection="template" item="item" index="index" separator="," >
+            	#{item}
+            </foreach>
+            )
+    </delete>
+</mapper>

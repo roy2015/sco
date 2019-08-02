@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+	<bean id="orgDao" class="com.powere2e.bizframe.org.dao.impl.OrgDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	<bean id="retailerDao" class="com.powere2e.bizframe.retailer.dao.impl.RetailerDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	<bean id="supplierDao" class="com.powere2e.bizframe.supplier.dao.impl.SupplierDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	<bean id="importMissionDao"
+		class="com.powere2e.bizframe.importmission.dao.impl.ImportMissionDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+
+	<bean id="relationSupplierRetailerDao"
+		class="com.powere2e.bizframe.relation.dao.impl.RelationSupplierRetailerDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+</beans>

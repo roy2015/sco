@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN" "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+  <package name="gavin" extends="pubstruts" namespace="/">
+    
+    <action name="accessoryIntention" method="{1}" class="com.powere2e.sco.action.accessoryintention.AccessoryIntentionAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+    <action name="downLoadFile" method="{1}" class="com.powere2e.sco.action.accessoryintention.DownLoadFileAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+     <action name="reports" method="{1}" class="com.powere2e.sco.action.reports.ReportsAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+   <action name="committeeApply" method="{1}" class="com.powere2e.sco.action.accessoryoaapplication.CommitteeApplyAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+     <action name="nonFoodApply" method="{1}" class="com.powere2e.sco.action.accessoryoaapplication.NonFoodApplyAction">
+      <interceptor-ref name="mydefault"/>
+    </action> 
+    <action name="compareApply" method="{1}" class="com.powere2e.sco.action.accessoryoaapplication.CompareApplyAction">
+      <interceptor-ref name="mydefault"/>
+    </action>  
+     <action name="totalcostanalysis" method="{1}" class="com.powere2e.sco.action.accessoryintentioncostanalysis.totalcostanalysis.TotalcostanalysisAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+    <action name="costAnalogy" method="{1}" class="com.powere2e.sco.action.accessoryintentioncostanalysis.costanalogy.CostAnalogyAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+    <action name="historicalQuoteSupplier" method="{1}" class="com.powere2e.sco.action.accessoryintentioncostanalysis.historicalquotesupplier.HistoricalQuoteSupplierAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+     <action name="supplierComprehensiveAnalysis" method="{1}" class="com.powere2e.sco.action.suppliercomprehensiveanalysis.SupplierComprehensiveAnalysisAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+  </package>
+</struts>

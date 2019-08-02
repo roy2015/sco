@@ -1,0 +1,838 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.merchandiseintention.QuotedCompareDao">
+	 <resultMap type="com.powere2e.sco.model.merchandiseintention.MerchandiseQuoted" id="merchandiseQuotedMap">
+		<result property="quotationCode" column="quotationCode"/>
+		<result property="intentionCode" column="intentionCode"/>
+		<result property="intentionName" column="intentionName"/>
+		<result property="intentionSupplierCode" column="intentionSupplierCode"/>
+		<result property="intentionSupplierName" column="intentionSupplierName"/>
+		<result property="companyName" column="companyName"/>
+		<result property="companySite" column="companySite"/>
+		<result property="contactsName" column="contactsName"/>
+		<result property="contactsPhone" column="contactsPhone"/>
+		<result property="contactsEmail" column="contactsEmail"/>
+		<result property="contactsFax" column="contactsFax"/>
+		<result property="quotedCurrency" column="quotedCurrency"/>
+		<result property="quotedDate" column="quotedDate"/>
+		<result property="price" column="price"/>
+		<result property="quotationUnits" column="quotationUnits"/>
+		<result property="minRationed" column="minRationed"/>
+		<result property="quotedEndDate" column="quotedEndDate"/>
+		<result property="packingType" column="packingType"/>
+		<result property="paymentType" column="paymentType"/>
+		<result property="deliveryType" column="deliveryType"/>
+		<result property="remarks" column="remarks"/>
+		<result property="created" column="created"/>
+		<result property="createby" column="createby"/>
+		<result property="updated" column="updated"/>
+		<result property="updateby" column="updateby"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="lastContactsName" column="lastContactsName"/>
+		<result property="lastContactsPhone" column="lastContactsPhone"/>
+		
+		<result property="firstQuotedDate" column="firstQuotedDate"/>
+		<result property="firstPrice" column="firstPrice"/>
+		<result property="priceGap" column="priceGap"/>
+		<result property="priceRange" column="priceRange"/>
+		<result property="supplierQuotedCounts" column="supplierQuotedCounts"/>
+		<result property="supplierNumbers" column="supplierNumbers"/>
+		<result property="priceRank" column="priceRank"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    
+    <resultMap type="com.powere2e.sco.model.merchandiseintention.MerchandiseIntention" id="merchandiseIntentionMap">
+		<result property="intentionCode" column="intentionCode"/>
+		<result property="intentionName" column="intentionName"/>
+		<result property="centreTypeCode" column="centreTypeCode"/>
+		<result property="smallTypeCode" column="smallTypeCode"/>
+		<result property="detailTypeCode" column="detailTypeCode"/>
+		<result property="fineTypeCode" column="fineTypeCode"/>
+		<result property="purchaseDepartments" column="purchaseDepartments"/>
+		<result property="rationed" column="rationed"/>
+		<result property="purchaseType" column="purchaseType"/>
+		<result property="saleType" column="saleType"/>
+		<result property="orderType" column="orderType"/>
+		<result property="quotedCurrency" column="quotedCurrency"/>
+		<result property="paymentType" column="paymentType"/>
+		<result property="deliveryType" column="deliveryType"/>
+		<result property="specification" column="specification"/>
+		<result property="packingType" column="packingType"/>
+		<result property="created" column="created"/>
+		<result property="createby" column="createby"/>
+		<result property="updated" column="updated"/>
+		<result property="updateby" column="updateby"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="intentionSupplierCode" column="intentionSupplierCode"/>
+		<result property="intentionSupplierName" column="intentionSupplierName"/>
+		<result property="merchandiseCode" column="merchandiseCode"/>
+		<result property="centreTypeName" column="centreTypeName"/>
+		<result property="smallTypeName" column="smallTypeName"/>
+		<result property="detailTypeName" column="detailTypeName"/>
+		<result property="fineTypeName" column="fineTypeName"/>
+		
+		<result property="purchaseDepartmentsName" column="purchaseDepartmentsName"/>
+		<result property="rationedName" column="rationedName"/>
+		<result property="purchaseTypeName" column="purchaseTypeName"/>
+		<result property="isTrueMerchandise" column="isTrueMerchandise"/><!-- 是否为正式商品 -->
+		<result property="merchandiseCode" column="merchandiseCode"/><!--同步的SAP物料号-->
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    
+     <!-- 分析已有报价记录-->
+    <select id="analysisQuoted" resultMap="merchandiseQuotedMap">
+    	SELECT
+    	<if test="page_count == null">
+			f.intentionSupplierCode,
+			f.intentionSupplierName,
+			f.quotationUnits,
+			f.packingType,
+			f.quotedDate,
+			ROUND(f.price,2) price,
+			f.firstQuotationUnits,
+			f.lastQuotedDate,
+			ROUND(f.lastPrice,2) lastPrice,
+			f.supplierQuotedCounts,
+			to_char(ROUND(DECODE(price,0,0,(f.lastPrice-price)/price)*100,2),'fm9999999990.00')||'%' priceGap,
+			f.priceRank,
+			f.supplierNumbers,
+			f.priceRange
+		</if>
+	    <if test="page_count != null">
+	       	count(1) AS record_count
+	    </if>
+    	FROM
+    	(
+    	SELECT
+			     d1.intentionSupplierCode intentionSupplierCode,
+                 d1.intentionSupplierName intentionSupplierName,
+                 d1.quotationUnits quotationUnits,
+                 d1.packingType packingType,
+                 d1.quotedDate quotedDate,
+                 DECODE(d1.firstQuotationUnits,0,0,NULL,0,NVL(d1.price,0)/d1.firstQuotationUnits)*#{convertUnit} price,
+                 d1.firstQuotationUnits firstQuotationUnits,
+                 d1.lastQuotedDate lastQuotedDate,
+                 DECODE(d1.quotationUnits,0,0,NULL,0,NVL(d1.lastPrice,0)/d1.quotationUnits)*#{convertUnit} lastPrice,
+                 d1.supplierQuotedCounts supplierQuotedCounts,
+                 
+                 row_number()over(order by d1.lastPrice) priceRank,<!--不考虑计量单位的换算, 价格排名 -->
+                 (SELECT COUNT(DISTINCT a1.intention_supplier_code)
+                  FROM   merchandise_quoted a1,intention_supplier_merchandise a2
+                  WHERE  a1.intention_code=a2.intention_code
+                  AND    a1.intention_supplier_code=a2.intention_supplier_code
+          		  AND    a1.intention_code=#{intentionCode}
+             	 ) supplierNumbers,<!-- 参与报价的供应商个数 -->
+                 (SELECT to_char(ROUND(MIN(DECODE(a3.quotation_units,0,0,NULL,0,NVL(a3.price,0)/a3.quotation_units)*#{convertUnit}),2),'fm9999999990.00')||'~'||to_char(ROUND(MAX(DECODE(a3.quotation_units,0,0,NULL,0,NVL(a3.price,0)/a3.quotation_units)*#{convertUnit}),2),'fm9999999990.00') 
+                 FROM	 merchandise_quoted a3,intention_supplier_merchandise a4
+                  WHERE  a3.intention_code=a4.intention_code
+                  AND    a3.intention_supplier_code=a4.intention_supplier_code
+            	  AND    a3.intention_code=#{intentionCode}     
+                 ) priceRange<!-- 意向品报价价格带 -->
+    	FROM
+    		(SELECT 
+                   t1.intention_supplier_code  intentionSupplierCode, 
+                   t3.intention_supplier_name||t4.supplier_name intentionSupplierName,
+                   t1.quotation_units          quotationUnits,
+                   t1.packing_type             packingType,
+                   (SELECT MIN(c1.quoted_date) FROM  merchandise_quoted c1 where c1.intention_code=t1.intention_code AND c1.intention_supplier_code=t1.intention_supplier_code GROUP BY   c1.intention_supplier_code) quotedDate,
+                   (SELECT c2.price FROM merchandise_quoted c2 WHERE c2.intention_code=t1.intention_code AND  c2.intention_supplier_code=t1.intention_supplier_code  and c2.quoted_date= (SELECT MIN(c3.quoted_date) FROM merchandise_quoted  c3   WHERE c3.intention_code=t1.intention_code AND c3.intention_supplier_code=t1.intention_supplier_code GROUP BY c3.intention_supplier_code)) price,
+                   (SELECT c4.quotation_units FROM merchandise_quoted c4 WHERE c4.intention_code=t1.intention_code AND   c4.intention_supplier_code=t1.intention_supplier_code and c4.quoted_date= (SELECT MIN(c5.quoted_date) FROM merchandise_quoted  c5 WHERE c5.intention_code=t1.intention_code AND c5.intention_supplier_code=t1.intention_supplier_code GROUP BY c5.intention_supplier_code)) firstQuotationUnits,
+                   t1.quoted_date lastQuotedDate,
+                   t1.price lastPrice,
+                   (SELECT COUNT(c6.intention_supplier_code) FROM merchandise_quoted c6 where c6.intention_code=t1.intention_code AND c6.intention_supplier_code=t1.intention_supplier_code) supplierQuotedCounts <!--供应商报价次数-->     
+          
+          FROM     	merchandise_quoted t1
+          LEFT JOIN intention_supplier_merchandise t2
+          ON 		t1.intention_code=t2.intention_code
+          AND 		t1.intention_supplier_code=t2.intention_supplier_code
+          LEFT JOIN 
+               		merchandise_intention_supplier t3
+          ON 		t2.intention_supplier_code=t3.intention_supplier_code
+          LEFT JOIN
+               		supplier t4
+          ON 		t2.intention_supplier_code=t4.supplier_code
+          WHERE 	1=1
+          AND       t2.intention_supplier_code is not null
+          AND       t1.quoted_date=(SELECT MAX(t5.quoted_date) FROM merchandise_quoted t5 where t5.intention_code=t1.intention_code AND t5.intention_supplier_code=t1.intention_supplier_code  GROUP BY   t5.intention_supplier_code)
+          AND       t1.intention_code=#{intentionCode}
+			 ) d1
+    	) f   
+    </select>
+    
+       <!-- 查看某个供应商历史报价-->
+    <select id="listHistoryQuoted" resultMap="merchandiseQuotedMap">
+    	SELECT
+    	 		<if test="page_count == null">
+			     b1.intentionCode intentionCode,
+                 b1.intentionName intentionName,
+                 b1.centreTypeCode centreTypeCode,
+                 b1.smallTypeCode smallTypeCode,
+                 b1.detailTypeCode detailTypeCode,
+                 b1.fineTypeCode fineTypeCode,
+                 b1.created created,
+                 b1.intentionSupplierCode intentionSupplierCode,
+                 b1.intentionSupplierName intentionSupplierName,
+                 b1.quotationUnits quotationUnits,
+                 b1.packingType packingType,
+                 b1.quotedDate quotedDate,
+                 ROUND(DECODE(b1.firstQuotationUnits,0,0,NULL,0,NVL(b1.price,0)/b1.firstQuotationUnits)*NVL(b1.quotationUnits,0),2) price,
+                 b1.firstQuotationUnits firstQuotationUnits,
+                 b1.lastQuotedDate lastQuotedDate,
+                 ROUND(b1.lastPrice,2) lastPrice,
+                 b1.supplierQuotedCounts supplierQuotedCounts,
+                 to_char(ROUND(DECODE(DECODE(b1.firstQuotationUnits,0,0,NULL,0,NVL(b1.price,0)/b1.firstQuotationUnits),0,0,(NVL(b1.lastPrice,0)-DECODE(b1.firstQuotationUnits,0,0,NULL,0,NVL(b1.price,0)/b1.firstQuotationUnits)*NVL(b1.quotationUnits,0))/DECODE(b1.firstQuotationUnits,0,NULL,NULL,NULL,NVL(b1.price,0)/b1.firstQuotationUnits))*NVL(b1.quotationUnits,0)*100,2),'fm9999999990.00')||'%' priceGap,
+                 (SELECT p.priceRank
+                  FROM (SELECT b3.intention_code intentionCode, b3.intention_supplier_code intentionSupplierCode, row_number() over(partition by b3.intention_code ORDER BY b3.price) priceRank
+                        FROM   merchandise_quoted b3,intention_supplier_merchandise b4
+                        WHERE  b3.intention_code = b4.intention_code
+                        AND    b3.intention_supplier_code=b4.intention_supplier_code
+                        <!--   AND    b4.intention_supplier_code=#{intentionSupplierCode} -->
+                        <!--查询某一个供应商对应的意向品的所有最晚报价单排名-->
+                        AND    b3.quoted_date =(SELECT MAX(b5.quoted_date) FROM merchandise_quoted b5 WHERE b5.intention_code = b3.intention_code AND b5.intention_supplier_code =b3.intention_supplier_code group by b5.intention_supplier_code)
+                        AND    b3.intention_code IN (SELECT DISTINCT(c1.intention_code) FROM intention_supplier_merchandise c1 WHERE c1.intention_supplier_code= #{intentionSupplierCode})
+                        ) p
+                 WHERE   p.intentionCode = b1.intentionCode
+                 AND     p.intentionSupplierCode = #{intentionSupplierCode}) priceRank,
+                 (SELECT COUNT(DISTINCT b6.intention_supplier_code)
+                  FROM   merchandise_quoted b6,intention_supplier_merchandise b7
+                 WHERE   b6.intention_code = b7.intention_code
+                 AND     b6.intention_supplier_code = b7.intention_supplier_code
+                 AND     b6.intention_code = b1.intentionCode) supplierNumbers,<!-- 参与报价的供应商个数 -->
+                 b1.centreTypeName centreTypeName,
+                 b1.smallTypeName  smallTypeName,
+                 b1.detailTypeName detailTypeName,
+                 b1.fineTypeName   fineTypeName  
+    			 </if>
+		    	 <if test="page_count != null">
+		       			count(1) AS record_count
+		    	 </if>
+    	FROM
+	    		(SELECT 
+			              t2.intention_code intentionCode,
+			              t2.intention_name intentionName,
+			              e1.centre_type_code centreTypeCode,
+                   		  e1.centre_type_name centreTypeName,
+                   		  e2.small_type_code smallTypeCode,
+                   		  e2.small_type_name smallTypeName,
+                   		  e3.detail_type_code detailTypeCode,
+                   		  e3.detail_type_name detailTypeName,
+                   		  e4.fine_type_code fineTypeCode,
+                   		  e4.fine_type_name fineTypeName,
+			              t2.created created,
+			              t1.intention_supplier_code  intentionSupplierCode, 
+			              t4.intention_supplier_name||t5.supplier_name  intentionSupplierName,
+			              t1.quotation_units quotationUnits,
+			              t1.packing_type packingType,
+			              (SELECT MIN(a1.quoted_date) FROM merchandise_quoted a1 WHERE a1.intention_code=t1.intention_code AND a1.intention_supplier_code=t1.intention_supplier_code GROUP BY a1.intention_supplier_code) quotedDate,
+			              (SELECT a2.price FROM merchandise_quoted a2 WHERE a2.intention_code=t1.intention_code AND a2.intention_supplier_code=t1.intention_supplier_code and a2.quoted_date=(select MIN(a3.quoted_date) from merchandise_quoted a3 WHERE a3.intention_code=t1.intention_code AND a3.intention_supplier_code=t1.intention_supplier_code GROUP BY a3.intention_supplier_code)) price,
+			              (SELECT a4.quotation_units FROM merchandise_quoted a4 WHERE a4.intention_code=t1.intention_code AND a4.intention_supplier_code=t1.intention_supplier_code and a4.quoted_date=(select MIN(a5.quoted_date) from merchandise_quoted a5 WHERE a5.intention_code=t1.intention_code AND a5.intention_supplier_code=t1.intention_supplier_code GROUP BY a5.intention_supplier_code)) firstQuotationUnits,
+			              t1.quoted_date lastQuotedDate,
+			              t1.price lastPrice,
+			              (SELECT COUNT(a6.intention_supplier_code) FROM merchandise_quoted a6 WHERE a6.intention_code=t1.intention_code AND a6.intention_supplier_code=t1.intention_supplier_code) supplierQuotedCounts
+	       	   FROM       merchandise_quoted t1 
+	       	   INNER JOIN   merchandise_intention t2 ON t1.intention_code = t2.intention_code
+	           LEFT JOIN   intention_supplier_merchandise t3 ON  t1.intention_code = t3.intention_code AND  t1.intention_supplier_code=t3.intention_supplier_code
+	           LEFT JOIN   merchandise_intention_supplier t4 ON  t3.intention_supplier_code = t4.intention_supplier_code
+	           LEFT JOIN   supplier t5 ON  t3.intention_supplier_code = t5.supplier_code
+	           LEFT JOIN   merchandise_centre_type e1 ON  e1.centre_type_code = t2.centre_type_code
+			   LEFT JOIN    merchandise_small_type e2 ON  e2.small_type_code = t2.small_type_code
+			   LEFT JOIN   merchandise_detail_type e3 ON  e3.detail_type_code = t2.detail_type_code
+			   LEFT JOIN   merchandise_fine_type e4 ON  e4.fine_type_code = t2.fine_type_code
+	           WHERE     1=1
+	           AND       t3.intention_supplier_code is not null
+	           AND       t1.quoted_date=(SELECT MAX(t6.quoted_date) FROM merchandise_quoted t6 where t6.intention_code=t1.intention_code AND t6.intention_supplier_code=t1.intention_supplier_code  GROUP BY   t6.intention_supplier_code)
+	           AND       t1.intention_supplier_code= #{intentionSupplierCode}
+	       		) b1
+    </select>
+    
+       <!-- 查看对比结果-->
+    <select id="listCompareResult" resultMap="merchandiseQuotedMap">
+	    	SELECT
+	    	 		<if test="page_count == null">
+				     d1.intentionCode        intentionCode,
+					 d1.intentionSupplierCode intentionSupplierCode,
+					 d1.intentionSupplierName intentionSupplierName,
+					 to_char(ROUND(d1.quotationUnits,3),'fm9999999990.000') quotationUnits,
+					 d1.packingType packingType,
+					 d1.lastQuotedDate lastQuotedDate,
+					 to_char(ROUND(DECODE(d1.quotationUnits,0,0,NULL,0,NVL(d1.lastPrice,0)/d1.quotationUnits)*#{compareUnit},3),'fm9999999990.000') lastPrice,
+					 (SELECT to_char(ROUND(MIN(DECODE(a1.quotationUnits,0,0,NULL,0,NVL(a1.lastPrice,0)/a1.quotationUnits)*#{compareUnit}),3),'fm9999999990.000')||'~'||to_char(ROUND(MAX((a1.lastPrice/a1.quotationUnits)*#{compareUnit}),3),'fm9999999990.000') FROM (<include refid="v_compare_merchandise_price" />) a1 where a1.intentionCode IN (${compareIntentionCodes})) priceRange,
+					 (SELECT to_char(ROUND(AVG(DECODE(a2.quotationUnits,0,0,NULL,0,NVL(a2.lastPrice,0)/a2.quotationUnits)*#{compareUnit}),3),'fm9999999990.000') FROM (<include refid="v_compare_merchandise_price" />) a2 WHERE a2.intentionCode IN (${compareIntentionCodes})) avgPrice,
+					 (SELECT COUNT(1)+1 FROM (<include refid="v_compare_merchandise_price" />) a3 WHERE a3.intentionCode IN (${compareIntentionCodes}) AND (a3.lastPrice/DECODE(a3.quotationUnits,0,1,null,1,a3.quotationUnits))*#{compareUnit} &lt; (d1.lastPrice/d1.quotationUnits)*#{compareUnit}) priceRank,
+					 (SELECT to_char(ROUND(DECODE(d1.quotationUnits,0,0,NULL,0,NVL(d1.lastPrice,0)/d1.quotationUnits)*#{compareUnit}-AVG(DECODE(a4.quotationUnits,0,0,NULL,0,NVL(a4.lastPrice,0)/a4.quotationUnits)*#{compareUnit}),3),'fm9999999990.000') FROM (<include refid="v_compare_merchandise_price" />) a4 WHERE a4.intentionCode IN (${compareIntentionCodes})) priceGap
+	    			 </if>
+			    	 <if test="page_count != null">
+			       			count(1) AS record_count
+			    	 </if>
+	    	FROM
+				    (SELECT 
+				        t1.intention_code 		   intentionCode,
+				        t1.intention_supplier_code intentionSupplierCode,
+                		t3.intention_supplier_name||t4.supplier_name intentionSupplierName,
+				        t1.quotation_units         quotationUnits,
+						t1.packing_type            packingType, 
+				        t1.quoted_date 			   lastQuotedDate,
+						t1.price 				   lastPrice                   
+			  		FROM 	  merchandise_quoted t1
+		         	LEFT JOIN intention_supplier_merchandise t2
+          			  ON 	  t1.intention_code=t2.intention_code
+			         AND      t1.intention_supplier_code=t2.intention_supplier_code
+			       LEFT JOIN 
+			                  merchandise_intention_supplier t3
+			          ON      t2.intention_supplier_code=t3.intention_supplier_code
+			       LEFT JOIN
+			                  supplier t4
+			          ON 	  t2.intention_supplier_code=t4.supplier_code
+			        WHERE 	  1=1
+			         AND      t2.intention_supplier_code is not null
+          			 AND      t1.quoted_date=(SELECT MAX(t5.quoted_date) FROM merchandise_quoted t5 where t5.intention_code=t1.intention_code AND t5.intention_supplier_code=t1.intention_supplier_code  GROUP BY   t5.intention_supplier_code)
+		       		 AND      t1.intention_code=#{intentionCode}
+				 ) d1
+    	   
+    </select>
+    
+     <!-- 查询商品X001地区对应的最晚报价和意向品所有供应商对应的最晚报价 -->
+    <sql id="v_compare_merchandise_price">
+    	<!--查询商品X001地区对应的最晚报价-->
+		SELECT 
+			   t1.merchandise_code intentionCode,
+		       t2.supplier_code    intentionSupplierCode,
+		       t2.purchase_price   lastPrice,
+		       t1.net_weight       quotationUnits
+		FROM   merchandise t1, merchandise_purchase_price t2
+		WHERE  t1.merchandise_code = t2.merchandise_code
+		AND    t2.warehouse_code = 'X001'
+		AND    t2.price_date = (SELECT MAX(t3.price_date) FROM merchandise_purchase_price t3 
+								WHERE t3.merchandise_code = t1.merchandise_code 
+								AND   t3.supplier_code = t1.supplier_code
+		                        GROUP BY t3.supplier_code)
+		
+		UNION
+		<!--查询意向品所有供应商对应的最晚报价-->
+		SELECT 
+			   t1.intention_code          intentionCode,
+		       t1.intention_supplier_code intentionSupplierCode,
+		       t1.price                   lastPrice,
+		       t1.quotation_units         quotationUnits
+		FROM   merchandise_quoted t1,intention_supplier_merchandise t2
+		WHERE  t1.intention_code = t2.intention_code
+		AND    t1.intention_supplier_code = t2.intention_supplier_code
+	    AND    t1.quoted_date =(SELECT MAX(t3.quoted_date) FROM merchandise_quoted t3
+		         				WHERE t3.intention_code = t1.intention_code
+					             AND  t3.intention_supplier_code = t1.intention_supplier_code
+					            GROUP BY t3.intention_supplier_code)
+    </sql>
+    
+     <!-- 查询已引进的商品-->
+	<select id="listFormalCompareMerchandise" resultMap="merchandiseIntentionMap">
+		SELECT 
+				<if test="page_count == null">
+				 k1.*,
+		         k2.centre_type_name centreTypeName, <!--中分类名称  -->
+		         k3.small_type_name  smallTypeName, <!-- 小分类名称 -->
+		         k4.detail_type_name detailTypeName, <!--明细类名称-->
+		         k5.fine_type_name   fineTypeName <!--细分类名称-->
+	    		</if>
+			    <if test="page_count != null">
+			       count(1) AS record_count
+			    </if>
+		  FROM (SELECT t1.merchandise_code intentionCode,
+		               t1.merchandise_name intentionName,
+		               t1.centre_type_code centreTypeCode,
+		               t1.small_type_code smallTypeCode,
+		               t1.detail_type_code detailTypeCode,
+		               <!--t1.fine_type_code fineTypeCode,  -->
+		               t3.fine_type_code fineTypeCode,
+		               t1.purchase_departments purchaseDepartments,
+		               t1.purchase_departments purchaseDepartmentsName,
+		               <!--商品的采购部门保存的是中文，不需要根据mapping表找value-->
+		               <!--(SELECT a1.value_string FROM common_mapping_config  a1 WHERE a1.code_string=t1.purchase_departments) purchaseDepartmentsName,-->
+		               DECODE(t1.net_weight,1,'GJZ','DLZ')  rationed,
+                   	   DECODE(t1.net_weight,1,'公斤装','定量装') rationedName,
+		               t3.purchase_type purchaseType,		 <!-- 采购类型 -->
+		              (SELECT a1.value_string FROM common_mapping_config  a1 WHERE a1.code_string=t3.purchase_type) purchaseTypeName,
+		               t1.storage_form saleType,	<!-- 销售方式 -->
+		        	   'Y' 	isTrueMerchandise,       <!--是否为正式商品-->
+		        	   t1.supplier_code intentionSupplierCode,
+		        	   t4.supplier_name intentionSupplierName
+		        
+		          FROM merchandise t1
+		          LEFT JOIN
+		          		   intention_supplier_merchandise t2
+		          ON       t1.merchandise_code=t2.merchandise_code
+		          AND      t1.supplier_code=t2.supplier_code
+		          LEFT JOIN
+		          		  merchandise_intention t3
+		          ON		 
+		          		  t2.intention_code=t3.intention_code
+		          LEFT JOIN
+		          		  supplier t4	
+		          ON	  t1.supplier_code=t4.supplier_code		  	  
+		          <where>
+		          		 1=1
+		                <if test= "currentIntentionCode != null and currentIntentionCode != ''">
+						AND  t1.merchandise_code &lt;&gt; #{currentIntentionCode}
+		  				</if>
+		  				<if test= "intentionSupplierCode != null and intentionSupplierCode != '' ">
+						AND UPPER(t1.supplier_code) LIKE UPPER('%'||#{intentionSupplierCode}||'%')
+						</if>
+						<if test= "intentionSupplierName != null and intentionSupplierName != '' ">
+						AND UPPER(t4.supplier_name) LIKE UPPER('%'||#{intentionSupplierName}||'%')
+						</if>
+		  				<if test= "intentionCode != null and intentionCode !=''">
+						AND UPPER(t1.merchandise_code) LIKE UPPER('%'||#{intentionCode}||'%')
+						</if>
+				    	<if test= "intentionName != null and intentionName !=''">
+						AND UPPER(t1.merchandise_name) LIKE UPPER('%'||#{intentionName}||'%')
+						</if>
+				    	<if test= "centreTypeCode != null and centreTypeCode !=''">
+						AND t1.centre_type_code = #{centreTypeCode}
+						</if>
+				    	<if test= "smallTypeCode != null and smallTypeCode !=''">
+						AND t1.small_type_code = #{smallTypeCode}
+						</if>
+				    	<if test= "detailTypeCode != null and detailTypeCode !=''">
+						AND t1.detail_type_code =#{detailTypeCode}
+						</if>
+				    	<if test= "fineTypeCode != null and fineTypeCode !=''">
+						AND t3.fine_type_code = #{fineTypeCode}
+						</if>
+				    	<if test= "purchaseDepartments != null and purchaseDepartments !=''">
+						<!--  AND t1.purchase_departments = #{purchaseDepartments}-->
+						AND t1.purchase_departments IN (SELECT a1.value_string FROM common_mapping_config  a1 WHERE a1.key_type = 'PURCHASE_DEPARTMENTS_TYPE' AND a1.code_string=#{purchaseDepartments})
+						</if>
+				    	<if test= "rationed != null and rationed !='' and rationed=='GJZ' ">
+						AND t1.net_weight =1
+						</if>
+						<if test= "rationed != null and rationed !='' and rationed=='DLZ' ">
+						AND t1.net_weight &lt;&gt; 1
+						</if>
+				    	<if test= "purchaseType != null and purchaseType !=''">
+						AND t3.purchase_type = #{purchaseType}
+						</if>
+				    	<if test= "saleType != null and saleType !=''">
+						AND t1.storage_form =#{saleType}
+						</if>
+						<if test="createDateStart != null and createDateStart != ''">
+						AND t3.created &gt;= to_date(#{createDateStart} || '00:00:00','yyyy-mm-dd HH24:mi:ss')
+						</if>
+						<if test="createDateEnd != null and createDateEnd != ''">
+						AND t3.created &lt;= to_date(#{createDateEnd} || '23:59:59','yyyy-mm-dd HH24:mi:ss')
+						</if>
+					</where>	
+		          ) k1 
+		          LEFT　JOIN
+        				   merchandise_centre_type k2
+         		  ON  
+         				   k1.centreTypeCode = k2.centre_type_code 
+     		   LEFT　JOIN
+       					   merchandise_small_type k3
+		          ON  
+		         		   k1.smallTypeCode = k3.small_type_code 
+		      LEFT　JOIN
+		       			   merchandise_detail_type k4
+		          ON  
+		         		   k1.detailTypeCode = k4.detail_type_code 
+		      LEFT　JOIN
+		      			 merchandise_fine_type k5    
+		          ON  
+		         		 k1.fineTypeCode = k5.fine_type_code 	
+			 
+    	  <if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY k1.intentionCode DESC
+    		</if>
+    	</if> 
+    	  
+    </select>
+    
+     <!-- 查询未引进的商品-->
+	<select id="listIntentionCompareMerchandise" resultMap="merchandiseIntentionMap">
+		SELECT 
+				<if test="page_count == null">
+				 k1.*,
+		         k2.centre_type_name centreTypeName, <!--中分类名称  -->
+		         k3.small_type_name  smallTypeName, <!-- 小分类名称 -->
+		         k4.detail_type_name detailTypeName, <!--明细类名称-->
+		         k5.fine_type_name   fineTypeName <!--细分类名称-->
+	    		</if>
+			    <if test="page_count != null">
+			       count(1) AS record_count
+			    </if>
+		  FROM (SELECT t1.intention_code intentionCode,
+		               t1.intention_name intentionName,
+		               t1.centre_type_code centreTypeCode,
+		               t1.small_type_code smallTypeCode,
+		               t1.detail_type_code detailTypeCode,
+		               t1.fine_type_code fineTypeCode,
+		               t1.purchase_departments purchaseDepartments,
+		               (SELECT a1.value_string  FROM common_mapping_config a1  WHERE a1.code_string = t1.purchase_departments) purchaseDepartmentsName,
+		               t1.rationed rationed,
+		               (SELECT a1.value_string FROM common_mapping_config a1 WHERE a1.code_string = t1.rationed) rationedName,
+		               t1.purchase_type purchaseType,
+		               (SELECT a1.value_string  FROM common_mapping_config a1  WHERE a1.code_string = t1.purchase_type) purchaseTypeName,
+		               t1.sale_type saleType,
+		               'N' 	isTrueMerchandise, <!--是否为正式商品-->
+		               t2.intention_supplier_code intentionSupplierCode,
+		               t3.intention_supplier_name||t4.supplier_name intentionSupplierName
+		        
+		          FROM merchandise_intention t1
+		          LEFT　JOIN
+		          		intention_supplier_merchandise t2
+		          ON		
+		          		t1.intention_code=t2.intention_code
+		          LEFT JOIN
+		          		merchandise_intention_supplier 	t3
+		          ON
+		          		t2.intention_supplier_code=t3.intention_supplier_code
+		          LEFT JOIN
+		          		supplier 	t4
+		          ON
+		          		t2.intention_supplier_code=t4.supplier_code					
+		          <where>
+		          		1=1
+		          		 <!-- 查询没有SAP物料号的意向品 -->
+		          		AND 
+		          			<!--  NOT EXISTS(SELECT t2.intention_code FROM intention_supplier_merchandise t2 WHERE t2.intention_code=t1.intention_code AND t2.merchandise_code IS NOT NULL)-->
+		          			<!-- 查询未OA申请审批通过的 -->
+		          			NOT EXISTS(SELECT a1.merchandise_code 
+		          					   FROM    application_merchandise a1, oa_application a2
+         								WHERE  a1.application_code = a2.application_code
+								         AND   a2.application_type='MERCHANDISE_NEW'
+								         AND   a1.merchandise_code=t1.intention_code
+								         AND   a2.application_status = 'SPTG')
+
+		                <if test= "currentIntentionCode != null and currentIntentionCode != ''">
+						AND  t1.intention_code &lt;&gt; #{currentIntentionCode}
+		  				</if>
+		  				<if test= "intentionSupplierCode != null and intentionSupplierCode != '' ">
+						AND UPPER(t2.intention_supplier_code) LIKE UPPER('%'||#{intentionSupplierCode}||'%')
+						</if>
+						<if test= "intentionSupplierName != null and intentionSupplierName != '' ">
+						AND (UPPER(t3.intention_supplier_name) LIKE UPPER('%'||#{intentionSupplierName}||'%') OR UPPER(t4.supplier_name) LIKE UPPER('%'||#{intentionSupplierName}||'%'))
+						</if>
+		  				<if test= "intentionCode != null and intentionCode !=''">
+						AND UPPER(t1.intention_code) LIKE UPPER('%'||#{intentionCode}||'%')
+						</if>
+				    	<if test= "intentionName != null and intentionName !=''">
+						AND UPPER(t1.intention_name) LIKE UPPER('%'||#{intentionName}||'%')
+						</if>
+				    	<if test= "centreTypeCode != null and centreTypeCode !=''">
+						AND t1.centre_type_code = #{centreTypeCode}
+						</if>
+				    	<if test= "smallTypeCode != null and smallTypeCode !=''">
+						AND t1.small_type_code = #{smallTypeCode}
+						</if>
+				    	<if test= "detailTypeCode != null and detailTypeCode !=''">
+						AND t1.detail_type_code =#{detailTypeCode}
+						</if>
+				    	<if test= "fineTypeCode != null and fineTypeCode !=''">
+						AND t1.fine_type_code = #{fineTypeCode}
+						</if>
+				    	<if test= "purchaseDepartments != null and purchaseDepartments !=''">
+						AND t1.purchase_departments = #{purchaseDepartments}
+						</if>
+				    	<if test= "rationed != null and rationed !=''">
+						AND t1.rationed = #{rationed}
+						</if>
+				    	<if test= "purchaseType != null and purchaseType !=''">
+						AND t1.purchase_type = #{purchaseType}
+						</if>
+				    	<if test= "saleType != null and saleType !=''">
+						AND t1.sale_type =#{saleType}
+						</if>
+						<if test="createDateStart != null and createDateStart != ''">
+						AND t1.created &gt;= to_date(#{createDateStart} || '00:00:00','yyyy-mm-dd HH24:mi:ss')
+						</if>
+						<if test="createDateEnd != null and createDateEnd != ''">
+						AND t1.created &lt;= to_date(#{createDateEnd} || '23:59:59','yyyy-mm-dd HH24:mi:ss')
+						</if>
+				  </where>		
+		          ) k1
+			 	LEFT　JOIN
+        				   merchandise_centre_type k2
+         		  ON  
+         				   k1.centreTypeCode = k2.centre_type_code 
+     		   LEFT　JOIN
+       					   merchandise_small_type k3
+		          ON  
+		         		   k1.smallTypeCode = k3.small_type_code 
+		      LEFT　JOIN
+		       			   merchandise_detail_type k4
+		          ON  
+		         		   k1.detailTypeCode = k4.detail_type_code 
+		      LEFT　JOIN
+		      			 merchandise_fine_type k5    
+		          ON  
+		         		 k1.fineTypeCode = k5.fine_type_code 
+			 
+    	  <if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY k1.intentionCode DESC
+    		</if>
+    	</if> 
+    	  
+    </select>
+    
+     <!-- 查询已引进和未引进的商品-->
+	<select id="listAllCompareMerchandise" resultMap="merchandiseIntentionMap">
+		SELECT 
+				<if test="page_count == null">
+				 k1.*,
+		         k2.centre_type_name centreTypeName, <!--中分类名称  -->
+		         k3.small_type_name  smallTypeName, <!-- 小分类名称 -->
+		         k4.detail_type_name detailTypeName, <!--明细类名称-->
+		         k5.fine_type_name   fineTypeName <!--细分类名称-->
+	    		</if>
+			    <if test="page_count != null">
+			       count(1) AS record_count
+			    </if>
+		  FROM (SELECT t1.intention_code intentionCode,
+		               t1.intention_name intentionName,
+		               t1.centre_type_code centreTypeCode,
+		               t1.small_type_code smallTypeCode,
+		               t1.detail_type_code detailTypeCode,
+		               t1.fine_type_code fineTypeCode,
+		               t1.purchase_departments purchaseDepartments,
+		               (SELECT a1.value_string  FROM common_mapping_config a1  WHERE a1.code_string = t1.purchase_departments) purchaseDepartmentsName,
+		               t1.rationed rationed,
+		               (SELECT a1.value_string FROM common_mapping_config a1 WHERE a1.code_string = t1.rationed) rationedName,
+		               t1.purchase_type purchaseType,
+		               (SELECT a1.value_string  FROM common_mapping_config a1  WHERE a1.code_string = t1.purchase_type) purchaseTypeName,
+		               t1.sale_type saleType,
+		               'N' 	isTrueMerchandise, <!--是否为正式商品-->
+		               t2.intention_supplier_code intentionSupplierCode,
+		               t3.intention_supplier_name||t4.supplier_name intentionSupplierName
+		        
+		          FROM merchandise_intention t1
+		          LEFT　JOIN
+		          		intention_supplier_merchandise t2
+		          ON		
+		          		t1.intention_code=t2.intention_code
+		          LEFT JOIN
+		          		merchandise_intention_supplier 	t3
+		          ON
+		          		t2.intention_supplier_code=t3.intention_supplier_code
+		          LEFT JOIN
+		          		supplier 	t4
+		          ON
+		          		t2.intention_supplier_code=t4.supplier_code
+		          <where>
+		          		 1=1
+		          		  <!-- 查询没有SAP物料号的意向品 -->
+		          		AND 
+		          			<!-- NOT EXISTS(SELECT t2.intention_code FROM intention_supplier_merchandise t2 WHERE t2.intention_code=t1.intention_code AND t2.merchandise_code IS NOT NULL)-->
+		               		<!-- 查询OA申请没有审批通过的-->
+		               		NOT EXISTS(SELECT a1.merchandise_code 
+		          					   FROM    application_merchandise a1, oa_application a2
+         								WHERE  a1.application_code = a2.application_code
+								         AND   a2.application_type='MERCHANDISE_NEW'
+								         AND   a1.merchandise_code=t1.intention_code
+								         AND   a2.application_status = 'SPTG')
+		               
+		                <if test= "currentIntentionCode != null and currentIntentionCode != ''">
+						AND  t1.intention_code &lt;&gt; #{currentIntentionCode}
+		  				</if>
+		  				<if test= "intentionSupplierCode != null and intentionSupplierCode != '' ">
+						AND UPPER(t2.intention_supplier_code) LIKE UPPER('%'||#{intentionSupplierCode}||'%')
+						</if>
+						<if test= "intentionSupplierName != null and intentionSupplierName != '' ">
+						AND (UPPER(t3.intention_supplier_name) LIKE UPPER('%'||#{intentionSupplierName}||'%') OR UPPER(t4.supplier_name) LIKE UPPER('%'||#{intentionSupplierName}||'%'))
+						</if>
+		  				<if test= "intentionCode != null and intentionCode !=''">
+						AND UPPER(t1.intention_code) LIKE UPPER('%'||#{intentionCode}||'%')
+						</if>
+				    	<if test= "intentionName != null and intentionName !=''">
+						AND UPPER(t1.intention_name) LIKE UPPER('%'||#{intentionName}||'%')
+						</if>
+				    	<if test= "centreTypeCode != null and centreTypeCode !=''">
+						AND t1.centre_type_code = #{centreTypeCode}
+						</if>
+				    	<if test= "smallTypeCode != null and smallTypeCode !=''">
+						AND t1.small_type_code = #{smallTypeCode}
+						</if>
+				    	<if test= "detailTypeCode != null and detailTypeCode !=''">
+						AND t1.detail_type_code =#{detailTypeCode}
+						</if>
+				    	<if test= "fineTypeCode != null and fineTypeCode !=''">
+						AND t1.fine_type_code = #{fineTypeCode}
+						</if>
+				    	<if test= "purchaseDepartments != null and purchaseDepartments !=''">
+						AND t1.purchase_departments = #{purchaseDepartments}
+						</if>
+				    	<if test= "rationed != null and rationed !=''">
+						AND t1.rationed = #{rationed}
+						</if>
+				    	<if test= "purchaseType != null and purchaseType !=''">
+						AND t1.purchase_type = #{purchaseType}
+						</if>
+				    	<if test= "saleType != null and saleType !=''">
+						AND t1.sale_type =#{saleType}
+						</if>
+						<if test="createDateStart != null and createDateStart != ''">
+						AND t1.created &gt;= to_date(#{createDateStart} || '00:00:00','yyyy-mm-dd HH24:mi:ss')
+						</if>
+						<if test="createDateEnd != null and createDateEnd != ''">
+						AND t1.created &lt;= to_date(#{createDateEnd} || '23:59:59','yyyy-mm-dd HH24:mi:ss')
+						</if>
+				  </where>		
+			
+		        UNION ALL
+		        SELECT t1.merchandise_code intentionCode,
+		               t1.merchandise_name intentionName,
+		               t1.centre_type_code centreTypeCode,
+		               t1.small_type_code smallTypeCode,
+		               t1.detail_type_code detailTypeCode,
+		               <!--t1.fine_type_code fineTypeCode,  -->
+		               t3.fine_type_code fineTypeCode,
+		               t1.purchase_departments purchaseDepartments,
+		               t1.purchase_departments purchaseDepartmentsName,
+		               <!--(SELECT a1.value_string FROM common_mapping_config  a1 WHERE a1.code_string=t1.purchase_departments) purchaseDepartmentsName,-->
+		               DECODE(t1.net_weight,1,'GJZ','DLZ')  rationed,
+                   	   DECODE(t1.net_weight,1,'公斤装','定量装') rationedName,
+		               t3.purchase_type purchaseType,		 <!-- 采购类型 -->
+		               (SELECT a1.value_string FROM common_mapping_config  a1 WHERE a1.code_string=t3.purchase_type) purchaseTypeName,
+		               t1.storage_form saleType,	<!-- 销售方式 -->
+		        	   'Y' 	isTrueMerchandise,       <!--是否为正式商品-->
+		        	   t1.supplier_code intentionSupplierCode,
+		        	   t4.supplier_name intentionSupplierName
+		        
+		          FROM merchandise t1
+		          LEFT JOIN
+		          		   intention_supplier_merchandise t2
+		          ON       t1.merchandise_code=t2.merchandise_code
+		          AND      t1.supplier_code=t2.supplier_code
+		          LEFT JOIN
+		          		  merchandise_intention t3
+		          ON		 
+		          		  t2.intention_code=t3.intention_code
+		          LEFT JOIN
+		          		  supplier t4	
+		          ON	  t1.supplier_code=t4.supplier_code		  
+		          <where>
+		          		 1=1
+		                <if test= "currentIntentionCode != null and currentIntentionCode != ''">
+						AND  t1.merchandise_code &lt;&gt; #{currentIntentionCode}
+		  				</if>
+		  				<if test= "intentionSupplierCode != null and intentionSupplierCode != '' ">
+						AND UPPER(t1.supplier_code) LIKE UPPER('%'||#{intentionSupplierCode}||'%')
+						</if>
+						<if test= "intentionSupplierName != null and intentionSupplierName != '' ">
+						AND UPPER(t4.supplier_name) LIKE UPPER('%'||#{intentionSupplierName}||'%')
+						</if>
+		  				<if test= "intentionCode != null and intentionCode !=''">
+						AND UPPER(t1.merchandise_code) LIKE UPPER('%'||#{intentionCode}||'%')
+						</if>
+				    	<if test= "intentionName != null and intentionName !=''">
+						AND UPPER(t1.merchandise_name) LIKE UPPER('%'||#{intentionName}||'%')
+						</if>
+				    	<if test= "centreTypeCode != null and centreTypeCode !=''">
+						AND t1.centre_type_code = #{centreTypeCode}
+						</if>
+				    	<if test= "smallTypeCode != null and smallTypeCode !=''">
+						AND t1.small_type_code = #{smallTypeCode}
+						</if>
+				    	<if test= "detailTypeCode != null and detailTypeCode !=''">
+						AND t1.detail_type_code =#{detailTypeCode}
+						</if>
+				    	<if test= "fineTypeCode != null and fineTypeCode !=''">
+						AND t3.fine_type_code = #{fineTypeCode}
+						</if>
+				    	<if test= "purchaseDepartments != null and purchaseDepartments !=''">
+				        AND t1.purchase_departments IN (SELECT a1.value_string FROM common_mapping_config  a1 WHERE a1.key_type = 'PURCHASE_DEPARTMENTS_TYPE' AND a1.code_string=#{purchaseDepartments})
+						</if>
+				    	<if test= "rationed != null and rationed !='' and rationed=='GJZ' ">
+						AND t1.net_weight =1
+						</if>
+						<if test= "rationed != null and rationed !='' and rationed=='DLZ' ">
+						AND t1.net_weight &lt;&gt; 1
+						</if>
+				    	<if test= "purchaseType != null and purchaseType !=''">
+						AND t3.purchase_type = #{purchaseType}
+						</if>
+				    	<if test= "saleType != null and saleType !=''">
+						AND t1.storage_form =#{saleType}
+						</if>
+						<if test="createDateStart != null and createDateStart != ''">
+						AND t3.created &gt;= to_date(#{createDateStart} || '00:00:00','yyyy-mm-dd HH24:mi:ss')
+						</if>
+						<if test="createDateEnd != null and createDateEnd != ''">
+						AND t3.created &lt;= to_date(#{createDateEnd} || '23:59:59','yyyy-mm-dd HH24:mi:ss')
+						</if>
+					</where>	
+		          ) k1 
+		        LEFT　JOIN
+        				   merchandise_centre_type k2
+         		  ON  
+         				   k1.centreTypeCode = k2.centre_type_code 
+     		   LEFT　JOIN
+       					   merchandise_small_type k3
+		          ON  
+		         		   k1.smallTypeCode = k3.small_type_code 
+		      LEFT　JOIN
+		       			   merchandise_detail_type k4
+		          ON  
+		         		   k1.detailTypeCode = k4.detail_type_code 
+		      LEFT　JOIN
+		      			 merchandise_fine_type k5    
+		          ON  
+		         		 k1.fineTypeCode = k5.fine_type_code 
+			 
+    	  <if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY k1.intentionCode DESC
+    		</if>
+    	</if> 
+    	  
+    </select>
+    
+    <!-- 查询一个供应商对某个意向品最晚报价信息-->
+    <select id="queryLastQuoted" resultMap="merchandiseQuotedMap">
+    	SELECT 
+    		ROWNUM,t.*
+    	FROM 
+    	(
+	  		SELECT 
+	              t1.intention_code intentionCode,
+	              t1.intention_supplier_code intentionSupplierCode,
+	              t3.intention_supplier_name||t4.supplier_name intentionSupplierName,
+	              t1.company_name companyName,
+	              t1.company_site companySite,
+	              t1.contacts_name contactsName,
+	              t1.contacts_phone contactsPhone,
+	              t1.contacts_email contactsEmail,
+	              t1.contacts_fax contactsFax 
+	       FROM    merchandise_quoted t1
+			LEFT JOIN  
+	 			intention_supplier_merchandise t2
+	        ON     t1.intention_code=t2.intention_code
+	        AND    t1.intention_supplier_code=t2.intention_supplier_code
+	    	LEFT JOIN  
+	    			merchandise_intention_supplier t3
+	        ON      t2.intention_supplier_code=t3.intention_supplier_code
+	    	LEFT JOIN  
+	    			supplier t4
+		 ON 		t2.intention_supplier_code=t4.supplier_code
+	         WHERE 1=1
+	          AND   t2.intention_supplier_code is not null
+	          AND   t1.quoted_date=(SELECT MAX(t5.quoted_date) FROM merchandise_quoted t5 where t5.intention_code=t1.intention_code AND t5.intention_supplier_code=t1.intention_supplier_code  GROUP BY   t5.intention_supplier_code)
+			<if test="excludeIntention == null">  <!-- 只需查询供应商最晚的即可 -->
+			  AND   t1.intention_code=#{intentionCode}
+			</if>
+			  AND   t1.intention_supplier_code=#{intentionSupplierCode}
+		  ORDER BY t1.quotation_code desc
+		) t WHERE ROWNUM = 1 
+    </select>
+    
+</mapper>

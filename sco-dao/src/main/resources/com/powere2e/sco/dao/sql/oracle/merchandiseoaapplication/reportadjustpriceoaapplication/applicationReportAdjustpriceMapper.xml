@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.merchandiseoaapplication.reportadjustpriceoaapplication.ApplicationReportAdjustpriceDao">
+	<resultMap type="com.powere2e.sco.model.merchandiseoaapplication.reportadjustpriceoaapplication.ApplicationReportAdjustprice" id="applicationReportAdjustpriceMap">
+		<result property="reportCode" column="reportCode"/>
+		<result property="applicationCode" column="applicationCode"/>
+		<result property="merchandiseCode" column="merchandiseCode"/>
+		<result property="merchandiseName" column="merchandiseName"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="supplierName" column="supplierName"/>
+		<result property="supplierAttribute" column="supplierAttribute"/>
+		<result property="supplierSite" column="supplierSite"/>
+		<result property="smallTypeSku" column="smallTypeSku"/>
+		<result property="detailTypeSku" column="detailTypeSku"/>
+		<result property="dlRoleCode" column="dlRoleCode"/>
+		<result property="dxRoleCode" column="dxRoleCode"/>
+		<result property="centreTypeCode" column="centreTypeCode"/>
+		<result property="smallTypeCode" column="smallTypeCode"/>
+		<result property="detailTypeCode" column="detailTypeCode"/>
+		<result property="fineTypeCode" column="fineTypeCode"/>
+		<result property="development" column="development"/>
+		<result property="sameMerchandisePrice" column="sameMerchandisePrice"/>
+		<result property="anticipatedSellStoreQuantit" column="anticipatedSellStoreQuantit"/>
+		<result property="anticipatedSellQuantity" column="anticipatedSellQuantity"/>
+		<result property="purchaseOpinion" column="purchaseOpinion"/>
+		<result property="isHaveSameReport" column="isHaveSameReport"/>
+		<result property="qlDate" column="qlDate"/>
+		<result property="atpQuantitySum" column="atpQuantitySum"/>
+		<result property="atpQuantitySumAccomplish" column="atpQuantitySumAccomplish"/>
+		<result property="atpQuantitySumUnfinished" column="atpQuantitySumUnfinished"/>
+		<result property="remarks" column="remarks"/>
+		<result property="oldMoistureContent" column="oldMoistureContent"/>
+		<result property="newMoistureContent" column="newMoistureContent"/>
+		<result property="purchaseAnalysis" column="purchaseAnalysis"/>
+		
+		<result property="created" column="created"/>
+		<result property="createby" column="createby"/>
+		<result property="updated" column="updated"/>
+		<result property="updateby" column="updateby"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    
+     <!--缺失文件说明的resultMap-->
+    <resultMap type="com.powere2e.sco.model.merchandiseoaapplication.ApplicationLackFileM" id="applicationLackFileMMap">
+		<result property="applicationCode" column="applicationCode"/>
+		<result property="merchandiseCode" column="merchandiseCode"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="lackFileName" column="lackFileName"/>
+		<result property="lackFileVersions" column="lackFileVersions"/>
+		<result property="lackFileCause" column="lackFileCause"/>
+    </resultMap>
+    
+   	 <!-- 查询没有报告的商品-->
+     <select id="queryNotHaveReportMerchandiseAdjustprice" resultMap="applicationLackFileMMap">
+     		SELECT 
+     			   t2.application_code   applicationCode,
+			       t2.merchandise_code   merchandiseCode,
+			       t2.supplier_code      supplierCode 
+			 FROM  oa_application t1, application_merchandise t2
+			 WHERE t1.application_code = t2.application_code 
+			 AND   t1.application_code=#{applicationCode}
+			
+			MINUS
+			
+			SELECT t3.application_code   applicationCode,
+			       t3.merchandise_code   merchandiseCode,
+			       t3.supplier_code      supplierCode
+			FROM   application_report_adjustprice t3
+			WHERE  t3.application_code=#{applicationCode}
+			
+     </select>
+     
+    <!-- 查询申请报告(调价)(可分页)-->
+    <select id="listApplicationReportAdjustprice" resultMap="applicationReportAdjustpriceMap">
+    	SELECT 
+		       t.report_code                    reportCode,
+		       t.price_adjust					priceAdjust,<!--价格上调or下调-->
+		       t.application_code               applicationCode,
+		       t.merchandise_code               merchandiseCode,
+		       t.merchandise_name               merchandiseName,
+		       t.supplier_code                  supplierCode,
+		       t.supplier_name                  supplierName,
+		       t.supplier_attribute             supplierAttribute,
+		       t.supplier_site                  supplierSite,
+		       t.small_type_sku                 smallTypeSku,
+		       t.detail_type_sku                detailTypeSku,
+		       t.dl_role_code                   dlRoleCode,
+		       t.dx_role_code                   dxRoleCode,
+		       t.centre_type_code               centreTypeCode,
+		       t.small_type_code                smallTypeCode,
+		       t.detail_type_code               detailTypeCode,
+		       t.fine_type_code                 fineTypeCode,
+		       t.development                    development,
+		       t.same_merchandise_price         sameMerchandisePrice,
+		       t.anticipated_sell_store_quantit anticipatedSellStoreQuantit,
+		       t.anticipated_sell_quantity      anticipatedSellQuantity,
+		       t.purchase_opinion               purchaseOpinion,
+		       t1.old_standard_colour           oldStandardColour,
+		       t1.new_standard_colour           newStandardColour,
+		       t1.old_standard_smell            oldStandardSmell,
+		       t1.new_standard_smell            newStandardSmell,
+		       t1.old_standard_from             oldStandardFrom,
+		       t1.new_standard_form             newStandardForm,
+		       t1.old_moisture_content			oldMoistureContent,
+		       t1.new_moisture_content			newMoistureContent,
+		       t.purchase_analysis				purchaseAnalysis,
+		       t.path							path,
+		        <!-- 判断申请报告是否有同类商品零售价 -->
+		       (SELECT a1.report_code FROM same_merchandise_adjustprice a1 WHERE a1.report_code=t.report_code and rownum=1)  isHaveSameReport,
+		       t2.ql_date qlDate,<!-- 签量日期（签量开始日期） -->
+	           t2.atp_quantity_sum atpQuantitySum,<!-- 签量数量 -->
+	           t2.atp_quantity_sum_accomplish  atpQuantitySumAccomplish,<!--  已完成量-->
+	           t2.atp_quantity_sum_unfinished atpQuantitySumUnfinished,<!--未完成量 -->
+		       t2.remarks remarks<!--备注-->
+		       
+	 FROM      application_report_adjustprice t
+     LEFT JOIN 
+      		   check_standard_adjustprice t1
+     ON	       t.report_code=t1.report_code
+     LEFT JOIN
+     		   atp_total_adjustprice t2
+     ON		   t.report_code=t2.report_code		   
+     WHERE     1=1
+     		<if test= "applicationCode != null and applicationCode !=''">
+				AND t.application_code = #{applicationCode}
+		    </if>
+	 AND 
+			(<foreach collection="list"  item="item" index="index" separator="OR">
+				(t.merchandise_code = #{item.merchandiseCode}	 
+				AND
+				t.supplier_code = #{item.supplierCode})
+			</foreach> 	
+			)       
+    </select>
+    
+     <!-- 查询申请报告从商品中带入的信息-->
+    <select id="queryReportOfAdjustprice" resultMap="applicationReportAdjustpriceMap">
+    	SELECT 
+		             t1.merchandise_code     merchandiseCode,
+		             t1.merchandise_name     merchandiseName,
+		             t1.centre_type_code     centreTypeCode,
+		             t1.small_type_code      smallTypeCode,
+		             t1.detail_type_code     detailTypeCode,
+		             ''                      fineTypeCode,
+		             t1.purchase_departments purchaseDepartments,
+		             DECODE(t1.net_weight,1,'GJZ','DLZ')  rationed,
+		             ''        purchaseType,
+		             t1.storage_form         saleType,
+		             t2.supplier_code  supplierCode,
+		             t2.supplier_name supplierName,
+		             '新供应商' supplierAttribute,
+		             t2.company_site supplierSite,
+		             (SELECT a1.report_code FROM application_report_adjustprice a1 WHERE a1.merchandise_code=t1.merchandise_code AND a1.supplier_code=t1.supplier_code and rownum=1) reportCode,<!-- 判断某一个供应商对应的意向品是否新增了报告 -->
+	                 t3.qlDate qlDate,<!-- 签量日期（签量开始日期） -->
+	                 t3.atpQuantitySum atpQuantitySum,<!-- 签量数量 -->
+	                 t3.atpQuantitySumAccomplish  atpQuantitySumAccomplish,<!--  已完成量-->
+	                 t3.atpQuantitySumUnfinished atpQuantitySumUnfinished,<!--未完成量=（签量数量-已完成量 ）  -->
+		             t3.remarks remarks<!--备注-->
+		                  
+		    FROM     MERCHANDISE t1
+		 INNER JOIN  supplier t2
+		     ON
+		             t1.supplier_code=t2.supplier_code
+		     AND 
+					(	<foreach collection="list"  item="item" index="index" separator="OR">
+					(t1.merchandise_code = #{item.merchandiseCode}	 
+					AND
+					t1.supplier_code = #{item.supplierCode})
+					</foreach> 	
+					)    
+		LEFT JOIN
+			        (SELECT 
+			                   d2.ql_code qlCode,
+						       d2.merchandise_code merchandiseCode,
+						       d2.supplier_code supplierCode,
+						       d2.remarks remarks,
+						       d1.ql_start_date qlDate,
+						       d1.ql_count atpQuantitySum,
+						       d1.finish_count atpQuantitySumAccomplish,
+						       (d1.ql_count - d1.finish_count) atpQuantitySumUnfinished
+			        
+			          FROM       merchandise_ql  d1,merchandise_ql_detail d2
+			          WHERE
+			                   d1.ql_code=d2.ql_code 
+			           <!-- 系统中签量单总共有4种状态：新增、改签、已改签、终止。其中已改签的“开始日期”我们不做限制的，它可以和另外三种状态的开始日期相同。而另外三种（也就是新增、改签、终止）的“开始日期”不可相同。
+							那你的快速调价这里，就是要改成显示商品非“已改签”状态的“签量开始日期”最晚的签量单记录-->        
+			           AND	   d1.status &lt;&gt; 'D'        
+			           AND 
+								(<foreach collection="list"  item="item" index="index" separator="OR">
+								(d2.merchandise_code = #{item.merchandiseCode}	 
+								AND
+								d2.supplier_code = #{item.supplierCode})
+								</foreach> 	
+								)             
+			          AND d1.ql_start_date=(SELECT MAX(a2.ql_start_date) FROM merchandise_ql a2,merchandise_ql_detail a3 WHERE a2.ql_code=a3.ql_code and a2.status &lt;&gt; 'D' and a3.merchandise_code=d2.merchandise_code and a3.supplier_code=d2.supplier_code)
+			          
+			       ) t3
+	       ON 		t1.merchandise_code=t3.merchandiseCode
+	       AND 		t1.supplier_code=supplierCode			   
+    </select>
+    
+    <!-- 根据主键查询某个申请报告(调价)(可分页)-->
+    <select id="loadApplicationReportAdjustprice" resultMap="applicationReportAdjustpriceMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		   t.report_code                    reportCode,
+       		   t.price_adjust					priceAdjust,<!--价格上调or下调-->
+		       t.application_code               applicationCode,
+		       t.merchandise_code               merchandiseCode,
+		       t.merchandise_name               merchandiseName,
+		       t.supplier_code                  supplierCode,
+		       t.supplier_name                  supplierName,
+		       t.supplier_attribute             supplierAttribute,
+		       t.supplier_site                  supplierSite,
+		       t.small_type_sku                 smallTypeSku,
+		       t.detail_type_sku                detailTypeSku,
+		       t.dl_role_code                   dlRoleCode,
+		       t.dx_role_code                   dxRoleCode,
+		       t.centre_type_code               centreTypeCode,
+		       t.small_type_code                smallTypeCode,
+		       t.detail_type_code               detailTypeCode,
+		       t.fine_type_code                 fineTypeCode,
+		       t.development                    development,
+		       t.same_merchandise_price         sameMerchandisePrice,
+		       t.anticipated_sell_store_quantit anticipatedSellStoreQuantit,
+		       t.anticipated_sell_quantity      anticipatedSellQuantity,
+		       t.purchase_opinion               purchaseOpinion,
+		       t1.old_standard_colour           oldStandardColour,
+		       t1.new_standard_colour           newStandardColour,
+		       t1.old_standard_smell            oldStandardSmell,
+		       t1.new_standard_smell            newStandardSmell,
+		       t1.old_standard_from             oldStandardFrom,
+		       t1.new_standard_form             newStandardForm,
+		       t.path							path,
+		        <!-- 判断申请报告是否有同类商品零售价 -->
+		       (SELECT a1.report_code FROM same_merchandise_adjustprice a1 WHERE a1.report_code=t.report_code and rownum=1)  isHaveSameReport,
+		       t2.ql_date qlDate,<!-- 签量日期（签量开始日期） -->
+	           t2.atp_quantity_sum atpQuantitySum,<!-- 签量数量 -->
+	           t2.atp_quantity_sum_accomplish  atpQuantitySumAccomplish,<!--  已完成量-->
+	           t2.atp_quantity_sum_unfinished atpQuantitySumUnfinished,<!--未完成量  -->
+		       t2.remarks remarks<!--备注-->
+		       
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM application_report_adjustprice t
+      		LEFT JOIN 
+      				check_standard_adjustprice t1
+      		ON	    t.report_code=t1.report_code
+      		LEFT JOIN
+     		   		atp_total_adjustprice t2
+    		ON		t.report_code=t2.report_code	
+    	<where>
+    		1=1
+	    	<if test= "reportCode != null and reportCode != ''">
+			AND  t.report_code = #{reportCode}
+			</if>
+	    	<if test= "applicationCode != null and applicationCode != ''">
+			AND  t.application_code = #{applicationCode}
+			</if>
+	    	<if test= "intentionCode != null and intentionCode != ''">
+			AND  t.merchandise_code = #{intentionCode}
+			</if>
+	    	<if test= "supplierCode != null and supplierCode != ''">
+			AND  t.supplier_code = #{supplierCode}
+			</if>
+    	</where>
+    </select>
+    
+    <!-- 增加申请报告(调价) --> 
+	<insert id="saveApplicationReportAdjustprice" parameterType="hashmap">
+		INSERT INTO application_report_adjustprice(report_code,application_code,merchandise_code,merchandise_name,supplier_code,supplier_name,supplier_attribute,supplier_site,small_type_sku,
+			detail_type_sku,dl_role_code,dx_role_code,centre_type_code,small_type_code,detail_type_code,fine_type_code,development,same_merchandise_price,anticipated_sell_store_quantit,
+			anticipated_sell_quantity,purchase_opinion,created,createby,price_adjust,purchase_analysis) 
+	 	VALUES(#{reportCode},#{applicationCode},#{merchandiseCode},#{merchandiseName},#{supplierCode},#{supplierName},#{supplierAttribute},#{supplierSite},#{smallTypeSku},
+	 		#{detailTypeSku},#{dlRoleCode},#{dxRoleCode},#{centreTypeCode},#{smallTypeCode},#{detailTypeCode},#{fineTypeCode},#{development},#{sameMerchandisePrice},#{anticipatedSellStoreQuantit},
+	 		#{anticipatedSellQuantity},#{purchaseOpinion},#{app_created},#{app_create_by},#{priceAdjust},#{purchaseAnalysis})
+    </insert>
+    <!-- 修改申请报告(调价)  -->
+    <update id="updateApplicationReportAdjustprice" parameterType="hashmap">
+		UPDATE	
+				application_report_adjustprice	
+		   SET	
+		   		application_code=#{applicationCode},
+		   		merchandise_code=#{merchandiseCode},
+		   		merchandise_name=#{merchandiseName},
+		   		supplier_code=#{supplierCode},
+		   		supplier_name=#{supplierName},
+		   		supplier_attribute=#{supplierAttribute},
+		   		supplier_site=#{supplierSite},
+		   		small_type_sku=#{smallTypeSku},
+		   		detail_type_sku=#{detailTypeSku},
+		   		dl_role_code=#{dlRoleCode},
+		   		dx_role_code=#{dxRoleCode},
+		   		centre_type_code=#{centreTypeCode},
+		   		small_type_code=#{smallTypeCode},
+		   		detail_type_code=#{detailTypeCode},
+		   		fine_type_code=#{fineTypeCode},
+		   		development=#{development},
+		   		same_merchandise_price=#{sameMerchandisePrice},
+		   		anticipated_sell_store_quantit=#{anticipatedSellStoreQuantit},
+		   		anticipated_sell_quantity=#{anticipatedSellQuantity},
+		   		purchase_opinion=#{purchaseOpinion}	,
+		   		path=#{path}		   		
+		 WHERE	
+		 		REPORT_CODE=#{reportCode}
+    </update>
+    <!-- 删除申请报告(调价) -->
+    <delete id="deleteApplicationReportAdjustprice" parameterType="hashmap">
+        DELETE FROM 
+        			application_report_adjustprice 
+        WHERE 
+        			REPORT_CODE=#{reportCode} <!--AND client_id=#{app_user_clientID}-->
+    </delete>
+    <!-- 删除申请报告(调价) -->
+    <delete id="deleteReportAdjustpriceByApplicationCode" parameterType="hashmap">
+        DELETE FROM 
+        			application_report_adjustprice 
+        WHERE 
+        			application_code in (${applicationCodes})
+    </delete>
+</mapper>

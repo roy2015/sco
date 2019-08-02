@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.powere2e.sco.interfaces.dao.datamaintenance.gradecontroldata.merchandiserecycle.MerchandiseRecycleDao">
+	<resultMap
+		type="com.powere2e.sco.model.datamaintenance.gradecontroldata.merchandiserecycle.MerchandiseRecycle"
+		id="merchandiseRecycleMap">
+		<result property="merchandiseName" column="merchandiseName" />
+		<result property="merchandiseCode" column="merchandiseCode" />
+		<result property="supplierName" column="supplierName" />
+		<result property="supplierCode" column="supplierCode" />
+		<result property="dxRoleName" column="dxRoleName" />
+		<result property="dlRoleName" column="dlRoleName" />
+		<result property="centreName" column="centreName" />
+		<result property="smallName" column="smallName" />
+		<result property="detailName" column="detailName" />
+		<result property="fineName" column="fineName" />
+		<result property="recycleDate" column="recycleDate" />
+		<result property="recycleCount" column="recycleCount" />
+		<result property="recordCount" column="record_count" />
+	</resultMap>
+	<!-- 查询商品回收记录(可分页) -->
+	<select id="searchMerchandiseRecycle" resultMap="merchandiseRecycleMap">
+		SELECT
+		<if test="page_count == null">
+			t.recycle_date recycleDate,
+			t.recycle_count recycleCount,
+
+			m.merchandise_code merchandiseCode,
+			m.merchandise_name
+			merchandiseName,
+
+			s.supplier_code
+			supplierCode,
+			s.supplier_name
+			supplierName,
+
+			dx.role_name dxRoleName,
+			dl.role_name dlRoleName,
+
+			ct.centre_type_name centreName,
+			sm.small_type_name smallName,
+
+			dt.detail_type_name detailName,
+			ft.fine_type_name fineName
+		</if>
+		<if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		FROM merchandise_recycle t  <!-- 商品回收记录表 -->
+		LEFT JOIN merchandise m ON t.merchandise_code = m.merchandise_code AND t.supplier_code = m.supplier_code<!-- 商品表 -->
+		LEFT JOIN supplier s ON m.supplier_code = s.supplier_code  <!-- 供应商表 -->
+		LEFT JOIN intention_supplier_merchandise ism ON (m.merchandise_code =
+		ism.merchandise_code AND s.supplier_code = ism.supplier_code) <!-- 商品,意向品关联表 -->
+		LEFT JOIN merchandise_intention mi ON ism.intention_code = mi.intention_code <!-- 意向品表 -->
+		LEFT JOIN merchandise_role r ON r.merchandise_code = m.merchandise_code <!-- 商品角色表 -->
+		LEFT JOIN merchandise_dx_role dx on dx.role_code = r.dx_role_code  <!-- 定性角色表 -->
+		LEFT JOIN merchandise_dl_role dl on dl.role_code = r.dl_role_code  <!-- 定量角色表 -->
+		LEFT JOIN merchandise_centre_type ct ON m.centre_type_code = ct.centre_type_code <!-- 中分类表 -->
+		LEFT JOIN merchandise_small_type sm ON m.small_type_code = sm.small_type_code <!-- 小分类表 -->
+		LEFT JOIN merchandise_detail_type dt ON m.detail_type_code = dt.detail_type_code <!-- 明细类表 -->
+		LEFT JOIN merchandise_fine_type ft ON mi.fine_type_code = ft.fine_type_code <!-- 细分类表 -->
+		<where>
+			1=1
+			<if test="merchandiseCode != null and merchandiseCode!=''">
+				AND UPPER(m.merchandise_code) LIKE UPPER('%'||#{merchandiseCode}||'%')
+			</if>
+			<if test="merchandiseName != null and merchandiseName != ''">
+				AND UPPER(m.merchandise_name) like UPPER('%'||#{merchandiseName}||'%')
+			</if>
+			<if test="supplierCode != null and supplierCode!=''">
+				AND UPPER(s.supplier_code) LIKE UPPER('%'||#{supplierCode}||'%')
+			</if>
+			<if test="supplierName != null and supplierName != ''">
+				AND UPPER(s.supplier_name) like UPPER('%'||#{supplierName}||'%')
+			</if>
+			<if test="dlRoleCode != null and dlRoleCode != ''">
+				AND UPPER(dl.role_code) like UPPER(#{dlRoleCode})
+			</if>
+			<if test="dxRoleCode != null and dxRoleCode != ''">
+				AND UPPER(dx.role_code) like UPPER(#{dxRoleCode})
+			</if>
+			<if test="centreTypeCode != null and centreTypeCode != ''">
+				AND UPPER(m.centre_type_code) like UPPER(#{centreTypeCode})
+			</if>
+			<if test="smallTypeCode != null and smallTypeCode != ''">
+				AND UPPER(m.small_type_code) like UPPER(#{smallTypeCode})
+			</if>
+			<if test="detailTypeCode != null and detailTypeCode != ''">
+				AND UPPER(m.detail_type_code) like UPPER(#{detailTypeCode})
+			</if>
+			<if test="fineTypeCode != null and fineTypeCode != ''">
+				AND UPPER(ft.fine_type_code) like UPPER(#{fineTypeCode})
+			</if>
+			<if test="marStartDate != null">
+			    AND t.recycle_date >= #{marStartDate}
+			</if>
+			<if test="marEndDate != null">
+			    AND t.recycle_date <![CDATA[<]]> (#{marEndDate}+1)
+			</if>
+			<if test="SearchMerchandiseCode != null and SearchMerchandiseCode!=''">
+				AND UPPER(m.merchandise_code) = #{SearchMerchandiseCode}
+			</if>
+			<if test="SearchSupplierCode != null and SearchSupplierCode!=''">
+				AND UPPER(s.supplier_code) = #{SearchSupplierCode}
+			</if>
+			<if test="SearchRecycleDate != null">
+				AND t.recycle_date = #{SearchRecycleDate}
+			</if>
+		</where>
+			<if test="page_count == null">
+				 <if test="app_orderby !=null">
+	    			ORDER BY ${app_orderby}
+	    		</if>
+	    		<if test="app_orderby == null">
+				    ORDER BY s.supplier_code ASC ,m.merchandise_code
+					DESC,t.recycle_date DESC
+				</if>
+			</if>
+	</select>
+
+	<!-- 增加商品回收记录 -->
+	<insert id="saveMerchandiseRecycle" parameterType="hashmap">
+		INSERT INTO
+		merchandise_recycle(merchandise_code,supplier_code,recycle_date,recycle_count,created,createby)
+		<foreach collection="insertList" item="item" separator="union all">
+			(
+			SELECT
+			#{item.merchandiseCode},#{item.supplierCode},#{item.recycleDate},#{item.recycleCount},#{app_created},#{app_create_by}
+			FROM
+			dual
+			)
+		</foreach>
+	</insert>
+	
+	<!-- 修改商品回收记录 -->
+	<update id="updateMerchandiseRecycle" parameterType="hashmap">
+			UPDATE
+			merchandise_recycle
+			<set>
+				merchandise_code=#{merchandiseCode},
+				supplier_code=#{supplierCode},
+				recycle_date=#{recycleDate},
+				recycle_count=#{recycleCount},
+				updated=#{app_updated},
+	   		    updateby=#{app_user_id}
+			</set>
+			<where>
+				merchandise_code=#{merchandiseCode}
+				AND supplier_code=#{supplierCode}
+				AND recycle_date=#{recycleDate}
+			</where>
+	</update>
+</mapper>

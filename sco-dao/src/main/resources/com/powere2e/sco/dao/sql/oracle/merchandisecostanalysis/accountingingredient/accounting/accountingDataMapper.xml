@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.powere2e.sco.interfaces.dao.merchandisecostanalysis.accountingingredient.accounting.AccountingDataDao">
+
+
+	<!-- 增加核算总表 -->
+	<insert id="saveAccounting" parameterType="hashmap">
+		INSERT INTO
+		accounting(accounting_code,inland_import,merchandise_code,supplier_code,quoted_currency,quoted_date,quantity,units,created,createby)
+		VALUES(#{accountingCode},#{inlandImport},#{merchandiseCode},#{supplierCode},#{quotedCurrency},#{quotedDate},#{quantity},#{units},#{app_created},#{app_create_by})
+	</insert>
+
+	<!-- 增加投料总表 -->
+	<insert id="saveIngredient" parameterType="hashmap">
+		INSERT INTO
+		ingredient(ingredient_code,merchandise_code,supplier_code,product_count,yield,moisture,created,createby)
+		VALUES(#{ingredientCode},#{merchandiseCode},#{supplierCode},#{productCount},#{yield},#{moisture},#{app_created},#{app_create_by})
+	</insert>
+
+	<!-- 增加投料明细 -->
+	<insert id="saveIngredientItem" parameterType="hashmap">
+		<selectKey resultType="String" keyProperty="materialCode"
+			order="BEFORE">
+			SELECT S_INGREDIENT_ITEM.NEXTVAL materialCode FROM DUAL
+		</selectKey>
+		INSERT INTO
+		ingredient_item(ingredient_code,material_type,material_code,material_name,material_origin,material_brand,material_level_specification,purchase_price,input_count,input_cost,avg_cost,moisture,remarks,input_count_proportion,input_cost_proportion)
+		VALUES(#{ingredientCode},#{materialType},#{materialCode},#{materialName},#{materialOrigin},#{materialBrand},#{materialLevelSpecification},#{purchasePrice},#{inputCount},#{inputCost},#{avgCost},#{moisture},#{remarks},#{inputCountProportion},#{inputCostProportion})
+	</insert>
+
+	<!-- 增加核算表地区表 -->
+	<insert id="saveAccountingRegion" parameterType="hashmap">
+		INSERT INTO
+		accounting_region(accounting_code,region)
+		VALUES(#{accountingCode},#{region})
+	</insert>
+
+	<!-- 增加核算表成本项 -->
+	<insert id="saveAccountingCostItem" parameterType="hashmap">
+		INSERT INTO
+		accounting_cost_item(accounting_code,yield_value,yield_remarks,zlsubtotal_value,zlsubtotal_remarks,flsubtotal_value,flsubtotal_remarks,i_totalcost_value,i_totalcost_remarks,m_totalcost_value,m_totalcost_remarks,packagproportion_value,packagproportion_remarks,deductptcost_value,deductptcost_remarks,nwpackagsubtotal_value,nwpackagsubtotal_remarks,wastagesubtotal_value,wastagesubtotal_remarks)
+		VALUES(#{accountingCode},#{yieldValue},#{yieldRemarks},#{zlsubtotalValue},#{zlsubtotalRemarks},#{flsubtotalValue},#{flsubtotalRemarks},#{iTotalcostValue},#{iTotalcostRemarks},#{mTotalcostValue},#{mTotalcostRemarks},#{packagproportionValue},#{packagproportionRemarks},#{deductptcostValue},#{deductptcostRemarks},#{nwpackagsubtotalValue},#{nwpackagsubtotalRemarks},#{wastagesubtotalValue},#{wastagesubtotalRemarks})
+	</insert>
+
+	<!-- 增加核算表内包装 -->
+	<insert id="saveAccountingNpackag" parameterType="hashmap">
+		INSERT INTO
+		accounting_npackag(accounting_code,npackag_type,else_name,price,texture,kg_price,weight_proportion,material_size,weight,units_price,quantity,technology_requirements,remarks)
+		VALUES(#{accountingCode},#{npackagType},#{elseName},#{price},#{texture},#{kgPrice},#{weightProportion},#{materialSize},#{weight},#{unitsPrice},#{quantity},#{technologyRequirements},#{remarks})
+	</insert>
+
+	<!-- 增加核算表外包装 -->
+	<insert id="saveAccountingWpackag" parameterType="hashmap">
+		INSERT INTO
+		accounting_wpackag(accounting_code,wpackag_type,else_name,price,units_price,use_quantity,texture,length,width,height,specification,remarks,area,yl_units_price)
+		VALUES(#{accountingCode},#{wpackagType},#{elseName},#{price},#{unitsPrice},#{useQuantity},#{texture},#{length},#{width},#{height},#{specification},#{remarks},#{area},#{ylUnitsPrice})
+	</insert>
+
+	<!-- 增加核算表损耗类型 -->
+	<insert id="saveAccountingWastage" parameterType="hashmap">
+		INSERT INTO
+		accounting_wastage(accounting_code,wastage_type,price,remarks)
+		VALUES(#{accountingCode},#{wastageType},#{price},#{remarks})
+	</insert>
+
+	<!-- 增加核算表水电煤 -->
+	<insert id="saveAccountingWec" parameterType="hashmap">
+		INSERT INTO
+		accounting_wec(accounting_code,price,water,electricity,gas,coal,oil,total,remarks)
+		VALUES(#{accountingCode},#{price},#{water},#{electricity},#{gas},#{coal},#{oil},#{total},#{remarks})
+	</insert>
+
+	<!-- 增加核算表设备折旧及维护 -->
+	<insert id="saveAccountingSbzjwh" parameterType="hashmap">
+		INSERT INTO
+		accounting_sbzjwh(accounting_code,price,total_price,age_limit,depreciation,capacity,remarks)
+		VALUES(#{accountingCode},#{price},#{totalPrice},#{ageLimit},#{depreciation},#{capacity},#{remarks})
+	</insert>
+
+	<!-- 增加核算表人工 -->
+	<insert id="saveAccountingManpower" parameterType="hashmap">
+		INSERT INTO
+		accounting_manpower(accounting_code,price,manpower_count,avg_wage,month_capacity,remarks,units_wage)
+		VALUES(#{accountingCode},#{price},#{manpowerCount},#{avgWage},#{monthCapacity},#{remarks},#{unitsWage})
+	</insert>
+
+	<!-- 增加核算表管理 -->
+	<insert id="saveAccountingManage" parameterType="hashmap">
+		INSERT INTO
+		accounting_manage(accounting_code,price,remarks)
+		VALUES(#{accountingCode},#{price},#{remarks})
+	</insert>
+
+	<!-- 增加核算表管理地区 -->
+	<insert id="saveAccountingManageRegion" parameterType="hashmap">
+		INSERT
+		INTO accounting_manage_region(accounting_code,region,proportion)
+		VALUES(#{accountingCode},#{region},#{proportion})
+	</insert>
+
+	<!-- 增加核算表运输备注 -->
+	<insert id="saveAccountingFreight" parameterType="hashmap">
+		INSERT INTO
+		accounting_freight(accounting_code,units,units_cost,remarks)
+		VALUES(#{accountingCode},#{unitsPrice},#{unitsCost},#{remarks})
+	</insert>
+
+	<!-- 增加核算表运输各地区 -->
+	<insert id="saveAccountingFreightRegion" parameterType="hashmap">
+		INSERT
+		INTO accounting_freight_region(accounting_code,region,price,sum_km)
+		VALUES(#{accountingCode},#{region},#{price},#{sumKm})
+	</insert>
+
+	<!-- 增加核算表税收 -->
+	<insert id="saveAccountingTax" parameterType="hashmap">
+		INSERT INTO
+		accounting_tax(accounting_code,tax_rate,remarks)
+		VALUES(#{accountingCode},#{taxRate},#{remarks})
+	</insert>
+
+	<!-- 增加核算表税收各地区 -->
+	<insert id="saveAccountingTaxRegion" parameterType="hashmap">
+		INSERT INTO
+		accounting_tax_region(accounting_code,region,price,proportion)
+		VALUES(#{accountingCode},#{region},#{price},#{proportion})
+	</insert>
+
+	<!-- 增加核算表利润 -->
+	<insert id="saveAccountingProfit" parameterType="hashmap">
+		INSERT INTO
+		accounting_profit(accounting_code,remarks)
+		VALUES(#{accountingCode},#{remarks})
+	</insert>
+
+	<!-- 增加核算表税收各地区 -->
+	<insert id="saveAccountingProfitRegion" parameterType="hashmap">
+		INSERT
+		INTO accounting_profit_region(accounting_code,region,price,proportion)
+		VALUES(#{accountingCode},#{region},#{price},#{proportion})
+	</insert>
+
+	<!-- 增加核算表总价 -->
+	<insert id="saveAccountingAggregate" parameterType="hashmap">
+		INSERT INTO
+		accounting_aggregate(accounting_code,remarks)
+		VALUES(#{accountingCode},#{remarks})
+	</insert>
+
+	<!-- 增加核算表总价地区 -->
+	<insert id="saveAccountingAggregateRegion" parameterType="hashmap">
+		INSERT
+		INTO accounting_aggregate_region(accounting_code,region,sum_price)
+		VALUES(#{accountingCode},#{region},#{sumPrice})
+	</insert>
+
+	<!-- 增加核算表其他成本小计 -->
+	<insert id="saveAccountingElsesubtotal" parameterType="hashmap">
+		INSERT
+		INTO accounting_elsesubtotal(accounting_code,remarks)
+		VALUES(#{accountingCode},#{remarks})
+	</insert>
+
+	<!-- 增加核算表其他成本小计地区 -->
+	<insert id="saveAccountingElsesubtotalRegion" parameterType="hashmap">
+		INSERT INTO
+		accounting_elsesubtotal_region(accounting_code,region,subtotal)
+		VALUES(#{accountingCode},#{region},#{subtotal})
+	</insert>
+
+	<!-- 根据商品编号查询核算编号 -->
+	<select id="searchAccountingCode" resultType="String">
+		SELECT t.accounting_code
+		FROM accounting t
+		<where>
+			1=1
+			<if test="merchandiseCode != null and merchandiseCode !=''">
+				AND t.merchandise_code=#{merchandiseCode}
+			</if>
+			<if test="supplierCode != null and supplierCode !=''">
+				AND t.supplier_code=#{supplierCode}
+			</if>
+			<if test="quotedDate != null">
+				AND t.quoted_date=#{quotedDate}
+			</if>
+		</where>
+	</select>
+
+	<!-- 删除投料总表 -->
+	<delete id="deleteIngredient" parameterType="hashmap">
+	
+		delete from ingredient where ingredient_code = #{accountingCode}
+	</delete>
+	<!-- 删除投料明细 -->
+	<delete id="deleteIngredientItem" parameterType="hashmap">
+		delete from ingredient_item where ingredient_code = #{accountingCode}
+	</delete>
+	<!-- 删除核算总表 -->
+	<delete id="deleteAccounting" parameterType="hashmap">
+		delete from accounting where accounting_code = #{accountingCode}
+	</delete>
+	<!-- 删除核算表地区表 -->
+	<delete id="deleteAccountingRegion" parameterType="hashmap">
+		delete from accounting_region where accounting_code =
+		#{accountingCode}
+	</delete>
+	<!-- 删除核算表成本项 -->
+	<delete id="deleteAccountingCostItem" parameterType="hashmap">
+		delete from accounting_cost_item where accounting_code =
+		#{accountingCode}
+	</delete>
+	<!-- 删除核算表内包装 -->
+	<delete id="deleteAccountingNpackag" parameterType="hashmap">
+		delete from accounting_npackag where accounting_code =
+		#{accountingCode}
+	</delete>
+	<!-- 删除核算表外包装 -->
+	<delete id="deleteAccountingWpackag" parameterType="hashmap">
+		delete from accounting_wpackag where accounting_code =
+		#{accountingCode}
+	</delete>
+	<!-- 删除核算表损耗类型 -->
+	<delete id="deleteAccountingWastage" parameterType="hashmap">
+		delete from accounting_wastage where accounting_code =
+		#{accountingCode}
+	</delete>
+	<!-- 删除核算表水电煤 -->
+	<delete id="deleteAccountingWec" parameterType="hashmap">
+		delete from accounting_wec where accounting_code = #{accountingCode}
+	</delete>
+	<!-- 删除核算表设备折旧及维护 -->
+	<delete id="deleteAccountingSbzjwh" parameterType="hashmap">
+		delete from accounting_sbzjwh where accounting_code =
+		#{accountingCode}
+	</delete>
+	<!-- 删除核算表人工 -->
+	<delete id="deleteAccountingManpower" parameterType="hashmap">
+		delete from accounting_manpower where accounting_code =
+		#{accountingCode}
+	</delete>
+	<!-- 删除核算表管理 -->
+	<delete id="deleteAccountingManage" parameterType="hashmap">
+		delete from accounting_manage where accounting_code =
+		#{accountingCode}
+	</delete>
+	<!-- 删除核算表管理 -->
+	<delete id="deleteAccountingManageRegion" parameterType="hashmap">
+		delete from accounting_manage_region where accounting_code =
+		#{accountingCode}
+	</delete>
+	<!-- 删除核算表运输备注 -->
+	<delete id="deleteAccountingFreight" parameterType="hashmap">
+		delete from accounting_freight where accounting_code =
+		#{accountingCode}
+	</delete>
+	<!-- 删除核算表运输各地区 -->
+	<delete id="deleteAccountingFreightRegion" parameterType="hashmap">
+		delete from accounting_freight_region where accounting_code =
+		#{accountingCode}
+	</delete>
+	<!-- 删除核算表税收 -->
+	<delete id="deleteAccountingTax" parameterType="hashmap">
+		delete from accounting_tax where accounting_code = #{accountingCode}
+	</delete>
+	<!-- 删除核算表税收各地区 -->
+	<delete id="deleteAccountingTaxRegion" parameterType="hashmap">
+		delete from accounting_tax_region where accounting_code =
+		#{accountingCode}
+	</delete>
+	<!-- 删除核算表利润 -->
+	<delete id="deleteAccountingProfit" parameterType="hashmap">
+		delete from accounting_profit where accounting_code =
+		#{accountingCode}
+	</delete>
+	<!-- 删除核算表税收各地区 -->
+	<delete id="deleteAccountingProfitRegion" parameterType="hashmap">
+		delete from accounting_profit_region where accounting_code =
+		#{accountingCode}
+	</delete>
+	<!-- 删除核算表总价 -->
+	<delete id="deleteAccountingAggregate" parameterType="hashmap">
+		delete from accounting_aggregate where accounting_code =
+		#{accountingCode}
+	</delete>
+	<!-- 删除核算表总价地区 -->
+	<delete id="deleteAccountingAggregateRegion" parameterType="hashmap">
+		delete from accounting_aggregate_region where accounting_code =
+		#{accountingCode}
+	</delete>
+	<!-- 删除核算表其他成本小计 -->
+	<delete id="deleteAccountingElsesubtotal" parameterType="hashmap">
+		delete from accounting_elsesubtotal where accounting_code =
+		#{accountingCode}
+	</delete>
+	<!-- 删除核算表其他成本小计 -->
+	<delete id="deleteAccountingElsesubtotalRegion" parameterType="hashmap">
+		delete from accounting_elsesubtotal_region where accounting_code =
+		#{accountingCode}
+	</delete>
+</mapper>

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.powere2e.sco.interfaces.dao.datamaintenance.systemmanagerdata.suppliercertificatetype.SupplierCertificateTypeDao">
+	<resultMap type="com.powere2e.sco.model.datamaintenance.systemmanagerdata.suppliercertificatetype.SupplierCertificateType" id="supplierCertificateTypeMap">
+		<result property="certificateTypeCode" column="certificateTypeCode" />
+		<result property="certificateTypeName" column="certificateTypeName" />
+		<result property="created" column="created" />
+		<result property="createby" column="createby" />
+		<result property="updated" column="updated" />
+		<result property="updateby" column="updateby" />
+		<result property="createUserName" column="createUserName" />
+		<result property="updateUserName" column="updateUserName" />
+		<result property="recordCount" column="record_count" />
+	</resultMap>
+	<!-- 查询证件名称(可分页) -->
+	<select id="searchSupplierCertificateType" resultMap="supplierCertificateTypeMap">
+		SELECT
+		<if test="page_count == null">
+			t.certificate_type_code certificateTypeCode,t.certificate_type_name certificateTypeName
+			,t.created, t.updated
+			,(select u.login_name from pub_user u where u.user_id=t.createby) as
+			createUserName,
+			(select u.login_name from pub_user u where u.user_id=t.updateby) as updateUserName
+		</if>
+		<if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		FROM supplier_certificate_type t
+		<where>
+			1=1
+			<if test="certificateTypeCode != null and certificateTypeCode!=''">
+				AND t.certificate_type_code = #{certificateTypeCode}
+			</if>
+			<if test="certificateTypeName != null and certificateTypeName!=''">
+				AND UPPER(t.certificate_type_name) LIKE UPPER('%'||#{certificateTypeName}||'%')
+			</if>
+			<if test="created != null and created!=''">
+				AND convert(varchar,t.created,120) LIKE (#{created})
+			</if>
+			<if test="createby != null and createby!=''">
+				AND UPPER(t.createby) LIKE UPPER('%'||#{createby}||'%')
+			</if>
+			<if test="updated != null and updated!=''">
+				AND convert(varchar,t.updated,120) LIKE (#{updated})
+			</if>
+			<if test="updateby != null and updateby!=''">
+				AND UPPER(t.updateby) LIKE UPPER('%'||#{updateby}||'%')
+			</if>
+		</where>
+		<if test="page_count == null">
+			<if test="app_orderby !=null">
+				ORDER BY ${app_orderby}
+			</if>
+			<if test="app_orderby ==null">
+				ORDER BY t.created DESC
+			</if>
+		</if>
+	</select>
+	<!-- 证件名称数据查询 -->
+	<select id="listQualitative" resultType="com.powere2e.security.model.Option">
+		SELECT
+		certificate_type_code id, certificate_type_name text
+		FROM
+		supplier_certificate_type 
+		ORDER BY certificate_type_name 
+	</select>
+	 <select id="searchSupplierCertificate" resultType="Integer">
+        select count(*) from SUPPLIER_CERTIFICATE where CERTIFICATE_TYPE_CODE=#{certificateTypeCode}
+    </select>
+	<!-- 根据主键查询某个证件名称(可分页) -->
+	<select id="loadSupplierCertificateType" resultMap="supplierCertificateTypeMap">
+		SELECT
+		<if test="page_count == null">
+			t.certificate_type_code certificateTypeCode,t.certificate_type_name certificateTypeName
+			,t.created, t.updated
+			,(select u.login_name from pub_user u where u.user_id=t.createby) as
+			createUserName,
+			(select u.login_name from pub_user u where u.user_id=t.updateby) as updateUserName
+		</if>
+		<if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		FROM supplier_certificate_type t
+		<where>
+			1=1
+			<if test="certificateTypeCode != null and certificateTypeCode!=''">
+				AND t.CERTIFICATE_TYPE_CODE = #{certificateTypeCode}
+			</if>
+			<if test="certificateTypeName != null and certificateTypeName!=''">
+				AND t.CERTIFICATE_TYPE_NAME = #{certificateTypeName}
+			</if>
+		</where>
+		<if test="page_count == null">
+			<if test="app_orderby !=null">
+				ORDER BY ${app_orderby}
+			</if>
+			<if test="app_orderby ==null">
+				ORDER BY t.created DESC
+			</if>
+		</if>
+	</select>
+
+	<!-- 增加证件名称 -->
+	<insert id="saveSupplierCertificateType" parameterType="hashmap">
+		INSERT INTO supplier_certificate_type(certificate_type_code,certificate_type_name,created,createby)
+		VALUES(S_SUPPLIER_CERTIFICATE_TYPE.NEXTVAL,#{certificateTypeName},sysdate,#{app_create_by})
+	</insert>
+	<!-- 删除证件名称 -->
+	<delete id="deleteSupplierCertificateType" parameterType="hashmap">
+		DELETE FROM
+		supplier_certificate_type
+		WHERE
+		CERTIFICATE_TYPE_CODE in
+		<foreach collection="certificateTypeCode" item="certificateTypeCode" close=")" open="(" separator=",">
+			#{certificateTypeCode}
+		</foreach>
+	</delete>
+</mapper>

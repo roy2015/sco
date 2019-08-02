@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN" "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+  <package name="joyce" extends="pubstruts" namespace="/">
+    
+    <!-- 意向品管理模块 -->
+    <action name="merchandiseIntention" method="{1}" class="com.powere2e.sco.action.merchandiseintention.MerchandiseIntentionAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+    
+     <!-- 意向品报价单模块 -->
+    <action name="merchandiseQuoted" method="{1}" class="com.powere2e.sco.action.merchandiseintention.MerchandiseQuotedAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+    
+     <!-- 报价比价模块 -->
+    <action name="quotedCompare" method="{1}" class="com.powere2e.sco.action.merchandiseintention.QuotedCompareAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+    
+     <!-- 试吃反馈模块 -->
+    <action name="foretasteFeedback" method="{1}" class="com.powere2e.sco.action.merchandiseintention.ForetasteFeedbackAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+    
+     <!-- 供应商列表数据 -->
+    <action name="supplierData" method="{1}" class="com.powere2e.sco.action.SupplierDataAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+    
+      <!-- 新品引进OA申请 -->
+    <action name="reportNew" method="{1}" class="com.powere2e.sco.action.merchandiseoaapplication.reportnewoaapplication.ApplicationReportNewAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+    
+    <!-- 老品新上OA申请 -->
+    <action name="reportOldup" method="{1}" class="com.powere2e.sco.action.merchandiseoaapplication.reportoldupoaapplication.ApplicationReportOldupAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+    
+     <!-- 正常调价OA申请 -->
+    <action name="reportAdjustprice" method="{1}" class="com.powere2e.sco.action.merchandiseoaapplication.reportadjustpriceoaapplication.ApplicationReportAdjustpriceAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+    
+     <!-- 快速调价OA申请 -->
+    <action name="fastAdjustprice" method="{1}" class="com.powere2e.sco.action.merchandiseoaapplication.fastadjustpriceoaapplication.ApplicationFastadjustpriceAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+    
+    <!-- 销售同比分析 -->
+    <action name="sellYearOnYear" method="{1}" class="com.powere2e.sco.action.sharefunctionanalysis.sellanalysis.sellyearonyearanalysis.SellYearOnYearAction">
+      <interceptor-ref name ="mydefault"/>
+    </action>
+    
+    <!-- 明细类销售同比分析 -->
+    <action name="detailSellYearOnYear" method="{1}" class="com.powere2e.sco.action.sharefunctionanalysis.sellanalysis.sellyearonyearanalysis.DetailSellYearOnYearAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+    
+    <!-- 小分类销售同比分析 -->
+    <action name="smallSellYearOnYear" method="{1}" class="com.powere2e.sco.action.sharefunctionanalysis.sellanalysis.sellyearonyearanalysis.SmallSellYearOnYearAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+    
+     <!-- 整体销售同比分析 -->
+    <action name="marketSellYearOnYear" method="{1}" class="com.powere2e.sco.action.sharefunctionanalysis.sellanalysis.sellyearonyearanalysis.MarketSellYearOnYearAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+    
+     <!-- 单品销售环比分析 -->
+    <action name="merchandiseLinkRelative" method="{1}" class="com.powere2e.sco.action.sharefunctionanalysis.sellanalysis.selllinkrelative.MerchandiseLinkRelativeAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+    
+     <!-- 明细类销售环比分析 -->
+    <action name="detailLinkRelative" method="{1}" class="com.powere2e.sco.action.sharefunctionanalysis.sellanalysis.selllinkrelative.DetailLinkRelativeAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+    
+      <!-- 小分类销售环比分析 -->
+    <action name="smallLinkRelative" method="{1}" class="com.powere2e.sco.action.sharefunctionanalysis.sellanalysis.selllinkrelative.SmallLinkRelativeAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+    
+     <!-- 整体销售环比分析 -->
+    <action name="marketLinkRelative" method="{1}" class="com.powere2e.sco.action.sharefunctionanalysis.sellanalysis.selllinkrelative.MarketLinkRelativeAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+    
+     <!-- 供应商销售贡献度排行 -->
+    <action name="salesContribution" method="{1}" class="com.powere2e.sco.action.sharefunctionanalysis.supplieranalysis.suppliersalescontribution.SupplierSalesContributionAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+  </package>
+</struts>

@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.accessoryoaapplication.DhInfoDao">
+	<resultMap type="com.powere2e.sco.model.accessoryoaapplication.DhInfo" id="dhInfoMap">
+		<result property="id" column="id"/>
+		<result property="applicationCode" column="applicationCode"/>
+		<result property="intentionCode" column="intentionCode"/>
+		<result property="accessoryCode" column="accessoryCode"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="fileType" column="fileType"/>
+		<result property="fileName" column="fileName"/>
+		<result property="path" column="path"/>
+		<result property="intentionSupplierName" column="intentionSupplierName"/>
+		<result property="supplierName" column="supplierName"/>
+		<result property="intentionName" column="intentionName"/>
+		<result property="created" column="created"/>
+		<result property="createby" column="createby"/>
+		<result property="updated" column="updated"/>
+		<result property="updateby" column="updateby"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <!-- 查询大货信息(可分页)-->
+    <select id="searchDhInfo" resultMap="dhInfoMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.id id,t.application_code applicationCode,t.intention_code intentionCode,t.accessory_code accessoryCode,t.supplier_code supplierCode,t.file_type fileType,t.file_name fileName,t.path path
+       		,t.created,	t.updated ,m.intention_supplier_name intentionSupplierName,n.supplier_name supplierName,a.intention_name intentionName
+			,(select u.real_name from pub_user u where u.user_id=t.createby) as createUserName,
+           	(select u.real_name from pub_user u where u.user_id=t.updateby) as updateUserName
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM dh_info t
+      		left join accessory_intention a on t.intention_code=a.intention_code
+      		left join accessory_intention_supplier m on t.supplier_code=m.intention_supplier_code
+      		left join supplier n on t.supplier_code=n.supplier_code
+    	<where>
+    		1=1
+	    	<if test= "applicationCode != null and applicationCode!=''">
+			AND t.application_code =#{applicationCode}
+			</if>
+	    	<if test= "intentionCode != null and intentionCode!=''">
+			AND t.intention_code = #{intentionCode}
+			</if>
+	    	<if test= "accessoryCode != null and accessoryCode!=''">
+			AND t.accessory_code= #{accessoryCode}
+			</if>
+	    	<if test= "supplierCode != null and supplierCode!=''">
+			AND t.supplier_code =#{supplierCode}
+			</if>
+	    	<if test= "fileType != null and fileType!=''">
+			AND UPPER(t.file_type) LIKE UPPER('%'||#{fileType}||'%')
+			</if>
+	    	<if test= "fileName != null and fileName!=''">
+			AND t.file_name=#{fileName}
+			</if>
+	    	<if test= "path != null and path!=''">
+			AND UPPER(t.path) LIKE UPPER('%'||#{path}||'%')
+			</if>
+	    	<if test= "created != null and created!=''">
+			AND	convert(varchar,t.created,120) LIKE (#{created})
+			</if>
+	    	<if test= "createby != null and createby!=''">
+			AND UPPER(t.createby) LIKE UPPER('%'||#{createby}||'%')
+			</if>
+	    	<if test= "updated != null and updated!=''">
+			AND	convert(varchar,t.updated,120) LIKE (#{updated})
+			</if>
+	    	<if test= "updateby != null and updateby!=''">
+			AND UPPER(t.updateby) LIKE UPPER('%'||#{updateby}||'%')
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.created DESC
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 根据主键查询某个大货信息(可分页)-->
+    <select id="loadDhInfo" resultMap="dhInfoMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.application_code applicationCode,t.intention_code intentionCode,t.accessory_code accessoryCode,t.supplier_code supplierCode,t.file_type fileType,t.file_name fileName,t.path path
+       		,t.created,	t.updated 
+		   ,(select u.real_name from pub_user u where u.user_id=t.createby) as createUserName,
+           	(select u.real_name from pub_user u where u.user_id=t.updateby) as updateUserName
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM dh_info t
+    	<where>
+    		1=1
+	    	<if test= "intentionCode != null and intentionCode!=''">
+			AND  t.INTENTION_CODE = #{intentionCode}
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.created DESC
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 增加大货信息 --> 
+	<insert id="saveDhInfo" parameterType="hashmap">
+		INSERT INTO dh_info(id,application_code,intention_code,accessory_code,supplier_code,file_type,file_name,path,created,createby) 
+			 VALUES(#{id},#{applicationCode},#{intentionCode},#{accessoryCode},#{supplierCode},#{fileType},#{fileName},#{path},#{app_created},#{app_create_by})
+    </insert>
+    <!-- 修改大货信息  -->
+    <update id="updateDhInfo" parameterType="hashmap">
+		UPDATE	
+				dh_info	
+		   SET	
+		   		application_code=#{applicationCode},
+		   		accessory_code=#{accessoryCode},
+		   		supplier_code=#{supplierCode},
+		   		file_type=#{fileType},
+		   		file_name=#{fileName},
+		   		path=#{path}		   		
+		 WHERE	
+		 		id=#{id}
+    </update>
+    <!-- 删除大货信息 -->
+    <delete id="deleteDhInfo" parameterType="hashmap">
+        DELETE FROM 
+        			dh_info 
+        WHERE
+        1=1 
+        <if test= "id != null and id!=''">
+			AND ID=#{id} <!--AND client_id=#{app_user_clientID}-->
+		</if>
+		<if test= "applicationCode != null and applicationCode!=''">
+			AND application_code=#{applicationCode} <!--AND client_id=#{app_user_clientID}-->
+		</if>
+        			
+    </delete>
+</mapper>

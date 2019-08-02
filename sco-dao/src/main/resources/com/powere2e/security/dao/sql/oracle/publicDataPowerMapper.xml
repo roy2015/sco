@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.security.dao.PublicDataPowerDao">           <!-- 完成 -->
+    
+    <!-- 统计某角色对某数据类型的所有权限的个数 -->
+    <select id="countRoleDataPowers" resultType="int">
+    	SELECT 
+    			count(1)
+    	FROM 
+    			pub_role_grant_way t 
+    	WHERE
+    			t.role_id=#{roleId} AND t.data_type=#{dataType} 
+    			AND t.client_id = #{app_user_clientID} 
+    </select>
+    
+    <!-- 获取某用户的角色对某数据类型的授权方式 -->
+    <select id="listUserGrantWay" resultType="string">
+    	SELECT
+    			distinct t.grant_way
+    	FROM
+    			pub_role_grant_way t
+    	WHERE
+    			t.data_type=#{dataType} 
+    			AND t.client_id = #{app_user_clientID} 
+    			AND t.role_id IN(SELECT ROLE_ID FROM PUB_USER_ROLE WHERE USER_ID=#{userId} AND client_id = #{app_user_clientID} )
+    </select>
+    <!-- 获取角色对某数据类型的授权方式 -->
+    <select id="getRoleGrantWay" resultType="string">
+    	SELECT
+    			t.grant_way
+    	FROM
+    			pub_role_grant_way t
+    	WHERE
+    			t.data_type=#{dataType}
+    			AND t.role_id=#{roleId} 
+    			AND t.client_id = #{app_user_clientID} 
+    </select>
+	<!-- 添加数据权限 -->
+	<insert id="insertDataPower">
+		INSERT INTO pub_data_power (owner_type, owner_id, data_type, data_id, created, createby, client_id)
+			VALUES (#{ownerType}, #{ownerId}, #{dataType}, #{dataId}, to_date(#{app_created},'YYYY-MM-DD HH24:MI:SS'), #{app_create_by}, #{app_user_clientID})
+	</insert>
+
+	<!-- 删除数据权限 -->
+	<delete id="deleteDataPowers">
+		DELETE 
+		FROM 
+				pub_data_power
+		WHERE 
+				client_id = #{app_user_clientID} 
+				<if test="ownerType != null and ownerType != ''">
+				AND owner_type=#{ownerType} 
+				</if>
+				<if test="ownerId != null and ownerId != ''">
+					AND owner_id = #{ownerId} 
+				</if>
+				<if test="dataType != null and dataType != ''">
+					AND data_type=#{dataType}				
+				</if>
+				<if test="dataIds != null and dataIds.length > 0">
+					AND data_id IN
+					<foreach collection="dataIds" open="(" separator="," close=")" item="dataId">
+						${dataId}
+					</foreach>
+				</if>
+	</delete>
+
+	<!-- 添加角色数据权限授权方式    Oracle 9i之后-->
+	<insert id="insertRoleGrantWay">
+		MERGE INTO pub_role_grant_way T1 
+	    	USING (
+	            	SELECT 
+			            #{roleId} as roleId, 
+			            #{dataType} as dataType, 
+			            #{grantWay} as grantWay,
+			            #{app_created} as created,	
+			            #{app_create_by} as createby,
+			            #{app_updated} as updated,
+			            #{app_user_id} as updateby,
+			           	#{app_user_clientID} as app_user_clientID 
+			        FROM dual 
+		           ) T2
+		ON ( T1.role_id = T2.roleId and T1.data_type = T2.dataType)   <!-- 更新还是插入判断条件 -->
+		WHEN MATCHED THEN
+		    UPDATE SET 
+	        T1.grant_way = T2.grantWay,
+			T1.updated = T2.updated,
+			T1.updateby = T2.updateby
+		WHEN NOT MATCHED THEN 
+	      	INSERT (role_id, data_type, grant_way, created, createby, updated, client_id) 
+        	VALUES(T2.roleId,T2.dataType,T2.grantWay,T2.created,T2.createby,T2.updated,T2.app_user_clientID)
+	</insert>
+
+	<!-- 删除角色数据权限授权方式 -->
+	<delete id="deleteRoleGrantWay">
+		DELETE 
+		FROM 
+				pub_role_grant_way
+		WHERE
+				role_id=#{roleId} AND data_type=#{dataType} AND grant_way=#{grantWay} AND client_id = #{app_user_clientID} 
+	</delete>
+	
+	<!-- 拷贝角色数据权限 -->
+	<insert id="completeCopyRoleDataPowers">
+		MERGE INTO pub_data_power T1
+	      	USING (
+	               SELECT DISTINCT 
+	                      owner_type owner_type, 
+	                      #{toRoleId} as owner_id, 
+	                      data_type, data_id, 
+	                      to_date(#{app_created},'YYYY-MM-DD HH24:MI:SS') created,
+	                      #{app_create_by} createby, 
+	                      #{app_user_clientID} client_id
+           			FROM pub_data_power t
+           			WHERE 
+           				owner_type='R' 
+           				AND t.client_id = #{app_user_clientID} 
+           				AND owner_id IN 
+           				<foreach collection="fromRoleIds" open="(" separator="," close=")" item="roleId">
+           					${roleId}
+           				</foreach>
+	           ) T2
+			ON (T1.OWNER_TYPE = T2.OWNER_TYPE AND T1.OWNER_ID = T2.OWNER_ID AND T1.DATA_TYPE = T2.DATA_TYPE AND T1.DATA_ID = T2.DATA_ID)
+			WHEN MATCHED THEN
+			     UPDATE SET 
+			       T1.updated = to_date(#{app_updated},'YYYY-MM-DD HH24:MI:SS') 
+			WHEN NOT MATCHED THEN 
+			      INSERT (owner_type, owner_id, data_type, data_id, created, createby, client_id) 
+			        VALUES(T2.owner_type,T2.owner_id,T2.data_type,T2.data_id,T2.created,T2.createby,T2.client_id)
+	</insert>
+    
+    <!-- 拷贝用户数据权限 -->
+	<insert id="completeCopyUserDataPowers">
+		MERGE INTO pub_data_power T1
+	      	USING (
+	               SELECT DISTINCT 
+	                      owner_type owner_type, 
+	                      #{toRoleId} as owner_id, 
+	                      data_type, data_id, 
+	                      to_date(#{app_created},'YYYY-MM-DD HH24:MI:SS') created,
+	                      #{app_create_by} createby, 
+	                      #{app_user_clientID} client_id
+           			FROM pub_data_power t
+           			WHERE 
+           				owner_type='U' 
+           				AND t.client_id = #{app_user_clientID} 
+           				AND owner_id IN 
+           				<foreach collection="fromRoleIds" open="(" separator="," close=")" item="roleId">
+           					${roleId}
+           				</foreach>
+	           ) T2
+			ON (T1.OWNER_TYPE = T2.OWNER_TYPE AND T1.OWNER_ID = T2.OWNER_ID AND T1.DATA_TYPE = T2.DATA_TYPE AND T1.DATA_ID = T2.DATA_ID)
+			WHEN MATCHED THEN
+			     UPDATE SET 
+			       T1.updated = to_date(#{app_updated},'YYYY-MM-DD HH24:MI:SS') 
+			WHEN NOT MATCHED THEN 
+			      INSERT (owner_type, owner_id, data_type, data_id, created, createby, client_id) 
+			        VALUES(T2.owner_type,T2.owner_id,T2.data_type,T2.data_id,T2.created,T2.createby,T2.client_id)
+	</insert>
+    
+</mapper>

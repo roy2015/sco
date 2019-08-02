@@ -1,0 +1,7 @@
+._banner{
+	clear:both;width:auto;height:60px;text-align:left;padding:0 10px;border-bottom:#1a446e solid 1px;
+	background:#d8e4f2;font-family:normal small Microsoft YaHei,"微软雅黑",Verdana, Arial, Helvetica, sans-serif;
+	}
+._bannerTitle{clear:both;float:left;line-height:24px;padding-left:20px;font-size:12px;color:#7493b7;}
+._bannerTitle b{font-size:20px;font-weight:bold;color:#184f9b;}
+._bannerWarning{font-size:12px;color:#F00;position:absolute;bottom:5px;right:0px;}

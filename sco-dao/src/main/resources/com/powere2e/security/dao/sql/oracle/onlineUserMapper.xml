@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.security.dao.OnlineUserDao">
+	<resultMap type="com.powere2e.security.model.OnlineUser" id="onlineUserMap">
+		<result property="userId" column="userId "/>
+		<result property="objectId" column="objectId "/>
+		<result property="loginName" column="loginName "/>
+		<result property="realName" column="realName "/>
+		<result property="email" column="email "/>
+		<result property="phone" column="phone "/>
+		<result property="mobile" column="mobile "/>
+		<result property="lastlogin" column="lastlogin "/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    
+    <!-- 查询在线用户基础信息(可分页)-->
+    <select id="listOnlineUser" resultMap="onlineUserMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.user_id userId,t.object_id objectId,t.object_typ objectTyp,
+       		t.login_name loginName,t.real_name realName,t.email email,
+       		t.phone phone,t.mobile mobile,t.lastlogin lastlogin
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM pub_user t 
+    	<where>
+	    	<!-- 
+	    	<if test= "userId != null and userId!=''">
+			AND t.user_id = #{userId}
+			</if>
+			 -->
+			t.client_id = #{app_user_clientID} 
+	    	<if test= "objectId != null and objectId!=''">
+			AND UPPER(t.object_id) LIKE UPPER('%'||#{objectId}||'%')
+			</if>
+	    	<if test= "loginName != null and loginName!=''">
+			AND UPPER(t.login_name) LIKE UPPER('%'||#{loginName}||'%')
+			</if>
+	    	<if test= "realName != null and realName!=''">
+			AND UPPER(t.real_name) LIKE UPPER('%'||#{realName}||'%')
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.created DESC
+    		</if>
+    	</if>
+    </select>
+    
+</mapper>

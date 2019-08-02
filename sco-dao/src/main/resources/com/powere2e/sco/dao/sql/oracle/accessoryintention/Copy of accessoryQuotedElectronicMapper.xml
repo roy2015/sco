@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.accessoryintention.AccessoryQuotedElectronicDao">
+	<resultMap type="com.powere2e.sco.model.accessoryintention.AccessoryQuotedElectronic" id="accessoryQuotedElectronicMap">
+		<result property="quotedCode" column="quotedCode"/>
+		<result property="enquiryCode" column="enquiryCode"/>
+		<result property="intentionCode" column="intentionCode"/>
+		<result property="intentionSupplierCode" column="intentionSupplierCode"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="supplierName" column="supplierName"/>
+		<result property="path" column="path"/>
+		<result property="intentionSupplierName" column="intentionSupplierName"/>
+		<result property="quotedMoney" column="quotedMoney"/>
+		<result property="quotedDate" column="quotedDate"/>
+		<result property="remarks" column="remarks"/>
+		<result property="created" column="created"/>
+		<result property="createby" column="createby"/>
+		<result property="updated" column="updated"/>
+		<result property="updateby" column="updateby"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <!-- 查询辅料报价单-电子版(可分页)-->
+    <select id="searchAccessoryQuotedElectronic" resultMap="accessoryQuotedElectronicMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.quoted_code quotedCode,t.enquiry_code enquiryCode,t.intention_code intentionCode,t.intention_supplier_code intentionSupplierCode,t.supplier_code supplierCode,t.quoted_date quotedDate,t.remarks remarks,t.path path
+       		,t.created,	t.updated ,m.intention_supplier_name intentionSupplierName,n.supplier_name supplierName
+			,(select u.login_name from pub_user u where u.user_id=t.createby) as createUserName,
+           	(select u.login_name from pub_user u where u.user_id=t.updateby) as updateUserName
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM accessory_quoted_electronic t
+      		left join ACCESSORY_INTENTION_SUPPLIER m on t.intention_supplier_code=m.intention_supplier_code
+      		left join SUPPLIER n on t.SUPPLIER_CODE=n.SUPPLIER_CODE
+      		inner join INTENTION_SUPPLIER_ACCESSORY f on ((t.intention_supplier_code=f.intention_supplier_code or t.supplier_code=f.supplier_code) and t.intention_code=f.intention_code)
+    	<where>
+    		1=1
+	    	<if test= "quotedCode != null and quotedCode!=''">
+			AND t.quoted_code = #{quotedCode}
+			</if>
+	    	<if test= "enquiryCode != null and enquiryCode!=''">
+			AND t.enquiry_code =#{enquiryCode}
+			</if>
+	    	<if test= "intentionCode != null and intentionCode!=''">
+			AND t.intention_code=#{intentionCode}
+			</if>
+	    	<if test= "intentionSupplierCode != null and intentionSupplierCode!=''">
+			AND t.intention_supplier_code=#{intentionSupplierCode}
+			</if>
+	    	<if test= "supplierCode != null and supplierCode!=''">
+			AND t.supplier_code=#{supplierCode}
+			</if>
+	    	
+	    	<if test= "quotedDate != null and quotedDate!=''">
+			AND	convert(varchar,t.quoted_date,120) LIKE (#{quotedDate})
+			</if>
+	    	<if test= "remarks != null and remarks!=''">
+			AND UPPER(t.remarks) LIKE UPPER('%'||#{remarks}||'%')
+			</if>
+	    	<if test= "created != null and created!=''">
+			AND	convert(varchar,t.created,120) LIKE (#{created})
+			</if>
+	    	<if test= "createby != null and createby!=''">
+			AND UPPER(t.createby) LIKE UPPER('%'||#{createby}||'%')
+			</if>
+	    	<if test= "updated != null and updated!=''">
+			AND	convert(varchar,t.updated,120) LIKE (#{updated})
+			</if>
+	    	<if test= "updateby != null and updateby!=''">
+			AND UPPER(t.updateby) LIKE UPPER('%'||#{updateby}||'%')
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.created DESC
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 根据主键查询某个辅料报价单-电子版(可分页)-->
+    <select id="loadAccessoryQuotedElectronic" resultMap="accessoryQuotedElectronicMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.quoted_code quotedCode,t.enquiry_code enquiryCode,t.intention_code intentionCode,t.intention_supplier_code intentionSupplierCode,t.supplier_code supplierCode,t.quoted_date quotedDate,t.remarks remarks,t.path path
+       		,t.created,	t.updated 
+		   ,(select u.login_name from pub_user u where u.user_id=t.createby) as createUserName,
+           	(select u.login_name from pub_user u where u.user_id=t.updateby) as updateUserName
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM accessory_quoted_electronic t
+    	<where>
+    		1=1
+	    	<if test= "quotedCode != null and quotedCode!=''">
+			AND  t.QUOTED_CODE = #{quotedCode}
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.created DESC
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 增加辅料报价单-电子版 --> 
+	<insert id="saveAccessoryQuotedElectronic" parameterType="hashmap">
+		INSERT INTO accessory_quoted_electronic(quoted_code,enquiry_code,intention_code,intention_supplier_code,supplier_code,quoted_date,remarks,created,createby) 
+			 VALUES(#{quotedCode},#{enquiryCode},#{intentionCode},#{intentionSupplierCode},#{supplierCode},#{quotedDate},#{remarks},#{app_created},#{app_createby})
+    </insert>
+    <!-- 修改辅料报价单-电子版  -->
+    <update id="updateAccessoryQuotedElectronic" parameterType="hashmap">
+		UPDATE	
+				accessory_quoted_electronic	
+		   SET	
+		   		path=#{path}  		
+		 WHERE	
+		 		QUOTED_CODE=#{quotedCode}
+    </update>
+    <!-- 删除辅料报价单-电子版 -->
+    <delete id="deleteAccessoryQuotedElectronic" parameterType="hashmap">
+        DELETE FROM 
+        			accessory_quoted_electronic 
+        WHERE 
+        			QUOTED_CODE=#{quotedCode} <!--AND client_id=#{app_user_clientID}-->
+    </delete>
+</mapper>

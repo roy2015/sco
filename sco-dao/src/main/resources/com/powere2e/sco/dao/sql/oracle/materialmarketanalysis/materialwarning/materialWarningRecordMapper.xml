@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.powere2e.sco.interfaces.dao.materialmarketanalysis.materialwarning.MaterialWarningRecordDao">
+	<resultMap type="com.powere2e.sco.model.materialmarketanalysis.materialwarningrecord.MaterialWarningRecord" id="matWarnRecMap">
+		<result property="materialCode" column="materialCode"/>
+		<result property="materialBigName" column="materialBigName"/>
+		<result property="materialSmallName" column="materialSmallName"/>
+		<result property="materialName" column="materialName"/>
+		<result property="websiteName" column="websiteName"/>
+		<result property="lasMonthAvgPrice" column="lasMonthAvgPrice"/>
+		<result property="momAvgMonthPrice" column="momAvgMonthPrice"/>
+		<result property="momChangeChange" column="momChangeChange"/>
+		<result property="region" column="region"/>
+		<result property="regionName" column="regionName"/>
+		<result property="warnType" column="warnType"/>
+		<result property="skuCount" column="skuCount"/>
+		<result property="created" column="created"/>
+		
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    
+    <resultMap type="com.powere2e.sco.model.datamaintenance.purchaserdata.relevancematerialandwebsite.RelevanceMaterialAndWebsite" id="merProMap">
+		<result property="merchandiseCode" column="merchandiseCode"/>
+		<result property="merchandiseName" column="merchandiseName"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="supplierName" column="supplierName"/>
+		<result property="dxRoleName" column="dxRoleName"/>
+		<result property="dlRoleName" column="dlRoleName"/>
+		<result property="centreName" column="centreName"/>
+		<result property="smallName" column="smallName"/>
+		<result property="detailName" column="detailName"/>
+		<result property="fineName" column="fineName"/>
+		<result property="inputCost" column="inputCost"/>
+		<result property="created" column="created"/>
+		<result property="createby" column="createby"/>
+    </resultMap>
+    
+    <!-- 查看预警记录 -->
+	<select id="listMatWarnRecord" resultMap="matWarnRecMap">
+		SELECT 
+			<if test="page_count == null">
+				mbt.material_big_type_code materialBigTypeCode,
+				mbt.material_big_type_name materialBigName,
+				mst.material_small_type_code materialSmallTypeCode,
+				mst.material_small_type_name materialSmallName,
+				mw.material_code materialCode,
+				m.material_name materialName,
+				w.website_code websiteCode,
+				w.website_name websiteName,
+				mw.material_region_code region,
+				mr.material_region_name regionName,
+				ROUND(mw.last_month_avg_price,2) lasMonthAvgPrice,
+				ROUND(mw.qoq_month_avg_price,2) momAvgMonthPrice,
+				ROUND(mw.qoq_change,2) momChangeChange,
+            	mw.sku_count skuCount,
+				cmc.value_string warnType,
+				mw.warn_date created 
+			</if>
+			<if test="page_count != null">
+       			count(1) AS record_count
+			</if>
+   	   FROM  
+			material_warn mw 
+        INNER JOIN material_warn_config mwc ON mw.material_code = mwc.material_code 
+        	AND mw.warn_type = mwc.warn_type 
+        LEFT JOIN 
+        (	SELECT 
+        		code_string,value_string 
+        	FROM 
+        		common_mapping_config 
+       		WHERE key_type = 'WARN_TYPE' 
+         )cmc ON mw.warn_type = cmc.code_string 
+        LEFT JOIN material m ON mw.material_code = m.material_code AND mwc.website_code = m.website_code
+        LEFT JOIN material_big_type mbt ON m.material_big_type_code = mbt.material_big_type_code 
+        LEFT JOIN material_small_type mst ON m.material_small_type_code = mst.material_small_type_code
+		LEFT JOIN website w ON mwc.website_code = w.website_code 
+		LEFT JOIN material_region mr ON mw.material_code = mr.material_code AND mw.material_region_code = mr.material_region_code 
+       WHERE ABS(mw.qoq_change) >= mwc.threshold_value 
+       	<if test="start != null">
+	       	AND #{start} <![CDATA[<=]]> mw.warn_date AND　#{end} > mw.warn_date 
+       	</if>	
+		<if test= "materialBigTypeCode != null and materialBigTypeCode!=''">
+			AND UPPER(mwc.material_big_type_code) LIKE UPPER(#{materialBigTypeCode})
+			AND UPPER(m.material_big_type_code) LIKE UPPER(#{materialBigTypeCode})
+		</if>
+    	<if test= "materialSmallTypeCode != null and materialSmallTypeCode!=''">
+			AND UPPER(mwc.material_small_type_code) LIKE UPPER(#{materialSmallTypeCode})
+			AND UPPER(m.material_small_type_code) LIKE UPPER(#{materialSmallTypeCode})
+		</if>
+    	<if test= "materialCode != null and materialCode!=''">
+			AND UPPER(mw.material_code) LIKE UPPER(#{materialCode})
+			AND UPPER(m.material_code) LIKE UPPER(#{materialCode})
+		</if>
+    	<if test= "websiteCode != null and websiteCode!=''">
+			AND UPPER(m.website_code) LIKE UPPER(#{websiteCode})
+		</if>
+    	<if test= "websiteCode != null and websiteCode!=''">
+			AND UPPER(m.website_code) LIKE UPPER(#{websiteCode})
+		</if>
+		<if test= "region != null and region !=''">
+			AND UPPER(mw.material_region_code) LIKE UPPER(#{region})
+		</if>
+    	<if test= "warnType != null and warnType!=''">
+			AND UPPER(mw.warn_type) LIKE UPPER(#{warnType})
+			AND UPPER(mwc.warn_type) LIKE UPPER(#{warnType})
+		</if>
+		<if test="warnType == null">	<!-- 原料价格预警 -->
+			AND UPPER(mw.warn_type) IN (${warnTypeOption}) 
+			AND UPPER(mwc.warn_type) IN (${warnTypeOption})
+       	</if>
+       <if test="page_count == null">
+       		ORDER BY mw.warn_date DESC, mwc.created DESC, w.website_code, mr.material_region_code
+       </if>
+    </select>
+    
+    <!-- 计算同环比月均价格 -->
+    <select id="calculateMomAvgMonthPrice" resultType="java.math.BigDecimal">
+    	 SELECT 
+          	AVG(price) lasMonthAvgPrice 
+         FROM material_price
+         WHERE 
+            price_date >= #{start}
+            AND price_date <![CDATA[<]]> #{end} 
+            AND material_code = #{materialCode} 
+            AND material_region_code = #{region}
+          GROUP BY material_code,material_region_code  
+    </select>
+    
+    <!-- 查询商品 -->
+    <select id="listMerchandise" resultMap="merProMap">
+		SELECT
+			m.merchandise_code merchandiseCode, m.merchandise_name merchandiseName,	
+			s.supplier_code supplierCode,s.supplier_name supplierName,
+			dx.role_name dxRoleName,dl.role_name dlRoleName, 
+			ct.centre_type_name centreName, sm.small_type_name smallName, 
+			dt.detail_type_name detailName, ft.fine_type_name fineName,
+			ROUND(ii.input_count_proportion,2) inputCost,
+			u.real_name createby,t.created 
+		FROM 
+		(merchandise_relevance_material ) t   	<!-- 商品原料关联表 -->
+		LEFT JOIN ingredient_item ii ON t.merchandise_material_code = ii.material_code 		<!-- 投料表-细 -->  
+       	INNER JOIN 
+	       (
+	       	 SELECT 
+				g4.accounting_code,g.merchandise_code merchandise_code, 
+				g.supplier_code supplier_code,MAX(g.imCode) imCode,MAX(g.isCode) isCode 
+			FROM
+           		(SELECT 
+            		am.application_code , am.merchandise_code, 
+            		am.supplier_code,am.imCode,am.isCode
+            	FROM 
+                  (
+	                  ( SELECT 											<!-- 新品引进 -->
+	 	              		    t1.application_code,
+	 	              		    t3.merchandise_code merchandise_code,
+	 	              		    t3.supplier_code supplier_code,
+	 	              		    t1.merchandise_code imCode,t1.supplier_code isCode
+	 	              	    FROM 
+	 	              	    	(SELECT 
+	 	              	    		application_code 
+	 	                  		FROM oa_application 
+	 	                 			WHERE 
+	 	                 				UPPER(application_type) = 'MERCHANDISE_NEW' 
+	 	              	    		AND UPPER(application_status) = 'SPTG'
+	 	              	    	) t2
+	 	              		INNER JOIN application_merchandise t1 ON t2.application_code = t1.application_code 
+	 	              		INNER JOIN intention_supplier_merchandise t3 ON t3.intention_code = t1.merchandise_code
+	 	              		 AND t3.intention_supplier_code = t1.supplier_code AND t3.merchandise_code IS NOT NULL 
+	 	              		 AND t3.supplier_code is not null
+	                     ) 
+  	              		UNION 
+	  	              	 (
+	                      SELECT 												<!-- 非新品引进 -->		
+	              	        t1.application_code,
+	              	        t1.merchandise_code merchandise_code,
+	              	        t1.supplier_code supplier_code,
+	              	        t1.merchandise_code imCode,t1.supplier_code isCode
+	                      FROM 
+	                      	(
+	                     		SELECT 	application_code FROM oa_application 	
+	                     	WHERE 
+	                     		UPPER(application_type) LIKE 'MERCHANDISE%' 
+	                      	AND	UPPER(application_type) != 'MERCHANDISE_NEW' 
+	                      	AND UPPER(application_status) = 'SPTG' 
+                     	) t2 
+                  	INNER JOIN application_merchandise t1 ON t2.application_code = t1.application_code 
+                 )  
+              ) am
+             ) g 
+          	INNER JOIN analysis_reports_m g3 ON g.application_code = g3.application_code
+          	INNER JOIN cost_analysis_merchandise g4 ON g3.reports_code = g4.reports_code 
+          		AND g.imCode = g4.merchandise_code AND g.isCode = g4.supplier_code	<!-- 成本分析-商品 -->
+		  	GROUP BY g4.accounting_code,g.merchandise_code,g.supplier_code 
+	       ) au ON ii.ingredient_code= au.accounting_code 
+        	AND t.merchandise_code = au.merchandise_code 
+        	AND t.supplier_code = au.supplier_code	<!-- 审批通过最新记录 -->
+			
+			LEFT JOIN merchandise m ON t.merchandise_code = m.merchandise_code 
+				AND t.supplier_code = m.supplier_code 
+			LEFT JOIN supplier s ON t.supplier_code = s.supplier_code  <!-- 供应商表 -->
+			LEFT JOIN merchandise_role mr on mr.merchandise_code = m.merchandise_code <!-- 商品角色中间表 -->
+			LEFT JOIN merchandise_dx_role dx ON mr.dx_role_code = dx.role_code  <!-- 定性角色表 -->
+			LEFT JOIN merchandise_dl_role dl ON mr.dl_role_code = dl.role_code  <!-- 定量角色表 -->
+			LEFT JOIN merchandise_centre_type ct ON m.centre_type_code = ct.centre_type_code <!-- 中分类 -->
+			LEFT JOIN merchandise_small_type sm ON m.small_type_code = sm.small_type_code <!-- 小分类 -->
+			
+			<!-- 查询细分类需关联意向品 -->
+		   	LEFT JOIN intention_supplier_merchandise ism 	<!-- 意向品供应商关联表 -->
+			ON 
+			 (
+			  (au.merchandise_code = ism.merchandise_code AND au.supplier_code = ism.supplier_code) 
+			 )
+			AND 	
+			  (au.imCode = ism.intention_code AND au.isCode = ism.intention_supplier_code) 
+							
+			LEFT JOIN merchandise_intention mi ON ism.intention_code = mi.intention_code
+			LEFT JOIN merchandise_detail_type dt ON m.detail_type_code = dt.detail_type_code <!-- 明细类 -->
+			LEFT JOIN merchandise_fine_type ft ON dt.detail_type_code = ft.detail_type_code 
+				AND mi.fine_type_code = ft.fine_type_code <!-- 细分类 -->
+			
+      		LEFT JOIN pub_user u ON t.createby = u.user_id 
+		WHERE 
+				t.material_code = #{materialCode} 
+			AND t.material_region_code = #{region}
+		ORDER BY t.merchandise_code DESC, t.supplier_code DESC 
+	</select>
+</mapper>

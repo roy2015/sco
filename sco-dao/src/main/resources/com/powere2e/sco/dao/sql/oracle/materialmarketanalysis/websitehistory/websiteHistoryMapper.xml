@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.powere2e.sco.interfaces.dao.materialmarketanalysis.websitehistory.WebsiteHistoryDao">
+	<resultMap type="com.powere2e.sco.model.materialmarketanalysis.websitehistory.WebsiteHistory" id="wb">
+		<result property="priceYear" column="priceYear"/>
+
+		<collection property="list" resultMap="list" />
+	</resultMap>
+	<resultMap id="list" type="com.powere2e.sco.model.materialmarketanalysis.websitehistory.WebsiteHistory">
+		<result property="priceYear" column="priceYear"/>
+		<result property="priceDate" column="lpriceDate"/>
+		<result property="price" column="lprice"/>
+	</resultMap>
+	
+	<resultMap type="com.powere2e.sco.model.datamaintenance.purchaserdata.relevancematerialandwebsite.RelevanceMaterialAndWebsite" id="webHisMateMap">
+		<result property="merchandiseCode" column="merchandiseCode"/>
+		<result property="merchandiseName" column="merchandiseName"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="supplierName" column="supplierName"/>
+		<result property="dxRoleName" column="dxRoleName"/>
+		<result property="dlRoleName" column="dlRoleName"/>
+		<result property="centreName" column="centreName"/>
+		<result property="smallName" column="smallName"/>
+		<result property="detailName" column="detailName"/>
+		<result property="fineName" column="fineName"/>
+		<result property="created" column="created"/>
+		<result property="createby" column="createby"/>
+		
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+	
+	<!-- 查看历史价格 -->
+	<select id="listHisPrice" resultMap="wb">
+		SELECT
+			SUBSTR(a.priceDate,0, INSTR(a.priceDate,'-')-1) priceYear,
+			a.priceDate lpriceDate,d.price lprice 
+		FROM 
+			(
+				<foreach collection="list" item="item" separator="union" >  
+                  	SELECT ${item} priceDate FROM DUAL 
+               	</foreach>
+			) a
+		LEFT JOIN 
+			(
+				SELECT 
+					t.* 
+				FROM
+					(
+					SELECT 
+						AVG(p.price) price, TO_CHAR(p.price_date, 'yyyy-mm') priceDate
+					FROM 
+						(SELECT 
+							* 
+						FROM 
+							material 
+						WHERE 
+							material_code = #{materialCode} 
+							AND website_code = #{websiteCode}
+							AND material_big_type_code = #{materialBigTypeCode}
+							AND material_small_type_code = #{materialSmallTypeCode} 
+					) t   
+					INNER JOIN 
+						(SELECT * FROM website WHERE website_code = #{websiteCode}) w ON t.website_code = w.website_code 
+					INNER JOIN 
+						(SELECT * FROM material_region WHERE material_region_code = #{priceRegion} ) mr ON t.material_code = mr.material_code 
+					LEFT JOIN 
+						(SELECT * FROM material_price 
+							WHERE price_date >= TO_DATE(#{startYear}, 'yyyy-mm-dd') 
+							AND price_date <![CDATA[<]]> TO_DATE(#{endYear}, 'yyyy-mm-dd')
+						)p ON t.material_code = p.material_code 
+						AND mr.material_region_code = p.material_region_code 
+					GROUP BY TO_CHAR(p.price_date, 'yyyy-mm')
+				) t 
+			) d
+		ON a.priceDate = d.priceDate
+		ORDER BY a.priceDate
+	</select>
+	
+	<!-- 查询商品数据 -->
+	<select id="listMerchandise" resultMap="webHisMateMap">
+		SELECT 
+		<if test="page_count == null">
+    	
+			m.merchandise_code merchandiseCode,m.merchandise_name merchandiseName,
+    		s.supplier_code supplierCode,s.supplier_name supplierName,
+    		
+    		dx.role_name dxRoleName,dl.role_name dlRoleName, 
+    		ct.centre_type_name centreName, sm.small_type_name smallName, 
+			dt.detail_type_name detailName, ft.fine_type_name fineName,
+			u.real_name createby,tt.created 
+		</if>
+		<if test="page_count != null">
+       		count(1) AS record_count
+	   	</if>
+		FROM
+			(
+				SELECT
+					t2.material_code,t2.merchandise_code,t2.supplier_code,
+					t2.material_region_code,t2.created,t2.createby
+				FROM
+				(
+					SELECT
+						MAX(created) created, MAX(id) id
+					FROM
+						merchandise_relevance_material
+					WHERE UPPER(material_region_code) LIKE UPPER(#{priceRegion})
+					GROUP BY material_code,merchandise_code,supplier_code
+				) t1
+				INNER JOIN merchandise_relevance_material t2 ON t1.id = t2.id
+			) t  	<!-- 商品原料关联表 -->
+			LEFT JOIN
+			(
+				SELECT
+					t2.material_code,t2.merchandise_code,
+					t2.supplier_code,t2.created,t2.createby
+				FROM
+				(
+					SELECT
+						MAX(created) created, MAX(id) id
+					FROM
+						merchandise_relevance_material
+					GROUP BY material_code,merchandise_code,supplier_code
+				) t1
+				INNER JOIN merchandise_relevance_material t2 ON t1.id = t2.id
+			) tt ON t.material_code = tt.material_code AND t.merchandise_code = tt.merchandise_code
+				AND t.supplier_code = tt.supplier_code
+			LEFT JOIN merchandise m ON t.merchandise_code = m.merchandise_code 
+				AND t.supplier_code = m.supplier_code 
+			LEFT JOIN material mt ON t.material_code = mt.material_code <!-- 原料 -->
+			LEFT JOIN website w ON mt.website_code = w.website_code   <!-- 公示网站 -->
+			
+			LEFT JOIN supplier s ON t.supplier_code = s.supplier_code <!-- 供应商表 -->
+			LEFT JOIN merchandise_role mr on m.merchandise_code = mr.merchandise_code <!-- 商品角色关联 -->
+			LEFT JOIN merchandise_dx_role dx ON mr.dx_role_code = dx.role_code <!-- 定性角色表 -->
+			LEFT JOIN merchandise_dl_role dl ON mr.dl_role_code = dl.role_code <!-- 定量角色表 -->
+			LEFT JOIN merchandise_centre_type ct ON m.centre_type_code = ct.centre_type_code <!-- 中分类 -->
+			LEFT JOIN merchandise_small_type sm ON m.small_type_code = sm.small_type_code <!-- 小分类 -->
+			
+			LEFT JOIN merchandise_detail_type dt ON m.detail_type_code = dt.detail_type_code <!-- 明细类 -->
+			LEFT JOIN intention_supplier_merchandise ism ON ism.merchandise_code = t.merchandise_code 
+            	AND ism.supplier_code = t.supplier_code
+			LEFT JOIN merchandise_intention mi ON ism.intention_code = mi.intention_code
+      		LEFT JOIN merchandise_fine_type ft ON dt.detail_type_code = ft.detail_type_code <!-- 细分类 -->
+				AND mi.fine_type_code = ft.fine_type_code <!-- 关联商品意向品细分类 -->
+			LEFT JOIN material_big_type b ON mt.material_big_type_code = b.material_big_type_code <!-- 原料大类 -->
+			LEFT JOIN material_small_type mst ON mt.material_small_type_code = mst.material_small_type_code 
+				AND mt.material_big_type_code = mst.material_big_type_code <!-- 原料小类 -->
+		 	LEFT JOIN pub_user u ON tt.createby = u.user_id 
+		 WHERE 1=1
+		 	<if test= "materialBigTypeCode != null and materialBigTypeCode != ''">
+				AND	UPPER(mt.material_big_type_code) LIKE UPPER(#{materialBigTypeCode})
+			</if>
+	    	<if test= "materialSmallTypeCode != null and materialSmallTypeCode != ''">
+				AND	UPPER(mt.material_small_type_code) LIKE UPPER(#{materialSmallTypeCode})
+			</if>
+	    	<if test= "materialCode != null and materialCode != ''">
+				AND	UPPER(t.material_code) LIKE UPPER(#{materialCode})
+			</if>
+			<if test= "websiteCode != null and websiteCode != ''">
+				AND	UPPER(w.website_code) LIKE UPPER(#{websiteCode})
+			</if>
+	    	<!-- <if test= "priceRegion != null and priceRegion != ''">
+				AND	UPPER(wr.material_region_code) LIKE UPPER('%'||#{priceRegion}||'%')
+			</if> -->
+			
+		 	<if test= "supplierCode != null and supplierCode != ''">
+				AND UPPER(s.supplier_code) LIKE UPPER('%'||#{supplierCode}||'%')
+			</if>
+	    	<if test= "supplierName != null and supplierName != ''">
+				AND UPPER(s.supplier_name) LIKE UPPER('%'||#{supplierName}||'%')
+			</if>
+	    	<if test= "merchandiseCode != null and merchandiseCode != ''">
+				AND UPPER(m.merchandise_code) LIKE UPPER('%'||#{merchandiseCode}||'%')
+			</if>
+	    	<if test= "merchandiseName != null and merchandiseName != ''">
+				AND UPPER(m.merchandise_name) LIKE UPPER('%'||#{merchandiseName}||'%')
+			</if>
+	    	<if test= "dxRoleName != null and dxRoleName != ''">
+				AND UPPER(dx.role_code) LIKE UPPER(#{dxRoleName})
+			</if>
+	    	<if test= "dlRoleName != null and dlRoleName != ''">
+				AND UPPER(dl.role_code) LIKE UPPER(#{dlRoleName})
+			</if>
+	    	<if test= "centreName != null and centreName != ''">
+				AND UPPER(ct.centre_type_code) LIKE UPPER(#{centreName})
+			</if>
+	    	<if test= "smallName != null and smallName != ''">
+				AND UPPER(sm.small_type_code) LIKE UPPER(#{smallName})
+			</if>
+	    	<if test= "detailName != null and detailName != ''">
+				AND UPPER(dt.detail_type_code) LIKE UPPER(#{detailName})
+			</if>
+	    	<if test= "fineName != null and fineName != ''">
+				AND UPPER(ft.fine_type_code) LIKE UPPER(#{fineName})
+			</if>
+			<if test= "createby != null and createby!=''">
+				AND UPPER(u.real_name) LIKE UPPER('%'||#{createby}||'%')
+			</if>
+		 <if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY m.merchandise_code DESC,created DESC
+    		</if>
+    	</if>
+	</select>
+	
+</mapper>

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.datamaintenance.purchaserdata.materialrolemaintenance.MaterialSmallTypeDao">
+	<resultMap type="com.powere2e.sco.model.datamaintenance.purchaserdata.materialrolemaintenance.MaterialSmallType" id="materialSmallTypeMap">
+		<result property="materialSmallTypeCode" column="materialSmallTypeCode"/>
+		<result property="materialSmallTypeName" column="materialSmallTypeName"/>
+		<result property="materialBigTypeName" column="materialBigTypeName"/>
+		<result property="materialBigTypeCode" column="materialBigTypeCode"/>
+		<result property="created" column="created"/>
+		<result property="createds" column="createds"/>
+		<result property="createby" column="createby"/>
+		<result property="updated" column="updated"/>
+		<result property="updateds" column="updateds"/>
+		<result property="updateby" column="updateby"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <!-- 查询原料小类(可分页)-->
+    <select id="searchMaterialSmallType" resultMap="materialSmallTypeMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.material_small_type_code materialSmallTypeCode,
+       		mbt.MATERIAL_BIG_TYPE_NAME materialBigTypeName,
+       		t.material_small_type_name materialSmallTypeName,t.material_big_type_code materialBigTypeCode
+       		,to_char(t.created,'yyyy-MM-DD') createds,	to_char(t.updated,'yyyy-MM-DD')	updateds,
+       		(SELECT u.real_name FROM pub_user u WHERE u.user_id = t.createby) createby,
+       		(SELECT u.real_name FROM pub_user u WHERE u.user_id = t.updateby) updateby
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM material_small_type t
+      		left join material_big_type mbt on t.MATERIAL_BIG_TYPE_CODE=mbt.MATERIAL_BIG_TYPE_CODE
+    	<where>
+    		1=1
+	    	<if test= "materialSmallTypeCode != null and materialSmallTypeCode!=''">
+			AND t.material_small_type_code = #{materialSmallTypeCode}
+			</if>
+	    	<if test= "materialSmallTypeName != null and materialSmallTypeName !=''">
+				AND UPPER(t.material_small_type_name) = UPPER(#{materialSmallTypeName})
+			</if>
+	    	<if test= "materialBigTypeCode != null and materialBigTypeCode!=''">
+			AND UPPER(t.material_big_type_code) LIKE UPPER('%'||#{materialBigTypeCode}||'%')
+			</if>
+	    	<if test= "created != null and created!=''">
+			AND	convert(varchar,t.created,120) LIKE (#{created})
+			</if>
+	    	<if test= "createby != null and createby!=''">
+			AND UPPER(t.createby) LIKE UPPER('%'||#{createby}||'%')
+			</if>
+	    	<if test= "updated != null and updated!=''">
+			AND	convert(varchar,t.updated,120) LIKE (#{updated})
+			</if>
+	    	<if test= "updateby != null and updateby!=''">
+			AND UPPER(t.updateby) LIKE UPPER('%'||#{updateby}||'%')
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.created DESC
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 根据主键查询某个原料小类(可分页)-->
+    <select id="loadMaterialSmallType" resultMap="materialSmallTypeMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.material_small_type_code materialSmallTypeCode,t.material_small_type_name materialSmallTypeName,t.material_big_type_code materialBigTypeCode
+       		,t.created,	t.updated 
+		   ,(select u.login_name from pub_user u where u.user_id=t.createby) as createby,
+           	(select u.login_name from pub_user u where u.user_id=t.updateby) as updateby
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM material_small_type t
+    	<where>
+    		1=1
+	    	<if test= "materialSmallTypeCode != null and materialSmallTypeCode!=''">
+			AND  t.MATERIAL_SMALL_TYPE_CODE = #{materialSmallTypeCode}
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.created DESC
+    		</if>
+    	</if>
+    </select>
+    <select id="searchMaterial" resultType="Integer">
+        select count(*) from material where MATERIAL_SMALL_TYPE_CODE=#{materialSmallTypeCode}
+    </select>
+    <!-- 增加原料小类 --> 
+	<insert id="saveMaterialSmallType" parameterType="hashmap">
+		INSERT INTO material_small_type(material_small_type_code,material_small_type_name,material_big_type_code,created,createby) 
+			 VALUES(S_MATERIAL_SMALL_TYPE.NEXTVAL,#{materialSmallTypeName},#{materialBigTypeCode},sysdate,#{app_create_by})
+    </insert>
+    <!-- 修改原料小类  -->
+    <update id="updateMaterialSmallType" parameterType="hashmap">
+		UPDATE	
+				material_small_type	
+		   SET	
+		   		<if test="materialSmallTypeName != null and materialSmallTypeName !=''">
+		   		    material_small_type_name=#{materialSmallTypeName},
+		   		</if>
+		   		<if test="materialBigTypeCode != null and materialBigTypeCode !='' ">
+		   		    material_big_type_code=#{materialBigTypeCode},
+		   		</if>
+		   		updated = sysdate,
+		   		updateby = #{app_update_by}	   		
+		 WHERE	
+		 		MATERIAL_SMALL_TYPE_CODE=#{materialSmallTypeCode}
+    </update>
+    <!-- 删除原料小类 -->
+    <delete id="deleteMaterialSmallType" parameterType="hashmap">
+        DELETE FROM 
+        			material_small_type 
+        WHERE 
+        			MATERIAL_SMALL_TYPE_CODE in 
+        			<foreach collection="materialSmallTypeCode" close=")" open="(" item="materialSmallTypeCode" separator=",">
+        			#{materialSmallTypeCode}
+        			</foreach>
+    </delete>
+</mapper>

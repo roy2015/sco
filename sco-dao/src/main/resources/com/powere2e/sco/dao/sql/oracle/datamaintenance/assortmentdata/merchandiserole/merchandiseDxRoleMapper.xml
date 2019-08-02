@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.datamaintenance.assortmentdata.merchandiserole.MerchandiseDxRoleDao">
+	<resultMap type="com.powere2e.sco.model.datamaintenance.assortmentdata.merchandiserole.MerchandiseDxRole" id="merchandiseDxRoleMap">
+		<result property="roleCode" column="roleCode"/>
+		<result property="roleName" column="roleName"/>
+		<result property="created" column="created"/>
+		<result property="createby" column="createby"/>
+		<result property="updated" column="updated"/>
+		<result property="updateby" column="updateby"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    
+    <!-- 查询商品定性角色-->
+    <select id="searchMerchandiseDxRole" resultMap="merchandiseDxRoleMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.role_code roleCode,t.role_name roleName
+       		,t.created,	t.updated 
+			,(select u.login_name from pub_user u where u.user_id=t.createby) as createUserName,
+           	(select u.login_name from pub_user u where u.user_id=t.updateby) as updateUserName
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM merchandise_dx_role t
+    	<where>
+    		1=1
+	    	<if test= "roleCode != null and roleCode!=''">
+			AND t.role_code = #{roleCode}
+			</if>
+	    	<if test= "roleName != null and roleName!=''">
+			AND UPPER(t.role_name) LIKE UPPER('%'||#{roleName}||'%')
+			</if>
+	    	<if test= "created != null and created!=''">
+			AND	convert(varchar,t.created,120) LIKE (#{created})
+			</if>
+	    	<if test= "createby != null and createby!=''">
+			AND UPPER(t.createby) LIKE UPPER('%'||#{createby}||'%')
+			</if>
+	    	<if test= "updated != null and updated!=''">
+			AND	convert(varchar,t.updated,120) LIKE (#{updated})
+			</if>
+	    	<if test= "updateby != null and updateby!=''">
+			AND UPPER(t.updateby) LIKE UPPER('%'||#{updateby}||'%')
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.role_name asc
+    		</if>
+    	</if>
+    </select>
+    <!-- 查询指定商品定性角色-->
+    <select id="searchMerchandiseDxRoleByroleName" resultMap="merchandiseDxRoleMap">
+    	SELECT  
+       		t.role_code roleCode,t.role_name roleName
+       		,t.created,	t.updated 
+			,(select u.login_name from pub_user u where u.user_id=t.createby) as createUserName,
+           	(select u.login_name from pub_user u where u.user_id=t.updateby) as updateUserName
+      		FROM merchandise_dx_role t where t.role_name='${roleName}'
+    </select>
+    <!-- 根据主键查询某个商品定性角色(可分页)-->
+    <select id="loadMerchandiseDxRole" resultMap="merchandiseDxRoleMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.role_code roleCode,t.role_name roleName
+       		,t.created,	t.updated 
+		   ,(select u.login_name from pub_user u where u.user_id=t.createby) as createUserName,
+           	(select u.login_name from pub_user u where u.user_id=t.updateby) as updateUserName
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM merchandise_dx_role t
+    	<where>
+    		1=1
+	    	<if test= "roleCode != null and roleCode!=''">
+			AND  t.ROLE_CODE = #{roleCode}
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.created DESC
+    		</if>
+    	</if>
+    </select>
+    <!-- 查询商品定量角色是否存在于商品中 -->
+    <select id="searchMerchandise" resultType="Integer">
+            select count(*) from MERCHANDISE_ROLE where DX_ROLE_CODE='${roleCode}'
+    </select>
+    <!-- 增加商品定性角色 --> 
+	<insert id="saveMerchandiseDxRole" parameterType="hashmap">
+		INSERT INTO merchandise_dx_role(role_code,role_name,created,createby) 
+			 VALUES(S_MERCHANDISE_DX_ROLE.NEXTVAL,#{roleName},#{app_created},#{app_create_by})
+    </insert>
+    <!-- 删除商品定性角色 -->
+    <delete id="deleteMerchandiseDxRole" parameterType="hashmap">
+        DELETE FROM 
+        			merchandise_dx_role 
+        WHERE 
+        			ROLE_CODE in 
+        			<foreach collection="roleCode"  item="roleCode" separator="," open="(" close=")">
+        			    #{roleCode}
+        			</foreach>
+    </delete>
+</mapper>

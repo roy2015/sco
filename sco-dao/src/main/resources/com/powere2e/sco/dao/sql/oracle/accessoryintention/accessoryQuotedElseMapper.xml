@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.accessoryintention.AccessoryQuotedElseDao">
+	<resultMap type="com.powere2e.sco.model.accessoryintention.AccessoryQuotedElse" id="accessoryQuotedElseMap">
+		<result property="enquiryCode" column="enquiryCode"/>
+		<result property="quotedCode" column="quotedCode"/>
+		<result property="orderCount" column="orderCount"/>
+		<result property="costType" column="costType"/>
+		<result property="cost" column="cost"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <!-- 查询辅料报价-其他成本(可分页)-->
+    <select id="searchAccessoryQuotedElse" resultMap="accessoryQuotedElseMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.enquiry_code enquiryCode,t.quoted_code quotedCode,t.order_count orderCount,t.cost_type costType,t.cost cost
+       		
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM accessory_quoted_else t
+    	<where>
+    		1=1
+	    	<if test= "enquiryCode != null and enquiryCode!=''">
+			AND t.enquiry_code = #{enquiryCode}
+			</if>
+	    	<if test= "quotedCode != null and quotedCode!=''">
+			AND t.quoted_code in (${quotedCode})
+			</if>
+	    	<if test= "orderCount != null and orderCount!=''">
+			AND t.order_count=#{orderCount}
+			</if>
+	    	<if test= "costType != null and costType!=''">
+			AND t.cost_type=#{costType}
+			</if>
+	    	<if test= "cost != null and cost!=''">
+			AND t.cost = #{cost}
+			</if>
+    	</where>
+    	
+    			ORDER BY t.cost_type
+    		
+    </select>
+    
+    <!-- 根据主键查询某个辅料报价-其他成本(可分页)-->
+    <select id="loadAccessoryQuotedElse" resultMap="accessoryQuotedElseMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.enquiry_code enquiryCode,t.quoted_code quotedCode,t.order_count orderCount,t.cost_type costType,t.cost cost
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM accessory_quoted_else t
+    	<where>
+    		1=1
+	    	<if test= "enquiryCode != null and enquiryCode!=''">
+			AND  t.ENQUIRY_CODE = #{enquiryCode}
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.created DESC
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 增加辅料报价-其他成本 --> 
+	<insert id="saveAccessoryQuotedElse" parameterType="hashmap">
+		INSERT INTO accessory_quoted_else(enquiry_code,quoted_code,order_count,cost_type,cost) 
+			 VALUES(#{enquiryCode},#{quotedCode},#{orderCount},#{costType},#{cost})
+    </insert>
+    <!-- 修改辅料报价-其他成本  -->
+    <update id="updateAccessoryQuotedElse" parameterType="hashmap">
+		UPDATE	
+				accessory_quoted_else	
+		   SET	
+		   		quoted_code=#{quotedCode},
+		   		order_count=#{orderCount},
+		   		cost_type=#{costType},
+		   		cost=#{cost}		   		
+		 WHERE	
+		 		ENQUIRY_CODE=#{enquiryCode}
+    </update>
+    <!-- 删除辅料报价-其他成本 -->
+    <delete id="deleteAccessoryQuotedElse" parameterType="hashmap">
+        DELETE FROM 
+        			accessory_quoted_else 
+        WHERE 
+        			QUOTED_CODE=#{quotedCode} <!--AND client_id=#{app_user_clientID}-->
+    </delete>
+</mapper>

@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<!-- SAP主数据中的类型及管理员维护的细分类 -->
+	<bean id="masterDataTypeService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.common.MasterDataTypeServiceImpl">
+				<property name="masterDataTypeDao" ref="masterDataTypeDao" />
+			</bean>
+		</property>
+	</bean>
+
+	<!-- 商品角色查询(定性、定量) -->
+	<bean id="merchandiseRoleService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.masterdata.MerchandiseRoleServiceImpl">
+				<property name="merchandiseRoleDao" ref="merchandiseRoleDao" />
+				<property name="merchandiseDao" ref="merchandiseDao" />
+			</bean>
+		</property>
+	</bean>
+
+	<!-- 商品主数据 -->
+	<bean id="merchandiseService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.masterdata.MerchandiseServiceImpl">
+				<property name="merchandiseDao" ref="merchandiseDao" />
+			</bean>
+		</property>
+	</bean>
+
+	<!-- 商品收货单信息 -->
+	<bean id="merchandiseReceiptService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.masterdata.MerchandiseReceiptServiceImpl">
+				<property name="merchandiseReceiptDao" ref="merchandiseReceiptMsgDao" />
+			</bean>
+		</property>
+	</bean>
+	
+	<!-- 签量数据维护 -->
+	<bean id="signedQuantityService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.datamaintenance.purchaserdata.signedquantity.SignedQuantityServiceImpl">
+				<property name="signedQuantityDao" ref="signedQuantityDao" />
+			</bean>
+		</property>
+	</bean>
+
+	<!-- 竞品价格市调数据维护 -->
+	<bean id="marketSurveyDataService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.datamaintenance.purchaserdata.marketsurveydata.MarketSurveyDataServiceImpl">
+				<property name="marketSurveyDataDao" ref="marketSurveyDataDao" />
+			</bean>
+		</property>
+	</bean>
+
+	<!-- 公示网站原料数据模块  -->
+	<bean id="websiteMaterialService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.datamaintenance.purchaserdata.websitematerial.WebsiteMaterialServiceImpl">
+				<property name="websiteMaterialDao" ref="websiteMaterialDao" />
+			</bean>
+		</property>
+	</bean>
+
+	<!-- 原料相关属性查询模块  -->
+	<bean id="materialPropertiesService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.common.MaterialPropertiesServiceImpl">
+				<property name="materialPropertiesDao" ref="materialPropertiesDao" />
+			</bean>
+		</property>
+	</bean>
+
+	<!-- 供应商证件数据模块  -->
+	<bean id="supplierCertificateService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.datamaintenance.purchaserdata.suppliercertificate.SupplierCertificateServiceImpl">
+				<property name="supplierCertificateDao" ref="supplierCertificateDao" />
+			</bean>
+		</property>
+	</bean>
+
+	<!-- 关联商品原料与公示网站原料模块  -->
+	<bean id="relevanceMaterialAndWebsiteService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.datamaintenance.purchaserdata.relevancematerialandwebsite.RelevanceMaterialAndWebsiteServiceImpl">
+				<property name="relevanceMaterialAndWebsiteDao" ref="relevanceMaterialAndWebsiteDao" />
+			</bean>
+		</property>
+	</bean>
+	
+	<!-- 关联辅料与公示网站原料模块  -->
+	<bean id="relevanceAccessoryAndWebsiteService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.datamaintenance.purchaserdata.relevanceaccessoryandwebsite.RelevanceAccessoryAndWebsiteServiceImpl">
+				<property name="relevanceAccessoryAndWebsiteDao" ref="relevanceAccessoryAndWebsiteDao" />
+			</bean>
+		</property>
+	</bean>
+
+	<!-- 新品引进报表分析模块  -->
+	<bean id="analysisReportNewService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.merchandiseoaapplication.reportnewoaapplication.reportanalysis.AnalysisReportNewServiceImpl">
+				<property name="analysisReportNewDao" ref="analysisReportNewDao" />
+			</bean>
+		</property>
+	</bean>
+
+	<!-- 新品引进物料信息 -->
+	<bean id="wlInfoNewService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.merchandiseoaapplication.reportnewoaapplication.wlinfo.WlInfoNewServiceImpl">
+				<property name="wlInfoNewDao" ref="wlInfoNewDao" />
+			</bean>
+		</property>
+	</bean>
+
+	<!-- 新品引进进度信息 -->
+	<bean id="applicationScheduleNewService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.merchandiseoaapplication.reportnewoaapplication.applicationschedule.ApplicationScheduleNewServiceImpl">
+				<property name="applicationScheduleNewDao" ref="applicationScheduleNewDao" />
+			</bean>
+		</property>
+	</bean>
+	
+	<!-- 旧品新上报表分析模块  -->
+	<bean id="analysisReportOldService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.merchandiseoaapplication.reportoldupoaapplication.reportanalysis.AnalysisReportOldServiceImpl">
+				<property name="analysisReportOldDao" ref="analysisReportOldDao" />
+			</bean>
+		</property>
+	</bean>
+	
+	<!-- 旧品新上物料信息模块  -->
+	<bean id="wlInfoOldService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.merchandiseoaapplication.reportoldupoaapplication.wlinfo.WlInfoOldServiceImpl">
+				<property name="wlInfoOldDao" ref="wlInfoOldDao" />
+			</bean>
+		</property>
+	</bean>
+
+	<!-- 旧品新上进度信息模块  -->
+	<bean id="applicationScheduleOldService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.merchandiseoaapplication.reportoldupoaapplication.applicationschedule.ApplicationScheduleOldServiceImpl">
+				<property name="applicationScheduleOldDao" ref="applicationScheduleOldDao" />
+			</bean>
+		</property>
+	</bean>
+	
+	<!-- 商品正常调价报表分析模块  -->
+	<bean id="analysisReportAdjustPriceService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.merchandiseoaapplication.reportadjustpriceoaapplication.reportanalysis.AnalysisReportAdjustPriceServiceImpl">
+				<property name="analysisReportAdjustPriceDao" ref="analysisReportAdjustPriceDao" />
+			</bean>
+		</property>
+	</bean>
+
+	<!-- 商品正常调价报表分析模块  -->
+	<bean id="wlInfoAdjustService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.merchandiseoaapplication.reportadjustpriceoaapplication.wlinfo.WlInfoAdjustServiceImpl">
+				<property name="wlInfoAdjustDao" ref="wlInfoAdjustDao" />
+			</bean>
+		</property>
+	</bean>
+
+	<!-- 商品快速调价物料信息模块  -->
+	<bean id="wlInfoFastAdjustService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.merchandiseoaapplication.fastadjustpriceoaapplication.wlinfo.WlInfoFastAdjustServiceImpl">
+				<property name="wlInfoFastAdjustDao" ref="wlInfoFastAdjustDao" />
+			</bean>
+		</property>
+	</bean>
+	
+	<!-- 辅料采购委员会竞价报表分析模块  -->
+	<bean id="committeeReportAnalysisService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.accessoryoaapplication.committeeApply.reportanalysis.CommitteeReportAnalysisServiceImpl">
+				<property name="committeeReportAnalysisDao" ref="committeeReportAnalysisDao" />
+			</bean>
+		</property>
+	</bean>
+	
+	<!-- 辅料采购委员会竞价进度信息模块  -->
+	<bean id="committeeApplicationScheduleService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.accessoryoaapplication.committeeApply.applicationschedule.CommitteeApplicationScheduleServiceImpl">
+				<property name="committeeApplicationScheduleDao" ref="committeeApplicationScheduleDao" />
+			</bean>
+		</property>
+	</bean>
+
+	<!-- 非食品竞价单OA申请报表分析模块  -->
+	<bean id="nonFoodReportAnalysisService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.accessoryoaapplication.nonFoodApply.reportanalysis.NonFoodReportAnalysisServiceImpl">
+				<property name="nonFoodReportAnalysisDao" ref="nonFoodReportAnalysisDao" />
+			</bean>
+		</property>
+	</bean>
+
+	<!-- 非食品竞价单OA申请进度信息模块  -->
+	<bean id="nonFoodApplicationScheduleService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.accessoryoaapplication.nonFoodApply.applicationschedule.NonFoodApplicationScheduleServiceImpl">
+				<property name="nonFoodApplicationScheduleDao" ref="nonFoodApplicationScheduleDao" />
+			</bean>
+		</property>
+	</bean>
+	
+	<!-- 辅料询价单比较报表分析模块  -->
+	<bean id="compareReportAnalysisService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.accessoryoaapplication.compareApply.reportanalysis.CompareReportAnalysisServiceImpl">
+				<property name="compareReportAnalysisDao" ref="compareReportAnalysisDao" />
+			</bean>
+		</property>
+	</bean>
+
+	<!-- 辅料询价单比较申请进度信息模块  -->
+	<bean id="compareApplicationScheduleService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.accessoryoaapplication.compareApply.applicationschedule.CompareApplicationScheduleServiceImpl">
+				<property name="compareApplicationScheduleDao" ref="compareApplicationScheduleDao" />
+			</bean>
+		</property>
+	</bean>
+
+	<!-- 商品价格带公共模块 -->
+	<bean id="categoryPriceService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.categoryanalysis.CategoryPriceServiceImpl">
+				<property name="categoryPriceDao" ref="categoryPriceDao" />
+			</bean>
+		</property>
+	</bean>
+
+	<!-- 公示网站原料历史行情 -->
+	<bean id="websiteHistoryService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.materialmarketanalysis.websitehistory.WebsiteHistoryServiceImpl">
+				<property name="websiteHistoryDao" ref="websiteHistoryDao" />
+			</bean>
+		</property>
+	</bean>
+
+	<!-- 商品原料供应商报价 -->
+	<bean id="merchMateSuppQuoteService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.materialmarketanalysis.merchmatesuppquote.MerchMateSuppQuoteServiceImpl">
+				<property name="merchMateSuppQuoteDao" ref="merchMateSuppQuoteDao" />
+			</bean>
+		</property>
+	</bean>
+
+	<!-- 原料预警记录 -->
+	<bean id="materialWarningRecordService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.materialmarketanalysis.materialwarning.MaterialWarningRecordServiceImpl">
+				<property name="materialWarningRecordDao" ref="materialWarningRecordDao" />
+			</bean>
+		</property>
+	</bean>
+
+	<!-- 商品预警记录 -->
+	<bean id="merchandiseWarningRecordService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.materialmarketanalysis.merchandisewarningrecord.MerchandiseWarningRecordServiceImpl">
+				<property name="merchandiseWarningRecordDao" ref="merchandiseWarningRecordDao" />
+			</bean>
+		</property>
+	</bean>
+
+	<!-- 辅料商品预警记录 -->
+	<bean id="accIntenRecService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.materialmarketanalysis.accessoryintentionrecord.AccessoryIntentionRecordServiceImpl">
+				<property name="accIntRecDao" ref="accIntRecDao" />
+			</bean>
+		</property>
+	</bean>
+	
+	<!-- 商品引进标准进度信息维护 -->
+	<bean id="merStandProInfoService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.datamaintenance.purchaserdata.merstandproinfo.MerStandProInfoServiceImpl">
+				<property name="merStandProInfoDao" ref="merStandProInfoDao" />
+			</bean>
+		</property>
+	</bean>
+	
+	<!-- 商品快速引进 -->
+	<bean id="fastImportApplicationService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.merchandiseoaapplication.fastimportoaapplication.ApplicationFastImportServiceImpl">
+				<property name="fastImportApplicationDao" ref="fastImportApplicationDao" />
+			</bean>
+		</property>
+	</bean>
+
+	<!-- 商品快速引进申请文件 -->
+	<bean id="fastImportAttachmentService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.merchandiseoaapplication.fastimportoaapplication.attachment.FastImportAttachmentServiceImpl">
+				<property name="fastImportAttachmentDao" ref="fastImportAttachmentDao" />
+				<property name="fastAdjustpriceDao" ref="fastAdjustpriceDao" />
+			</bean>
+		</property>
+	</bean>
+
+	<!-- 商品快速引进物料信息 -->
+	<bean id="fastImportWlInfoService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.merchandiseoaapplication.fastimportoaapplication.wlinfo.FastImportWlInfoServiceImpl">
+				<property name="fastImportWlInfoDao" ref="fastImportWlInfoDao" />
+				<property name="wlInfoFastAdjustDao" ref="wlInfoFastAdjustDao" />
+			</bean>
+		</property>
+	</bean>
+	
+</beans>

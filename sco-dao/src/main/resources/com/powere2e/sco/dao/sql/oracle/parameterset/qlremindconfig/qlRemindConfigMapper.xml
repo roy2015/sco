@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.parameterset.qlremindconfig.QlRemindConfigDao">
+	<resultMap type="com.powere2e.sco.model.parameterset.qlremindconfig.QlRemindConfig" id="qlRemindConfigMap">
+		<result property="configCode" column="configCode"/>
+		<result property="thresholdValue" column="thresholdValue"/>
+		<result property="created" column="created"/>
+		<result property="createby" column="createby"/>
+		<result property="updated" column="updated"/>
+		<result property="updateby" column="updateby"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <!-- 查询签量提醒设置(可分页)-->
+    <select id="searchQlRemindConfig" resultMap="qlRemindConfigMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.config_code configCode,t.threshold_value thresholdValue
+       		,t.created,	t.updated 
+			,(select u.login_name from pub_user u where u.user_id=t.createby) as createUserName,
+           	(select u.login_name from pub_user u where u.user_id=t.updateby) as updateUserName
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM ql_remind_config t
+    	<where>
+    		1=1
+	    	<if test= "configCode != null and configCode!=''">
+			AND t.config_code = #{configCode}
+			</if>
+	    	<if test= "thresholdValue != null and thresholdValue!=''">
+			AND t.threshold_value = #{thresholdValue}
+			</if>
+	    	<if test= "created != null and created!=''">
+			AND	convert(varchar,t.created,120) LIKE (#{created})
+			</if>
+	    	<if test= "createby != null and createby!=''">
+			AND UPPER(t.createby) LIKE UPPER('%'||#{createby}||'%')
+			</if>
+	    	<if test= "updated != null and updated!=''">
+			AND	convert(varchar,t.updated,120) LIKE (#{updated})
+			</if>
+	    	<if test= "updateby != null and updateby!=''">
+			AND UPPER(t.updateby) LIKE UPPER('%'||#{updateby}||'%')
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.created DESC
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 根据主键查询某个签量提醒设置(可分页)-->
+    <select id="loadQlRemindConfig" resultMap="qlRemindConfigMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.config_code configCode,t.threshold_value thresholdValue
+       		,t.created,	t.updated 
+		   ,(select u.login_name from pub_user u where u.user_id=t.createby) as createUserName,
+           	(select u.login_name from pub_user u where u.user_id=t.updateby) as updateUserName
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM ql_remind_config t
+    	<where>
+    		1=1
+	    	<if test= "configCode != null and configCode!=''">
+			AND  t.CONFIG_CODE = #{configCode}
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.created DESC
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 增加签量提醒设置 --> 
+	<insert id="saveQlRemindConfig" parameterType="hashmap">
+		INSERT INTO ql_remind_config(config_code,threshold_value,created,createby) 
+			 VALUES(#{configCode},#{thresholdValue},#{app_created},#{app_createby})
+    </insert>
+    <!-- 修改签量提醒设置  -->
+    <update id="updateQlRemindConfig" parameterType="hashmap">
+		UPDATE	
+				ql_remind_config	
+		   SET	
+		   		threshold_value=#{thresholdValue}		   		
+		 WHERE	
+		 		CONFIG_CODE=#{configCode}
+    </update>
+    <!-- 删除签量提醒设置 -->
+    <delete id="deleteQlRemindConfig" parameterType="hashmap">
+        DELETE FROM 
+        			ql_remind_config 
+        WHERE 
+        			CONFIG_CODE in 
+        			<foreach collection="configCode" item="temp" open="(" separator="," close=")">
+        			#{temp}
+        			</foreach>
+    </delete>
+</mapper>

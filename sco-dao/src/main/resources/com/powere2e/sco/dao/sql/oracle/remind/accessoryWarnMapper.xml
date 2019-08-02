@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.remind.AccessoryWarnDao">
+	<resultMap type="com.powere2e.sco.model.remind.AccessoryWarn" id="accessoryWarnMap">
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    
+    <!-- 查询所有原料预警记录 -->
+    <select id="listAccessoryWarn" resultMap="accessoryWarnMap">
+	    SELECT
+			aw.warn_code,
+			aw.warn_date,
+			aw.warn_type,
+			aw.relevance_id,
+			aw.merchandise_purchase_price,
+			aw.supplier_purchase_price,
+			aw.supplier_input_price,
+			aw.supplier_input_price_compute,
+			aw.paper_weight,
+			aw.website_price,
+			aw.website_lm_price,
+			aw.merchandise_price_compute,
+			aw.merchandise_price_growth,
+			aw.merchandise_price_proportion*100
+		FROM accessory_warn aw
+    </select>
+    
+    <!-- 添加辅料意向品预警记录 (定时任务) -->
+    <insert id="insertAccessoryWarn">
+    	INSERT INTO accessory_warn(warn_code,warn_date,warn_type,relevance_id,merchandise_purchase_price,supplier_purchase_price,supplier_input_price,supplier_input_price_compute,paper_weight,website_price,website_lm_price,merchandise_price_compute,merchandise_price_growth,merchandise_price_proportion)
+		SELECT
+			S_ACCESSORY_WARN.NEXTVAL,  					<!-- 预警编号 -->
+			SYSDATE,  									<!-- 预警日期 -->
+			'FLYXPJGYJ',  								<!-- 预警方式 -->
+			fz.id,  									<!-- 辅料原料关联公示网站原料编号 -->
+			ROUND(fz.contract_price,2),  				<!-- 辅料商品进价 -->
+			ROUND(fz.price,2),							<!-- 供应商原料采购价 -->
+			ROUND(fz.cost,2),  						    <!-- 供应商原料投入价 -->
+			ROUND(fz.supplier_input_price_compute,2),   <!-- 供应商原料投入价试算 -->
+			ROUND(fz.weight,2),  	   <!-- 纸张克重 -->
+			ROUND(fz.oa_avg_price,2),  <!-- 公示网站原料行情原价 -->
+			ROUND(fz.sy_avg_price,2),  <!-- 公示网站上月原料行情价 -->
+			ROUND(fz.supplier_input_price_compute+fz.else_total_cost-NVL(aqma.cost,0),2),  <!-- 辅料商品进价试算 -->
+			ROUND(fz.supplier_input_price_compute+fz.else_total_cost-NVL(aqma.cost,0)-NVL(fz.contract_price,0),2),  <!-- 辅料商品进价增长数值 -->
+			ROUND((DECODE(fz.contract_price,0,0,NULL,0,(fz.supplier_input_price_compute+fz.else_total_cost-NVL(aqma.cost,0))/fz.contract_price)-1)*100,2)  <!-- 辅料商品进价变化百分比 -->
+		FROM
+		(
+			<!-- 辅料商品进价 -->
+		  SELECT
+			  f1.id,
+			  f1.contract_price,
+			  f1.price,
+			  f1.cost,
+			  f1.weight,
+			  f2.sy_avg_price,
+			  f3.oa_avg_price,
+			  f4.else_total_cost,
+			  f4.enquiry_count,
+			  (DECODE(f3.oa_avg_price,0,0,NULL,0,NVL(f2.sy_avg_price,0)/f3.oa_avg_price)*NVL(f1.cost,0)/1000*NVL(f1.weight,0)) supplier_input_price_compute
+		  FROM
+		  (
+		    SELECT
+			  arm.id,
+			  oa_info.contract_price,
+			  aqm.cost,
+			  aqm.price,
+			  arm.weight
+			FROM
+			(
+			     <include refid="accessory_info"/>
+			) oa_info 
+			INNER JOIN accessory_quoted_material aqm ON aqm.enquiry_code = oa_info.enquiry_code AND aqm.quoted_code = oa_info.quoted_code AND aqm.order_count = oa_info.enquiry_count
+			INNER JOIN accessory_relevance_materia arm ON arm.intention_code = oa_info.intention_code AND arm.intention_supplier_code = oa_info.supplier_code AND arm.accessory_material_code = aqm.material_code
+		  ) f1
+		  INNER JOIN
+		  (
+		    <!-- 公示网站上月原料行情价 -->
+		    SELECT
+		      arm.id,
+		      AVG(NVL(m.price,0)) sy_avg_price
+		    FROM
+		    accessory_relevance_materia arm,material_warn_config mwc,material_price m
+		    WHERE arm.material_code = mwc.material_code
+		    AND m.material_code = arm.material_code AND m.material_region_code = arm.material_region_code
+		    AND mwc.warn_type = 'FLYXPJGYJ'
+		    AND TO_CHAR(ADD_MONTHS(SYSDATE,-1),'yyyymm') = TO_CHAR(m.price_date,'yyyymm')
+		    GROUP BY arm.id
+		  ) f2 ON f1.id = f2.id
+		  INNER JOIN
+		  (
+		    <!-- OA审批通过月原料的行情价 -->
+		    SELECT
+			    mm.id,
+			    AVG(NVL(mm.price,0)) oa_avg_price
+		    FROM 
+		    (
+		    	<include refid="accessory_info"/>
+		    ) last_oa
+		    INNER JOIN accessory_quoted_material aqm ON aqm.enquiry_code = last_oa.enquiry_code AND aqm.quoted_code = last_oa.quoted_code AND aqm.order_count = last_oa.enquiry_count
+		    INNER JOIN
+		    (
+		      SELECT
+			      arm.intention_code,
+			      arm.intention_supplier_code,
+			      arm.accessory_material_code,
+			      arm.material_code,
+			      arm.material_region_code,
+			      arm.id,
+			      mp.price,
+			      mp.price_date
+		      FROM accessory_relevance_materia arm
+		      INNER JOIN material_price mp ON mp.material_code = arm.material_code AND mp.material_region_code = arm.material_region_code
+		      INNER JOIN material_warn_config mwc ON mwc.material_code = arm.material_code
+		      WHERE mwc.warn_type = 'FLYXPJGYJ'
+		    ) mm ON mm.accessory_material_code = aqm.material_code AND mm.intention_code = last_oa.intention_code AND mm.intention_supplier_code = last_oa.supplier_code
+		    WHERE TO_CHAR(mm.price_date,'YYYYMM') = TO_CHAR(last_oa.oa_approve_date,'YYYYMM')
+		    GROUP BY mm.id
+		  ) f3 ON f3.id = f1.id
+		  INNER JOIN
+		  (
+		    <!-- 原材料、辅料、内外包装材料、工艺、其它成本总和  -->
+		   SELECT
+			  arm.id,
+			  wl.else_total_cost,
+			  last_oa.enquiry_count
+		  FROM
+		  (
+		     <include refid="accessory_info"/>
+		  ) last_oa
+		  INNER JOIN 
+		  (
+			    SELECT
+					aa.intention_code,
+					aa.intention_supplier_code,
+					aa.enquiry_code,
+					aa.quoted_code,
+					NVL(a.sum_cost,0)+NVL(b.sum_cost,0)+NVL(c.sum_cost,0)+NVL(d.sum_cost,0)+NVL(e.sum_cost,0) else_total_cost
+				FROM wl_info aa
+				LEFT JOIN
+				(
+				  SELECT
+					  t.enquiry_code,
+					  t.quoted_code,
+					  t.order_count,
+					  SUM(NVL(t.cost,0)) sum_cost
+				  FROM accessory_quoted_material t
+				  GROUP BY t.enquiry_code,t.quoted_code,t.order_count
+				) a ON a.enquiry_code = aa.enquiry_code AND a.quoted_code = aa.quoted_code AND a.order_count = aa.enquiry_count
+				LEFT JOIN
+				(
+				  SELECT
+					  t.enquiry_code,
+					  t.quoted_code,
+					  t.order_count,
+					  SUM(NVL(t.cost,0)) sum_cost
+				  FROM accessory_quoted_packing t
+				  GROUP BY t.enquiry_code,t.quoted_code,t.order_count
+				) b ON b.enquiry_code = aa.enquiry_code AND b.quoted_code = aa.quoted_code AND b.order_count = aa.enquiry_count
+				LEFT JOIN
+				(
+				  SELECT
+					  t.enquiry_code,
+					  t.quoted_code,
+					  t.order_count,
+					  SUM(NVL(t.cost,0)) sum_cost
+				  FROM accessory_quoted_technology t
+				  GROUP BY t.enquiry_code,t.quoted_code,t.order_count
+				) c ON c.enquiry_code = aa.enquiry_code AND c.quoted_code = aa.quoted_code AND c.order_count = aa.enquiry_count
+				LEFT JOIN
+				(
+				  SELECT
+					  t.enquiry_code,
+					  t.quoted_code,
+					  t.order_count,
+					  SUM(NVL(t.cost,0)) sum_cost
+				  FROM accessory_quoted_accessory t
+				  GROUP BY t.enquiry_code,t.quoted_code,t.order_count
+				) d ON d.enquiry_code = aa.enquiry_code AND d.quoted_code = aa.quoted_code AND d.order_count = aa.enquiry_count
+				LEFT JOIN
+				(
+				  SELECT
+					  t.enquiry_code,
+					  t.quoted_code,
+					  t.order_count,
+					  SUM(NVL(t.cost,0)) sum_cost
+				  FROM accessory_quoted_else t
+				  WHERE t.cost_type NOT IN ('税额占比','利润占比')
+				  GROUP BY t.enquiry_code,t.quoted_code,t.order_count
+				) e ON e.enquiry_code = aa.enquiry_code AND e.quoted_code = aa.quoted_code AND e.order_count = aa.enquiry_count
+		  ) wl ON wl.intention_code = last_oa.intention_code AND wl.intention_supplier_code = last_oa.supplier_code AND wl.enquiry_code = last_oa.enquiry_code AND wl.quoted_code = last_oa.quoted_code
+		  INNER JOIN accessory_quoted_material aqm ON aqm.enquiry_code = last_oa.enquiry_code AND aqm.quoted_code = last_oa.quoted_code AND aqm.order_count = last_oa.enquiry_count
+		  INNER JOIN accessory_relevance_materia arm ON last_oa.intention_code = arm.intention_code AND last_oa.supplier_code = arm.intention_supplier_code AND aqm.material_code = arm.accessory_material_code
+		  ) f4 ON f4.id = f1.id
+		) fz
+		INNER JOIN accessory_relevance_materia fa ON fz.id = fa.id
+		INNER JOIN material_warn_config fm ON fm.material_code = fa.material_code
+		 INNER JOIN accessory_quoted_material aqma ON aqma.material_code = fa.accessory_material_code AND fz.enquiry_count = aqma.order_count
+		WHERE fm.warn_type = 'FLYXPJGYJ'
+    </insert>
+    
+    <sql id="accessory_info">
+    <!-- 辅料商品的原料信息 -->
+    SELECT
+	    intention_code,
+	    supplier_code,
+	    enquiry_code,
+	    quoted_code,
+	    contract_price,
+	    purchase_money,
+	    enquiry_count,
+	    oa_approve_date
+    FROM
+    (
+      <!-- 辅料意向品最后一次通过0A审批的最晚的报价单 -->
+      SELECT
+        wl.*,
+        oa.application_code,
+        oa.application_status,
+        oa.oa_approve_date,
+        aqe.quoted_date,
+        row_number() OVER(partition by ai.intention_code order by oa.oa_approve_date DESC) row_number1,
+        rank() OVER(partition by ai.intention_code order by aqe.quoted_date DESC) row_number2
+      FROM accessory_intention ai
+      INNER JOIN accessory_enquiry ae ON ae.intention_code = ai.intention_code
+      INNER JOIN accessory_quoted_electronic aqe ON aqe.intention_code = ae.intention_code AND aqe.enquiry_code = ae.enquiry_code
+      INNER JOIN wl_info wl ON wl.intention_code = aqe.intention_code AND wl.supplier_code = aqe.intention_supplier_code
+      AND wl.enquiry_code = aqe.enquiry_code AND wl.quoted_code = aqe.quoted_code
+      INNER JOIN oa_application oa ON oa.application_code = wl.application_code AND oa.application_status = 'SPTG'
+    ) 
+    WHERE row_number1 = 1 AND row_number2 = 1
+    </sql>
+</mapper>

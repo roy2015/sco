@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.powere2e.sco.interfaces.dao.datamaintenance.gradecontroldata.suppliervisitfactory.SupplierVisitFactoryDao">
+	<resultMap type="com.powere2e.sco.model.datamaintenance.gradecontroldata.suppliervisitfactory.SupplierVisitFactory"
+		id="supplierVisitFactoryMap">
+		<result property="supplierCode" column="supplierCode" />
+		<result property="supplierName" column="supplierName" />
+		<result property="floorArea" column="floorArea" />
+		<result property="plantArea" column="plantArea" />
+		<result property="enterpriseCountPeople" column="enterpriseCountPeople" />
+		<result property="yearTotalOutput" column="yearTotalOutput" />
+		<result property="visitFactoryDate" column="visitFactoryDate" />
+		<result property="fullScore" column="fullScore" />
+		<result property="qualifiedScore" column="qualifiedScore" />
+		<result property="score" column="score" />
+		<result property="visitFactoryOpinion" column="visitFactoryOpinion" />
+		<result property="visitFactoryPrincipal" column="visitFactoryPrincipal" />
+		<result property="recordCount" column="record_count" />
+	</resultMap>
+	<!-- 查询供应商年度巡厂得分(可分页) -->
+	<select id="searchSupplierVisitFactory" resultMap="supplierVisitFactoryMap">
+		SELECT
+		<if test="page_count == null">
+			s.supplier_code supplierCode,
+			s.supplier_name supplierName,
+
+			t.floor_area floorArea,
+			t.plant_area plantArea,
+			t.enterprise_count_people enterpriseCountPeople,
+			t.year_total_output yearTotalOutput,
+			t.visit_factory_date visitFactoryDate,
+			t.full_score fullScore,
+			t.qualified_score qualifiedScore,
+			t.score score,
+			t.visit_factory_opinion visitFactoryOpinion,
+			t.visit_factory_principal visitFactoryPrincipal
+		</if>
+		<if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		FROM supplier_visit_factory t
+		LEFT JOIN supplier s ON t.supplier_code = s.supplier_code  <!-- 供应商表 -->
+		<where>
+			1=1
+			<if test="supplierCode != null and supplierCode!=''">
+				AND UPPER(s.supplier_code) LIKE UPPER('%'||#{supplierCode}||'%')
+			</if>
+			<if test="supplierName != null and supplierName!=''">
+				AND UPPER(s.supplier_name) LIKE UPPER('%'||#{supplierName}||'%')
+			</if>
+			<if test="marStartDate != null">
+			    AND to_number(to_char(t.visit_factory_date,'yyyy'))>= #{marStartDate}
+			</if>
+			<if test="marEndDate != null">
+			    AND to_number(to_char(t.visit_factory_date,'yyyy'))<![CDATA[<]]> (#{marEndDate}+1)
+			</if>
+			<if test="searchSupplierCode != null and searchSupplierCode!=''">
+				AND UPPER(s.supplier_code) = #{searchSupplierCode}
+			</if>
+			<if test="searchVisitFactoryDate != null">
+				AND t.visit_factory_date = #{searchVisitFactoryDate}
+			</if>
+		</where>
+		<if test="page_count == null">
+		    <if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby == null">
+			    ORDER BY s.supplier_code ASC,t.visit_factory_date DESC
+			</if>
+		</if>
+	</select>
+
+	<!-- 增加供应商年度巡厂得分 -->
+	<insert id="saveSupplierVisitFactory" parameterType="hashmap">
+		INSERT INTO
+		supplier_visit_factory(supplier_code,supplier_name,floor_area,plant_area,enterprise_count_people,year_total_output,visit_factory_date,full_score,qualified_score,score,visit_factory_opinion,visit_factory_principal,created,createby)
+		<foreach collection="insertList" item="item" separator="union all">
+			(
+			SELECT
+			#{item.supplierCode},#{item.supplierName},#{item.floorArea},#{item.plantArea},#{item.enterpriseCountPeople},#{item.yearTotalOutput},#{item.visitFactoryDate},#{item.fullScore},#{item.qualifiedScore},#{item.score},#{item.visitFactoryOpinion},#{item.visitFactoryPrincipal},#{app_created},#{app_create_by}
+			FROM
+			dual
+			)
+		</foreach>
+	</insert>
+
+	<!-- 修改供应商年度巡厂得分 -->
+	<update id="updateSupplierVisitFactory" parameterType="hashmap">
+			UPDATE
+			supplier_visit_factory
+			<set>
+				supplier_code=#{supplierCode},
+				floor_area=#{floorArea},
+				plant_area=#{plantArea},
+				enterprise_count_people=#{enterpriseCountPeople},
+				year_total_output=#{yearTotalOutput},
+				visit_factory_date=#{visitFactoryDate},
+				full_score=#{fullScore},
+				qualified_score=#{qualifiedScore},
+				score=#{score},
+				visit_factory_opinion=#{visitFactoryOpinion},
+				visit_factory_principal=#{visitFactoryPrincipal},
+				updated=#{app_updated},
+	   		    updateby=#{app_user_id}
+			</set>
+			<where>
+			   supplier_code=#{supplierCode}
+			   AND visit_factory_date=#{visitFactoryDate}
+			</where>
+	</update>
+</mapper>

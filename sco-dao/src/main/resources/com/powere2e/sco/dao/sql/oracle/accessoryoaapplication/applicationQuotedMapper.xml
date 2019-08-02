@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.accessoryoaapplication.ApplicationQuotedDao">
+	<resultMap type="com.powere2e.sco.model.accessoryoaapplication.ApplicationQuoted" id="applicationQuotedMap">
+		<result property="applicationCode" column="applicationCode"/>
+		<result property="intentionCode" column="intentionCode"/>
+		<result property="accessoryCode" column="accessoryCode"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="enquiryCode" column="enquiryCode"/>
+		<result property="quotedCode" column="quotedCode"/>
+		<result property="intentionSupplierName" column="intentionSupplierName"/>
+		<result property="supplierName" column="supplierName"/>
+		<result property="intentionName" column="intentionName"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <!-- 查询报价单(可分页)-->
+    <select id="searchApplicationQuotedForDhInfo" resultMap="applicationQuotedMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.application_code applicationCode,t.intention_code intentionCode,t.supplier_code supplierCode
+       		,m.intention_supplier_name intentionSupplierName,n.supplier_name supplierName,a.intention_name intentionName
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count 
+    	</if>
+    	<if test="page_count != null">
+       		FROM (SELECT t.application_code applicationCode,t.intention_code intentionCode,t.supplier_code supplierCode
+       		,m.intention_supplier_name intentionSupplierName,n.supplier_name supplierName,a.intention_name intentionName
+       		from application_quoted t
+      		left join accessory_intention a on t.intention_code=a.intention_code
+      		left join accessory_intention_supplier m on t.supplier_code=m.intention_supplier_code
+      		left join supplier n on t.supplier_code=n.supplier_code
+    	<where>
+    		1=1
+	    	<if test= "applicationCode != null and applicationCode!=''">
+			AND t.application_code= #{applicationCode}
+			</if>
+	    	<if test= "intentionCode != null and intentionCode!=''">
+			AND t.intention_code=#{intentionCode}
+			</if>
+	    	<if test= "accessoryCode != null and accessoryCode!=''">
+			AND t.accessory_code=#{accessoryCode}
+			</if>
+	    	<if test= "supplierCode != null and supplierCode!=''">
+			AND t.supplier_code=#{supplierCode}
+			</if>
+	    	<if test= "enquiryCode != null and enquiryCode!=''">
+			AND t.enquiry_code=#{enquiryCode}
+			</if>
+	    	<if test= "quotedCode != null and quotedCode!=''">
+			AND t.quoted_code = #{quotedCode}
+			
+			</if>
+    	</where>
+    	group by t.application_code,t.supplier_code,t.intention_code,m.intention_supplier_name,n.supplier_name,a.intention_name )
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		
+    	</if>
+    	</if>
+      	<if test="page_count == null">
+       		FROM application_quoted t
+      		left join accessory_intention a on t.intention_code=a.intention_code
+      		left join accessory_intention_supplier m on t.supplier_code=m.intention_supplier_code
+      		left join supplier n on t.supplier_code=n.supplier_code
+    	<where>
+    		1=1
+	    	<if test= "applicationCode != null and applicationCode!=''">
+			AND UPPER(t.application_code) LIKE UPPER('%'||#{applicationCode}||'%')
+			</if>
+	    	<if test= "intentionCode != null and intentionCode!=''">
+			AND UPPER(t.intention_code) LIKE UPPER('%'||#{intentionCode}||'%')
+			</if>
+	    	<if test= "accessoryCode != null and accessoryCode!=''">
+			AND UPPER(t.accessory_code) LIKE UPPER('%'||#{accessoryCode}||'%')
+			</if>
+	    	<if test= "supplierCode != null and supplierCode!=''">
+			AND UPPER(t.supplier_code) LIKE UPPER('%'||#{supplierCode}||'%')
+			</if>
+	    	<if test= "enquiryCode != null and enquiryCode!=''">
+			AND UPPER(t.enquiry_code) LIKE UPPER('%'||#{enquiryCode}||'%')
+			</if>
+	    	<if test= "quotedCode != null and quotedCode!=''">
+			AND t.quoted_code = #{quotedCode}
+			</if>
+    	</where>
+    	group by t.application_code,t.supplier_code,t.intention_code,m.intention_supplier_name,n.supplier_name,a.intention_name
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		
+    	</if>
+    	</if>		
+    </select>
+     <select id="searchApplicationQuoted" resultMap="applicationQuotedMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.application_code applicationCode,t.intention_code intentionCode,t.accessory_code accessoryCode,t.supplier_code supplierCode,t.enquiry_code enquiryCode,t.quoted_code quotedCode
+       		,m.intention_supplier_name intentionSupplierName,n.supplier_name supplierName,a.intention_name intentionName
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM application_quoted t
+      		left join accessory_intention a on t.intention_code=a.intention_code
+      		left join accessory_intention_supplier m on t.supplier_code=m.intention_supplier_code
+      		left join supplier n on t.supplier_code=n.supplier_code
+    	<where>
+    		1=1
+	    	<if test= "applicationCode != null and applicationCode!=''">
+			AND UPPER(t.application_code) LIKE UPPER('%'||#{applicationCode}||'%')
+			</if>
+	    	<if test= "intentionCode != null and intentionCode!=''">
+			AND UPPER(t.intention_code) LIKE UPPER('%'||#{intentionCode}||'%')
+			</if>
+	    	<if test= "accessoryCode != null and accessoryCode!=''">
+			AND UPPER(t.accessory_code) LIKE UPPER('%'||#{accessoryCode}||'%')
+			</if>
+	    	<if test= "supplierCode != null and supplierCode!=''">
+			AND UPPER(t.supplier_code) LIKE UPPER('%'||#{supplierCode}||'%')
+			</if>
+	    	<if test= "enquiryCode != null and enquiryCode!=''">
+			AND UPPER(t.enquiry_code) LIKE UPPER('%'||#{enquiryCode}||'%')
+			</if>
+	    	<if test= "quotedCode != null and quotedCode!=''">
+			AND t.quoted_code = #{quotedCode}
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		
+    	</if>
+    </select>
+    <!-- 根据主键查询某个报价单(可分页)-->
+    <select id="loadApplicationQuoted" resultMap="applicationQuotedMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.application_code applicationCode,t.intention_code intentionCode,t.accessory_code accessoryCode,t.supplier_code supplierCode,t.enquiry_code enquiryCode,t.quoted_code quotedCode
+       		
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM application_quoted t
+    	<where>
+    		1=1
+	    	<if test= "quotedCode != null and quotedCode!=''">
+			AND  t.QUOTED_CODE = #{quotedCode}
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		
+    	</if>
+    </select>
+    
+    <!-- 增加报价单 --> 
+	<insert id="saveApplicationQuoted" parameterType="hashmap">
+		INSERT INTO application_quoted(application_code,intention_code,accessory_code,supplier_code,enquiry_code,quoted_code) 
+			 VALUES(#{applicationCode},#{intentionCode},#{accessoryCode},#{supplierCode},#{enquiryCode},#{quotedCode})
+    </insert>
+    <!-- 修改报价单  -->
+    <update id="updateApplicationQuoted" parameterType="hashmap">
+		UPDATE	
+				application_quoted	
+		   SET	
+		   		application_code=#{applicationCode},
+		   		intention_code=#{intentionCode},
+		   		accessory_code=#{accessoryCode},
+		   		supplier_code=#{supplierCode},
+		   		enquiry_code=#{enquiryCode},
+		   		
+		 WHERE	
+		 		QUOTED_CODE=#{quotedCode}
+    </update>
+    <!-- 删除报价单 -->
+    <delete id="deleteApplicationQuoted" parameterType="hashmap">
+        DELETE FROM 
+        			application_quoted 
+        WHERE 
+        1=1
+        <if test= "quotedCode != null and quotedCode!=''">
+			AND QUOTED_CODE=#{quotedCode} 
+		</if>
+		<if test= "applicationCode != null and applicationCode!=''">
+			AND application_code=#{applicationCode}
+		</if>
+    </delete>
+</mapper>

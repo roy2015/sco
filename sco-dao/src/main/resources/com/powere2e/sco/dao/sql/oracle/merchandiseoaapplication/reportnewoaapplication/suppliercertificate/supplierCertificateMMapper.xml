@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.powere2e.sco.interfaces.dao.merchandiseoaapplication.reportnewoaapplication.suppliercertificate.SupplierCertificateMDao">
+	<resultMap type="com.powere2e.sco.model.merchandiseoaapplication.reportnewoaapplication.suppliercertificate.SupplierCertificateM" id="supplierCertificateMMap">
+		<result property="applicationCode" column="applicationCode" />
+		<result property="supplierCode" column="supplierCode" />
+		<result property="supplierName" column="supplierName" />
+		<result property="intentionSupplierCode" column="intentionSupplierCode" />
+		<result property="intentionSupplierName" column="intentionSupplierName" />
+		<result property="certificateCode" column="certificateCode" />
+		<result property="certificateTypeName" column="certificateTypeName" />
+		<result property="merchandiseName" column="merchandiseName" />
+		<result property="merchandiseCode" column="merchandiseCode" />
+		<result property="path" column="path" />
+		<result property="created" column="created" />
+		<result property="createby" column="createby" />
+		<result property="startDate" column="startDate" />
+		<result property="endDate" column="endDate" />
+		<result property="createUserName" column="createUserName" />
+		<result property="updateUserName" column="updateUserName" />
+		<result property="recordCount" column="record_count" />
+	</resultMap>
+	<!-- 查询供应商证件(可分页) -->
+	<select id="searchSupplierCertificateM" resultMap="supplierCertificateMMap">
+		select
+		<if test="page_count == null">
+			distinct
+		    scm.application_code applicationCode,
+			mis.intention_supplier_code intentionSupplierCode,
+			g.supplierCode supplierCode,
+			mis.intention_supplier_name intentionSupplierName,
+			g.supplierName supplierName,
+			scm.certificate_code certificateCode,
+			sct.certificate_type_name certificateTypeName,
+			sc.path,
+			sc.created,(select
+			u.real_name from pub_user u where
+			u.user_id=sc.createby) as createby,
+			to_char(sc.start_date,'yyyy-mm-dd') startDate,
+			to_char(sc.end_date,'yyyy-mm-dd') endDate
+		</if>
+		<if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		from SUPPLIER_CERTIFICATE_M scm
+		left join APPLICATION_MERCHANDISE am on am.application_code=scm.application_code and am.supplier_code=scm.supplier_code
+		left join MERCHANDISE_INTENTION_SUPPLIER mis on mis.INTENTION_SUPPLIER_CODE=scm.supplier_code
+		left join SUPPLIER_CERTIFICATE sc on sc.certificate_code=scm.certificate_code
+		left join SUPPLIER_CERTIFICATE_TYPE sct on sc.certificate_type_code=sct.certificate_type_code
+		left join supplier s on s.supplier_code=scm.supplier_code
+		left join (select INTENTION_SUPPLIER_CODE as supplierCode ,INTENTION_SUPPLIER_NAME as supplierName from MERCHANDISE_INTENTION_SUPPLIER union select SUPPLIER_CODE as supplierCode ,SUPPLIER_NAME as supplierName from SUPPLIER)
+           g   ON  g.supplierCode=scm.supplier_code
+		<where>
+			1=1
+			<if test="applicationCode != null and applicationCode!=''">
+				AND scm.application_code = #{applicationCode}
+			</if>
+			<if test="supplierCode != null and supplierCode !=''">
+				and scm.supplier_code = #{supplierCode}
+			</if>
+			<if test="certificateCode != null and certificateCode!=''">
+				and scm.certificate_code = #{certificateCode}
+			</if>
+			<if test="supplierCodes != null and supplierCodes !=''">
+				and UPPER(scm.supplier_code) in (${supplierCodes})
+			</if>
+			<if test="path != null and path !=''">
+				and sc.path=#{path}
+			</if>
+		</where>
+		<if test="page_count == null">
+			<if test="app_orderby !=null">
+				ORDER BY ${app_orderby}
+			</if>
+			<if test="app_orderby ==null">
+    			ORDER BY g.supplierName 
+    		</if>
+		</if>
+	</select>
+
+	<!-- 根据主键查询某个供应商证件(可分页) -->
+	<select id="loadSupplierCertificateM" resultMap="supplierCertificateMMap">
+		SELECT
+		<if test="page_count == null">
+			t.application_code applicationCode,t.supplier_code supplierCode,t.certificate_code certificateCode
+		</if>
+		<if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		FROM supplier_certificate_m t
+		<where>
+			1=1
+			<if test="applicationCode != null and applicationCode!=''">
+				AND t.APPLICATION_CODE = #{applicationCode}
+			</if>
+		</where>
+		<if test="page_count == null">
+			<if test="app_orderby !=null">
+				ORDER BY ${app_orderby}
+			</if>
+		</if>
+	</select>
+	<!-- 添加供应商 -->
+	<insert id="saveSupplierCertificateM" parameterType="hashmap">
+		insert into supplier_certificate_m(APPLICATION_CODE,SUPPLIER_CODE,CERTIFICATE_CODE)
+		<foreach collection="list" item="item" separator="union all" >  
+			(
+			  SELECT 
+				#{item.applicationCode},#{item.supplierCode}, #{item.certificateCode}
+			  FROM 
+			  	DUAL 
+		 	)
+	    </foreach> 
+<!-- 		values(#{applicationCode},#{supplierCode},#{certificateCode}) -->
+	</insert>
+	<!-- 删除供应商 -->
+	<delete id="deleteSupplierCertificateMs" parameterType="hashmap">
+		delete supplier_certificate_m where application_code=#{applicationCode} and
+		supplier_code in
+		<foreach collection="supplierCodes" item="supplierCode" separator="," open="(" close=")">
+			#{supplierCode}
+		</foreach>
+		and certificate_code in
+		<foreach collection="certificateCodes" item="certificateCode" separator="," open="(" close=")">
+			#{certificateCode}
+		</foreach>
+	</delete>
+</mapper>

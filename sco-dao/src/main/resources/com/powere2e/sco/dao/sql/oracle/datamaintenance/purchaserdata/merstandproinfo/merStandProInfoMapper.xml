@@ -1,0 +1,384 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.powere2e.sco.interfaces.dao.datamaintenance.purchaserdata.merstandproinfo.MerStandProInfoDao">
+	<resultMap type="com.powere2e.sco.model.datamaintenance.purchaserdata.merStandProInfo.MerStandProInfo" id="merStandProInfoMap">
+		<result property="configCode" column="configCode" />
+		<result property="startDate" column="startDate" />
+		<result property="endDate" column="endDate" />
+		<result property="sumDay" column="sumDay" />
+		
+		<result property="processDate1" column="processDate1" />
+		<result property="processDate2" column="processDate2" />
+		<result property="processDate3" column="processDate3" />
+		<result property="processDate4" column="processDate4" />
+		<result property="processDate5" column="processDate5" />
+		<result property="processDate6" column="processDate6" />
+		<result property="processDate7" column="processDate7" />
+		<result property="processDate8" column="processDate8" />
+		<result property="processDate9" column="processDate9" />
+		<result property="processDate10" column="processDate10" />
+		<result property="processDate11" column="processDate11" />
+		<result property="processDate12" column="processDate12" />
+
+		<result property="created" column="created" />
+		<result property="createby" column="createby" />
+		
+		<result property="recordCount" column="record_count" />
+	</resultMap>
+
+	<!-- 查询标准进度信息 (可分页) -->
+	<select id="listMerMerStandProInfo" resultMap="merStandProInfoMap">
+		SELECT
+		<if test="page_count == null">
+			t.config_code configCode,t.start_date startDate,
+			t.end_date endDate,
+			t.qryxp_day processDate1,t.bzsjsq_day processDate2,t.xcsqtj_day processDate3,
+			t.xpyjbgtj_day processDate4,t.xpyjbgsptg_day processDate5,t.bzsjsqwc_day processDate6,
+			t.pksjxc_day processDate7,t.zsjsqsptg_day processDate8,t.bzsjcgqr_day processDate9,
+			t.bzsjwgtg_wl_day processDate10,t.bzsjwgtg_bz_day processDate11,t.xpff_day processDate12,
+			t.sum_day sumDay,
+			t.created,u.real_name createby
+		</if>
+		<if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		FROM 
+			merchandise_introduce_plan t 
+		INNER JOIN pub_user u ON t.createby = u.user_id  
+		<where>
+			<if test="configCode != null and configCode != ''">
+				t.config_code = #{configCode}
+			</if>
+		</where>
+		<if test="page_count == null">
+			<if test="app_orderby !=null">
+				ORDER BY ${app_orderby}
+			</if>
+			<if test="app_orderby ==null">
+				ORDER BY t.created DESC,t.start_date 
+			</if>
+		</if>
+	</select>
+	
+	<!-- 新增标准进度信息 -->
+	<insert id="insertMerStandProInfo">
+		INSERT INTO merchandise_introduce_plan(config_code,qryxp_day,bzsjsq_day,xcsqtj_day,
+			xpyjbgtj_day,xpyjbgsptg_day,bzsjsqwc_day,pksjxc_day,zsjsqsptg_day,bzsjcgqr_day,
+			bzsjwgtg_wl_day,bzsjwgtg_bz_day, xpff_day,
+			sum_day,start_date,end_date,created,createby) 
+		VALUES(#{configCode},#{processDate1},#{processDate2},#{processDate3},
+			#{processDate4},#{processDate5},#{processDate6},#{processDate7},#{processDate8},#{processDate9},
+			#{processDate10},#{processDate11},#{processDate12},
+			#{sumDay},#{startDate},#{endDate},#{app_updated},#{app_user_id})
+	</insert>
+	
+	<!-- 修改标准进度信息 -->
+	<update id="updateMerStandProInfo">
+		UPDATE 
+			merchandise_introduce_plan
+		SET
+			end_date = #{endDate} 
+		WHERE
+			config_code = #{configCode}
+	</update>
+		
+	<!-- 删除标准进度信息 -->
+	<delete id="deleteMerStandProInfo">
+		DELETE 
+			merchandise_introduce_plan 
+		WHERE
+			config_code IN (${configCode})
+	</delete>
+	
+	<!-- 生效日期是否存在 -->
+	<select id="ifMerStandProInfoExists" resultType="java.lang.String">
+		SELECT 
+			config_code 
+		FROM 
+			merchandise_introduce_plan 
+		WHERE 
+			start_date = #{startDate}
+			<if test="configCode != null and configCode != ''">
+				AND config_code = #{configCode}
+			</if>
+	</select>
+	
+	<!-- 查询审批商品的信息 -->
+	<select id="searchAppByCodeAndMerchandise" resultType="com.powere2e.sco.model.datamaintenance.purchaserdata.merStandProInfo.ApplicationScheduleM2">
+		SELECT 
+			am.application_code applicationCode,am.merchandise_code merchandiseCode,am.supplier_code supplierCode,
+			sm.application_vf_code applicationVfCode,sm.application_pd_code applicationPdCode,
+			
+			mi.created<!-- 样品收集日期(创建日期) -->,t2.foretaste_pass_date qryxpDate<!-- 试吃通过时间(SCO确认意向品日期) -->,
+			sm.sctg_bz_day sctgBzDay<!-- 试吃通过标准天数 -->,sm.sctg_sj_day sctgSjDay<!-- 试吃通过实际天数 -->,
+			
+			sm.xcsqtj_date xcsqtjDate<!-- 巡厂申请提交日期 -->,sm.xcsqtj_status xcsqtjStatus<!-- 巡厂申请提交状态 -->,
+			sm.xcsqtj_sj_day xcsqtjSjDay<!-- 巡厂申请提交实际天数 -->,sm.xcsqtj_bz_day xcsqtjBzDay<!-- 巡厂申请提交标准天数 -->,
+			
+			sm.xcsqshtg_date xcsqshtgDate<!-- 巡厂申请审核通过日期 -->,sm.xcsqshtg_status xcsqshtgStatus<!-- 巡厂申请审核通过状态 -->,
+			sm.xcsqshtg_bz_day xcsqshtgBzDay<!-- 巡厂申请审核通过标准天数 -->,sm.xcsqshtg_sj_day xcsqshtgSjDay<!-- 巡厂申请审核通过实际天数 -->,
+			
+			sm.pksjxc_date pksjxcDate<!-- 品控实际巡厂日期 -->,sm.pksjxc_status pksjxcStatus<!-- 品控实际巡厂状态 -->,
+			sm.pksjxc_bz_day pksjxcBzDay<!-- 品控实际巡厂标准天数 -->,sm.pksjxc_sj_day pksjxcSjDay<!-- 品控实际巡厂实际天数 -->,
+			
+			sm.xpyjbgtj_date xpyjbgtjDate<!-- 新品引进报告提交日期 -->,sm.xpyjbgtj_status xpyjbgtjStatus<!-- 新品引进报告提交状态 -->,
+			sm.xpyjbgtj_bz_day xpyjbgtjBzDay<!-- 新品引进报告提交标准天数 -->,sm.xpyjbgtj_sj_day xpyjbgtjSjDay<!-- 新品引进报告提交实际天数 -->,
+			
+			sm.xpyjbgsptg_date xpyjbgsptgDate<!-- 新品引进报告审批通过日期 -->,sm.xpyjbgsptg_status xpyjbgsptgStatus<!-- 新品引进报告审批通过状态 -->,
+			sm.xpyjbgsptg_bz_day xpyjbgsptgBzDay<!-- 新品引进报告审批通过标准天数 -->,sm.xpyjbgsptg_sj_day xpyjbgsptgSjDay<!-- 新品引进报告审批通过实际天数 -->,
+			
+			sm.zsjsqsptg_date zsjsqsptgDate<!-- 主数据申请审批通过日期 -->,sm.zsjsqsptg_status zsjsqsptgStatus<!-- 主数据申请审批通过状态 -->,
+			sm.zsjsqsptg_bz_day zsjsqsptgBzDay<!-- 主数据申请审批通过标准天数 -->,sm.zsjsqsptg_sj_day zsjsqsptgSjDay<!-- 主数据申请审批通过实际天数 -->,
+			
+			sm.bzsjsq_date bzsjsqDate<!-- 包装设计申请日期 -->,sm.bzsjsq_status bzsjsqStatus<!-- 包装设计申请状态 -->,
+			sm.bzsjsq_bz_day bzsjsqBzDay<!-- 包装设计申请标准天数 -->,sm.bzsjsq_sj_day bzsjsqSjDay<!-- 包装设计申请实际天数 -->,
+			
+			sm.bzsjsqwc_date bzsjsqwcDate<!-- 包装设计申请完成日期 -->,sm.bzsjsqwc_status bzsjsqwcStatus<!-- 包装设计申请完成状态 -->,
+			sm.bzsjsqwc_bz_day bzsjsqwcBzDay<!-- 包装设计申请完成标准天数 -->,sm.bzsjsqwc_sj_day bzsjsqwcSjDay<!-- 包装设计申请完成实际天数 -->,
+			
+			sm.bzsjcgqr_date bzsjcgqrDate<!-- 包装设计初稿确认日期 -->,sm.bzsjcgqr_status bzsjcgqrStatus<!-- 包装设计初稿确认状态 -->,
+			sm.bzsjcgqr_bz_day bzsjcgqrBzDay<!-- 包装设计初稿确认标准天数 -->,sm.bzsjcgqr_sj_day bzsjcgqrSjDay<!-- 包装设计初稿确认实际天数 -->,
+			
+			sm.bzsjwgtg_date bzsjwgtgDate<!-- 包装设计完稿通过日期 -->,sm.bzsjwgtg_status bzsjwgtgStatus<!-- 包装设计完稿通过状态 -->,
+			sm.jlbzsjcgqr_bz_day jlbzsjcgqrBzDay<!-- 距离包装设计初稿确认日期标准天数 -->, sm.jlbzsjcgqr_sj_day jlbzsjcgqrSjDay<!-- 距离包装设计初稿确认日期实际天数 -->,
+			sm.jlwlzsjsqsptg_bz_day jlwlzsjsqsptgBzDay<!-- 距离物料主数据申请审批通过日期标准天数 -->,sm.jlwlzsjsqsptg_sj_day jlwlzsjsqsptgSjDay<!-- 距离物料主数据申请审批通过日期实际天数 -->,
+			
+			sm.xpff_date xpffDate<!-- 新品发放日期 -->,sm.xpff_status xpffStatus<!-- 新品发放状态 -->,
+			sm.xpff_bz_day xpffBzDay<!-- 新品发放标准天数 -->,sm.xpff_sj_day xpffSjDay<!-- 新品发放实际天数 -->,
+			
+			sm.bz_day bzDay<!-- 标准总天数 -->,sm.sj_day sjDay<!-- 实际总天数 -->,
+			sm.start_date startDate<!-- 生效日期 -->, sm.end_date endDate<!-- 结束日期 -->
+		FROM 
+        	<!-- oa_application oa -->	<!-- 审批表 -->
+	        application_merchandise am <!-- 审批商品表 -->
+			INNER JOIN merchandise_intention mi ON am.merchandise_code = mi.intention_code			<!-- 意向品表 -->
+			LEFT JOIN intention_supplier_merchandise t2 ON am.merchandise_code = t2.intention_code	<!-- 意向品供应商和SAP商品关联表 -->
+				AND am.supplier_code = t2.intention_supplier_code
+			LEFT JOIN application_schedule_m2 sm ON am.application_code = sm.application_code 		<!-- 审批进度信息 -->
+				AND am.merchandise_code = sm.merchandise_code AND am.supplier_code = sm.supplier_code
+			<choose>
+				<when test='dateType == "dateType1"'>
+					INNER JOIN application_visit_factory_m vfm ON am.application_code = vfm.application_code 
+						AND am.merchandise_code = vfm.merchandise_code
+						AND am.supplier_code = vfm.supplier_code
+					INNER JOIN application_visit_factory vf ON vfm.application_vf_code = vf.application_vf_code <!-- 商品巡厂申请单 -->
+				</when>
+				<when test='dateType == "dateType4"'>
+					INNER JOIN application_package_design_m apdm ON am.application_code = apdm.application_code
+						AND am.merchandise_code = apdm.merchandise_code
+						AND am.supplier_code = apdm.supplier_code
+					INNER JOIN application_package_design apd ON apdm.application_pd_code = apd.application_pd_code
+				</when>
+			</choose>
+			WHERE 1 = 1 
+				<choose>
+					<when test='dateType == "dateType1"'>
+						AND vf.application_vf_code = #{applicationVfCode}
+						AND am.supplier_code = #{supplierCode}
+					</when>
+					<when test='dateType == "dateType2"'>
+						AND am.application_code = #{oaApplicationCode}
+						AND am.merchandise_code = #{intentionCode}
+						AND am.supplier_code = #{supplierCode}
+					</when>
+					<when test='dateType == "dateType3"'>
+						AND am.merchandise_code = #{intentionCode}
+						AND am.supplier_code = #{supplierCode}
+					</when>
+					<when test='dateType == "dateType4"'>
+						AND apd.application_pd_code = #{applicationPdCode}
+						AND am.merchandise_code = #{intentionCode}
+						AND am.supplier_code = #{supplierCode}
+					</when>
+					<when test='dateType == "dateType5"'>
+						AND t2.merchandise_code = #{sapMerchandise}
+					</when>
+				</choose>
+	</select>
+	
+	<!-- 查询标准信息数据 -->
+	<select id="searchMerStandProInfoByCreated" resultMap="merStandProInfoMap">
+		SELECT * FROM 
+			(	
+				SELECT 
+					t.config_code configCode,t.start_date startDate,
+					t.end_date endDate,
+					t.qryxp_day processDate1,t.bzsjsq_day processDate2,t.xcsqtj_day processDate3,
+					t.xpyjbgtj_day processDate4,t.xpyjbgsptg_day processDate5,t.bzsjsqwc_day processDate6,
+					t.pksjxc_day processDate7,t.zsjsqsptg_day processDate8,t.bzsjcgqr_day processDate9,
+					t.bzsjwgtg_wl_day processDate10,t.bzsjwgtg_bz_day processDate11,t.xpff_day processDate12,
+					t.sum_day sumDay
+				FROM 
+					merchandise_introduce_plan t
+				WHERE 
+					t.start_date <![CDATA[<]]> #{created} 
+				ORDER BY start_date DESC
+			) 
+		WHERE ROWNUM = 1
+	</select>
+	
+	<!-- 更新/插入申请单审批进度信息 -->
+	<update id="completeAppSchedule">
+		MERGE INTO application_schedule_m2 T1
+	      	USING (
+		      SELECT 
+		      	A1.c, A2.* 
+		      FROM
+		        ( 
+		          SELECT 
+		          	ROWNUM c
+		          FROM 
+		          	application_schedule_m2 am
+		          WHERE 
+		            	am.application_code = #{applicationCode}
+					AND am.merchandise_code = #{merchandiseCode}
+					AND am.supplier_code = #{supplierCode}
+		         ) A1
+		       RIGHT JOIN
+		         (
+		          SELECT 
+               	  	#{applicationCode} applicationCode,
+               	  	#{applicationVfCode} applicationVfCode,
+               	  	#{applicationPdCode} applicationPdCode,
+					#{merchandiseCode} merchandiseCode,
+					#{supplierCode} supplierCode,
+					#{qryxpDate} qryxpDate,
+					#{sctgBzDay} sctgBzDay,
+					#{sctgSjDay} sctgSjDay,
+					#{xcsqtjDate} xcsqtjDate,
+					#{xcsqtjStatus} xcsqtjStatus,
+					#{xcsqtjSjDay} xcsqtjSjDay,
+					#{xcsqtjBzDay} xcsqtjBzDay,
+					#{xcsqshtgDate} xcsqshtgDate,
+					#{xcsqshtgStatus} xcsqshtgStatus,
+					#{xcsqshtgBzDay} xcsqshtgBzDay,
+					#{xcsqshtgSjDay} xcsqshtgSjDay,
+					#{pksjxcDate} pksjxcDate,
+					#{pksjxcStatus} pksjxcStatus,
+					#{pksjxcBzDay} pksjxcBzDay,
+					#{pksjxcSjDay} pksjxcSjDay,
+					#{xpyjbgtjDate} xpyjbgtjDate,
+					#{xpyjbgtjStatus} xpyjbgtjStatus,
+					#{xpyjbgtjBzDay} xpyjbgtjBzDay,
+					#{xpyjbgtjSjDay} xpyjbgtjSjDay,
+					#{xpyjbgsptgDate} xpyjbgsptgDate,
+					#{xpyjbgsptgStatus} xpyjbgsptgStatus,
+					#{xpyjbgsptgBzDay} xpyjbgsptgBzDay,
+					#{xpyjbgsptgSjDay} xpyjbgsptgSjDay,
+					#{zsjsqsptgDate} zsjsqsptgDate,
+					#{zsjsqsptgStatus} zsjsqsptgStatus,
+					#{zsjsqsptgBzDay} zsjsqsptgBzDay,
+					#{zsjsqsptgSjDay} zsjsqsptgSjDay,
+					#{bzsjsqDate} bzsjsqDate,
+					#{bzsjsqStatus} bzsjsqStatus,
+					#{bzsjsqBzDay} bzsjsqBzDay,
+					#{bzsjsqSjDay} bzsjsqSjDay,
+					#{bzsjsqwcDate} bzsjsqwcDate,
+					#{bzsjsqwcStatus} bzsjsqwcStatus,
+					#{bzsjsqwcBzDay} bzsjsqwcBzDay,
+					#{bzsjsqwcSjDay} bzsjsqwcSjDay,
+					#{bzsjcgqrDate} bzsjcgqrDate,
+					#{bzsjcgqrStatus} bzsjcgqrStatus,
+					#{bzsjcgqrBzDay} bzsjcgqrBzDay,
+					#{bzsjcgqrSjDay} bzsjcgqrSjDay,
+					#{bzsjwgtgDate} bzsjwgtgDate,
+					#{bzsjwgtgStatus} bzsjwgtgStatus,
+					#{jlbzsjcgqrBzDay} jlbzsjcgqrBzDay,
+					#{jlbzsjcgqrSjDay} jlbzsjcgqrSjDay,
+					#{jlwlzsjsqsptgBzDay} jlwlzsjsqsptgBzDay,
+					#{jlwlzsjsqsptgSjDay} jlwlzsjsqsptgSjDay,
+					#{xpffDate} xpffDate,
+					#{xpffStatus} xpffStatus,
+					#{xpffBzDay} xpffBzDay,
+					#{xpffSjDay} xpffSjDay,
+					#{bzDay} bzDay,
+					#{sjDay} sjDay,
+					#{startDate} startDate,
+					#{endDate} endDate,
+					#{app_created} created,
+					#{app_user_id} createby 
+          		  FROM dual 
+		         ) A2
+		         ON 1=1
+	        ) T2
+			ON (T2.c > 0)   <!-- 判断条件 -->
+			WHEN MATCHED THEN															 <!-- 更新 -->
+			     UPDATE SET 
+                   	T1.application_code = T2.applicationCode,
+                   	T1.application_vf_code = T2.applicationVfCode,
+                   	T1.application_pd_code = T2.applicationPdCode,
+					T1.merchandise_code = T2.merchandiseCode,
+					T1.supplier_code = T2.supplierCode,
+					T1.qryxp_date = T2.qryxpDate,
+					T1.sctg_bz_day = T2.sctgBzDay,
+					T1.sctg_sj_day = T2.sctgSjDay,
+					T1.xcsqtj_date = T2.xcsqtjDate,
+					T1.xcsqtj_status = T2.xcsqtjStatus,
+					T1.xcsqtj_sj_day = T2.xcsqtjSjDay,
+					T1.xcsqtj_bz_day = T2.xcsqtjBzDay,
+					T1.xcsqshtg_date = T2.xcsqshtgDate,
+					T1.xcsqshtg_status = T2.xcsqshtgStatus,
+					T1.xcsqshtg_bz_day = T2.xcsqshtgBzDay,
+					T1.xcsqshtg_sj_day = T2.xcsqshtgSjDay,
+					T1.pksjxc_date = T2.pksjxcDate,
+					T1.pksjxc_status = T2.pksjxcStatus,
+					T1.pksjxc_bz_day = T2.pksjxcBzDay,
+					T1.pksjxc_sj_day = T2.pksjxcSjDay,
+					T1.xpyjbgtj_date = T2.xpyjbgtjDate,
+					T1.xpyjbgtj_status = T2.xpyjbgtjStatus,
+					T1.xpyjbgtj_bz_day = T2.xpyjbgtjBzDay,
+					T1.xpyjbgtj_sj_day = T2.xpyjbgtjSjDay,
+					T1.xpyjbgsptg_date = T2.xpyjbgsptgDate,
+					T1.xpyjbgsptg_status = T2.xpyjbgsptgStatus,
+					T1.xpyjbgsptg_bz_day = T2.xpyjbgsptgBzDay,
+					T1.xpyjbgsptg_sj_day = T2.xpyjbgsptgSjDay,
+					T1.zsjsqsptg_date = T2.zsjsqsptgDate,
+					T1.zsjsqsptg_status = T2.zsjsqsptgStatus,
+					T1.zsjsqsptg_bz_day = T2.zsjsqsptgBzDay,
+					T1.zsjsqsptg_sj_day = T2.zsjsqsptgSjDay,
+					T1.bzsjsq_date = T2.bzsjsqDate,
+					T1.bzsjsq_status = T2.bzsjsqStatus,
+					T1.bzsjsq_bz_day = T2.bzsjsqBzDay,
+					T1.bzsjsq_sj_day = T2.bzsjsqSjDay,
+					T1.bzsjsqwc_date = T2.bzsjsqwcDate,
+					T1.bzsjsqwc_status = T2.bzsjsqwcStatus,
+					T1.bzsjsqwc_bz_day = T2.bzsjsqwcBzDay,
+					T1.bzsjsqwc_sj_day = T2.bzsjsqwcSjDay,
+					T1.bzsjcgqr_date = T2.bzsjcgqrDate,
+					T1.bzsjcgqr_status = T2.bzsjcgqrStatus,
+					T1.bzsjcgqr_bz_day = T2.bzsjcgqrBzDay,
+					T1.bzsjcgqr_sj_day = T2.bzsjcgqrSjDay,
+					T1.bzsjwgtg_date = T2.bzsjwgtgDate,
+					T1.bzsjwgtg_status = T2.bzsjwgtgStatus,
+					T1.jlbzsjcgqr_bz_day = T2.jlbzsjcgqrBzDay,
+					T1.jlbzsjcgqr_sj_day = T2.jlbzsjcgqrSjDay,
+					T1.jlwlzsjsqsptg_bz_day = T2.jlwlzsjsqsptgBzDay,
+					T1.jlwlzsjsqsptg_sj_day = T2.jlwlzsjsqsptgSjDay,
+					T1.xpff_date = T2.xpffDate,
+					T1.xpff_status = T2.xpffStatus,
+					T1.xpff_bz_day = T2.xpffBzDay,
+					T1.xpff_sj_day = T2.xpffSjDay,
+					T1.bz_day = T2.bzDay,
+					T1.sj_day = T2.sjDay,
+					T1.start_date = T2.startDate,
+					T1.end_date = T2.endDate	
+				WHERE 
+						T1.application_code = T2.applicationCode
+					AND T1.merchandise_code = T2.merchandiseCode
+					AND T1.supplier_code = T2.supplierCode
+			WHEN NOT MATCHED THEN 
+			     INSERT (application_code,application_vf_code,application_pd_code,merchandise_code,supplier_code,qryxp_date,sctg_bz_day,sctg_sj_day,xcsqtj_date,xcsqtj_status,xcsqtj_sj_day,xcsqtj_bz_day,
+			      	xcsqshtg_date,xcsqshtg_status,xcsqshtg_bz_day,xcsqshtg_sj_day,pksjxc_date,pksjxc_status,pksjxc_bz_day,pksjxc_sj_day,xpyjbgtj_date,xpyjbgtj_status,
+			      	xpyjbgtj_bz_day,xpyjbgtj_sj_day,xpyjbgsptg_date,xpyjbgsptg_status,xpyjbgsptg_bz_day,xpyjbgsptg_sj_day,zsjsqsptg_date,zsjsqsptg_status,zsjsqsptg_bz_day,
+			      	zsjsqsptg_sj_day,bzsjsq_date,bzsjsq_status,bzsjsq_bz_day,bzsjsq_sj_day,bzsjsqwc_date,bzsjsqwc_status,bzsjsqwc_bz_day,bzsjsqwc_sj_day,bzsjcgqr_date,
+			      	bzsjcgqr_status,bzsjcgqr_bz_day,bzsjcgqr_sj_day,bzsjwgtg_date,bzsjwgtg_status,jlbzsjcgqr_bz_day,jlbzsjcgqr_sj_day,jlwlzsjsqsptg_bz_day,jlwlzsjsqsptg_sj_day,
+			      	xpff_date,xpff_status,xpff_bz_day,xpff_sj_day,bz_day,sj_day,start_date,end_date,created,createby) 
+			     VALUES(T2.applicationCode,T2.applicationVfCode,T2.applicationPdCode,T2.merchandiseCode,T2.supplierCode,T2.qryxpDate,T2.sctgBzDay,T2.sctgSjDay,T2.xcsqtjDate,T2.xcsqtjStatus,T2.xcsqtjSjDay,T2.xcsqtjBzDay,
+			       	T2.xcsqshtgDate,T2.xcsqshtgStatus,T2.xcsqshtgBzDay,T2.xcsqshtgSjDay,T2.pksjxcDate,T2.pksjxcStatus,T2.pksjxcBzDay,T2.pksjxcSjDay,T2.xpyjbgtjDate,T2.xpyjbgtjStatus,
+			       	T2.xpyjbgtjBzDay,T2.xpyjbgtjSjDay,T2.xpyjbgsptgDate,T2.xpyjbgsptgStatus,T2.xpyjbgsptgBzDay,T2.xpyjbgsptgSjDay,T2.zsjsqsptgDate,T2.zsjsqsptgStatus,T2.zsjsqsptgBzDay,
+			       	T2.zsjsqsptgSjDay,T2.bzsjsqDate,T2.bzsjsqStatus,T2.bzsjsqBzDay,T2.bzsjsqSjDay,T2.bzsjsqwcDate,T2.bzsjsqwcStatus,T2.bzsjsqwcBzDay,T2.bzsjsqwcSjDay,T2.bzsjcgqrDate,
+			       	T2.bzsjcgqrStatus,T2.bzsjcgqrBzDay,T2.bzsjcgqrSjDay,T2.bzsjwgtgDate,T2.bzsjwgtgStatus,T2.jlbzsjcgqrBzDay,T2.jlbzsjcgqrSjDay,T2.jlwlzsjsqsptgBzDay,T2.jlwlzsjsqsptgSjDay,
+			       	T2.xpffDate,T2.xpffStatus,T2.xpffBzDay,T2.xpffSjDay,T2.bzDay,T2.sjDay,T2.startDate,T2.endDate,T2.created,T2.createby)
+	</update>
+	
+</mapper>

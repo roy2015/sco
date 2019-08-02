@@ -1,0 +1,53 @@
+﻿@charset "utf-8";
+/* CSS Document */
+/*html { filter:progid:DXImageTransform.Microsoft.BasicImage(grayscale=1); }*/
+*{margin:0px;padding:0px;}
+/*网站主体开始*/
+html,body{
+	width:100%;
+	height:100%;
+	margin:0px;
+	padding:0px;
+	color:#333;
+	text-align:left;
+	overflow: inherit;
+	background:#f3f7fb url(../images/bg.gif) repeat-x center top;
+	font-family:normal small "Microsoft YaHei","Microsoft JhengHei","微软雅黑",Arial,Verdana,Helvetica,sans-serif;
+	font-size:12px;
+}
+.clear{clear:both;}
+.les{margin-left:50px;}
+.res{margin-right:10px;}
+
+div,h1,h2,h3,h4,h5,h6,h7,dd,b,table,td,th,p,form,input,select,textarea{margin:0;padding:0;}
+
+ul,ol,dl,dt,li{list-style-type:none;margin:0;padding:0;}
+img{border:none;}
+i{font-style:normal;}
+
+a{color:#333;text-decoration:none;}
+a:hover{color:#FF3300;text-decoration:none;}
+
+.cloud{width:100%;height:100%;background:url(../images/cloud.png) no-repeat center top;}
+
+.top{clear:both;width:100%;height:29px;background:url(../images/tbg.gif) repeat-x;}
+.top .topinfo{width:900px;height:29px;margin:0 auto;}
+.top .topinfo span{width:50px;background:url(../images/help.png) no-repeat left center;padding-left:20px;float:right;line-height:29px;display:block;}
+.logo{clear:both;width:900px;height:60px;background:url(../images/logo.png) no-repeat;margin:20px auto;}
+
+.login{clear:both;width:900px;height:auto;overflow:hidden;margin:50px auto;background:url(../images/world.png) no-repeat left top;position:relative;}
+.box{clear:both;width:260px;height:185px;background:url(../images/box.png) no-repeat;float:right;padding:50px 26px 26px 26px;}
+.wrong{clear:both;width:260px;height:30px;position:absolute;bottom:-6px;right:0px;z-index:9999;line-height:30px;background:url(../images/warning.gif) no-repeat left center;padding-left:20px;line-height:30px;}
+.box p{margin:0;padding-bottom:12px;height:26px; line-height:26px;}
+.box span{display:block;float:left;width:50px;}
+.box .username{border:none;width:161px;height:29px;float:left;background:url(../images/username.png) no-repeat 0 0;padding-left:30px;font-family:normal small Arial,Verdana,Helvetica,sans-serif;color:#1292d8;}
+.box .password{border:none;width:161px;height:29px;float:left;background:url(../images/lock.png) no-repeat 0 0;padding-left:30px;font-family:normal small Arial,Verdana,Helvetica,sans-serif;}
+.box .code{border:none;width:70px;height:29px;float:left;background:url(../images/code.png) no-repeat 0 0;padding-left:30px;font-family:normal small Arial,Verdana,Helvetica,sans-serif;}
+.box i{padding-left:10px;width:70px;font-size:18px;font-family:Arial, Helvetica, sans-serif;line-height:29px;}
+.box .btn{width:86px;height:28px;color:#1e1e1e;border:none;background:url(../images/out.png);text-align:center;line-height:28px; cursor:pointer;}
+.box .btn:hover{background:url(../images/over.png);}
+.box .checkbox{float:left;margin-top:5px;margin-left:50px;display:inline;}
+.box b{float:left;line-height:26px;font-weight:normal;height:26px;padding-left:10px;}
+
+.foot{clear:both;width:100%;height:29px;background:url(../images/fbg.gif) repeat-x;position:fixed;left:0px;bottom:0;_position:absolute;_top:expression(document.documentElement.clientHeight + document.documentElement.scrollTop - this.offsetHeight);font-family:Arial, Helvetica, sans-serif;overflow:hidden;}
+.foot .copy{line-height:39px;text-align:center;color:#454545}

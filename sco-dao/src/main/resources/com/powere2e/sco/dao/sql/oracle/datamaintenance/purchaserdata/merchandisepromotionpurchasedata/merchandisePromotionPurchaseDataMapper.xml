@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.datamaintenance.purchaserdata.merchandisepromotionpurchasedata.MerchandisePromotionPurchaseDataDao">
+	<resultMap type="com.powere2e.sco.model.datamaintenance.purchaserdata.merchandisepromotionpurchasedata.MerchandisePromotionPurchaseData" id="merchandisePromotionPurchaseDataMap">
+		<result property="promotionSchedule" column="promotionSchedule"/>
+		<result property="sapUpdateDate" column="sapUpdateDate"/>
+		<result property="promotionCode" column="promotionCode"/>
+		<result property="promotionName" column="promotionName"/>
+		<result property="merchandiseCode" column="merchandiseCode"/>
+		<result property="merchandiseName" column="merchandiseName"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="supplierName" column="supplierName"/>
+		<result property="warehouseCode" column="warehouseCode"/>
+		<result property="minDate" column="minDate"/>
+		<result property="maxDate" column="maxDate"/>
+		<result property="price" column="price"/>
+		<result property="syncDate" column="syncDate"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <!-- 查询商品促销进货价格维护(可分页)-->
+    <select id="searchMerchandisePromotionPurchaseData" resultMap="merchandisePromotionPurchaseDataMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.promotion_schedule promotionSchedule,
+       		t.sap_update_date sapUpdateDate,
+       		t.promotion_code promotionCode,
+       		t.promotion_name promotionName,
+       		t.merchandise_code merchandiseCode,
+       		m.merchandise_name merchandiseName,
+       		t.supplier_code supplierCode,
+       		s.supplier_name supplierName,
+       		t.warehouse_code warehouseCode,
+       		to_char(t.start_date,'yyyy-mm-dd') minDate,
+       		to_char(t.end_date,'yyyy-mm-dd') maxDate,
+       		t.price price,
+       		to_char(t.price) priceMax,
+       		to_char(t.sync_date,'yyyy-mm-dd') syncDate
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM merchandise_promotion_purchase t
+      		left join merchandise m on t.merchandise_code=m.merchandise_code and m.supplier_code=t.supplier_code
+			left join supplier s on s.supplier_code=t.supplier_code
+    	<where>
+    		1=1
+	    	<if test= "promotionSchedule != null and promotionSchedule!=''">
+				AND UPPER(t.promotion_schedule) LIKE UPPER('%'||#{promotionSchedule}||'%')
+			</if>
+	    	<if test= "promotionCode != null and promotionCode!=''">
+				AND t.promotion_code = #{promotionCode}
+			</if>
+	    	<if test= "promotionName != null and promotionName!=''">
+				AND UPPER(t.promotion_name) LIKE UPPER('%'||#{promotionName}||'%')
+			</if>
+	    	<if test= "merchandiseCode != null and merchandiseCode!=''">
+				AND UPPER(t.merchandise_code) LIKE UPPER('%'||#{merchandiseCode}||'%')
+			</if>
+	    	<if test= "supplierCode != null and supplierCode!=''">
+				AND UPPER(t.supplier_code) LIKE UPPER('%'||#{supplierCode}||'%')
+			</if>
+	    	<if test= "minDate != null and minDate!=''">
+	    	    and t.start_date >= to_date(#{minDate},'yyyy-MM-DD') and to_date(#{maxDate},'yyyy-MM-DD') >= t.end_date
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby ==null">
+    			ORDER BY t.start_date,t.end_date
+    		</if>
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    	</if>
+    </select>
+    <!-- 增加商品促销进货价格 --> 
+	<insert id="saveMerchandisePromotionPurchaseData" parameterType="hashmap">
+	INSERT INTO merchandise_promotion_purchase
+	(promotion_schedule,promotion_name,merchandise_code,supplier_code,start_date,end_date,price,sync_date) 
+		<foreach collection="list" item="item" index="index" separator="union all">
+				(
+				SELECT
+				#{item.promotionSchedule},#{item.promotionName},#{item.merchandiseCode},#{item.supplierCode},to_date(#{item.minDate},'yyyy-mm-dd'),to_date(#{item.maxDate},'yyyy-mm-dd'),#{item.price},sysdate
+				FROM DUAL
+				)
+    	</foreach>
+    </insert>
+    <!-- 根据主键查询某个商品促销进货价格维护(可分页)-->
+    <select id="loadMerchandisePromotionPurchaseData" resultMap="merchandisePromotionPurchaseDataMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.promotion_schedule promotionSchedule,t.sap_update_date sapUpdateDate,t.promotion_code promotionCode,t.promotion_name promotionName,t.merchandise_code merchandiseCode,t.supplier_code supplierCode,t.warehouse_code warehouseCode,t.start_date startDate,t.end_date endDate,t.price price,t.sync_date syncDate
+       		,t.created,	t.updated 
+		   ,(select u.login_name from pub_user u where u.user_id=t.createby) as createUserName,
+           	(select u.login_name from pub_user u where u.user_id=t.updateby) as updateUserName
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM merchandise_promotion_purchase t
+    	<where>
+    		1=1
+	    	<if test= "promotionCode != null and promotionCode!=''">
+			AND  t.PROMOTION_CODE = #{promotionCode}
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.created DESC
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 删除商品促销进货价格维护 -->
+    <delete id="deleteMerchandisePromotionPurchaseData" parameterType="hashmap">
+        DELETE FROM 
+        			merchandise_promotion_purchase 
+        WHERE 
+        		1=1
+        		and 
+        		(<foreach collection="list"  item="item" index="index" separator="or" >
+	        		(
+	        			<if test="item.promotionSchedule ==null">
+	        				promotion_schedule is null 
+	        			</if>
+	        			<if test="item.promotionSchedule !=null">
+	        			    promotion_schedule=#{item.promotionSchedule}
+	        			</if>
+	        		and 
+	        			<if test="item.promotionCode ==null">
+	        				promotion_code is null 
+	        			</if>
+	        			<if test="item.promotionCode !=null">
+	        			    promotion_code=#{item.promotionCode}
+	        			</if>
+	        		and
+	        			merchandise_code=#{item.merchandiseCode}
+	        		and
+	        			supplier_code=#{item.supplierCode}
+	        		and 
+	        			to_char(start_date,'yyyy-mm-dd') =#{item.minDate}
+	        		and 
+	        			to_char(end_date,'yyyy-mm-dd') =#{item.maxDate}
+	        		and 
+	        			price=to_number(#{item.priceMax})
+	        		)
+	        	</foreach>)
+    </delete>
+</mapper>

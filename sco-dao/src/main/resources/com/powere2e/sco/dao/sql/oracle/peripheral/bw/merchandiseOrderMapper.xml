@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.peripheral.bw.MerchandiseOrderDao">
+	<resultMap type="com.powere2e.sco.model.peripheral.bw.MerchandiseOrder" id="merchandiseOrderMap">
+		<result property="regionCode" column="regionCode"/>
+		<result property="warehouseCode" column="warehouseCode"/>
+		<result property="warehouseSiteCode" column="warehouseSiteCode"/>
+		<result property="merchandiseCode" column="merchandiseCode"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="orderDate" column="orderDate"/>
+		<result property="orderCode" column="orderCode"/>
+		<result property="orderTotalPrice" column="orderTotalPrice"/>
+		<result property="orderQuantity" column="orderQuantity"/>
+		<result property="expectArriveDate" column="expectArriveDate"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    
+    
+    <!-- 增加商品订货单信息 --> 
+	<insert id="saveMerchandiseOrder" parameterType="hashmap">
+		INSERT INTO merchandise_order(region_code,warehouse_code,warehouse_site_code,merchandise_code,supplier_code,order_date,order_code,order_total_price,order_quantity,expect_arrive_date) 
+    		<foreach collection="list" item="item" index="index" separator="union all" > 
+		         (
+		         SELECT 
+			         #{item.regionCode}, 
+			         #{item.warehouseCode},
+			         #{item.warehouseSiteCode},
+			         #{item.merchandiseCode},
+			         #{item.supplierCode},
+			         #{item.orderDate},
+			         #{item.orderCode},
+			         #{item.orderTotalPrice},
+			         #{item.orderQuantity},
+			         #{item.expectArriveDate}
+		         FROM　DUAL
+		         )
+		     </foreach>      
+    </insert>
+</mapper>

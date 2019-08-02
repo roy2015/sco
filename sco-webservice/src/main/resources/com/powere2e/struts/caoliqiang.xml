@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN" "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+  <package name="caoliqiang" extends="pubstruts" namespace="/">
+    
+    <!-- 商品抽检不合格记录 -->
+    <action name="merchandiseUnqualified" method="{1}" class="com.powere2e.sco.action.datamaintenance.gradecontroldata.merchandiseunqualified.MerchandiseUnqualifiedAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+    <!-- 供应商考评模版 -->
+    <action name="supplierEvaluateTemplate" method="{1}" class="com.powere2e.sco.action.sharefunctionanalysis.supplieranalysis.supplierevaluatetemplate.SupplierEvaluateTemplateAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+    <!-- 供应商考评模版 -->
+    <action name="supplierEvaluateTable" method="{1}" class="com.powere2e.sco.action.sharefunctionanalysis.supplieranalysis.supplierevaluatetable.SupplierEvaluateTableAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+  </package>
+</struts>

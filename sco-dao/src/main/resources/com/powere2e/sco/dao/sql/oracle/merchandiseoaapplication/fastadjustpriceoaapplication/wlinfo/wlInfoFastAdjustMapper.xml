@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.powere2e.sco.interfaces.dao.merchandiseoaapplication.fastadjustpriceoaapplication.wlinfo.WlInfoFastAdjustDao">
+	<resultMap type="com.powere2e.sco.model.merchandiseoaapplication.reportnewoaapplication.wlinfo.MerchandiseWlInfo" id="mwl">
+		<result property="applicationCode" column="applicationCode"/>
+		<result property="intentionCode" column="intentionCode"/>
+		<result property="intentionName" column="intentionName"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="supplierName" column="supplierName"/>
+		<result property="accessorySAPCode" column="accessorySAPCode"/>
+		<result property="supplierSAPCode" column="supplierSAPCode"/>
+		<result property="region" column="region"/>
+		<result property="sumPrice" column="sumPrice"/>
+		
+		<result property="recordCount" column="record_count" />		
+	</resultMap>
+	
+	<!-- 物料信息列表 -->
+	<select id="listWlInfoFastAdjust" resultMap="mwl">
+		SELECT
+			<if test="page_count == null">
+				a.application_code applicationCode, 
+				DECODE(m.merchandise_code,NULL,mi.intention_code,m.merchandise_code) intentionCode,
+				DECODE(m.merchandise_code,NULL,mi.intention_name,m.merchandise_name) intentionName,
+				DECODE(s.supplier_code,NULL,mis.intention_supplier_code,s.supplier_code) supplierCode,
+				DECODE(s.supplier_code,NULL,mis.intention_supplier_name,s.supplier_name) supplierName, 
+				DECODE(mp.price,NULL,'否','是') region 
+			</if> 
+			<if test="page_count != null">
+	       		count(1) AS record_count 
+	    	</if>
+		FROM
+			(SELECT * FROM application_merchandise WHERE application_code = #{applicationCode}) a
+			LEFT JOIN merchandise_intention_supplier mis ON a.supplier_code = mis.intention_supplier_code
+			LEFT JOIN supplier s ON a.supplier_code = s.supplier_code
+			LEFT JOIN merchandise m ON m.merchandise_code = a.merchandise_code 
+				AND a.supplier_code = m.supplier_code  
+			LEFT JOIN merchandise_intention mi ON a.merchandise_code = mi.intention_code
+			LEFT JOIN (												<!-- 只要有一个地区价格不为null即可 -->
+				SELECT
+					application_code,merchandise_code,supplier_code,MAX(price) price
+				FROM
+					merchandise_contract_price WHERE application_code = #{applicationCode} AND price IS NOT NULL
+				GROUP BY application_code,merchandise_code,supplier_code 
+			) mp ON a.application_code = mp.application_code
+				AND DECODE(m.merchandise_code,NULL,mi.intention_code,m.merchandise_code) = mp.merchandise_code
+				AND DECODE(s.supplier_code,NULL,mis.intention_supplier_code,s.supplier_code) = mp.supplier_code 
+	</select>
+	
+	<!-- 物料地区价格 -->
+	<select id="listWlInfoDetail" resultMap="mwl">
+		SELECT
+			<if test="page_count == null">
+				a.application_code applicationCode, 
+				DECODE(m.merchandise_code,NULL,mi.intention_code,m.merchandise_code) intentionCode,
+				DECODE(m.merchandise_code,NULL,mi.intention_name,m.merchandise_name) intentionName,
+				DECODE(s.supplier_code,NULL,mis.intention_supplier_code,s.supplier_code) supplierCode,
+				DECODE(s.supplier_code,NULL,mis.intention_supplier_name,s.supplier_name) supplierName, 
+				sap.merchandise_code accessorySAPCode, sap.supplier_code supplierSAPCode,
+				mp.region,mp.price sumPrice 
+			</if> 
+			<if test="page_count != null">
+	       		count(1) AS record_count 
+	    	</if>
+		FROM
+			(SELECT * FROM application_merchandise WHERE application_code = #{applicationCode}) a
+			LEFT JOIN merchandise_intention_supplier mis ON a.supplier_code = mis.intention_supplier_code
+			LEFT JOIN supplier s ON a.supplier_code = s.supplier_code
+			LEFT JOIN merchandise m ON a.merchandise_code = m.merchandise_code 
+				AND a.supplier_code = m.supplier_code
+			LEFT JOIN merchandise_intention mi ON mi.intention_code = a.merchandise_code
+			INNER JOIN merchandise_contract_price mp ON a.application_code = mp.application_code
+				AND DECODE(m.merchandise_code,NULL,mi.intention_code,m.merchandise_code) = mp.merchandise_code
+				AND DECODE(s.supplier_code,NULL,mis.intention_supplier_code,s.supplier_code) = mp.supplier_code 
+			LEFT JOIN intention_merchandise_sap sap ON a.application_code = sap.application_code 
+				AND a.merchandise_code = sap.intention_code AND a.supplier_code = sap.intention_supplier_code
+	</select>
+	
+	<!-- 是否存在 -->
+	<select id="ifWlInfoExists" resultType="java.lang.String">
+		SELECT 
+			region 
+		FROM 
+			merchandise_contract_price 
+		WHERE
+			application_code = #{applicationCode} 
+			AND merchandise_code = #{intentionCode} 
+			AND supplier_code = #{supplierCode} 
+			AND region = #{region} 
+	</select>
+	
+	<!-- 查询某个物料信息 -->
+	<select id="loadWlInfo" resultMap="mwl">
+		SELECT 
+			ar.merchandise_code intentionCode,
+			ar.supplier_code supplierCode,
+			ar.region,price sumPrice,
+			sap.merchandise_code accessorySAPCode, 
+			sap.supplier_code supplierSAPCode 
+        FROM 
+           	merchandise_contract_price ar 
+           	LEFT JOIN intention_merchandise_sap sap ON ar.application_code = sap.application_code 
+				AND ar.merchandise_code = sap.intention_code AND ar.supplier_code = sap.intention_supplier_code
+        WHERE 
+	           	ar.application_code = #{applicationCode}
+			AND ar.merchandise_code = #{intentionCode} 
+			AND ar.supplier_code = #{supplierCode}
+			AND ar.region = #{region} 
+	</select>
+	
+	<!-- 新增商品合同价 -->
+	<update id="insertMerchandiseContractPrice">
+	   	INSERT INTO merchandise_contract_price(application_code, merchandise_code, supplier_code, 
+	      	region, price, created, createby)       
+		VALUES(#{applicationCode}, #{intentionCode},#{supplierCode},
+		 	#{region},#{sumPrice},#{app_created},#{app_create_by}) 
+	</update>
+	
+	<!-- 更新 -->
+	<update id="updateMerchandiseContractPrice">
+		UPDATE
+			merchandise_contract_price ar 
+		SET
+			ar.price = #{sumPrice},
+			ar.region = #{region},
+			ar.updated = #{app_updated},
+			ar.updateby = #{app_user_id}
+		WHERE 
+				ar.application_code = #{applicationCode}
+			AND ar.merchandise_code = #{intentionCode} 
+			AND ar.supplier_code = #{supplierCode}
+			AND ar.region = #{oldRegion} 
+	</update>
+	
+	<!-- 删除 -->
+	<delete id="deleteMerchandiseContractPrice">
+		DELETE 
+			merchandise_contract_price
+		WHERE 
+				application_code = #{applicationCode}
+			AND merchandise_code = #{intentionCode} 
+			AND supplier_code = #{supplierCode}
+			AND region = #{region} 
+	</delete>
+	
+</mapper>

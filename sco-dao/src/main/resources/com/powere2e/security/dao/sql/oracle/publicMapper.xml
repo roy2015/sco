@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.frame.commons.dao.PublicDao">
+
+	<!-- 用户管理的对象模型 -->
+	<resultMap type="com.powere2e.frame.commons.model.UserObject" id="userObject_Map">
+        <result property="objID" column="DATA_ID"/>
+         <result property="objTyp" column="DATA_TYPE"/>
+    </resultMap>
+    
+      <resultMap type="com.powere2e.frame.server.sequence.model.Sequence" id="pub_sequence_Map">
+        <result property="sequenceID" column="SEQUENCE_ID"/>
+        <result property="isactive" column="ISACTIVE"/>
+        <result property="name" column="NAME"/>
+        <result property="description" column="DESCRIPTION"/>
+        <result property="tableName" column="TABLE_NAME"/>
+        <result property="startNo" column="START_NO"/>
+        <result property="inc" column="INC"/>
+        <result property="prefix" column="PREFIX"/>
+        <result property="suffix" column="SUFFIX"/>
+        <result property="fromClass" column="FROM_CLASS"/>
+        <result property="cacheNum" column="CACHE_NUM"/>
+        <result property="currentNo" column="CURRENT_NO"/>
+        <result property="clientID" column="CLIENT_ID"/>
+    </resultMap>
+    
+     <resultMap type="com.powere2e.frame.server.quartz.model.Trigger" id="pub_trigger_Map">
+        <result property="triggerName" column="TRIGGER_NAME"/>
+        <result property="triggerGroup" column="TRIGGER_GROUP"/>
+        <result property="jobName" column="JOB_NAME"/>
+        <result property="jobGroup" column="JOB_GROUP"/>
+        <result property="isVolatile" column="IS_VOLATILE"/>
+        <result property="description" column="DESCRIPTION"/>
+        <result property="priority" column="PRIORITY"/>
+        <result property="triggerState" column="TRIGGER_STATE"/>
+        <result property="triggerType" column="TRIGGER_TYPE"/>
+        <result property="calendarName" column="CALENDAR_NAME"/>
+        <result property="misfireInstr" column="MISFIRE_INSTR"/>
+        
+        <result property="nextFiretime" column="NEXT_FIRE_TIME"/>
+        <result property="prevFiretime" column="PREV_FIRE_TIME"/>
+        <result property="startTime" column="START_TIME"/>
+        <result property="endTime" column="END_TIME"/>
+        
+        <result property="recordCount" column="record_count" />
+    </resultMap>
+	
+	<!--获取用户权限清单-->
+    <select id="loginUser_PowerList" resultType="String">
+      <![CDATA[
+       select
+       			FUNC_KEY
+       from
+       			PUB_USER_FUNC
+       where
+       			USER_ID =  #{app_hiddenuser_id}
+       ]]>
+    </select>
+    
+    <!-- 用户是否是超级用户 -->
+    <select id="loginUser_IsAdmin" resultType="int">
+      <![CDATA[
+       select 
+       			110
+       from 
+       			PUB_USER_ROLE 
+       where
+       			ROLE_ID = 'admin' and USER_ID = #{app_hiddenuser_id} and CLIENT_ID = #{app_user_clientID}
+       ]]>
+    </select>
+    
+    <!--获取用户具有操作权限的组织列表, 与角色管理的对象取并集-->
+    <select id="loginUser_ObjectTyp" resultType="String">
+    	SELECT DISTINCT DATA_TYPE FROM PUB_DATA_POWER WHERE client_id = #{app_user_clientID}
+    </select>
+    
+    <!-- 插入管理的对应 -->
+    <insert id="insert_Manage_Object" parameterType="hashmap">
+    	MERGE INTO PUB_DATA_POWER T1
+	      USING (
+	            SELECT 
+	                  	(
+	                     <if test= "user_object != null"> 'U'</if>
+	    	             <if test= "role_object != null"> 'R'</if> 
+	                    ) as OWNER_TYPE,
+	                   #{ownerId} as OWNER_ID,
+	                   #{objectId} as DATA_ID,
+	                   #{objectTyp} as DATA_TYPE,
+	                   to_date(#{app_created_str},'YYYY-MM-DD HH24:MI:SS') as CREATED,
+	                   #{app_create_by} as CREATEBY,
+	                   #{app_user_clientID} as CLIENT_ID 
+	            FROM DUAL
+	         ) T2 
+		ON (T1.OWNER_TYPE = T2.OWNER_TYPE AND T1.OWNER_ID = T2.OWNER_ID AND T1.DATA_TYPE = T2.DATA_TYPE AND T1.DATA_ID = T2.DATA_ID)
+		WHEN MATCHED THEN
+		     UPDATE SET 
+		        T1.UPDATEBY=#{app_user_id},
+		        T1.UPDATED=to_date(#{app_updated_str},'YYYY-MM-DD HH24:MI:SS')
+		WHEN NOT MATCHED THEN 
+		      INSERT (OWNER_TYPE,OWNER_ID,DATA_ID, DATA_TYPE, CREATED, CREATEBY,CLIENT_ID) 
+		        VALUES(T2.OWNER_TYPE,T2.OWNER_ID,T2.DATA_ID,T2.DATA_TYPE,T2.CREATED,T2.CREATEBY,T2.CLIENT_ID)
+    </insert>
+    
+    <!-- 检查用户是否无需数据权限审核 -->
+    <select id="userNeedDataPowers" resultType="String">
+    	SELECT R.DATAPOWER 
+    	FROM PUB_USER_ROLE UR, PUB_ROLE R 
+    	WHERE UR.ROLE_ID=R.ROLE_ID 
+    				AND R.DATAPOWER IS NOT NULL 
+    	<if test= "agentUserId != null and agentUserId !=''"> 
+       		 AND UR.USER_ID = #{agentUserId} 
+    	</if>
+    	<if test= "agentUserId == null"> 
+       		 AND UR.USER_ID = #{app_user_id} 
+    	</if>
+    	   	 AND UR.client_id = #{app_user_clientID} 
+    	   	 AND R.client_id = #{app_user_clientID} 
+    </select>
+    
+    <!--获取用户具有操作权限的组织列表-->
+    <select id="loginUser_Objects" resultMap="userObject_Map">
+      	SELECT 
+      		data_id, data_type from pub_data_power
+	  	WHERE 
+	  		owner_type='U' 
+	  		<if test= "agentUserId != null and agentUserId !=''"> 
+       		AND owner_id = #{agentUserId} 
+    		</if>
+    		<if test= "agentUserId == null"> 
+       		AND owner_id = #{app_user_id} 
+    		</if>
+    		AND client_id = #{app_user_clientID} 
+    </select>
+    
+    <!-- 代理用户用户名 -->
+    <select id="loginUser_agentUserName" resultType="String">
+    	SELECT 
+    		real_name 
+    	FROM 
+    		pub_user 
+    	WHERE 
+    		user_id = #{agentUserId}
+    </select>
+    
+    <select id="sequenceList" resultMap="pub_sequence_Map">
+      <![CDATA[
+       SELECT
+	       sequence_id, isactive, name, description, table_name, start_no, 
+	       inc, prefix, suffix, from_class, cache_num, current_no, client_id
+       FROM
+        pub_sequence
+       WHERE
+        isactive = 'Y' 
+        AND client_id = #{app_user_clientID} 
+       ]]>
+    </select>
+    
+    <select id="sequenceOne" resultMap="pub_sequence_Map">
+      <![CDATA[
+       SELECT
+        sequence_id, isactive, name, description, table_name, 
+        start_no, inc, prefix, suffix, from_class, cache_num, 
+        current_no, client_id
+       from
+        PUB_SEQUENCE
+       where
+        SEQUENCE_ID = #{sequenceID} 
+        AND client_id = #{app_user_clientID} 
+       ]]>
+    </select>
+    
+    <insert id="insert_Sequence"  parameterType="hashmap">
+    	INSERT INTO PUB_SEQUENCE(SEQUENCE_ID, ISACTIVE, NAME, DESCRIPTION, TABLE_NAME, START_NO, INC, PREFIX, SUFFIX, FROM_CLASS, CACHE_NUM, CURRENT_NO, CLIENT_ID) 
+      	 	VALUES (#{sequenceID}, #{isactive}, #{name}, #{description}, #{tableName}, #{startNo}, #{inc}, #{prefix}, #{suffix}, #{fromClass}, #{cacheNum}, #{currentNo}, #{app_user_clientID})
+    </insert>
+    <update id="update_Sequence" parameterType="hashmap">
+		UPDATE PUB_SEQUENCE SET CURRENT_NO = CURRENT_NO + CACHE_NUM + 1 where SEQUENCE_ID = #{sequenceID}
+    </update>
+    
+    <select id="triggerList" resultMap="pub_trigger_Map">
+    	SELECT  
+    	<if test="page_count == null">
+       		trigger_name triggername,trigger_group triggergroup,job_name jobname,job_group jobgroup,is_volatile isvolatile,description description,
+       		next_fire_time nextfiretime ,prev_fire_time prevfiretime ,priority priority, trigger_state triggerstate,trigger_type triggertype,
+       		start_time starttime,end_time endtime,calendar_name calendarname,misfire_instr misfireinstr
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM QRTZ_TRIGGERS
+    	<where>
+		    <if test= "triggerName != null and triggerName !=''">
+				AND TRIGGER_NAME = #{triggerName}		
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+       		<if test="app_orderby == null">
+    			ORDER BY TRIGGER_NAME
+    		</if>
+    	</if>
+    </select>
+
+</mapper>

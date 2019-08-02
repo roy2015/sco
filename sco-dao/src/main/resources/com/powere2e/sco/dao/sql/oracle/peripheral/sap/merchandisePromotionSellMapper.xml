@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.peripheral.sap.MerchandisePromotionSellDao">
+	<resultMap type="com.powere2e.sco.model.peripheral.sap.MerchandisePromotionSell" id="merchandisePromotionSellMap">
+		<result property="merchandiseCode" column="merchandiseCode"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="promotionCode" column="promotionCode"/>
+		<result property="promotionName" column="promotionName"/>
+		<result property="regionCode" column="regionCode"/>
+		<result property="startDate" column="startDate"/>
+		<result property="endDate" column="endDate"/>
+		<result property="price" column="price"/>
+		<result property="sapUpdateDate" column="sapUpdateDate"/>
+		<result property="syncDate" column="syncDate"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+   
+    <!-- 增加商品促销销售价 --> 
+	<insert id="saveMerchandisePromotionSell" parameterType="hashmap">
+		INSERT INTO merchandise_promotion_sell(merchandise_code,supplier_code,promotion_code,promotion_name,region_code,start_date,end_date,price,sap_update_date,sync_date) 
+    		  <foreach collection="list" item="item" index="index" separator="union all" > 
+		         (
+		         SELECT 
+			         #{item.merchandiseCode}, 
+			         #{item.supplierCode},
+			         #{item.promotionCode}, 
+			         #{item.promotionName},
+			         #{item.regionCode}, 
+			         #{item.startDate},
+			         #{item.endDate}, 
+			         #{item.price},
+			         #{item.sapUpdateDate},
+			         #{app_created}
+		         FROM　DUAL
+		         )
+		     </foreach>      
+    </insert>
+    
+     <!--删除商品促销销售价 -->
+    <delete id="deleteMerchandisePromotionSell">
+    	DELETE FROM merchandise_promotion_sell
+    </delete>
+    
+</mapper>

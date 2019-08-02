@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.parameterset.certificateoutofdateconfig.CertificateOutofdateConfigDao">
+	<resultMap type="com.powere2e.sco.model.parameterset.certificateoutofdateconfig.CertificateOutofdateConfig" id="certificateOutofdateConfigMap">
+		<result property="configCode" column="configCode"/>
+		<result property="outofdate" column="outofdate"/>
+		<result property="created" column="created"/>
+		<result property="createby" column="createby"/>
+		<result property="updated" column="updated"/>
+		<result property="updateby" column="updateby"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <!-- 查询证件过期提醒设置(可分页)-->
+    <select id="searchCertificateOutofdateConfig" resultMap="certificateOutofdateConfigMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.config_code configCode,t.outofdate outofdate
+       		,t.created,	t.updated 
+			,(select u.login_name from pub_user u where u.user_id=t.createby) as createUserName,
+           	(select u.login_name from pub_user u where u.user_id=t.updateby) as updateUserName
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM certificate_outofdate_config t
+      		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+	    		ORDER BY t.outofdate ASC
+    		</if>
+    </select>
+    <!-- 根据提醒天数查询   -->
+    <select id="searchCertificateOutofdateConfigByOutofdate" resultMap="certificateOutofdateConfigMap">
+    	SELECT  
+       		t.config_code configCode,t.outofdate outofdate
+       		,t.created,	t.updated 
+			,(select u.login_name from pub_user u where u.user_id=t.createby) as createUserName,
+           	(select u.login_name from pub_user u where u.user_id=t.updateby) as updateUserName
+      		FROM certificate_outofdate_config t where t.outofdate=#{outofdate}
+    </select>
+    <!-- 根据主键查询某个证件过期提醒设置(可分页)-->
+    <select id="loadCertificateOutofdateConfig" resultMap="certificateOutofdateConfigMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.config_code configCode,t.outofdate outofdate
+       		,t.created,	t.updated 
+		   ,(select u.login_name from pub_user u where u.user_id=t.createby) as createUserName,
+           	(select u.login_name from pub_user u where u.user_id=t.updateby) as updateUserName
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM certificate_outofdate_config t
+    	<where>
+    		1=1
+	    	<if test= "configCode != null and configCode!=''">
+			AND  t.CONFIG_CODE = #{configCode}
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.created DESC
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 增加证件过期提醒设置 --> 
+	<insert id="saveCertificateOutofdateConfig" parameterType="hashmap">
+		INSERT INTO certificate_outofdate_config(config_code,outofdate,created,createby,updated,updateby) 
+			 VALUES(S_CERTIFICATE_OUTOFDATE_CONFIG.NEXTVAL,#{outofdate},#{app_created},#{app_create_by},#{app_updated},#{app_update_by})
+    </insert>
+    <!-- 修改证件过期提醒设置  -->
+    <update id="updateCertificateOutofdateConfig" parameterType="hashmap">
+		UPDATE	
+				certificate_outofdate_config
+		   SET	
+		   		outofdate=#{outofdate},updated=#{app_updated},updateby=#{app_update_by}  		
+		 WHERE	
+		 		CONFIG_CODE=#{configCode}
+    </update>
+    <!-- 删除证件过期提醒设置 -->
+    <delete id="deleteCertificateOutofdateConfig" parameterType="hashmap" >
+        DELETE FROM 
+        			certificate_outofdate_config 
+        WHERE 
+        			
+        			CONFIG_CODE in 
+        			<foreach collection="configCode"  item="a" separator="," open="(" close=")">
+        			    #{a}
+        			</foreach>
+        			
+        			 <!--AND client_id=#{app_user_clientID}-->
+    </delete>
+</mapper>

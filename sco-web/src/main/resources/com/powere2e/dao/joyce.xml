@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+  
+  <!--意向品管理模块 --> 
+  <bean id="merchandiseIntentionDao" class="com.powere2e.sco.dao.impl.merchandiseintention.MerchandiseIntentionDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  
+  <bean id="merchandiseQuotedDao" class="com.powere2e.sco.dao.impl.merchandiseintention.MerchandiseQuotedDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  
+  <bean id="quotedCompareDao" class="com.powere2e.sco.dao.impl.merchandiseintention.QuotedCompareDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  
+  <bean id="foretasteFeedbackDao" class="com.powere2e.sco.dao.impl.merchandiseintention.ForetasteFeedbackDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  
+  <!-- 供应商列表数据 -->
+   <bean id="supplierDataDao" class="com.powere2e.sco.dao.impl.SupplierDataDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  
+  <!-- 新品引进OA申请 -->
+   <bean id="reportNewDao" class="com.powere2e.sco.dao.impl.merchandiseoaapplication.reportnewoaapplication.ApplicationReportNewDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  
+  <!-- 老品新上OA申请 -->
+   <bean id="reportOldupDao" class="com.powere2e.sco.dao.impl.merchandiseoaapplication.reportoldupoaapplication.ApplicationReportOldupDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  
+  <!-- 正常调价OA申请 -->
+   <bean id="reportAdjustpriceDao" class="com.powere2e.sco.dao.impl.merchandiseoaapplication.reportadjustpriceoaapplication.ApplicationReportAdjustpriceDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  
+  <!-- 快速调价OA申请 -->
+   <bean id="fastAdjustpriceDao" class="com.powere2e.sco.dao.impl.merchandiseoaapplication.fastadjustpriceoaapplication.ApplicationFastadjustpriceDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  
+  <!-- 商品OA申请 -->
+   <bean id="merchandiseOaApplicationDao" class="com.powere2e.sco.dao.impl.merchandiseoaapplication.MerchandiseOaApplicationDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  
+   <!-- 商品价格(新品引进) -->
+   <bean id="priceNewDao" class="com.powere2e.sco.dao.impl.merchandiseoaapplication.reportnewoaapplication.reportnew.MerchandisePriceNewDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  
+   <!-- 历史与本次价格(老品新上) -->
+   <bean id="priceOldupDao" class="com.powere2e.sco.dao.impl.merchandiseoaapplication.reportoldupoaapplication.reportoldup.HistoryPriceOldupDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  
+   <!-- 历史与本次价格(正常调价) -->
+   <bean id="priceAdjustpriceDao" class="com.powere2e.sco.dao.impl.merchandiseoaapplication.reportadjustpriceoaapplication.reportadjustprice.HistoryPriceAdjustpriceDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  
+  
+   <!-- 销售同比分析 -->
+   <bean id="sellYearOnYearDao" class="com.powere2e.sco.dao.impl.sharefunctionanalysis.sellanalysis.sellyearonyearanalysis.SellYearOnYearDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  
+   <!-- 明细类销售同比分析 -->
+   <bean id="detailSellYearOnYearDao" class="com.powere2e.sco.dao.impl.sharefunctionanalysis.sellanalysis.sellyearonyearanalysis.DetailSellYearOnYearDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  
+   <!-- 小分类销售同比分析 -->
+   <bean id="smallSellYearOnYearDao" class="com.powere2e.sco.dao.impl.sharefunctionanalysis.sellanalysis.sellyearonyearanalysis.SmallSellYearOnYearDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  
+   <!-- 整体销售同比分析 -->
+   <bean id="marketSellYearOnYearDao" class="com.powere2e.sco.dao.impl.sharefunctionanalysis.sellanalysis.sellyearonyearanalysis.MarketSellYearOnYearDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  
+  <!-- 单品销售环比分析 -->
+   <bean id="merchandiseLinkRelativeDao" class="com.powere2e.sco.dao.impl.sharefunctionanalysis.sellanalysis.selllinkrelative.MerchandiseLinkRelativeDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  
+  <!-- 明细类销售环比分析 -->
+   <bean id="detailLinkRelativeDao" class="com.powere2e.sco.dao.impl.sharefunctionanalysis.sellanalysis.selllinkrelative.DetailLinkRelativeDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  
+   <!-- 小分类销售环比分析 -->
+   <bean id="smallLinkRelativeDao" class="com.powere2e.sco.dao.impl.sharefunctionanalysis.sellanalysis.selllinkrelative.SmallLinkRelativeDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  
+  
+  <!-- 整体销售环比分析 -->
+   <bean id="marketLinkRelativeDao" class="com.powere2e.sco.dao.impl.sharefunctionanalysis.sellanalysis.selllinkrelative.MarketLinkRelativeDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  
+   <!-- 供应商销售贡献度排行 -->
+   <bean id="supplierSalesContributionDao" class="com.powere2e.sco.dao.impl.sharefunctionanalysis.supplieranalysis.suppliersalescontribution.SupplierSalesContributionDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  
+</beans>

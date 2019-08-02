@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN" "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="common" extends="pubstruts" namespace="/">
+		<!-- 主数据类型下拉框 -->
+		<action name="masterDataType" method="{1}" class="com.powere2e.sco.action.common.MasterDataTypeAction">
+			<interceptor-ref name="mydefault" />
+		</action>
+
+	    <!-- 商品角色类型下拉框 -->
+	    <action name="merchandiseRole" method="{1}" class="com.powere2e.sco.action.masterdata.MerchandiseRoleAction">
+	      <interceptor-ref name="mydefault"/>
+	    </action>
+    
+		<!-- 公共业务下拉框 -->
+		<action name="businessComBox" method="{1}" class="com.powere2e.sco.action.common.combox.BusinessComBoxAction">
+			<interceptor-ref name="mydefault" />
+		</action>
+	</package>
+</struts>

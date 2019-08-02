@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.powere2e.sco.interfaces.dao.masterdata.MerchandiseRoleDao">
+<!-- 修改商品定性角色  -->
+    <update id="updateMerchandiseRole" parameterType="hashmap">
+		UPDATE	
+				MERCHANDISE_ROLE	
+		   SET	
+		   <if test="dlRoleCode != null and dlRoleCode != ''">
+		   		dl_role_code=#{dlRoleCode}
+		   </if>
+		   <if test="dlRoleCode != null and dlRoleCode != '' and dxRoleCode != null and dxRoleCode != ''">
+		   		,
+		   </if>
+		   <if test="dxRoleCode != null and dxRoleCode != ''">
+		   		dx_role_code=#{dxRoleCode}	   		
+		   </if>
+		   ,updated=#{app_created},updateby=#{app_create_by}
+		 WHERE	
+		 	merchandise_code in 
+		 			<if test="merchandiseCodes != null and merchandiseCodes != ''">
+		   				<foreach collection="merchandiseCodes"  item="a" separator="," open="(" close=")">
+        			    	#{a}
+        				</foreach>
+		  			</if>
+		  			<if test="merchandiseCode != '' and merchandiseCode != null ">
+						#{merchandiseCode}
+					</if>
+        			
+    </update>
+    <!-- 查询 -->
+    	<select id="searchMerchandiseRole" resultType="Integer">
+    	    select count(*) from MERCHANDISE_ROLE 
+    	    <where>
+    	        merchandise_code=#{merchandiseCode}
+    	    </where>
+    	</select>
+    <!-- 新增商品角色 -->
+    <insert id="insertMerchandiseRole" parameterType="hashmap">
+    	insert into merchandise_role(merchandise_code,dl_role_code,dx_role_code,createby,created) 
+    	<foreach collection="list" item="item" separator="union all" >  
+			(
+			  SELECT 
+				#{item.merchandiseCode}, #{item.dlRoleCode}, #{item.dxRoleCode},#{app_create_by},#{app_created}
+			  FROM 
+			  	dual 
+		 	)
+	    </foreach>   
+    </insert>
+	<!-- 定性角色数据查询 -->
+	<select id="listQualitative" resultType="com.powere2e.security.model.Option">
+		SELECT
+		role_code id, role_name text
+		FROM
+		merchandise_dx_role
+		<where>
+			<if test="roleCode != '' and roleCode != null ">
+				role_code = #{roleCode}
+			</if>
+		</where>
+		ORDER BY role_name 
+	</select>
+	<!-- 定性角色数据查询 -->
+	<select id="listMerchandiseDxRoleStorageForm" resultType="String">
+		SELECT
+		distinct role_code roleCode
+		FROM
+		merchandise_dx_role
+	</select>
+	<!-- 定性角色数据查询(按名字查询) -->
+	<select id="searchMerchandiseDxRoleName" resultType="String">
+		SELECT
+		distinct role_code roleCode
+		FROM
+		merchandise_dx_role
+		where role_name=#{roleName}
+	</select>
+	<!-- 新增定性角色 -->
+	<insert id="saveQualitative" parameterType="hashmap">
+		INSERT INTO
+		merchandise_dx_role(role_code,role_name)
+		VALUES(#{roleCode},#{roleName})
+	</insert>
+	<!-- 刪除定性角色 -->
+	<delete id="deleteQualitative" parameterType="hashmap">
+		DELETE FROM
+		merchandise_dx_role
+		WHERE
+		role_code in
+		<foreach collection="roleCode" item="a" separator="," open="("
+			close=")">
+			#{a}
+		</foreach>
+	</delete>
+	<!-- 定量角色数据查询 -->
+	<select id="listQuantify" resultType="com.powere2e.security.model.Option">
+		SELECT
+		role_code id, role_name text
+		FROM
+		merchandise_dl_role
+		<where>
+			<if test="roleCode != '' and roleCode != null ">
+				role_code = #{roleCode}
+			</if>
+		</where>
+		ORDER BY role_name 
+	</select>
+	<!-- 定量角色数据查询(按名字查询) -->
+	<select id="searchMerchandiseDlRoleName" resultType="String">
+		SELECT
+		distinct role_code roleCode
+		FROM
+		merchandise_dl_role
+		where role_name=#{roleName}
+	</select>
+	<!-- 新增定量角色 -->
+	<insert id="saveQuantify" parameterType="hashmap">
+		INSERT INTO
+		merchandise_dl_role(role_code,role_name)
+		VALUES(#{roleCode},#{roleName})
+	</insert>
+	<!-- 刪除定量角色 -->
+	<delete id="deleteQuantify" parameterType="hashmap">
+		DELETE FROM
+		merchandise_dl_role
+		WHERE
+		role_code in
+		<foreach collection="roleCode" item="a" separator="," open="("
+			close=")">
+			#{a}
+		</foreach>
+	</delete>
+</mapper>

@@ -1,0 +1,85 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:context="http://www.springframework.org/schema/context"
+        xsi:schemaLocation="
+        http://www.springframework.org/schema/beans 
+        http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+        
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-3.1.xsd
+        ">
+		<!-- 具体数据库连接信息见jdbc.properties -->
+	    <bean id="dataSource" class="com.powere2e.frame.commons.datasource.DataSourceImpl" lazy-init="true">
+	        <property name="driverClassName" value="${jdbc.driverClassName}"></property>
+			<property name="url" value="${jdbc.url}"></property>
+			<property name="username" value="${jdbc.username}"></property>
+			<property name="password" value="${jdbc.password}"></property>
+	        <property name="maxActive" value="100"></property>
+	        <property name="maxIdle" value="30"></property>
+	        <property name="maxWait" value="10"></property>
+	        <property name="defaultAutoCommit" value="false"></property>
+	    </bean>
+	    
+	    <bean class="com.google.code.morphia.Morphia" id="morphia" lazy-init="true"/>
+	    <bean class="com.mongodb.Mongo" id="mongo" lazy-init="true">
+	       <constructor-arg index="0" value="127.0.0.1"></constructor-arg>
+	       <constructor-arg index="1" value="27017"></constructor-arg>
+	    </bean>
+	    
+	    <!--  -->
+	    <bean class="com.google.code.morphia.DatastoreImpl" id="loggerDataStore" lazy-init="true">
+	       <constructor-arg index="0" ref="morphia" />
+	       <constructor-arg index="1" ref="mongo" />
+	       <constructor-arg index="2" value="logger"></constructor-arg>
+	    </bean>
+	    
+	    <bean id="dataSourceFactory" class="com.powere2e.frame.commons.datasource.DataSourceManager" lazy-init="true">
+	    	<property name="dataSourceList">
+	    		<list>
+	    			<!-- <ref bean="oracleSource" /> -->
+	    			<ref bean="dataSource" />
+	    			<!-- <ref bean="sqlServerSource" /> -->
+	    		</list>
+	    	</property>
+	    	<property name="mongodb" ref="mongo" />
+	    </bean>
+	    
+	    <context:property-placeholder location="classpath:jdbc.properties"/>
+	    <bean id="paginationInterceptor" class="com.powere2e.frame.commons.mybatis.interceptor.PaginationInterceptor"></bean> 
+	    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        	<property name="plugins">
+				<array>
+					<ref bean="paginationInterceptor"/>
+					<!-- 解析权限函数的拦截器 -->
+					<bean class="com.powere2e.security.interceptor.DataPowereInterceptor"></bean>
+				</array>
+			</property>
+			<!-- 自动扫描Mapper（特别提醒：当sqlMapper映射文件在jar中的时候，该配置无效） -->
+         	<property name="mapperLocations" value="classpath*:com/powere2e/dao/sql/frame/${jdbc.dialect}/*Mapper.xml" />
+        	
+        	<property name="configLocation" value="classpath:com/powere2e/dao/sqlMapper.xml"></property>
+        	<property name="dataSource" ref="dataSource" />
+    	</bean>
+
+		<!-- 配置事务管理 -->
+    	<bean id="dataSourceTransaction"
+        			class="org.springframework.jdbc.datasource.DataSourceTransactionManager">  
+        	<property name="dataSource" ref="dataSource"/>
+    	</bean>
+    	
+    	<!-- 定义了所有事务处理方面的公共属性 -->
+    	<bean id="baseTxProxy" abstract="true"  
+        			class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">  
+        	<property name="transactionManager" ref="dataSourceTransaction"/>  
+        	<property name="transactionAttributes">
+            	<props>
+                	<prop key="insert*">PROPAGATION_REQUIRED</prop>
+                	<prop key="delete*">PROPAGATION_REQUIRED</prop>
+                	<prop key="update*">PROPAGATION_NESTED</prop>
+                	<prop key="complete*">PROPAGATION_REQUIRED</prop>
+                	<prop key="create*">PROPAGATION_REQUIRED</prop>
+            	</props>
+        	</property>
+    	</bean>
+</beans>

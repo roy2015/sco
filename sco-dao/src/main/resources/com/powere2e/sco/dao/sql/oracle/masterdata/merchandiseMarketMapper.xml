@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.powere2e.sco.interfaces.dao.masterdata.MerchandiseMarketDao">
+    <!-- 插入来自商品上下市信息 -->
+    <insert id="insertMerchandiseMarket" parameterType="hashmap">
+    	INSERT INTO merchandise_market (merchandise_code,supplier_code,market_type,market_date,sync_date,isupdown)
+    	<foreach collection="list" item="item" separator="union all">
+			(
+			SELECT
+				#{item.merchandiseCode}, #{item.supplierCode}, #{item.marketype}, #{item.marketate},#{item.syncate},#{item.isUpDown}
+			FROM 
+			dual
+			)
+		</foreach>
+    </insert>
+	 
+</mapper>

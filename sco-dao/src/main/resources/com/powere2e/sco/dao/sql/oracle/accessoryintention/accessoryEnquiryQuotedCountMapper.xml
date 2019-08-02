@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.accessoryintention.AccessoryEnquiryQuotedCountDao">
+	<resultMap type="com.powere2e.sco.model.accessoryintention.AccessoryEnquiryQuotedCount" id="accessoryEnquiryQuotedCountMap">
+		<result property="enquiryCode" column="enquiryCode"/>
+		<result property="quotedCount" column="quotedCount"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <!-- 查询询价单原材料(可分页)-->
+    <select id="searchAccessoryEnquiryQuotedCount" resultMap="accessoryEnquiryQuotedCountMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.enquiry_code enquiryCode,t.quoted_count quotedCount
+       		
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM accessory_enquiry_quoted_count t
+    	<where>
+    		1=1
+	    	<if test= "enquiryCode != null and enquiryCode!=''">
+			AND t.enquiry_code = #{enquiryCode}
+			</if>
+	    	<if test= "quotedCount != null and quotedCount!=''">
+			AND t.quoted_count=#{quotedCount}
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		
+    	</if>
+    </select>
+    
+    <!-- 根据主键查询某个询价单原材料(可分页)-->
+    <select id="loadAccessoryEnquiryQuotedCount" resultMap="accessoryEnquiryQuotedCountMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.enquiry_code enquiryCode,t.quoted_count quotedCount
+       		
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM accessory_enquiry_quoted_count t
+    	<where>
+    		1=1
+	    	<if test= "enquiryCode != null and enquiryCode!=''">
+			AND  t.ENQUIRY_CODE = #{enquiryCode}
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 增加询价单原材料 --> 
+	<insert id="saveAccessoryEnquiryQuotedCount" parameterType="hashmap">
+		INSERT INTO accessory_enquiry_quoted_count(enquiry_code,quoted_count) 
+			 VALUES(#{enquiryCode},#{quotedCount})
+    </insert>
+    <!-- 修改询价单原材料  -->
+    <update id="updateAccessoryEnquiryQuotedCount" parameterType="hashmap">
+		UPDATE	
+				accessory_enquiry_quoted_count	
+		   SET	
+		   		quoted_count=#{quotedCount}		   		
+		 WHERE	
+		 		ENQUIRY_CODE=#{enquiryCode}
+    </update>
+    <!-- 删除询价单原材料 -->
+    <delete id="deleteAccessoryEnquiryQuotedCount" parameterType="hashmap">
+        DELETE FROM 
+        			accessory_enquiry_quoted_count 
+        WHERE 
+        			ENQUIRY_CODE=#{enquiryCode} <!--AND client_id=#{app_user_clientID}-->
+    </delete>
+</mapper>

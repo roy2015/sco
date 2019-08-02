@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.accessoryintention.AccessoryEnquiryDao">
+	<resultMap type="com.powere2e.sco.model.accessoryintention.AccessoryEnquiry" id="accessoryEnquiryMap">
+		<result property="enquiryCode" column="enquiryCode"/>
+		<result property="enquiryName" column="enquiryName"/>
+		<result property="intentionCode" column="intentionCode"/>
+		<result property="quotedCurrency" column="quotedCurrency"/>
+		<result property="quotedUnits" column="quotedUnits"/>
+		<result property="paymentType" column="paymentType"/>
+		<result property="deliveryType" column="deliveryType"/>
+		<result property="remarks" column="remarks"/>
+		<result property="supplierCount" column="supplierCount"/>
+		<result property="attachment" column="attachment"/>
+		<result property="lastQuotedDate" column="lastQuotedDate"/>
+		<result property="created" column="created"/>
+		<result property="createby" column="createby"/>
+		<result property="updated" column="updated"/>
+		<result property="updateby" column="updateby"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <!-- 查询询价单(可分页)-->
+    <select id="searchAccessoryEnquiry" resultMap="accessoryEnquiryMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.enquiry_code enquiryCode,t.enquiry_name enquiryName,t.intention_code intentionCode,t.quoted_currency quotedCurrency,t.quoted_units quotedUnits,t.payment_type paymentType,t.delivery_type deliveryType,t.remarks remarks,t.attachment attachment,t.last_quoted_date lastQuotedDate
+       		,t.created,	t.updated ,(select count(1) from (select aqe.INTENTION_SUPPLIER_CODE, aqe.INTENTION_CODE,aqe.enquiry_code from ACCESSORY_QUOTED_ELECTRONIC aqe
+ inner join INTENTION_SUPPLIER_ACCESSORY isa on aqe.intention_code=isa.intention_code and (aqe.intention_supplier_code=isa.intention_supplier_code )
+  group by aqe.INTENTION_SUPPLIER_CODE,aqe.INTENTION_CODE,aqe.enquiry_code) s where s.enquiry_code=t.enquiry_code) supplierCount
+			,(select u.real_name from pub_user u where u.user_id=t.createby) as createUserName,
+           	(select u.real_name from pub_user u where u.user_id=t.updateby) as updateUserName
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM accessory_enquiry t
+    	<where>
+    		1=1
+	    	<if test= "enquiryCode != null and enquiryCode!=''">
+			AND t.enquiry_code = #{enquiryCode}
+			</if>
+			<if test= "enquiryName != null and enquiryName!=''">
+			AND t.enquiry_name = #{enquiryName}
+			</if>
+	    	<if test= "intentionCode != null and intentionCode!=''">
+			AND t.intention_code =#{intentionCode}
+			</if>
+	    	<if test= "quotedCurrency != null and quotedCurrency!=''">
+			AND UPPER(t.quoted_currency) LIKE UPPER('%'||#{quotedCurrency}||'%')
+			</if>
+	    	<if test= "quotedUnits != null and quotedUnits!=''">
+			AND UPPER(t.quoted_units) LIKE UPPER('%'||#{quotedUnits}||'%')
+			</if>
+	    	<if test= "paymentType != null and paymentType!=''">
+			AND UPPER(t.payment_type) LIKE UPPER('%'||#{paymentType}||'%')
+			</if>
+	    	<if test= "deliveryType != null and deliveryType!=''">
+			AND UPPER(t.delivery_type) LIKE UPPER('%'||#{deliveryType}||'%')
+			</if>
+	    	<if test= "remarks != null and remarks!=''">
+			AND UPPER(t.remarks) LIKE UPPER('%'||#{remarks}||'%')
+			</if>
+	    	<if test= "attachment != null and attachment!=''">
+			AND UPPER(t.attachment) LIKE UPPER('%'||#{attachment}||'%')
+			</if>
+	    	<if test= "lastQuotedDate != null and lastQuotedDate!=''">
+			AND	convert(varchar,t.last_quoted_date,120) LIKE (#{lastQuotedDate})
+			</if>
+	    	<if test= "created != null and created!=''">
+			AND	convert(varchar,t.created,120) LIKE (#{created})
+			</if>
+	    	<if test= "createby != null and createby!=''">
+			AND UPPER(t.createby) LIKE UPPER('%'||#{createby}||'%')
+			</if>
+	    	<if test= "updated != null and updated!=''">
+			AND	convert(varchar,t.updated,120) LIKE (#{updated})
+			</if>
+	    	<if test= "updateby != null and updateby!=''">
+			AND UPPER(t.updateby) LIKE UPPER('%'||#{updateby}||'%')
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.created DESC
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 根据主键查询某个询价单(可分页)-->
+    <select id="loadAccessoryEnquiry" resultMap="accessoryEnquiryMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.enquiry_code enquiryCode,t.enquiry_name enquiryName,t.intention_code intentionCode,t.quoted_currency quotedCurrency,t.quoted_units quotedUnits,t.payment_type paymentType,t.delivery_type deliveryType,t.remarks remarks,t.attachment attachment,t.last_quoted_date lastQuotedDate
+       		,t.created,	t.updated 
+		   ,(select u.real_name from pub_user u where u.user_id=t.createby) as createUserName,
+           	(select u.real_name from pub_user u where u.user_id=t.updateby) as updateUserName
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM accessory_enquiry t
+    	<where>
+    		1=1
+	    	<if test= "enquiryCode != null and enquiryCode!=''">
+			AND  t.ENQUIRY_CODE = #{enquiryCode}
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.created DESC
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 增加询价单 --> 
+	<insert id="saveAccessoryEnquiry" parameterType="hashmap">
+		INSERT INTO accessory_enquiry(enquiry_code,enquiry_name,intention_code,quoted_currency,quoted_units,payment_type,delivery_type,remarks,attachment,last_quoted_date,created,createby) 
+			 VALUES(#{enquiryCode},#{enquiryName},#{intentionCode},#{quotedCurrency},#{quotedUnits},#{paymentType},#{deliveryType},#{remarks},#{attachment},#{lastQuotedDate},#{app_created},#{app_create_by})
+    </insert>
+    <!-- 修改询价单  -->
+    <update id="updateAccessoryEnquiry" parameterType="hashmap">
+		UPDATE	
+				accessory_enquiry	
+		   SET	
+		        enquiry_name=#{enquiryName},
+		   		quoted_currency=#{quotedCurrency},
+		   		quoted_units=#{quotedUnits},
+		   		payment_type=#{paymentType},
+		   		delivery_type=#{deliveryType},
+		   		remarks=#{remarks},
+		   		<if test= "attachment != null and attachment!=''">
+			attachment=#{attachment},
+			</if>
+		   		
+		   		last_quoted_date=#{lastQuotedDate}		   		
+		 WHERE	
+		 		ENQUIRY_CODE=#{enquiryCode}
+    </update>
+    <!-- 删除询价单 -->
+    <delete id="deleteAccessoryEnquiry" parameterType="hashmap">
+        DELETE FROM 
+        			accessory_enquiry 
+        WHERE 
+        			ENQUIRY_CODE=#{enquiryCode} <!--AND client_id=#{app_user_clientID}-->
+    </delete>
+</mapper>

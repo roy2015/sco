@@ -1,0 +1,1738 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.powere2e.sco.interfaces.dao.merchandisecostanalysis.accountingingredient.accounting.AccountingDao">
+	<resultMap type="com.powere2e.sco.model.merchandisecostanalysis.accountingingredient.accounting.Accounting" id="accountingMap">
+		<result property="accountingCode" column="accountingCode" />
+		<result property="inlandImport" column="inlandImport" />
+		<result property="intentionCode" column="intentionCode" />
+		<result property="intentionSupplierCode" column="intentionSupplierCode" />
+		<result property="merchandiseCode" column="merchandiseCode" />
+		<result property="supplierCode" column="supplierCode" />
+		<result property="quotedCurrency" column="quotedCurrency" />
+		<result property="quotedDate" column="quotedDate" />
+		<result property="factoryPriceType" column="factoryPriceType" />
+		<result property="factoryPriceTypeElse" column="factoryPriceTypeElse" />
+		<result property="units" column="units" />
+		<result property="quantity" column="quantity" />
+		<result property="importCountry" column="importCountry" />
+		<result property="packRegion" column="packRegion" />
+		<result property="isoem" column="isoem" />
+		<result property="created" column="created" />
+		<result property="createby" column="createby" />
+		<result property="updated" column="updated" />
+		<result property="updateby" column="updateby" />
+		<result property="createUserName" column="createUserName" />
+		<result property="updateUserName" column="updateUserName" />
+		<result property="recordCount" column="record_count" />
+	</resultMap>
+	<resultMap type="com.powere2e.sco.model.merchandisecostanalysis.accountingingredient.accounting.AccountingBo" id="accountingBoMap">
+		<result property="accountingCode" column="accountingCode" />
+		<result property="intentionCode" column="intentionCode" />
+		<result property="intentionName" column="intentionName" />
+		<result property="intentionSupplierCode" column="intentionSupplierCode" />
+		<result property="intentionSupplierName" column="intentionSupplierName" />
+		<result property="intentionSmallTypeCode" column="intentionSmallTypeCode" />
+		<result property="elseTypeName" column="elseTypeName" />
+		<result property="merchandiseCode" column="merchandiseCode" />
+		<result property="merchandiseName" column="merchandiseName" />
+		<result property="supplierCode" column="supplierCode" />
+		<result property="supplierName" column="supplierName" />
+		<result property="merchandiseDxRoleCode" column="merchandiseDxRoleCode" />
+		<result property="merchandiseDxRoleName" column="merchandiseDxRoleName" />
+		<result property="merchandiseDlRoleCode" column="merchandiseDlRoleCode" />
+		<result property="merchandiseDlRoleName" column="merchandiseDlRoleName" />
+		<result property="purchaseDepartments" column="purchaseDepartments" />
+		<result property="rationed" column="rationed" />
+		<result property="netWeight" column="netWeight" />
+		<result property="purchaseType" column="purchaseType" />
+		<result property="saleType" column="saleType" />
+		<result property="storageForm" column="storageForm" />
+		<result property="centreTypeCode" column="centreTypeCode" />
+		<result property="centreTypeName" column="centreTypeName" />
+		<result property="smallTypeCode" column="smallTypeCode" />
+		<result property="smallTypeName" column="smallTypeName" />
+		<result property="detailTypeCode" column="detailTypeCode" />
+		<result property="detailTypeName" column="detailTypeName" />
+		<result property="fineTypeCode" column="fineTypeCode" />
+		<result property="fineTypeName" column="fineTypeName" />
+		<result property="accountingScanPath" column="accountingScanPath" />
+		<result property="ingredientScanPath" column="ingredientScanPath" />
+		<result property="applicationCode" column="applicationCode" />
+		<result property="applicationStatus" column="applicationStatus" />
+		<result property="applicationStatusValue" column="applicationStatusValue" />
+		<result property="oaApproveDate" column="oaApproveDate" />
+		<result property="region" column="region" />
+		<result property="quotedDate" column="quotedDate" />
+		<result property="created" column="created" />
+		<result property="createby" column="createby" />
+		<result property="updated" column="updated" />
+		<result property="updateby" column="updateby" />
+		<result property="createUserName" column="createUserName" />
+		<result property="updateUserName" column="updateUserName" />
+		<result property="recordCount" column="record_count" />
+	</resultMap>
+	<resultMap type="com.powere2e.sco.model.merchandisecostanalysis.accountingingredient.accounting.AccountingRegion" id="accountingRegionMap">
+		<result property="accountingCode" column="accountingCode" />
+		<result property="region" column="region" />
+	</resultMap>
+
+	<!-- 查询商品核算表(可分页) -->
+	<select id="searchAccountingList" resultMap="accountingBoMap">
+		SELECT
+		<if test="page_count == null">
+			a.intentionCode,
+			a.intentionName,
+			a.intentionSupplierCode,
+			a.intentionSupplierName,
+			(SELECT value_string from common_mapping_config WHERE key_type = 'PURCHASE_DEPARTMENTS_TYPE' AND code_string = a.intentionPurchaseDepartments) intentionPurchaseDepartments,
+			a.smallTypeCode intentionSmallTypeCode,
+			a.elseTypeName,
+			b.merchandiseCode,
+			b.merchandiseName,
+			b.supplierCode,
+			b.supplierName,
+			b.purchaseDepartments,
+			b.storageForm,
+			b.netWeight,
+			c.role_code merchandiseDxRoleCode,
+			c.role_name merchandiseDxRoleName,
+			d.role_code merchandiseDlRoleCode,
+			d.role_name merchandiseDlRoleName,
+			(SELECT value_string from common_mapping_config WHERE key_type = 'RATIONED_TYPE' AND code_string = a.rationed) rationed,
+			(SELECT value_string from common_mapping_config WHERE key_type = 'PURCHASE_TYPE' AND code_string = a.purchaseType) purchaseType,
+			a.saleType,
+			e1.centre_type_code centreTypeCode,
+			e1.centre_type_name centreTypeName,
+			e2.small_type_code smallTypeCode,
+			e2.small_type_name smallTypeName,
+			e3.detail_type_code detailTypeCode,
+			e3.detail_type_name detailTypeName,
+			e4.fine_type_code fineTypeCode,
+			e4.fine_type_name fineTypeName,
+			f.accountingCode,
+			f.inlandImport,
+			f.accountingScanPath,
+			f.ingredientScanPath,
+			g.applicationCode,
+			g.applicationStatus,
+			(SELECT value_string from common_mapping_config WHERE key_type = 'APPLICATION_STATUS' AND code_string = DECODE(g.applicationStatus,null,'W',g.applicationStatus)) applicationStatusValue,
+			g.oaApproveDate,
+			f.quotedDate,
+			f.updated,
+			(SELECT u.real_name from pub_user u WHERE u.user_id=f.updateby) as updateby
+		</if>
+		<if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		FROM
+			(
+			SELECT 
+				a1.merchandise_code merchandiseCode,
+				a1.supplier_code supplierCode,
+				a2.intention_code intentionCode,
+				a2.intention_name intentionName,
+				a2.centre_type_code centreTypeCode,
+				a2.small_type_code smallTypeCode,
+				a2.detail_type_code detailTypeCode,
+				a2.fine_type_code fineTypeCode,
+				a2.else_type_name elseTypeName,
+				a2.purchase_departments intentionPurchaseDepartments,
+				a2.rationed rationed,
+				a2.purchase_type purchaseType,
+				a2.sale_type saleType,
+				a1.intention_supplier_code intentionSupplierCode,
+				NVL(a3.intention_supplier_name,a4.supplier_name) intentionSupplierName
+			FROM
+				intention_supplier_merchandise a1
+				left join merchandise_intention a2 on a2.intention_code = a1.intention_code
+				left join merchandise_intention_supplier a3 on a3.intention_supplier_code = a1.intention_supplier_code
+				left join supplier a4 on a4.supplier_code = a1.intention_supplier_code
+				left join merchandise a5 on a5.merchandise_code = a1.merchandise_code AND a5.supplier_code = a1.supplier_code
+			<where>
+				1=1
+				AND a1.intention_supplier_code is not null
+				<if test="merchandiseCode != null and merchandiseCode != ''">
+					AND (a1.intention_code LIKE UPPER('%'||#{merchandiseCode}||'%') or a1.merchandise_code LIKE UPPER('%'||#{merchandiseCode}||'%'))
+				</if>
+				<if test="merchandiseName != null and merchandiseName != ''">
+					AND (UPPER(a2.intention_name) LIKE UPPER('%'||#{merchandiseName}||'%') or UPPER(a5.merchandise_name) LIKE UPPER('%'||#{merchandiseName}||'%'))
+				</if>
+				<if test="centreTypeCode != null and centreTypeCode != ''">
+					AND a2.centre_type_code = #{centreTypeCode}
+				</if>
+				<if test="smallTypeCode != null and smallTypeCode != ''">
+					AND a2.small_type_code = #{smallTypeCode}
+				</if>
+				<if test="detailTypeCode != null and detailTypeCode != ''">
+					AND a2.detail_type_code = #{detailTypeCode}
+				</if>
+				<if test="fineTypeCode != null and fineTypeCode != ''">
+					AND a2.fine_type_code = #{fineTypeCode}
+				</if>
+				<if test="purchaseDepartments != null and purchaseDepartments != ''">
+					AND a2.purchase_departments = #{purchaseDepartments}
+				</if>
+				<if test="rationed != null and rationed != ''">
+					AND a2.rationed = #{rationed}
+				</if>
+				<if test="purchaseType != null and purchaseType != ''">
+					AND a2.purchase_type = #{purchaseType}
+				</if>
+				<if test="saleType != null and saleType != ''">
+					AND a2.sale_type = #{saleType}
+				</if>
+				<if test="supplierCode != null and supplierCode != ''">
+					AND (a1.intention_supplier_code LIKE UPPER('%'||#{supplierCode}||'%') or a1.supplier_code LIKE UPPER('%'||#{supplierCode}||'%'))
+				</if>
+				<if test="supplierName != null and supplierName != ''">
+					AND (UPPER(a3.intention_supplier_name) LIKE UPPER('%'||#{supplierName}||'%') or UPPER(a4.supplier_name) LIKE UPPER('%'||#{supplierName}||'%'))
+				</if>
+			</where>
+			) a
+			<choose>
+				<when test="purchaseType != null and purchaseType != ''">
+					left join
+				</when>
+				<otherwise>
+					<choose>
+						<when test="(merchandiseDxRoleCode != null and merchandiseDxRoleCode != '') or (merchandiseDlRoleCode != null and merchandiseDlRoleCode != '')">
+							right join
+						</when>
+						<otherwise>
+							full join
+						</otherwise>
+					</choose>
+				</otherwise>	
+					
+			</choose>
+			(
+			select
+				b1.merchandise_code merchandiseCode,
+				b1.merchandise_name merchandiseName,
+				b1.centre_type_code centreTypeCode,
+				b1.small_type_code smallTypeCode,
+				b1.detail_type_code detailTypeCode,
+				b1.purchase_departments purchaseDepartments,
+				b1.storage_form storageForm,
+				DECODE(b1.net_weight,1,'公斤装','定量装') netWeight,
+				b2.supplier_code supplierCode,
+				b2.supplier_name supplierName,
+				b3.dx_role_code merchandiseDxRoleCode,
+				b3.dl_role_code merchandiseDlRoleCode
+			FROM
+				merchandise b1
+				<choose>
+					<when test="supplierCode != null and supplierCode != ''">
+						inner join
+					</when>
+					<otherwise>
+						left join
+					</otherwise>
+				</choose>
+				supplier b2 on b2.supplier_code = b1.supplier_code
+				<choose>
+					<when test="(merchandiseDxRoleCode != null and merchandiseDxRoleCode != '') or (merchandiseDlRoleCode != null and merchandiseDlRoleCode != '')">
+						inner join
+					</when>
+					<otherwise>
+						left join
+					</otherwise>
+				</choose>
+				merchandise_role b3 on b3.merchandise_code = b1.merchandise_code
+				left join intention_supplier_merchandise b4 on b4.merchandise_code = b1.merchandise_code AND b4.supplier_code = b1.supplier_code
+				left join merchandise_intention b5 on b5.intention_code = b4.intention_code
+				left join merchandise_intention_supplier b6 on b6.intention_supplier_code = b4.intention_supplier_code
+			<where>
+				1=1
+				AND b1.supplier_code is not null
+				<if test="merchandiseCode != null and merchandiseCode != ''">
+					AND (b1.merchandise_code LIKE UPPER('%'||#{merchandiseCode}||'%') or b4.intention_code LIKE UPPER('%'||#{merchandiseCode}||'%'))
+				</if>
+				<if test="merchandiseName != null and merchandiseName != ''">
+					AND (UPPER(b1.merchandise_name) LIKE UPPER('%'||#{merchandiseName}||'%') or UPPER(b5.intention_name) LIKE UPPER('%'||#{merchandiseName}||'%'))
+				</if>
+				<if test="centreTypeCode != null and centreTypeCode != ''">
+					AND b1.centre_type_code = #{centreTypeCode}
+				</if>
+				<if test="smallTypeCode != null and smallTypeCode != ''">
+					AND b1.small_type_code = #{smallTypeCode}
+				</if>
+				<if test="detailTypeCode != null and detailTypeCode != ''">
+					AND b1.detail_type_code = #{detailTypeCode}
+				</if>
+				<if test="purchaseDepartments != null and purchaseDepartments != ''">
+					<if test="purchaseDepartments == 'INLAND'">
+						AND b1.purchase_departments = '国内'
+					</if>
+					<if test="purchaseDepartments == 'IMPORT'">
+						AND b1.purchase_departments = '国际'
+					</if>
+				</if>
+				<if test="saleType != null and saleType != ''">
+					AND b1.storage_form = #{saleType}
+				</if>
+				<if test="rationed != null and rationed != ''">
+					<if test="rationed == 'GJZ'">
+						AND b1.net_weight = 1
+					</if>
+					<if test="rationed == 'DLZ'">
+						AND b1.net_weight != 1
+					</if>
+				</if>
+				<if test="supplierCode != null and supplierCode != ''">
+					AND (b2.supplier_code LIKE UPPER('%'||#{supplierCode}||'%') or b4.intention_supplier_code LIKE UPPER('%'||#{supplierCode}||'%'))
+				</if>
+				<if test="supplierName != null and supplierName != ''">
+					AND (UPPER(b2.supplier_name) LIKE UPPER('%'||#{supplierName}||'%') or UPPER(b6.intention_supplier_name) LIKE UPPER('%'||#{supplierName}||'%'))
+				</if>
+				<if test="merchandiseDxRoleCode != null and merchandiseDxRoleCode != ''">
+					AND b3.dx_role_code = #{merchandiseDxRoleCode}
+				</if>
+				<if test="merchandiseDlRoleCode != null and merchandiseDlRoleCode != ''">
+					AND b3.dl_role_code = #{merchandiseDlRoleCode}
+				</if>
+			</where>
+			) b on a.merchandiseCode = b.merchandiseCode AND a.supplierCode = b.supplierCode
+			left join merchandise_dx_role c on b.merchandiseDxRoleCode = c.role_code
+			left join merchandise_dl_role d on b.merchandiseDlRoleCode = d.role_code
+			left join merchandise_centre_type e1 on DECODE(b.centreTypeCode,NULL,a.centreTypeCode,b.centreTypeCode) = e1.centre_type_code
+			left join merchandise_small_type e2 on DECODE(b.smallTypeCode,NULL,a.smallTypeCode,b.smallTypeCode) = e2.small_type_code
+			left join merchandise_detail_type e3 on DECODE(b.detailTypeCode,NULL,a.detailTypeCode,b.detailTypeCode) = e3.detail_type_code
+			left join merchandise_fine_type e4 on a.fineTypeCode = e4.fine_type_code
+			<choose>
+				<when test="(accountingCode != null and accountingCode != '') or (updateby != null and updateby != '') or (minUpdated != null and minUpdated != '') or (updatedEnd != null and updatedEnd != '') or (lastUpdated != null and lastUpdated == 'true') or costAnalysis == 'true'">
+					inner join
+				</when>
+				<otherwise>
+					left join
+				</otherwise>
+			</choose>
+			(
+			SELECT 
+				f1.intention_code intentionCode,
+				f1.intention_supplier_code intentionSupplierCode,
+				f1.merchandise_code merchandiseCode,
+				f1.supplier_code supplierCode,
+				f1.accounting_code accountingCode,
+				f1.quoted_date quotedDate,
+				f1.inland_import inlandImport,
+				f1.created,
+				f1.updated,
+				f1.updateby,
+				f2.accounting_scan_path accountingScanPath,
+				f2.ingredient_scan_path ingredientScanPath
+			FROM
+				(
+				<choose>
+					<when test="lastUpdated != null and lastUpdated == 'true'">
+						SELECT a.* from 
+						(SELECT merchandise_code, supplier_code, intention_code, intention_supplier_code, max(updated) updated from accounting 
+						<where>
+							1=1
+							<if test="accountingCode != null and accountingCode != ''">
+								AND accounting_code LIKE UPPER('%'||#{accountingCode}||'%')
+							</if>
+							<if test="updateby != null and updateby != ''">
+								AND updateby in (SELECT u.user_id from pub_user u WHERE UPPER(u.real_name) like UPPER('%'||#{updateby}||'%'))
+							</if>
+							<if test="minUpdated != null and minUpdated != ''">
+								AND updated &gt;= to_date(#{minUpdated} || '00:00:00','yyyy-mm-dd HH24:mi:ss')
+							</if>
+							<if test="maxUpdated != null and maxUpdated != ''">
+								AND updated &lt;= to_date(#{maxUpdated} || '23:59:59','yyyy-mm-dd HH24:mi:ss')
+							</if>
+						</where>
+						group by merchandise_code, supplier_code, intention_code, intention_supplier_code
+						) ag
+						inner join accounting a 
+							on nvl(ag.merchandise_code,'null') = nvl(a.merchandise_code,'null')
+							AND nvl(ag.supplier_code,'null') = nvl(a.supplier_code,'null')
+							AND nvl(ag.intention_code,'null') = nvl(a.intention_code,'null')
+							AND nvl(ag.intention_supplier_code,'null') = nvl(a.intention_supplier_code,'null')
+							AND ag.updated = a.updated
+					</when>
+					<otherwise>
+						SELECT * from accounting
+						<where>
+							1=1
+							<if test="accountingCode != null and accountingCode != ''">
+								AND accounting_code LIKE UPPER('%'||#{accountingCode}||'%')
+							</if>
+							<if test="updateby != null and updateby != ''">
+								AND updateby in (SELECT u.user_id from pub_user u WHERE UPPER(u.real_name) like UPPER('%'||#{updateby}||'%'))
+							</if>
+							<if test="minUpdated != null and minUpdated != ''">
+								AND updated &gt;= to_date(#{minUpdated} || '00:00:00','yyyy-mm-dd HH24:mi:ss')
+							</if>
+							<if test="maxUpdated != null and maxUpdated != ''">
+								AND updated &lt;= to_date(#{maxUpdated} || '23:59:59','yyyy-mm-dd HH24:mi:ss')
+							</if>
+						</where>
+					</otherwise>
+				</choose>
+				) f1
+				left join accounting_ingredient_scan f2 on f1.accounting_code = f2.accounting_code
+			) f on DECODE(f.merchandiseCode,null,a.intentionCode,b.merchandiseCode) = NVL(f.merchandiseCode,f.intentionCode)
+      		   AND DECODE(f.supplierCode,null,a.intentionSupplierCode,b.supplierCode) = NVL(f.supplierCode,f.intentionSupplierCode)
+			<choose>
+				<when test="(applicationCode != null and applicationCode != '') or (applicationStatus != null and applicationStatus != '' and applicationStatus != 'W'.toString()) or (minApproveDate != null and minApproveDate != '') or (maxApproveDate != null and maxApproveDate != '')">
+					inner join
+				</when>
+				<otherwise>
+					left join
+				</otherwise>
+			</choose>
+			(
+			SELECT 
+				g1.merchandise_code merchandiseCode,
+				g1.supplier_code supplierCode,
+				g2.application_code applicationCode,
+				g2.application_status applicationStatus,
+				g2.oa_approve_date oaApproveDate,
+				g4.accounting_code accountingCode
+			FROM
+				application_merchandise g1
+				left join oa_application g2 on g2.application_code = g1.application_code
+				left join analysis_reports_m g3 on g3.application_code = g2.application_code
+				left join cost_analysis_merchandise g4 on g4.reports_code = g3.reports_code AND g4.merchandise_code = g1.merchandise_code AND g4.supplier_code = g1.supplier_code
+			<where>
+				1=1
+				<if test="applicationCode != null and applicationCode != ''">
+					AND g2.application_code LIKE UPPER('%'||#{applicationCode}||'%')
+				</if>
+				<if test="applicationStatus != null and applicationStatus != '' and applicationStatus != 'W'.toString()">
+					AND g2.application_status = #{applicationStatus}
+				</if>
+				<if test="minApproveDate != null and minApproveDate != ''">
+					AND g2.oa_approve_date &gt;= to_date(#{minApproveDate} || '00:00:00','yyyy-mm-dd HH24:mi:ss')
+				</if>
+				<if test="maxApproveDate != null and maxApproveDate != ''">
+					AND g2.oa_approve_date &lt;= to_date(#{maxApproveDate} || '23:59:59','yyyy-mm-dd HH24:mi:ss')
+				</if>
+				<if test="accountingCode != null and accountingCode != ''">
+					AND g4.accounting_code LIKE UPPER('%'||#{accountingCode}||'%')
+				</if>
+			</where>
+			) g on f.accountingCode = g.accountingCode
+		<where>
+			1=1
+			<if test="applicationStatus != null and applicationStatus != '' and applicationStatus == 'W'.toString()">
+				AND g.applicationStatus is null
+			</if>
+		</where>
+		<if test="page_count == null">
+			<if test="app_orderby != null">
+				ORDER BY ${app_orderby}
+			</if>
+			<if test="app_orderby == null">
+				ORDER BY f.accountingCode DESC NULLS LAST
+			</if>
+		</if>
+	</select>
+	
+	<!-- 查询商品或者意向品扫描版核/投料表 -->
+	<select id="searchAccountingBo" resultMap="accountingBoMap">
+		SELECT
+			a.intentionCode,
+			a.intentionName,
+			a.intentionSupplierCode,
+			a.intentionSupplierName,
+			a.smallTypeCode intentionSmallTypeCode,
+			a.elseTypeName,
+			case when a.rationed is null then a.rationed else (SELECT value_string from common_mapping_config WHERE key_type = 'RATIONED_TYPE' AND code_string = a.rationed) end rationed,
+			case when a.purchaseType is null then a.purchaseType else (SELECT value_string from common_mapping_config WHERE key_type = 'PURCHASE_TYPE' AND code_string = a.purchaseType) end purchaseType,
+			a.saleType,
+			case when a.intentionPurchaseDepartments is null then a.intentionPurchaseDepartments else (SELECT value_string from common_mapping_config WHERE key_type = 'PURCHASE_DEPARTMENTS_TYPE' AND code_string = a.intentionPurchaseDepartments) end intentionPurchaseDepartments,
+			b.merchandiseCode,
+			b.merchandiseName,
+			b.supplierCode,
+			b.supplierName,
+			b.purchaseDepartments,
+			b.storageForm,
+			b.netWeight,
+			c.role_code merchandiseDxRoleCode,
+			c.role_name merchandiseDxRoleName,
+			d.role_code merchandiseDlRoleCode,
+			d.role_name merchandiseDlRoleName,
+			e1.centre_type_code centreTypeCode,
+			e1.centre_type_name centreTypeName,
+			e2.small_type_code smallTypeCode,
+			e2.small_type_name smallTypeName,
+			e3.detail_type_code detailTypeCode,
+			e3.detail_type_name detailTypeName,
+			e4.fine_type_code fineTypeCode,
+			e4.fine_type_name fineTypeName,
+			g.accounting_scan_path accountingScanPath,
+			g.ingredient_scan_path ingredientScanPath
+		FROM
+			(
+			SELECT
+				a1.merchandise_code merchandiseCode,
+				a1.supplier_code supplierCode,
+				a2.intention_code intentionCode,
+				a2.intention_name intentionName,
+				a2.centre_type_code centreTypeCode,
+				a2.small_type_code smallTypeCode,
+				a2.detail_type_code detailTypeCode,
+				a2.fine_type_code fineTypeCode,
+				a2.else_type_name elseTypeName,
+				a2.purchase_departments intentionPurchaseDepartments,
+				a2.rationed rationed,
+				a2.purchase_type purchaseType,
+				a2.sale_type saleType,
+				a1.intention_supplier_code intentionSupplierCode,
+				NVL(a3.intention_supplier_name,a4.supplier_name) intentionSupplierName
+			FROM
+				intention_supplier_merchandise a1
+				left join merchandise_intention a2 on a2.intention_code = a1.intention_code
+				left join merchandise_intention_supplier a3 on a3.intention_supplier_code = a1.intention_supplier_code
+				left join supplier a4 on a4.supplier_code = a1.intention_supplier_code
+			<where>
+				1=1
+				AND a1.intention_code = #{intentionCode}
+				AND a1.intention_supplier_code = #{intentionSupplierCode}
+			</where>
+			) a
+			full join
+			(
+			SELECT
+				b1.merchandise_code merchandiseCode,
+				b1.merchandise_name merchandiseName,
+				b1.purchase_departments purchaseDepartments,
+				b1.storage_form storageForm,
+				DECODE(b1.net_weight,1,'公斤装','定量装') netWeight,
+				b1.centre_type_code centreTypeCode,
+				b1.small_type_code smallTypeCode,
+				b1.detail_type_code detailTypeCode,
+				b2.supplier_code supplierCode,
+				b2.supplier_name supplierName,
+				b3.dx_role_code merchandiseDxRoleCode,
+				b3.dl_role_code merchandiseDlRoleCode
+			FROM
+				merchandise b1
+				inner join supplier b2 on b2.supplier_code = b1.supplier_code
+				left join merchandise_role b3 on b3.merchandise_code = b1.merchandise_code
+			<where>
+				1=1
+				AND b1.merchandise_code = #{merchandiseCode}
+				AND b1.supplier_code = #{supplierCode}
+			</where>
+			) b on a.merchandiseCode = b.merchandiseCode AND a.supplierCode = b.supplierCode
+			left join
+			merchandise_dx_role c on b.merchandiseDxRoleCode = c.role_code
+			left join
+			merchandise_dl_role d on b.merchandiseDlRoleCode = d.role_code
+			left join
+			merchandise_centre_type e1 on DECODE(b.centreTypeCode,NULL,a.centreTypeCode,b.centreTypeCode) = e1.centre_type_code
+			left join
+			merchandise_small_type e2 on DECODE(b.smallTypeCode,NULL,a.smallTypeCode,b.smallTypeCode) = e2.small_type_code
+			left join
+			merchandise_detail_type e3 on DECODE(b.detailTypeCode,NULL,a.detailTypeCode,b.detailTypeCode) = e3.detail_type_code
+			left join
+			merchandise_fine_type e4 on a.fineTypeCode = e4.fine_type_code
+			<if test="accountingCode != null and accountingCode != ''">
+				inner join (SELECT * from accounting WHERE accounting_code = #{accountingCode}) f
+				  ON DECODE(f.merchandise_code,null,a.intentionCode,b.merchandiseCode) = NVL(f.merchandise_code,f.intention_code)
+      			 AND DECODE(f.supplier_code,null,a.intentionSupplierCode,b.supplierCode) = NVL(f.supplier_code,f.intention_supplier_code)
+			</if>
+			left join
+			(SELECT * from accounting_ingredient_scan WHERE accounting_code = #{accountingCode}) g
+				  ON DECODE(g.merchandise_code,null,a.intentionCode,b.merchandiseCode) = NVL(g.merchandise_code,g.intention_code)
+      			 AND DECODE(g.supplier_code,null,a.intentionSupplierCode,b.supplierCode) = NVL(g.supplier_code,g.intention_supplier_code)
+	</select>
+	
+	<!-- 根据核算表编号查询核算表OA申请状态-->
+	<select id="getAccountingOaStatus" resultMap="accountingBoMap">
+		SELECT
+			a.accounting_code accountingCode,
+			d.application_status applicationStatus,
+			f.value_string applicationStatusValue
+		FROM 
+			accounting a, 
+			cost_analysis_merchandise b, 
+			analysis_reports_m c, 
+			oa_application d, 
+			application_merchandise e, 
+			common_mapping_config f
+		WHERE
+			1=1
+			AND a.accounting_code = b.accounting_code
+			AND b.reports_code = c.reports_code
+			AND c.application_code = d.application_code
+			AND d.application_code = e.application_code
+			AND e.merchandise_code = b.merchandise_code 
+			AND e.supplier_code = b.supplier_code
+			AND f.code_string = d.application_status
+			AND f.key_type = 'APPLICATION_STATUS'
+			AND a.accounting_code = #{accountingCode}
+	</select>
+
+	<!-- 修改商品核算表 -->
+	<update id="updateAccounting" parameterType="hashmap">
+		UPDATE
+			accounting
+		SET
+			inland_import=#{accounting.inlandImport},
+			intention_code=#{accounting.intentionCode},
+			intention_supplier_code=#{accounting.intentionSupplierCode},
+			merchandise_code=#{accounting.merchandiseCode},
+			supplier_code=#{accounting.supplierCode},
+			quoted_currency=#{accounting.quotedCurrency},
+			quoted_date=#{accounting.quotedDate},
+			factory_price_type=#{accounting.factoryPriceType},
+			factory_price_type_else=#{accounting.factoryPriceTypeElse},
+			units=#{accounting.units},
+			quantity=#{accounting.quantity},
+			import_country=#{accounting.importCountry},
+			pack_region=#{accounting.packRegion},
+			isoem=#{accounting.isoem},
+			updated=#{app_created},
+			updateby=#{app_create_by}
+		WHERE
+			ACCOUNTING_CODE=#{accounting.accountingCode}
+	</update>
+
+	<!-- 修改商品核算/投料表扫描版 -->
+	<update id="updateAccountingIngredientScan" parameterType="hashmap">
+		UPDATE
+			accounting_ingredient_scan
+		SET
+			intention_code=#{intentionCode},
+			intention_supplier_code=#{intentionSupplierCode},
+			merchandise_code=#{merchandiseCode},
+			supplier_code=#{supplierCode},
+			accounting_scan_path=#{accountingScanPath},
+			ingredient_scan_path=#{ingredientScanPath}
+		WHERE
+			ACCOUNTING_CODE=#{accountingCode}
+	</update>
+
+	<!-- 增加核算总表 -->
+	<insert id="saveAccounting" parameterType="hashmap">
+		INSERT INTO accounting(accounting_code,inland_import,intention_code,intention_supplier_code,merchandise_code,supplier_code,quoted_currency,quoted_date,factory_price_type,factory_price_type_else,units,quantity,import_country,pack_region,isoem,created,createby,updated,updateby)
+			VALUES(#{accounting.accountingCode},#{accounting.inlandImport},#{accounting.intentionCode},#{accounting.intentionSupplierCode},#{accounting.merchandiseCode},#{accounting.supplierCode},#{accounting.quotedCurrency},#{accounting.quotedDate},#{accounting.factoryPriceType},#{accounting.factoryPriceTypeElse},#{accounting.units},#{accounting.quantity},#{accounting.importCountry},#{accounting.packRegion},#{accounting.isoem},#{app_created},#{app_create_by},#{app_created},#{app_create_by})
+	</insert>
+
+	<!-- 增加核算表地区表 -->
+	<insert id="saveAccountingRegion" parameterType="hashmap">
+		INSERT INTO accounting_region(accounting_code,region)
+		<foreach collection="accountingRegionList" item="item" index="index" separator="UNION">
+			SELECT #{item.accountingCode},#{item.region} FROM dual
+		</foreach>
+	</insert>
+
+	<!-- 增加核算表成本项 -->
+	<insert id="saveAccountingCostItem" parameterType="hashmap">
+		INSERT INTO 
+			accounting_cost_item(
+				accounting_code,
+				yield_value,
+				yield_remarks,
+				zlsubtotal_value,
+				zlsubtotal_remarks,
+				flsubtotal_value,
+				flsubtotal_remarks,
+				i_totalcost_value,
+				i_totalcost_remarks,
+				m_totalcost_value,
+				m_totalcost_remarks,
+				packagproportion_value,
+				packagproportion_remarks,
+				deductptcost_value,
+				deductptcost_remarks,
+				nwpackagsubtotal_value,
+				nwpackagsubtotal_remarks,
+				wastagesubtotal_value,
+				wastagesubtotal_remarks,
+				rmb_settlement_price,
+				rmb_settlement_price_remarks,
+				update_order_fee,
+				update_order_fee_remarks,
+				premium,
+				premium_remarks,
+				import_fee_total,
+				import_fee_total_remarks,
+				cd_avt_total,
+				cd_avt_total_remarks,
+				customs_clearance_total,
+				customs_clearance_total_remark
+			)
+			VALUES(
+				#{accountingCostItem.accountingCode},
+				#{accountingCostItem.yieldValue},
+				#{accountingCostItem.yieldRemarks},
+				#{accountingCostItem.zlsubtotalValue},
+				#{accountingCostItem.zlsubtotalRemarks},
+				#{accountingCostItem.flsubtotalValue},
+				#{accountingCostItem.flsubtotalRemarks},
+				#{accountingCostItem.itotalcostValue},
+				#{accountingCostItem.itotalcostRemarks},
+				#{accountingCostItem.mtotalcostValue},
+				#{accountingCostItem.mtotalcostRemarks},
+				#{accountingCostItem.packagproportionValue},
+				#{accountingCostItem.packagproportionRemarks},
+				#{accountingCostItem.deductptcostValue},
+				#{accountingCostItem.deductptcostRemarks},
+				#{accountingCostItem.nwpackagsubtotalValue},
+				#{accountingCostItem.nwpackagsubtotalRemarks},
+				#{accountingCostItem.wastagesubtotalValue},
+				#{accountingCostItem.wastagesubtotalRemarks},
+				#{accountingCostItem.rmbSettlementPrice},
+				#{accountingCostItem.rmbSettlementPriceRemarks},
+				#{accountingCostItem.updateOrderFee},
+				#{accountingCostItem.updateOrderFeeRemarks},
+				#{accountingCostItem.premium},
+				#{accountingCostItem.premiumRemarks},
+				#{accountingCostItem.importFeeTotal},
+				#{accountingCostItem.importFeeTotalRemarks},
+				#{accountingCostItem.cdAvtTotal},
+				#{accountingCostItem.cdAvtTotalRemarks},
+				#{accountingCostItem.customsClearanceTotal},
+				#{accountingCostItem.customsClearanceTotalRemark}
+			)
+	</insert>
+
+	<!-- 增加核算表内包装 -->
+	<insert id="saveAccountingNPackag" parameterType="hashmap">
+		INSERT INTO accounting_npackag(accounting_code,npackag_type,else_name,price,texture,kg_price,weight_proportion,material_size,weight,units_price,quantity,technology_requirements,remarks)
+		<foreach collection="accountingNPackagList" item="item" index="index" separator="UNION">
+			SELECT 
+				#{item.accountingCode,jdbcType=VARCHAR},
+				#{item.npackagType,jdbcType=VARCHAR},
+				#{item.elseName,jdbcType=VARCHAR},
+				#{item.price,jdbcType=NUMERIC},
+				#{item.texture,jdbcType=VARCHAR},
+				#{item.kgPrice,jdbcType=NUMERIC},
+				#{item.weightProportion,jdbcType=NUMERIC},
+				#{item.materialSize,jdbcType=VARCHAR},
+				#{item.weight,jdbcType=NUMERIC},
+				#{item.unitsPrice,jdbcType=NUMERIC},
+				#{item.quantity,jdbcType=INTEGER},
+				#{item.technologyRequirements,jdbcType=VARCHAR},
+				#{item.remarks,jdbcType=VARCHAR} 
+			FROM dual
+		</foreach>
+	</insert>
+
+	<!-- 增加核算表外包装 -->
+	<insert id="saveAccountingWPackag" parameterType="hashmap">
+		INSERT INTO accounting_wpackag(accounting_code,wpackag_type,else_name,price,units_price,use_quantity,texture,length,width,height,area,yl_units_price,specification,remarks)
+		<foreach collection="accountingWPackagList" item="item" index="index" separator="UNION">
+			SELECT 
+				#{item.accountingCode,jdbcType=VARCHAR},
+				#{item.wpackagType,jdbcType=VARCHAR},
+				#{item.elseName,jdbcType=VARCHAR},
+				#{item.price,jdbcType=NUMERIC},
+				#{item.unitsPrice,jdbcType=NUMERIC},
+				#{item.useQuantity,jdbcType=NUMERIC},
+				#{item.texture,jdbcType=VARCHAR},
+				#{item.length,jdbcType=NUMERIC},
+				#{item.width,jdbcType=NUMERIC},
+				#{item.height,jdbcType=NUMERIC},
+				#{item.area,jdbcType=NUMERIC},
+				#{item.ylUnitsPrice,jdbcType=NUMERIC},
+				#{item.specification,jdbcType=VARCHAR},
+				#{item.remarks,jdbcType=VARCHAR}
+			FROM dual
+		</foreach>
+	</insert>
+
+	<!-- 增加核算表损耗类型 -->
+	<insert id="saveAccountingWastage" parameterType="hashmap">
+		INSERT INTO accounting_wastage(accounting_code,wastage_type,price,remarks)
+		<foreach collection="accountingWastageList" item="item" index="index" separator="UNION">
+			SELECT 
+				#{item.accountingCode,jdbcType=VARCHAR},
+				#{item.wastageType,jdbcType=VARCHAR},
+				#{item.price,jdbcType=NUMERIC},
+				#{item.remarks,jdbcType=VARCHAR}
+			FROM dual
+		</foreach>
+	</insert>
+
+	<!-- 增加核算表水电煤 -->
+	<insert id="saveAccountingWec" parameterType="hashmap">
+		INSERT INTO accounting_wec(accounting_code,price,water,electricity,gas,coal,oil,total,remarks)
+			VALUES(#{accountingWec.accountingCode},#{accountingWec.price},#{accountingWec.water},#{accountingWec.electricity},#{accountingWec.gas},#{accountingWec.coal},#{accountingWec.oil},#{accountingWec.total},#{accountingWec.remarks})
+	</insert>
+
+	<!-- 增加核算表设备折旧及维护 -->
+	<insert id="saveAccountingSbzjwh" parameterType="hashmap">
+		INSERT INTO accounting_sbzjwh(accounting_code,price,total_price,age_limit,depreciation,capacity,total,remarks)
+			VALUES(#{accountingSbzjwh.accountingCode},#{accountingSbzjwh.price},#{accountingSbzjwh.totalPrice},#{accountingSbzjwh.ageLimit},#{accountingSbzjwh.depreciation},#{accountingSbzjwh.capacity},#{accountingSbzjwh.total},#{accountingSbzjwh.remarks})
+	</insert>
+
+	<!-- 增加核算表人工 -->
+	<insert id="saveAccountingManpower" parameterType="hashmap">
+		INSERT INTO accounting_manpower(accounting_code,price,manpower_count,avg_wage,month_capacity,units_wage,remarks)
+			VALUES(#{accountingManpower.accountingCode},#{accountingManpower.price},#{accountingManpower.manpowerCount},#{accountingManpower.avgWage},#{accountingManpower.monthCapacity},#{accountingManpower.unitsWage},#{accountingManpower.remarks})
+	</insert>
+
+	<!-- 增加核算表管理 -->
+	<insert id="saveAccountingManage" parameterType="hashmap">
+		INSERT INTO accounting_manage(accounting_code,price,remarks)
+			VALUES(#{accountingManage.accountingCode},#{accountingManage.price},#{accountingManage.remarks})
+	</insert>
+
+	<!-- 增加核算表管理各地区 -->
+	<insert id="saveAccountingManageRegion" parameterType="hashmap">
+		INSERT INTO accounting_manage_region(accounting_code,region,proportion)
+		<foreach collection="accountingManageRegionList" item="item" index="index" separator="UNION">
+			SELECT 
+				#{item.accountingCode,jdbcType=VARCHAR},
+				#{item.region,jdbcType=VARCHAR},
+				#{item.proportion,jdbcType=NUMERIC}
+			FROM dual
+		</foreach>
+	</insert>
+
+	<!-- 增加核算表运输 -->
+	<insert id="saveAccountingFreight" parameterType="hashmap">
+		INSERT INTO accounting_freight(accounting_code,units,units_cost,remarks)
+			VALUES(#{accountingFreight.accountingCode},#{accountingFreight.units},#{accountingFreight.unitsCost},#{accountingFreight.remarks})
+	</insert>
+
+	<!-- 增加核算表运输各地区 -->
+	<insert id="saveAccountingFreightRegion" parameterType="hashmap">
+		INSERT INTO accounting_freight_region(accounting_code,region,price,sum_km)
+		<foreach collection="accountingFreightRegionList" item="item" index="index" separator="UNION">
+			SELECT 
+				#{item.accountingCode,jdbcType=VARCHAR},
+				#{item.region,jdbcType=VARCHAR},
+				#{item.price,jdbcType=NUMERIC},
+				#{item.sumKm,jdbcType=NUMERIC}
+			FROM dual
+		</foreach>
+	</insert>
+
+	<!-- 增加核算表税收 -->
+	<insert id="saveAccountingTax" parameterType="hashmap">
+		INSERT INTO accounting_tax(accounting_code,tax_rate,remarks)
+			VALUES(#{accountingTax.accountingCode},#{accountingTax.taxRate},#{accountingTax.remarks})
+	</insert>
+
+	<!-- 增加核算表税收各地区 -->
+	<insert id="saveAccountingTaxRegion" parameterType="hashmap">
+		INSERT INTO accounting_tax_region(accounting_code,region,price,proportion)
+		<foreach collection="accountingTaxRegionList" item="item" index="index" separator="UNION">
+			SELECT 
+				#{item.accountingCode,jdbcType=VARCHAR},
+				#{item.region,jdbcType=VARCHAR},
+				#{item.price,jdbcType=NUMERIC},
+				#{item.proportion,jdbcType=NUMERIC}
+			FROM dual
+		</foreach>
+	</insert>
+
+	<!-- 增加核算表利润 -->
+	<insert id="saveAccountingProfit" parameterType="hashmap">
+		INSERT INTO accounting_profit(accounting_code,remarks)
+			VALUES(#{accountingProfit.accountingCode},#{accountingProfit.remarks})
+	</insert>
+
+	<!-- 增加核算表利润各地区 -->
+	<insert id="saveAccountingProfitRegion" parameterType="hashmap">
+		INSERT INTO accounting_profit_region(accounting_code,region,price,proportion)
+		<foreach collection="accountingProfitRegionList" item="item" index="index" separator="UNION">
+			SELECT 
+				#{item.accountingCode,jdbcType=VARCHAR},
+				#{item.region,jdbcType=VARCHAR},
+				#{item.price,jdbcType=NUMERIC},
+				#{item.proportion,jdbcType=NUMERIC} 
+			FROM dual
+		</foreach>
+	</insert>
+
+	<!-- 增加进口核算表商品出厂价 --> 
+	<insert id="saveAccountingFactoryPrice" parameterType="hashmap">
+		INSERT INTO accounting_factory_price(accounting_code,price,currency,payment_type,remarks) 
+			VALUES(#{accountingFactoryPrice.accountingCode},#{accountingFactoryPrice.price},#{accountingFactoryPrice.currency},#{accountingFactoryPrice.paymentType},#{accountingFactoryPrice.remarks})
+    </insert>
+
+	<!-- 增加进口核算表汇率 -->
+	<insert id="saveAccountingExchangerate" parameterType="hashmap">
+		INSERT INTO accounting_exchangerate(accounting_code,exchangerate,reference_date,reference_bank,remarks)
+			VALUES(#{accountingExchangerate.accountingCode},#{accountingExchangerate.exchangerate},#{accountingExchangerate.referenceDate},#{accountingExchangerate.referenceBank},#{accountingExchangerate.remarks})
+	</insert>
+
+	<!-- 增加进口核算表海运费 -->
+	<insert id="saveAccountingOceanfreight" parameterType="hashmap">
+		INSERT INTO accounting_oceanfreight(accounting_code,freight_type,price,transport_start_date,transport_end_date,starting,destination,container_type,else_type,container_size,unit_price,container_capacity,compute_type,remarks)
+			VALUES(#{accountingOceanfreight.accountingCode},#{accountingOceanfreight.freightType},#{accountingOceanfreight.price},#{accountingOceanfreight.transportStartDate},#{accountingOceanfreight.transportEndDate},#{accountingOceanfreight.starting},#{accountingOceanfreight.destination},#{accountingOceanfreight.containerType},#{accountingOceanfreight.elseType},#{accountingOceanfreight.containerSize},#{accountingOceanfreight.unitPrice},#{accountingOceanfreight.containerCapacity},#{accountingOceanfreight.computeType},#{accountingOceanfreight.remarks})
+	</insert>
+
+	<!-- 增加进口核算表报关服务费 -->
+	<insert id="saveAccountingCustomscharges" parameterType="hashmap">
+		INSERT INTO accounting_customscharges(accounting_code,price,customscharges,port_surcharge,demurrage_charge,container_dirtyness_change,else_fee,remarks)
+			VALUES(#{accountingCustomscharges.accountingCode},#{accountingCustomscharges.price},#{accountingCustomscharges.customscharges},#{accountingCustomscharges.portSurcharge},#{accountingCustomscharges.demurrageCharge},#{accountingCustomscharges.containerDirtynessChange},#{accountingCustomscharges.elseFee},#{accountingCustomscharges.remarks})
+	</insert>
+
+	<!-- 增加进口核算表关税 -->
+	<insert id="saveAccountingCustomsduties" parameterType="hashmap">
+		INSERT INTO accounting_customsduties(accounting_code,price,hs_code,tax_rate,customsduties_compute_type,remarks)
+			VALUES(#{accountingCustomsduties.accountingCode},#{accountingCustomsduties.price},#{accountingCustomsduties.hsCode},#{accountingCustomsduties.taxRate},#{accountingCustomsduties.customsdutiesComputeType},#{accountingCustomsduties.remarks})
+	</insert>
+
+	<!-- 增加进口核算表增值税 -->
+	<insert id="saveAccountingAddedvaluetax" parameterType="hashmap">
+		INSERT INTO accounting_addedvaluetax(accounting_code,price,tax_rate,addedvaluetax_compute_type,remarks)
+			VALUES(#{accountingAddedvaluetax.accountingCode},#{accountingAddedvaluetax.price},#{accountingAddedvaluetax.taxRate},#{accountingAddedvaluetax.addedvaluetaxComputeType},#{accountingAddedvaluetax.remarks})
+	</insert>
+
+	<!-- 增加进口核算表税差 -->
+	<insert id="saveAccountingTaxDiffer" parameterType="hashmap">
+		INSERT INTO accounting_tax_differ(accounting_code,price,tax_differ_compute_type,remarks)
+			VALUES(#{accountingTaxDiffer.accountingCode},#{accountingTaxDiffer.price},#{accountingTaxDiffer.taxDifferComputeType},#{accountingTaxDiffer.remarks})
+	</insert>
+
+	<!-- 增加进口核算表利息 -->
+	<insert id="saveAccountingInterest" parameterType="hashmap">
+		INSERT INTO accounting_interest(accounting_code,price,loan_rate,interest_compute_type,remarks)
+			VALUES(#{accountingInterest.accountingCode},#{accountingInterest.price},#{accountingInterest.loanRate},#{accountingInterest.interestComputeType},#{accountingInterest.remarks})
+	</insert>
+
+	<!-- 增加核算表其他成本小计 -->
+	<insert id="saveAccountingElsesubtotal" parameterType="hashmap">
+		INSERT INTO accounting_elsesubtotal(accounting_code,remarks)
+			VALUES(#{accountingElsesubtotal.accountingCode},#{accountingElsesubtotal.remarks})
+	</insert>
+
+	<!-- 增加核算表其他成本小计各地区 -->
+	<insert id="saveAccountingElsesubtotalRegion" parameterType="hashmap">
+		INSERT INTO accounting_elsesubtotal_region(accounting_code,region,subtotal)
+		<foreach collection="accountingElsesubtotalRegionList" item="item" index="index" separator="UNION">
+			SELECT 
+				#{item.accountingCode,jdbcType=VARCHAR},
+				#{item.region,jdbcType=VARCHAR},
+				#{item.subtotal,jdbcType=NUMERIC} 
+			FROM dual
+		</foreach>
+	</insert>
+
+	<!-- 增加核算表总价 -->
+	<insert id="saveAccountingAggregate" parameterType="hashmap">
+		INSERT INTO accounting_aggregate(accounting_code,remarks)
+			VALUES(#{accountingAggregate.accountingCode},#{accountingAggregate.remarks})
+	</insert>
+
+	<!-- 增加核算表总价各地区 -->
+	<insert id="saveAccountingAggregateRegion" parameterType="hashmap">
+		INSERT INTO accounting_aggregate_region(accounting_code,region,sum_price)
+		<foreach collection="accountingAggregateRegionList" item="item" index="index" separator="UNION">
+			SELECT 
+				#{item.accountingCode,jdbcType=VARCHAR},
+				#{item.region,jdbcType=VARCHAR},
+				#{item.sumPrice,jdbcType=NUMERIC} 
+			FROM dual
+		</foreach>
+	</insert>
+	
+	<!-- 新增核算/投料表扫描版 -->
+	<insert id="saveAccountingIngredientScan" parameterType="hashmap">
+		INSERT INTO accounting_ingredient_scan(accounting_code,intention_code,intention_supplier_code,merchandise_code,supplier_code,accounting_scan_path,ingredient_scan_path,created,createby) 
+			VALUES(#{accountingCode},#{intentionCode},#{intentionSupplierCode},#{merchandiseCode},#{supplierCode},#{accountingScanPath},#{ingredientScanPath},#{app_created},#{app_create_by})
+	</insert>
+
+	<!-- 删除核算总表 -->
+	<delete id="deleteAccounting" parameterType="hashmap">
+		DELETE FROM accounting WHERE accounting_code = #{accountingCode}
+	</delete>
+	
+	<!-- 删除核算表地区表 -->
+	<delete id="deleteAccountingRegion" parameterType="hashmap">
+		DELETE FROM accounting_region WHERE accounting_code = #{accountingCode}
+	</delete>
+	
+	<!-- 删除核算表成本项 -->
+	<delete id="deleteAccountingCostItem" parameterType="hashmap">
+		DELETE FROM accounting_cost_item WHERE accounting_code = #{accountingCode}
+	</delete>
+	
+	<!-- 删除核算表内包装 -->
+	<delete id="deleteAccountingNPackag" parameterType="hashmap">
+		DELETE FROM accounting_npackag WHERE accounting_code = #{accountingCode}
+	</delete>
+	
+	<!-- 删除核算表外包装 -->
+	<delete id="deleteAccountingWPackag" parameterType="hashmap">
+		DELETE FROM accounting_wpackag WHERE accounting_code = #{accountingCode}
+	</delete>
+	<!-- 删除核算表损耗类型 -->
+	<delete id="deleteAccountingWastage" parameterType="hashmap">
+		DELETE FROM accounting_wastage WHERE accounting_code = #{accountingCode}
+	</delete>
+	
+	<!-- 删除核算表水电煤 -->
+	<delete id="deleteAccountingWec" parameterType="hashmap">
+		DELETE FROM accounting_wec WHERE accounting_code = #{accountingCode}
+	</delete>
+	
+	<!-- 删除核算表设备折旧及维护 -->
+	<delete id="deleteAccountingSbzjwh" parameterType="hashmap">
+		DELETE FROM accounting_sbzjwh WHERE accounting_code = #{accountingCode}
+	</delete>
+	
+	<!-- 删除核算表人工 -->
+	<delete id="deleteAccountingManpower" parameterType="hashmap">
+		DELETE FROM accounting_manpower WHERE accounting_code = #{accountingCode}
+	</delete>
+	
+	<!-- 删除核算表管理 -->
+	<delete id="deleteAccountingManage" parameterType="hashmap">
+		DELETE FROM accounting_manage WHERE accounting_code = #{accountingCode}
+	</delete>
+	
+	<!-- 删除核算表管理各地区 -->
+	<delete id="deleteAccountingManageRegion" parameterType="hashmap">
+		DELETE FROM accounting_manage_region WHERE accounting_code = #{accountingCode}
+	</delete>
+	
+	<!-- 删除核算表运输备注 -->
+	<delete id="deleteAccountingFreight" parameterType="hashmap">
+		DELETE FROM accounting_freight WHERE accounting_code = #{accountingCode}
+	</delete>
+	
+	<!-- 删除核算表运输各地区 -->
+	<delete id="deleteAccountingFreightRegion" parameterType="hashmap">
+		DELETE FROM accounting_freight_region WHERE accounting_code = #{accountingCode}
+	</delete>
+	
+	<!-- 删除核算表税收 -->
+	<delete id="deleteAccountingTax" parameterType="hashmap">
+		DELETE FROM accounting_tax WHERE accounting_code = #{accountingCode}
+	</delete>
+	
+	<!-- 删除核算表税收各地区 -->
+	<delete id="deleteAccountingTaxRegion" parameterType="hashmap">
+		DELETE FROM accounting_tax_region WHERE accounting_code = #{accountingCode}
+	</delete>
+	
+	<!-- 删除核算表利润 -->
+	<delete id="deleteAccountingProfit" parameterType="hashmap">
+		DELETE FROM accounting_profit WHERE accounting_code = #{accountingCode}
+	</delete>
+	
+	<!-- 删除核算表利润各地区 -->
+	<delete id="deleteAccountingProfitRegion" parameterType="hashmap">
+		DELETE FROM accounting_profit_region WHERE accounting_code = #{accountingCode}
+	</delete>
+
+	<!-- 删除进口核算表商品出厂价 -->
+	<delete id="deleteAccountingFactoryPrice" parameterType="hashmap">
+		DELETE FROM accounting_factory_price WHERE accounting_code = #{accountingCode}
+	</delete>
+
+	<!-- 删除进口核算表汇率 -->
+	<delete id="deleteAccountingExchangerate" parameterType="hashmap">
+		DELETE FROM accounting_exchangerate WHERE accounting_code = #{accountingCode}
+	</delete>
+
+	<!-- 删除进口核算表海运费 -->
+	<delete id="deleteAccountingOceanfreight" parameterType="hashmap">
+		DELETE FROM accounting_oceanfreight WHERE accounting_code = #{accountingCode}
+	</delete>
+
+	<!-- 删除进口核算表报关服务费 -->
+	<delete id="deleteAccountingCustomscharges" parameterType="hashmap">
+		DELETE FROM accounting_customscharges WHERE accounting_code = #{accountingCode}
+	</delete>
+
+	<!-- 删除进口核算表关税 -->
+	<delete id="deleteAccountingCustomsduties" parameterType="hashmap">
+		DELETE FROM accounting_customsduties WHERE accounting_code = #{accountingCode}
+	</delete>
+
+	<!-- 删除进口核算表关税 -->
+	<delete id="deleteAccountingAddedvaluetax" parameterType="hashmap">
+		DELETE FROM accounting_addedvaluetax WHERE accounting_code = #{accountingCode}
+	</delete>
+
+	<!-- 删除进口核算表税差 -->
+	<delete id="deleteAccountingTaxDiffer" parameterType="hashmap">
+		DELETE FROM accounting_tax_differ WHERE accounting_code = #{accountingCode}
+	</delete>
+
+	<!-- 删除进口核算表利息 -->
+	<delete id="deleteAccountingInterest" parameterType="hashmap">
+		DELETE FROM accounting_interest WHERE accounting_code = #{accountingCode}
+	</delete>
+
+	<!-- 删除核算表其他成本小计 -->
+	<delete id="deleteAccountingElsesubtotal" parameterType="hashmap">
+		DELETE FROM accounting_elsesubtotal WHERE accounting_code = #{accountingCode}
+	</delete>
+	
+	<!-- 删除核算表其他成本小计各地区 -->
+	<delete id="deleteAccountingElsesubtotalRegion" parameterType="hashmap">
+		DELETE FROM accounting_elsesubtotal_region WHERE accounting_code = #{accountingCode}
+	</delete>
+	
+	<!-- 删除核算表总价 -->
+	<delete id="deleteAccountingAggregate" parameterType="hashmap">
+		DELETE FROM accounting_aggregate WHERE accounting_code = #{accountingCode}
+	</delete>
+	
+	<!-- 删除核算表总价各地区 -->
+	<delete id="deleteAccountingAggregateRegion" parameterType="hashmap">
+		DELETE FROM accounting_aggregate_region WHERE accounting_code = #{accountingCode}
+	</delete>
+	
+	<!-- 删除核算/投料表扫描版 -->
+	<delete id="deleteAccountingIngredientScan" parameterType="hashmap">
+		DELETE FROM accounting_ingredient_scan WHERE accounting_code = #{accountingCode}
+	</delete>
+	
+		<!-- 根据主键查询某个商品成本分析(可分页) -->
+	<select id="loadAccounting" resultMap="accountingMap">
+		SELECT
+		  f.accounting_code accountingCode,
+		  f.inland_import inlandImport,
+		  f.intention_code intentionCode,
+		  f.intention_supplier_code intentionSupplierCode,
+		  b.merchandiseCode,
+		  b.merchandiseName,
+		  b.supplierCode,
+		  b.supplierName,
+		  a.intentionCode,
+		  a.intentionName,
+		  a.intentionSupplierCode,
+		  a.intentionSupplierName,
+		  f.quoted_currency quotedCurrency,
+		  f.quoted_date quotedDate,
+		  f.factory_price_type factoryPriceType,
+		  f.factory_price_type_else factoryPriceTypeElse,
+		  <if test="quantity != null and convertAfterQuantity != null">
+		  ${convertAfterQuantity} quantity,
+		  </if>
+		  <if test="quantity == null or convertAfterQuantity == null">
+		  quantity quantity,
+		  </if>
+		  f.units units,
+		  f.import_country importCountry,
+		  f.pack_region packRegion,
+		  f.isoem isoem,
+		  f.created, 
+		  f.updated,
+		  (SELECT u.real_name from pub_user u WHERE u.user_id=f.createby) as createUserName,
+		  (SELECT u.real_name from pub_user u WHERE u.user_id=f.updateby) as updateUserName
+				 
+		FROM 
+		  (
+		    select
+		    a1.merchandise_code merchandiseCode,
+		    a1.supplier_code supplierCode,
+		    a2.intention_code intentionCode,
+		    a2.intention_name intentionName,
+		    a1.intention_supplier_code intentionSupplierCode,
+		    DECODE(a4.supplier_code,null,a3.intention_supplier_name,a4.supplier_name) intentionSupplierName
+		    FROM
+		    (SELECT * from intention_supplier_merchandise WHERE intention_supplier_code is not null or supplier_code is not null) a1
+		    left join merchandise_intention a2 on a2.intention_code = a1.intention_code
+		    left join merchandise_intention_supplier a3 on a3.intention_supplier_code = a1.intention_supplier_code
+		    left join supplier a4 on a4.supplier_code = a1.intention_supplier_code
+		    left join merchandise a5 on a5.merchandise_code = a1.merchandise_code AND a5.supplier_code = a1.supplier_code
+		  ) a
+		  full join	 
+		  (
+		    select
+		    b1.merchandise_code merchandiseCode,
+		    b1.merchandise_name merchandiseName,
+		    b2.supplier_code supplierCode,
+		    b2.supplier_name supplierName
+		    FROM merchandise b1 
+		    left JOIN supplier b2 on b2.supplier_code = b1.supplier_code
+		  ) b on a.merchandiseCode = b.merchandiseCode AND a.supplierCode = b.supplierCode
+		  inner join (SELECT * from accounting WHERE accounting_code = #{accountingCode}) f
+		  	ON DECODE(f.merchandise_code,null,a.intentionCode,b.merchandiseCode) = NVL(f.merchandise_code,f.intention_code)
+      	   AND DECODE(f.supplier_code,null,a.intentionSupplierCode,b.supplierCode) = NVL(f.supplier_code,f.intention_supplier_code)
+		<where>
+			1=1
+			<if test="accountingCode != null and accountingCode!=''">
+				AND f.accounting_code = #{accountingCode}
+			</if>
+			<if test="quotedDate != null and quotedDate != ''">
+				AND f.quoted_date = to_date(#{quotedDate}, 'yyyy-mm-dd HH24:mi:ss')
+			</if>
+			<!-- <if test="intentionCode != null and intentionCode != ''">
+				AND f.intention_code = #{intentionCode}
+			</if>
+			<if test="intentionSupplierCode != null and intentionSupplierCode != ''">
+				AND f.intention_supplier_code = #{intentionSupplierCode}
+			</if>
+			<if test="merchandiseCode != null and merchandiseCode != ''">
+				AND f.merchandise_code = #{merchandiseCode}
+			</if>
+			<if test="supplierCode != null and supplierCode != ''">
+				AND f.supplier_code = #{supplierCode}
+			</if> -->
+		</where>
+	</select>
+	
+	<!-- 查询核算表地区表 -->
+	<select id="loadAccountingRegion" resultType="com.powere2e.sco.model.merchandisecostanalysis.accountingingredient.accounting.AccountingRegion">
+		SELECT 
+			accounting_code accountingCode,
+			region region
+		FROM 
+			accounting_region 
+		WHERE 
+			accounting_code = #{accountingCode}
+			ORDER BY region
+	</select>
+	
+	<!-- 查询核算表成本项 -->
+	<select id="loadAccountingCostItem" resultType="com.powere2e.sco.model.merchandisecostanalysis.accountingingredient.accounting.AccountingCostItem">
+		SELECT 
+		    accounting_code accountingCode,
+		    <if test="quantity != null and convertAfterQuantity != null">
+			round(zlsubtotal_value/${quantity}*${convertAfterQuantity},3) zlsubtotalValue,
+			round(flsubtotal_value/${quantity}*${convertAfterQuantity},3) flsubtotalValue,
+			round(i_totalcost_value/${quantity}*${convertAfterQuantity},3) itotalcostValue,
+			round(m_totalcost_value/${quantity}*${convertAfterQuantity},3) mtotalcostValue,
+			round(deductptcost_value/${quantity}*${convertAfterQuantity},3) deductptcostValue,
+			round(nwpackagsubtotal_value/${quantity}*${convertAfterQuantity},3) nwpackagsubtotalValue,
+			round(wastagesubtotal_value/${quantity}*${convertAfterQuantity},3) wastagesubtotalValue,
+			round(rmb_settlement_price/${quantity}*${convertAfterQuantity},3) rmbSettlementPrice,
+			round(update_order_fee/${quantity}*${convertAfterQuantity},3) updateOrderFee,
+			round(premium/${quantity}*${convertAfterQuantity},3) premium,
+			round(import_fee_total/${quantity}*${convertAfterQuantity},3) importFeeTotal,
+			round(cd_avt_total/${quantity}*${convertAfterQuantity},3) cdAvtTotal,
+			round(customs_clearance_total/${quantity}*${convertAfterQuantity},3) customsClearanceTotal,
+			</if>
+			<if test="quantity == null or convertAfterQuantity == null">
+			zlsubtotal_value zlsubtotalValue,
+			flsubtotal_value flsubtotalValue,
+			i_totalcost_value itotalcostValue,
+			m_totalcost_value mtotalcostValue,
+			deductptcost_value deductptcostValue,
+			nwpackagsubtotal_value nwpackagsubtotalValue,
+			wastagesubtotal_value wastagesubtotalValue,
+			rmb_settlement_price rmbSettlementPrice,
+			update_order_fee updateOrderFee,
+			premium premium,
+			import_fee_total importFeeTotal,
+			cd_avt_total cdAvtTotal,
+			customs_clearance_total customsClearanceTotal,
+			</if>
+			yield_value yieldValue,
+			packagproportion_value packagproportionValue,
+			yield_remarks yieldRemarks,
+			zlsubtotal_remarks zlsubtotalRemarks,
+			flsubtotal_remarks flsubtotalRemarks,
+			i_totalcost_remarks itotalcostRemarks,
+			m_totalcost_remarks mtotalcostRemarks,
+			packagproportion_remarks packagproportionRemarks,
+			deductptcost_remarks deductptcostRemarks,
+			nwpackagsubtotal_remarks nwpackagsubtotalRemarks,
+			wastagesubtotal_remarks wastagesubtotalRemarks,
+			rmb_settlement_price_remarks rmbSettlementPriceRemarks,
+			update_order_fee_remarks updateOrderFeeRemarks,
+			premium_remarks premiumRemarks,
+			import_fee_total_remarks importFeeTotalRemarks,
+			cd_avt_total_remarks cdAvtTotalRemarks,
+			customs_clearance_total_remark customsClearanceTotalRemark
+		FROM 
+			accounting_cost_item 
+		WHERE 
+			accounting_code = #{accountingCode}
+	</select>
+	
+	<!-- 查询核算表内包装 -->
+	<select id="loadAccountingNPackag" resultType="com.powere2e.sco.model.merchandisecostanalysis.accountingingredient.accounting.AccountingNPackag">
+		SELECT 
+			accounting_code accountingCode,
+			npackag_type npackagType,
+			decode(UPPER(npackag_type),'ELSE',else_name,(SELECT value_string FROM common_mapping_config WHERE key_type='NPACKAG_TYPE' AND code_string = npackag_type)) npackagName,
+			else_name elseName,
+			 <if test="quantity != null and convertAfterQuantity != null">
+			 round(price/${quantity}*${convertAfterQuantity},3) price,
+			 </if>
+			 <if test="quantity == null or convertAfterQuantity == null">
+			 price price,
+			 </if>
+			 kg_price kgPrice,
+			 units_price unitsPrice,
+			texture texture,
+			weight_proportion weightProportion,
+			material_size materialSize,
+			weight weight,
+			quantity quantity,
+			technology_requirements technologyRequirements,
+			remarks remarks
+		FROM 
+			accounting_npackag 
+		WHERE 
+			ACCOUNTING_CODE = #{accountingCode}
+			ORDER BY npackag_type
+	</select>
+	
+	<!-- 查询核算表外包装 -->
+	<select id="loadAccountingWPackag" resultType="com.powere2e.sco.model.merchandisecostanalysis.accountingingredient.accounting.AccountingWPackag">
+		SELECT
+			accounting_code accountingCode,
+			wpackag_type wpackagType,
+			decode(UPPER(wpackag_type),'ELSE',else_name,(SELECT value_string FROM common_mapping_config WHERE key_type='WPACKAG_TYPE' AND code_string = wpackag_type)) wpackagName,
+			else_name elseName,
+			<if test="quantity != null and convertAfterQuantity != null">
+			 round(price/${quantity}*${convertAfterQuantity},3) price,
+			 </if>
+			 <if test="quantity == null or convertAfterQuantity == null">
+			 price price,
+			 </if>
+			 yl_units_price ylUnitsPrice,
+			 units_price unitsPrice,
+			use_quantity useQuantity,
+			texture texture,
+			length length,
+			width width,
+			height height,
+			area area,
+			specification specification,
+			remarks remarks
+		FROM 
+			accounting_wpackag 
+		WHERE 
+			accounting_code = #{accountingCode}
+			ORDER BY wpackag_type
+	</select>
+	
+	<!-- 查询核算表损耗类型 -->
+	<select id="loadAccountingWastage" resultType="com.powere2e.sco.model.merchandisecostanalysis.accountingingredient.accounting.AccountingWastage">
+		SELECT
+			accounting_code accountingCode,
+			wastage_type wastageType,
+			<if test="quantity != null and convertAfterQuantity != null">
+			 round(price/${quantity}*${convertAfterQuantity},3) price,
+			 </if>
+			 <if test="quantity == null or convertAfterQuantity == null">
+			 price price,
+			 </if>
+			remarks remarks
+		FROM 
+			accounting_wastage 
+		WHERE 
+			accounting_code = #{accountingCode}
+			ORDER BY wastage_type
+	</select>
+	
+	<!-- 查询核算表水电煤 -->
+	<select id="loadAccountingWec" resultType="com.powere2e.sco.model.merchandisecostanalysis.accountingingredient.accounting.AccountingWec">
+		SELECT
+			accounting_code AccountingCode,
+			<if test="quantity != null and convertAfterQuantity != null">
+			 round(price/${quantity}*${convertAfterQuantity},3) price,
+			 </if>
+			 <if test="quantity == null or convertAfterQuantity == null">
+			 price price,
+			 </if>
+			water water,
+			electricity electricity,
+			gas gas,
+			coal coal,
+			oil oil,
+			total total,
+			remarks remarks
+		FROM 
+			accounting_wec 
+		WHERE 
+			accounting_code = #{accountingCode}
+	</select>
+	
+	<!-- 查询核算表设备折旧及维护 -->
+	<select id="loadAccountingSbzjwh" resultType="com.powere2e.sco.model.merchandisecostanalysis.accountingingredient.accounting.AccountingSbzjwh">
+		SELECT
+			accounting_code accountingCode,
+			<if test="quantity != null and convertAfterQuantity != null">
+			 round(price/${quantity}*${convertAfterQuantity},3) price,
+			 </if>
+			 <if test="quantity == null or convertAfterQuantity == null">
+			 price price,
+			 </if>
+			total total,
+			total_price totalPrice,
+			age_limit ageLimit,
+			depreciation depreciation,
+			capacity capacity,
+			remarks remarks
+		FROM accounting_sbzjwh WHERE ACCOUNTING_CODE = #{accountingCode}
+	</select>
+	
+	<!-- 查询核算表人工 -->
+	<select id="loadAccountingManpower" resultType="com.powere2e.sco.model.merchandisecostanalysis.accountingingredient.accounting.AccountingManpower">
+		SELECT
+			accounting_code accountingCode,
+			 <if test="quantity != null and convertAfterQuantity != null">
+			 round(price/${quantity}*${convertAfterQuantity},3) price,
+			 </if>
+			 <if test="quantity == null or convertAfterQuantity == null">
+			 price price,
+			 </if>
+			manpower_count manpowerCount,
+			avg_wage avgWage,
+			month_capacity monthCapacity,
+			units_wage unitsWage,
+			remarks remarks
+		FROM 
+			accounting_manpower 
+		WHERE 
+			accounting_code = #{accountingCode}
+	</select>
+	
+	<!-- 查询核算表管理 -->
+	<select id="loadAccountingManage" resultType="com.powere2e.sco.model.merchandisecostanalysis.accountingingredient.accounting.AccountingManage">
+		SELECT 
+			accounting_code accountingCode,
+			<if test="quantity != null and convertAfterQuantity != null">
+			 round(price/${quantity}*${convertAfterQuantity},3) price,
+			 </if>
+			 <if test="quantity == null or convertAfterQuantity == null">
+			 price price,
+			 </if>
+			remarks remarks
+		FROM 
+			accounting_manage 
+		WHERE 
+			accounting_code = #{accountingCode}
+	</select>
+	
+	<!-- 查询核算表管理各地区 -->
+	<select id="loadAccountingManageRegion" resultType="com.powere2e.sco.model.merchandisecostanalysis.accountingingredient.accounting.AccountingManageRegion">
+		SELECT 
+			t.accounting_code accountingCode,
+			t.region region,
+			t.proportion proportion,
+			t1.region_name regionName
+		FROM 
+			(select * from accounting_manage_region WHERE accounting_code = #{accountingCode}) t
+			left join region t1 on t1.region_code = t.region
+			ORDER BY t.region
+	</select>
+	
+	<!-- 查询核算表运输备注 -->
+	<select id="loadAccountingFreight" resultType="com.powere2e.sco.model.merchandisecostanalysis.accountingingredient.accounting.AccountingFreight">
+		SELECT 
+			accounting_code accountingCode,
+			units units,
+			units_cost unitsCost,
+			remarks remarks
+		FROM 
+			accounting_freight 
+		WHERE 
+			accounting_code = #{accountingCode}
+	</select>
+	
+	<!-- 查询核算表运输各地区 -->
+	<select id="loadAccountingFreightRegion" resultType="com.powere2e.sco.model.merchandisecostanalysis.accountingingredient.accounting.AccountingFreightRegion">
+		SELECT
+			t.accounting_code accountingCode,
+			t.region region,
+			<if test="quantity != null and convertAfterQuantity != null">
+			 round(t.price/${quantity}*${convertAfterQuantity},3) price,
+			 </if>
+			 <if test="quantity == null or convertAfterQuantity == null">
+			 t.price price,
+			 </if>
+			t.sum_km sumKm,
+			t1.region_name regionName
+		FROM 
+			(select * from accounting_freight_region WHERE accounting_code = #{accountingCode}) t
+			left join region t1 on t1.region_code = t.region
+			ORDER BY t.region
+	</select>
+	
+	<!-- 查询核算表税收 -->
+	<select id="loadAccountingTax" resultType="com.powere2e.sco.model.merchandisecostanalysis.accountingingredient.accounting.AccountingTax">
+		SELECT 
+			accounting_code accountingCode,
+			tax_rate taxRate,
+			remarks remarks
+		FROM 
+			accounting_tax 
+		WHERE 
+			accounting_code = #{accountingCode}
+	</select>
+	
+	<!-- 查询核算表税收各地区 -->
+	<select id="loadAccountingTaxRegion" resultType="com.powere2e.sco.model.merchandisecostanalysis.accountingingredient.accounting.AccountingTaxRegion">
+		SELECT 
+			t.accounting_code accountingCode,
+			t.region region,
+			 <if test="quantity != null and convertAfterQuantity != null">
+			 round(t.price/${quantity}*${convertAfterQuantity},3) price,
+			 </if>
+			 <if test="quantity == null or convertAfterQuantity == null">
+			 t.price price,
+			 </if>
+			t.proportion proportion,
+			t1.region_name regionName
+		FROM 
+			(select * from accounting_tax_region WHERE accounting_code = #{accountingCode}) t
+			left join region t1 on t1.region_code = t.region
+			ORDER BY t.region
+	</select>
+	
+	<!-- 查询核算表利润 -->
+	<select id="loadAccountingProfit" resultType="com.powere2e.sco.model.merchandisecostanalysis.accountingingredient.accounting.AccountingProfit">
+		SELECT 
+			accounting_code accountingCode,
+			remarks remarks
+		FROM 
+			accounting_profit 
+		WHERE 
+			accounting_code = #{accountingCode}
+	</select>
+	
+	<!-- 查询核算表利润各地区 -->
+	<select id="loadAccountingProfitRegion" resultType="com.powere2e.sco.model.merchandisecostanalysis.accountingingredient.accounting.AccountingProfitRegion">
+		SELECT 
+			t.accounting_code accountingCode,
+			t.region region,
+			 <if test="quantity != null and convertAfterQuantity != null">
+			 round(t.price/${quantity}*${convertAfterQuantity},3) price,
+			 </if>
+			 <if test="quantity == null or convertAfterQuantity == null">
+			 t.price price,
+			 </if>
+			t.proportion proportion,
+			t1.region_name regionName
+		FROM 
+			(select * from accounting_profit_region WHERE accounting_code = #{accountingCode}) t
+			left join region t1 on t1.region_code = t.region
+			ORDER BY t.region
+	</select>
+
+	<!-- 查询进口核算表商品出厂价 -->
+	<select id="loadAccountingFactoryPrice" resultType="com.powere2e.sco.model.merchandisecostanalysis.accountingingredient.accounting.AccountingFactoryPrice">
+		SELECT
+			t.accounting_code accountingCode,
+			<if test="quantity != null and convertAfterQuantity != null">
+			round(t.price/${quantity}*${convertAfterQuantity},3) price,
+			</if>
+			<if test="quantity == null or convertAfterQuantity == null">
+			t.price price,
+			</if>
+			t.currency currency,
+			t.payment_type paymentType,
+			t.remarks remarks
+		FROM 
+			accounting_factory_price t
+		WHERE 
+			t.accounting_code = #{accountingCode}
+	</select>
+
+	<!-- 查询进口核算表汇率 -->
+	<select id="loadAccountingExchangerate" resultType="com.powere2e.sco.model.merchandisecostanalysis.accountingingredient.accounting.AccountingExchangerate">
+		SELECT
+			t.accounting_code accountingCode,
+			t.exchangerate exchangerate,
+			t.reference_date referenceDate,
+			t.reference_bank referenceBank,
+			t.remarks remarks
+		FROM 
+			accounting_exchangerate t
+		WHERE
+			t.accounting_code = #{accountingCode}
+	</select>
+
+	<!-- 查询进口核算表海运费 -->
+	<select id="loadAccountingOceanfreight" resultType="com.powere2e.sco.model.merchandisecostanalysis.accountingingredient.accounting.AccountingOceanfreight">
+		SELECT
+			t.accounting_code accountingCode,
+			t.freight_type freightType,
+			<if test="quantity != null and convertAfterQuantity != null">
+			round(t.price/${quantity}*${convertAfterQuantity},3) price,
+			round(t.unit_price/${quantity}*${convertAfterQuantity},3) unitPrice,
+			</if>
+			<if test="quantity == null or convertAfterQuantity == null">
+			t.price price,
+			t.unit_price unitPrice,
+			</if>
+			TRANSPORT_START_DATE transportStartDate,
+			TRANSPORT_END_DATE transportEndDate,
+			t.starting starting,
+			t.destination destination,
+			t.container_type containerType,
+			DECODE(UPPER(t.container_type),'ELSE',t.else_type,(SELECT value_string FROM common_mapping_config WHERE key_type = 'CONTAINER_TYPE' AND code_string = t.container_type)) containerTypeString,
+			t.else_type elseType,
+			t.container_size containerSize,
+			t.container_capacity containerCapacity,
+			t.compute_type computeType,
+			t.remarks remarks
+		FROM 
+			accounting_oceanfreight t
+		WHERE
+			t.accounting_code = #{accountingCode}
+	</select>
+
+	<!-- 查询进口核算表报关服务费 -->
+	<select id="loadAccountingCustomscharges" resultType="com.powere2e.sco.model.merchandisecostanalysis.accountingingredient.accounting.AccountingCustomscharges">
+		SELECT
+			t.accounting_code accountingCode,
+			<if test="quantity != null and convertAfterQuantity != null">
+			round(t.price/${quantity}*${convertAfterQuantity},3) price,
+			</if>
+			<if test="quantity == null or convertAfterQuantity == null">
+			t.price price,
+			</if>
+			t.customscharges customscharges,
+			t.port_surcharge portSurcharge,
+			t.demurrage_charge demurrageCharge,
+			t.container_dirtyness_change containerDirtynessChange,
+			t.else_fee elseFee,
+			t.remarks remarks
+		FROM 
+			accounting_customscharges t
+		WHERE
+			t.accounting_code = #{accountingCode}
+	</select>
+
+	<!-- 查询进口核算表关税 -->
+	<select id="loadAccountingCustomsduties" resultType="com.powere2e.sco.model.merchandisecostanalysis.accountingingredient.accounting.AccountingCustomsduties">
+		SELECT
+			t.accounting_code accountingCode,
+			<if test="quantity != null and convertAfterQuantity != null">
+			round(t.price/${quantity}*${convertAfterQuantity},3) price,
+			</if>
+			<if test="quantity == null or convertAfterQuantity == null">
+			t.price price,
+			</if>
+			t.hs_code hsCode,
+			t.tax_rate taxRate,
+			t.customsduties_compute_type customsdutiesComputeType,
+			t.remarks remarks
+		FROM 
+			accounting_customsduties t
+		WHERE
+			t.accounting_code = #{accountingCode}
+	</select>
+
+	<!-- 查询进口核算表增值税 -->
+	<select id="loadAccountingAddedvaluetax" resultType="com.powere2e.sco.model.merchandisecostanalysis.accountingingredient.accounting.AccountingAddedvaluetax">
+		SELECT
+			t.accounting_code accountingCode,
+			<if test="quantity != null and convertAfterQuantity != null">
+			round(t.price/${quantity}*${convertAfterQuantity},3) price,
+			</if>
+			<if test="quantity == null or convertAfterQuantity == null">
+			t.price price,
+			</if>
+			t.tax_rate taxRate,
+			t.addedvaluetax_compute_type addedvaluetaxComputeType,
+			t.remarks remarks
+		FROM 
+			accounting_addedvaluetax t
+		WHERE
+			t.accounting_code = #{accountingCode}
+	</select>
+
+	<!-- 查询进口核算表税差 -->
+	<select id="loadAccountingTaxDiffer" resultType="com.powere2e.sco.model.merchandisecostanalysis.accountingingredient.accounting.AccountingTaxDiffer">
+		SELECT
+			t.accounting_code accountingCode,
+			<if test="quantity != null and convertAfterQuantity != null">
+			round(t.price/${quantity}*${convertAfterQuantity},3) price,
+			</if>
+			<if test="quantity == null or convertAfterQuantity == null">
+			t.price price,
+			</if>
+			t.tax_differ_compute_type taxDifferComputeType,
+			t.remarks remarks
+		FROM 
+			accounting_tax_differ t
+		WHERE
+			t.accounting_code = #{accountingCode}
+	</select>
+
+	<!-- 查询进口核算表利息 -->
+	<select id="loadAccountingInterest" resultType="com.powere2e.sco.model.merchandisecostanalysis.accountingingredient.accounting.AccountingInterest">
+		SELECT
+			t.accounting_code accountingCode,
+			<if test="quantity != null and convertAfterQuantity != null">
+			round(t.price/${quantity}*${convertAfterQuantity},3) price,
+			</if>
+			<if test="quantity == null or convertAfterQuantity == null">
+			t.price price,
+			</if>
+			t.loan_rate loanRate,
+			t.interest_compute_type interestComputeType,
+			t.remarks remarks
+		FROM 
+			accounting_interest t
+		WHERE
+			t.accounting_code = #{accountingCode}
+	</select>
+
+	<!-- 查询核算表其他成本小计 -->
+	<select id="loadAccountingElsesubtotal" resultType="com.powere2e.sco.model.merchandisecostanalysis.accountingingredient.accounting.AccountingElsesubtotal">
+		SELECT 
+			accounting_code accountingCode,
+			remarks remarks
+		FROM 
+			accounting_elsesubtotal 
+		WHERE 
+			accounting_code = #{accountingCode}
+	</select>
+	
+	<!-- 查询核算表其他成本小计各地区 -->
+	<select id="loadAccountingElsesubtotalRegion" resultType="com.powere2e.sco.model.merchandisecostanalysis.accountingingredient.accounting.AccountingElsesubtotalRegion">
+		SELECT 
+			t.accounting_code accountingCode,
+			t.region region,
+			 <if test="quantity != null and convertAfterQuantity != null">
+			 round(t.subtotal/${quantity}*${convertAfterQuantity},3) subtotal,
+			 </if>
+			 <if test="quantity == null or convertAfterQuantity == null">
+			 t.subtotal subtotal,
+			 </if>
+			t1.region_name regionName
+		FROM 
+			(select * from accounting_elsesubtotal_region WHERE accounting_code = #{accountingCode}) t
+			left join region t1 on t1.region_code = t.region
+			ORDER BY t.region
+	</select>
+	
+	<!-- 查询核算表总价 -->
+	<select id="loadAccountingAggregate" resultType="com.powere2e.sco.model.merchandisecostanalysis.accountingingredient.accounting.AccountingAggregate">
+		SELECT 
+			accounting_code accountingCode,
+			remarks remarks
+		FROM 
+			accounting_aggregate 
+		WHERE 
+			accounting_code = #{accountingCode}
+	</select>
+	
+	<!-- 查询核算表总价各地区 -->
+	<select id="loadAccountingAggregateRegion" resultType="com.powere2e.sco.model.merchandisecostanalysis.accountingingredient.accounting.AccountingAggregateRegion">
+		SELECT 
+			t.accounting_code accountingCode,
+			t.region region,
+			 <if test="quantity != null and convertAfterQuantity != null">
+			 round(t.sum_price/${quantity}*${convertAfterQuantity},3) sumPrice,
+			 </if>
+			 <if test="quantity == null or convertAfterQuantity == null">
+			 t.sum_price sumPrice,
+			 </if>
+			t1.region_name regionName
+		FROM 
+			(SELECT * from accounting_aggregate_region WHERE accounting_code = #{accountingCode}) t
+			left join region t1 on t1.region_code = t.region
+			ORDER BY t.region
+	</select>
+	
+	<!-- 查询核算/投料表扫描版-->
+	<select id="loadAccountingIngredientScan" resultType="com.powere2e.sco.model.merchandisecostanalysis.accountingingredient.accounting.AccountingIngredientScan">
+		SELECT 
+			accounting_code accountingCode,
+			intention_code intentionCode,
+			intention_supplier_code intentionSupplierCode,
+			merchandise_code merchandiseCode,
+			supplier_code supplierCode,
+			accounting_scan_path accountingScanPath,
+			ingredient_scan_path ingredientScanPath
+		FROM 
+			accounting_ingredient_scan
+		WHERE 
+			accounting_code = #{accountingCode}
+	</select>
+</mapper>

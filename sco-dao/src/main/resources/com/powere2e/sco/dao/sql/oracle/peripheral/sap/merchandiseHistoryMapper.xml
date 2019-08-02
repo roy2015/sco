@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.peripheral.sap.MerchandiseHistoryDao">
+	<resultMap type="com.powere2e.sco.model.peripheral.sap.MerchandiseHistory" id="merchandiseHistoryMap">
+		<result property="merchandiseCode" column="merchandiseCode"/>
+		<result property="wlReplace" column="wlReplace"/>
+		<result property="syncDate" column="syncDate"/>
+    </resultMap>
+    
+    <!-- 商品历史物料号 --> 
+	<insert id="saveMerchandiseHistory" parameterType="hashmap">
+		INSERT INTO merchandise_history(merchandise_code,wl_replace,sync_date) 
+			 <foreach collection="list" item="item" index="index" separator="union all" > 
+		         (
+		         SELECT 
+			         #{item.merchandiseCode}, 
+			         #{item.wlReplace},
+			         #{app_created}
+		         FROM　DUAL
+		         )
+		     </foreach>      
+    </insert>
+    
+     <!--删除商品历史物料号-->
+    <delete id="deleteMerchandiseHistory">
+    	DELETE FROM merchandise_history
+    </delete>
+    
+</mapper>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+  
+  <!-- 商品抽检不合格记录 -->
+  <bean id="merchandiseUnqualifiedDao" class="com.powere2e.sco.dao.impl.datamaintenance.gradecontroldata.merchandiseunqualified.MerchandiseUnqualifiedDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  <!-- 供应商考评模版 -->
+  <bean id="supplierEvaluateTemplateDao" class="com.powere2e.sco.dao.impl.sharefunctionanalysis.supplieranalysis.supplierevaluatetemplate.SupplierEvaluateTemplateDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  <!-- 获取序列的值 -->
+  <bean id="masterDataTypeDao" class="com.powere2e.sco.dao.impl.common.MasterDataTypeDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  <!-- 供应商考评表 -->
+  <bean id="supplierEvaluateTableDao" class="com.powere2e.sco.dao.impl.sharefunctionanalysis.supplieranalysis.supplierevaluatetable.SupplierEvaluateTableDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+</beans>

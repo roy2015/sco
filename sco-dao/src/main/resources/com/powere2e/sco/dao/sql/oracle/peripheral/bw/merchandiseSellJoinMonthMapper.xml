@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.peripheral.bw.MerchandiseSellJoinMonthDao">
+	<resultMap type="com.powere2e.sco.model.peripheral.bw.MerchandiseSellJoinMonth" id="merchandiseSellJoinMonthMap">
+		<result property="merchandiseCode" column="merchandiseCode"/>
+		<result property="sellMonth" column="sellMonth"/>
+		<result property="sellRegion" column="sellRegion"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="sellQuantity" column="sellQuantity"/>
+		<result property="sellTotalPrice" column="sellTotalPrice"/>
+		<result property="sellProfit" column="sellProfit"/>
+		<result property="psdSellQuantity" column="psdSellQuantity"/>
+		<result property="psdSellTotalPrice" column="psdSellTotalPrice"/>
+		<result property="psdSellProfit" column="psdSellProfit"/>
+		<result property="sellQuantityProportionM" column="sellQuantityProportionM"/>
+		<result property="sellTotalPriceProportionM" column="sellTotalPriceProportionM"/>
+		<result property="sellProfitProportionM" column="sellProfitProportionM"/>
+		<result property="sellQuantityProportionS" column="sellQuantityProportionS"/>
+		<result property="sellTotalPriceProportionS" column="sellTotalPriceProportionS"/>
+		<result property="sellProfitProportionS" column="sellProfitProportionS"/>
+		<result property="sellQuantityProportionD" column="sellQuantityProportionD"/>
+		<result property="sellTotalPriceProportionD" column="sellTotalPriceProportionD"/>
+		<result property="sellProfitProportionD" column="sellProfitProportionD"/>
+		<result property="sellStoreQuantity" column="sellStoreQuantity"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+   
+    
+    <!-- 增加商品区域销售情况(月加盟) --> 
+	<insert id="saveMerchandiseSellJoinMonth" parameterType="hashmap">
+		INSERT INTO merchandise_sell_join_month(merchandise_code,sell_month,sell_region,supplier_code,sell_quantity,sell_total_price,sell_profit,psd_sell_quantity,psd_sell_total_price,psd_sell_profit,sell_quantity_proportion_m,sell_total_price_proportion_m,sell_profit_proportion_m,sell_quantity_proportion_s,sell_total_price_proportion_s,sell_profit_proportion_s,sell_quantity_proportion_d,sell_total_price_proportion_d,sell_profit_proportion_d,sell_store_quantity) 
+    		 <foreach collection="list" item="item" index="index" separator="union all" > 
+		         (
+		         SELECT 
+			         #{item.merchandiseCode}, 
+			         #{item.sellMonth},
+			         #{item.sellRegion},
+			         #{item.supplierCode},
+			         #{item.sellQuantity},
+			         #{item.sellTotalPrice},
+			         #{item.sellProfit},
+			         #{item.psdSellQuantity},
+			         #{item.psdSellTotalPrice},
+			         #{item.psdSellProfit},
+			         #{item.sellQuantityProportionM},
+			         #{item.sellTotalPriceProportionM},
+			         #{item.sellProfitProportionM},
+			         #{item.sellQuantityProportionS},
+			         
+			         #{item.sellTotalPriceProportionS},
+			         #{item.sellProfitProportionS},
+			         #{item.sellQuantityProportionD},
+			         #{item.sellTotalPriceProportionD},
+			         #{item.sellProfitProportionD},
+			         #{item.sellStoreQuantity}
+		         FROM　DUAL
+		         )
+		     </foreach>      
+    </insert>
+   
+</mapper>

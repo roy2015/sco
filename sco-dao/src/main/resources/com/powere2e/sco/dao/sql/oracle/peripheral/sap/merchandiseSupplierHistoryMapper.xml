@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.peripheral.sap.MerchandiseSupplierHistoryDao">
+	<resultMap type="com.powere2e.sco.model.peripheral.sap.MerchandiseSupplierHistory" id="merchandiseSupplierHistoryMap">
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="wlReplace" column="wlReplace"/>
+		<result property="syncDate" column="syncDate"/>
+    </resultMap>
+    
+    
+    <!-- 增加供应商历史物料号 --> 
+	<insert id="saveMerchandiseSupplierHistory" parameterType="hashmap">
+		INSERT INTO supplier_history(supplier_code,wl_replace,sync_date) 
+			 <foreach collection="list" item="item" index="index" separator="union all" > 
+		         (
+		         SELECT 
+			         #{item.supplierCode}, 
+			         #{item.wlReplace},
+			         #{app_created}
+		         FROM　DUAL
+		         )
+		     </foreach>   
+    </insert>
+    
+     <!--删除供应商历史物料号-->
+    <delete id="deleteMerchandiseSupplierHistory">
+    	DELETE FROM supplier_history
+    </delete>
+    
+</mapper>

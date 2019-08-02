@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN" "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+  <constant name="struts.i18n.encoding" value="UTF-8"/>
+  <constant name="struts.action.extension" value="do"/>
+  <!-- 设置浏览器是否缓存静态内容,默认值为true(部署阶段开启(true)), 开发阶段最好关闭 -->
+  <constant name="struts.serve.static.browserCache" value="true"/>
+  <constant name="struts.enable.DynamicMethodInvocation" value="true"/>
+  <constant name="struts.devMode" value="false"/>
+  <constant name="struts.locale" value="zh_CN"/>
+  <constant name="struts.custom.i18n.resources"  value="com/powere2e/i18n/security,
+  														com/powere2e/i18n/bizframe,
+  														com/powere2e/i18n/appBase,
+  														com/powere2e/i18n/dic,
+  														com/powere2e/i18n/gavin,
+  														com/powere2e/i18n/matt,
+  														com/powere2e/i18n/gavillen,
+  														com/powere2e/i18n/joyce"/>
+  <!-- 附件上传最大约500M(超过会有JS错误)-->
+  <constant name="struts.multipart.maxSize" value="524288000"/>
+
+  <!-- Add packages here -->
+  <package name="pubstruts" namespace="/" extends="powere2eresult">
+    <!-- 定义一个拦截器 -->
+    <interceptors>
+      <interceptor name="authority" class="com.powere2e.frame.web.AuthorityInterceptor"/>
+      <!-- 新定义的功能权限拦截器 -->
+      <interceptor name="checkFuncPower" class="com.powere2e.security.interceptor.FuncPowerInterceptor"/>
+      <!-- 拦截器栈 -->
+      <interceptor-stack name="mydefault">
+        <interceptor-ref name="checkFuncPower"/>
+        <interceptor-ref name="authority"/>
+        <interceptor-ref name="defaultStack"/>
+      </interceptor-stack>
+    </interceptors>
+    <default-interceptor-ref name="mydefault"/>
+    <global-results>
+      <result name="page.result.data" type="powere2epage"/>
+      <result name="ajax.result.data" type="powere2ejson"/>
+      <result name="excel.result.data" type="powere2ejxls"/>
+      <result name="pdf.result.data" type="powere2epdf"/>
+      <result name="download.result.data" type="powere2edownload"/>
+      <result name="error">/error.jsp</result>
+    </global-results>
+  </package>
+  <include file="com/powere2e/struts/base.xml"/>
+  <include file="com/powere2e/struts/security.xml"/>
+  <include file="com/powere2e/struts/bizframe.xml"/>
+  <include file="com/powere2e/struts/dic.xml"/>
+  <include file="com/powere2e/struts/common.xml"/>
+  <include file="com/powere2e/struts/appBase.xml"/>
+  <include file="com/powere2e/struts/gavin.xml"/>
+  <include file="com/powere2e/struts/joyce.xml"/>
+  <include file="com/powere2e/struts/matt.xml"/>
+  <include file="com/powere2e/struts/gavillen.xml"/>
+  <include file="com/powere2e/struts/lipengjie.xml"/>
+  <include file="com/powere2e/struts/xiejiajie.xml"/>
+  <include file="com/powere2e/struts/caoliqiang.xml"/>
+</struts>

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+	<bean id="orgManager" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.bizframe.org.impl.OrgServiceImpl">
+				<property name="orgDao" ref="orgDao" />
+			</bean>
+		</property>
+	</bean>
+	<bean id="retailerManager" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.bizframe.retailer.impl.RetailerServiceImpl">
+				<property name="retailerDao" ref="retailerDao" />
+				<property name="retailerDefaultDataPowerID">
+					<value>82000</value>
+				</property>
+			</bean>
+		</property>
+	</bean>
+	<bean id="supplierManager" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.bizframe.supplier.impl.SupplierServiceImpl">
+				<property name="supplierDao" ref="supplierDao" />
+				<property name="supplierDefaultDataPowerID">
+					<value>85536</value>
+				</property>
+			</bean>
+		</property>
+	</bean>
+	<bean id="importManager" parent="baseTxProxy">
+		<property name="target">
+			<bean
+				class="com.powere2e.bizframe.importmission.impl.ImportMissionServiceImpl">
+				<property name="importMissionDao" ref="importMissionDao" />
+			</bean>
+		</property>
+	</bean>
+	<!-- 记录当前用户导入成功的文件名 -->
+	<bean id="proccessingMissionManager" scope="session"
+		class="com.powere2e.bizframe.importmission.ProccessingMissionManager"></bean>
+
+	<bean id="relationSupplierRetailerManager" parent="baseTxProxy">
+		<property name="target">
+			<bean
+				class="com.powere2e.bizframe.relation.impl.RelationSupplierRetailerServiceImpl">
+				<property name="relationSupplierRetailerDao" ref="relationSupplierRetailerDao" />
+			</bean>
+		</property>
+	</bean>
+	<!-- 配置所有数据权限模块 -->
+	<bean id="dataPowerServiceMap" class="java.util.HashMap">
+		<constructor-arg type="java.util.Map">
+			<map>
+			<!--  
+				<entry key="R" value-ref="retailerManager" />
+				<entry key="S" value-ref="supplierManager" />
+				-->
+			</map>
+		</constructor-arg>
+	</bean>
+	<!-- 配置用户和用户所属组织的对应关系 -->
+	<bean id="userOrgMappingList" class="java.util.ArrayList">
+		<constructor-arg>
+			<list>
+				<!--
+				<bean class="com.powere2e.security.impl.UserOrgMapping">
+					<constructor-arg value="R" />			 类型 
+					<constructor-arg value="t_retailer" />	 表名
+					<constructor-arg value="retailer_id" />	 ID列名 
+					<constructor-arg value="name_cn" />		 名称列名 
+				</bean>
+				-->
+				<!--  
+				<bean class="com.powere2e.security.impl.UserOrgMapping">
+					<constructor-arg value="S" />
+					<constructor-arg value="t_supplier" />
+					<constructor-arg value="suppl_id" />
+					<constructor-arg value="suppl_name" />
+				</bean>
+				-->
+				<bean class="com.powere2e.security.impl.UserOrgMapping">
+					<constructor-arg value="O" />
+					<constructor-arg value="pub_org" />
+					<constructor-arg value="org_id" />
+					<constructor-arg value="name" />
+				</bean>
+			</list>
+		</constructor-arg>
+	</bean>
+	<!-- 配置自已的数据权限监听器 -->
+	<bean id="dataPowerListeners" class="java.util.ArrayList">
+		<!-- 
+		<constructor-arg>
+			<list>
+				<bean class="com.powere2e.bizframe.utils.MyDataPowerListener"/>
+			</list>
+		</constructor-arg>
+		-->
+	</bean>
+</beans>

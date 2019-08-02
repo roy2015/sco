@@ -1,0 +1,444 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.accessoryintentioncostanalysis.historicalquotesupplier.HistoricalQuoteSupplierDao">
+	<resultMap type="com.powere2e.sco.model.accessoryintentioncostanalysis.historicalquotesupplier.HistoricalQuoteSupplier" id="HistoricalQuoteSupplierMap">
+		<result property="intentionCode" column="intentionCode"/>
+		<result property="intentionName" column="intentionName"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="supplierName" column="supplierName"/>
+		<result property="intentionSupplierCode" column="intentionSupplierCode"/>
+		<result property="intentionSupplierName" column="intentionSupplierName"/>
+		<result property="centreTypeCode" column="centreTypeCode"/>
+		<result property="smallTypeCode" column="smallTypeCode"/>
+		<result property="detailTypeCode" column="detailTypeCode"/>
+		<result property="fineTypeCodes" column="fineTypeCodes"/>
+		<result property="centreTypeName" column="centreTypeName"/>
+		<result property="smallTypeName" column="smallTypeName"/>
+		<result property="detailTypeName" column="detailTypeName"/>
+		<result property="fineTypeName" column="fineTypeName"/>
+		
+		<result property="intentionCreateby" column="intentionCreateby"/>
+		<result property="created" column="created"/>
+		<result property="createby" column="createby"/>
+		<result property="updated" column="updated"/>
+		<result property="updateby" column="updateby"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <resultMap type="com.powere2e.sco.model.accessoryintentioncostanalysis.historicalquotesupplier.HistoricalQuoteSupplierForm" id="HistoricalQuoteSupplierFormMap">
+		<result property="intentionCode" column="intentionCode"/>
+		<result property="intentionName" column="intentionName"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="supplierName" column="supplierName"/>
+		<result property="intentionSupplierCode" column="intentionSupplierCode"/>
+		<result property="intentionSupplierName" column="intentionSupplierName"/>
+		<result property="intentionPicture" column="intentionPicture"/>
+		<result property="lastSpecifications" column="lastSpecifications"/>
+		<result property="actualSpecifications" column="actualSpecifications"/>
+		<result property="lastQuoteCount" column="lastQuoteCount"/>
+		<result property="lastQuoteTotal" column="lastQuoteTotal"/>
+		<result property="supplierCount" column="supplierCount"/>
+		<result property="supplierRanking" column="supplierRanking"/>
+		<result property="cooperationPrice" column="cooperationPrice"/>
+		<result property="cooperationPriceDate" column="cooperationPriceDate"/>
+		<result property="purchaseMoney" column="purchaseMoney"/>
+		<result property="purchaseCount" column="purchaseCount"/>
+		<result property="receivedOADate" column="receivedOADate"/>
+		<result property="requiredDeliveryDate" column="requiredDeliveryDate"/>
+		<result property="receivedOADate" column="receivedOADate"/>
+		<result property="oaSubmitDate" column="oaSubmitDate"/>
+		<result property="oaCompleteDate" column="oaCompleteDate"/>
+		<result property="oaCompleteDays" column="oaCompleteDays"/>
+		<result property="poDate" column="poDate"/>
+		<result property="actualDeliveryDate" column="actualDeliveryDate"/>
+		<result property="proofingCycle" column="proofingCycle"/>
+		<result property="normalProcessDays" column="normalProcessDays"/>
+		<result property="actualProcessDays" column="actualProcessDays"/>
+		<result property="differencesDays" column="differencesDays"/>
+		<result property="proofingEvaluate" column="proofingEvaluate"/>
+		<result property="created" column="created"/>
+		<result property="createby" column="createby"/>
+		<result property="updated" column="updated"/>
+		<result property="updateby" column="updateby"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+     <resultMap type="com.powere2e.sco.model.accessoryintentioncostanalysis.totalcostanalysis.QuotedForm" id="QuotedFormMap">
+		<result property="lastQuotedRank" column="lastQuotedRank"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="lastProductionCycle" column="lastProductionCycle"/>
+    </resultMap>
+    <resultMap type="com.powere2e.sco.model.accessoryintentioncostanalysis.totalcostanalysis.QuotedDetailForm" id="QuotedDetailFormMap">
+		<result property="quotedDate" column="quotedDate"/>
+		<result property="unitPrice" column="unitPrice"/>
+		<result property="quotedTotal" column="quotedTotal"/>
+    </resultMap>
+    
+    
+     <!-- 查询采购委员会竞价单OA申请列表(可分页)-->
+    <select id="listHistoricalQuoteSupplierIntentionApplication" resultMap="HistoricalQuoteSupplierMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.intention_code intentionCode,t.intention_supplier_code intentionSupplierCode ,m.intention_supplier_name intentionSupplierName,n.supplier_name supplierName,
+          a.INTENTION_NAME intentionName,
+           
+      c.centre_type_name centreTypeName,s.small_type_name smallTypeName,d.detail_type_name detailTypeName,f.fine_type_name fineTypeName
+      ,u.real_name as intentionCreateby
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM (select intention_code,intention_supplier_code from accessory_quoted_electronic  group by intention_code,intention_supplier_code) t
+          left join ACCESSORY_INTENTION_SUPPLIER m on t.intention_supplier_code=m.intention_supplier_code
+          left join SUPPLIER n on t.intention_supplier_code=n.SUPPLIER_CODE
+          left join ACCESSORY_INTENTION a on t.intention_code=a.intention_code
+          left join MERCHANDISE_CENTRE_TYPE c on a.centre_type_code=c.centre_type_code
+           left join MERCHANDISE_SMALL_TYPE s on a.small_type_code=s.small_type_code
+           left join MERCHANDISE_DETAIL_TYPE d on a.detail_type_code=d.detail_type_code
+           left join ACCESSORY_FINE_TYPE f on a.fine_type_code=f.fine_type_code
+           left join pub_user u on u.user_id=a.CREATEBY
+      		
+    	<where>
+    		1=1
+			
+			
+			
+	    	
+	    	<if test= "intentionCode != null and intentionCode!=''">
+			AND UPPER(t.intention_code) LIKE UPPER('%'||#{intentionCode}||'%')
+			</if>
+			<if test= "intentionName != null and intentionName!=''">
+			AND UPPER(a.intention_name) LIKE UPPER('%'||#{intentionName}||'%')
+			</if>
+			<if test= "intentionCreateby != null and intentionCreateby!=''">
+			AND UPPER(u.real_name) LIKE UPPER('%'||#{intentionCreateby}||'%')
+			</if>
+	    	<if test= "intentionSupplierCode != null and intentionSupplierCode!=''">
+			AND ( UPPER(m.intention_supplier_code) LIKE UPPER('%'||#{intentionSupplierCode}||'%')
+			</if>
+	    	<if test= "supplierCode != null and supplierCode!=''">
+			or UPPER(n.supplier_code) LIKE UPPER('%'||#{supplierCode}||'%') )
+			</if>
+	    	<if test= "intentionSupplierName != null and intentionSupplierName!=''">
+			AND ( UPPER(m.intention_supplier_name) LIKE UPPER('%'||#{intentionSupplierName}||'%')
+			</if>
+	    	<if test= "supplierName != null and supplierName!=''">
+			or UPPER(n.supplier_name) LIKE UPPER('%'||#{supplierName}||'%')   )
+			</if>
+			<if test= "centreTypeCode != null and centreTypeCode!=''">
+			AND UPPER(a.centre_type_code) LIKE UPPER('%'||#{centreTypeCode}||'%')
+			</if>
+	    	<if test= "smallTypeCode != null and smallTypeCode!=''">
+			AND UPPER(a.small_type_code) LIKE UPPER('%'||#{smallTypeCode}||'%')
+			</if>
+	    	<if test= "detailTypeCode != null and detailTypeCode!=''">
+			AND UPPER(a.detail_type_code) LIKE UPPER('%'||#{detailTypeCode}||'%')
+			</if>
+	    	<if test= "fineTypeCodes != null and fineTypeCodes!=''">
+			AND UPPER(a.fine_type_code) LIKE UPPER('%'||#{fineTypeCodes}||'%')
+			</if>
+	    	
+			
+	    	
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.intention_code desc
+    		</if>
+    	</if>
+    </select>
+    
+     <!-- 查询采购委员会竞价单OA申请列表(可分页)-->
+    <select id="listHistoricalQuoteSupplierForm" resultMap="HistoricalQuoteSupplierFormMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		 t.quoted_code quotedCode,
+ t.enquiry_code enquiryCode,
+ t.intention_code intentionCode,
+ t.intention_supplier_code intentionSupplierCode,
+ t.quoted_date quotedDate,
+ t.created quotedCreated,
+ m.intention_supplier_name intentionSupplierName,
+ n.supplier_name supplierName,
+ e.attachment intentionPicture ,--图片
+ e.enquiry_code enquiryCode,
+
+ a.INTENTION_NAME intentionName,
+ 
+ 
+ 
+ (select count(1)
+    from (select aqe.INTENTION_SUPPLIER_CODE, aqe.INTENTION_CODE
+            from ACCESSORY_QUOTED_ELECTRONIC aqe
+           inner join INTENTION_SUPPLIER_ACCESSORY isa
+              on aqe.intention_code = isa.intention_code
+             and (aqe.intention_supplier_code = isa.intention_supplier_code)
+           group by aqe.INTENTION_SUPPLIER_CODE, aqe.INTENTION_CODE) s
+   where s.INTENTION_CODE = t.INTENTION_CODE) supplierCount,--报价供应商数
+ z.line supplierRanking,--供应商报价排行
+ (z.order_count||e.QUOTED_UNITS)  lastQuoteCount,--报价数量
+ k2.unit_price lastQuoteTotal,--最后一次报价总价
+ k9.SUBSCRIBE_BILL_DATE receivedOADate,--收到申购单日期
+ k3.PURCHASE_COUNT purchaseCount,--实际采购数量
+ k3.CONTRACT_PRICE cooperationPrice,--合作价格
+ k3.PURCHASE_MONEY purchaseMoney,--实际采购金额
+ k3.SJYJ_SPECIFICATION actualSpecifications,--实际引进规格
+ k3.CREATED cooperationPriceDate,--合作价格日期
+ k4.SJWG_DATE sjwgDate,--设计完稿日期
+ k4.ORDER_DATE poDate,--ORDER_DATE
+ k4.AOG_DATE actualDeliveryDate,--实际到货日期
+ k4.NORMAL_FLOW_DATE normalProcessDays,--正常作业流程时间（天）
+ k7.oa_initiate_date oaSubmitDate,--OA系统审批发起时间
+ k7.oa_approve_date oaCompleteDate,  --OA系统审批通过时间
+ k7.created receivedOADate,
+k8.proofing_cycle proofingCycle,--打样周期
+k8.proofing_evaluate proofingEvaluate,--打样评价
+k9.REQUIREMENTS_DW_DATE requiredDeliveryDate--要求到货日期
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+    	<if test= "isYorN != null and isYorN!=''">
+      		 FROM (select t1.*
+          from ACCESSORY_QUOTED_ELECTRONIC t1
+         inner join (select t3.intention_code,t3.intention_supplier_code, max(QUOTED_DATE) quoted_date 
+                      from ACCESSORY_QUOTED_ELECTRONIC t3
+                     group by t3.intention_code,t3.intention_supplier_code) t2
+            on (t1.intention_code = t2.intention_code and t1.intention_supplier_code=t2.intention_supplier_code and t1.quoted_date=t2.quoted_date )) t
+</if>
+	<if test= "isYorN == null">
+      		FROM (select t1.*
+          from ACCESSORY_QUOTED_ELECTRONIC t1
+         inner join  WL_INFO t3 on t1.intention_code = t3.intention_code and t1.intention_supplier_code=t3.intention_supplier_code and t1.quoted_code=t3.quoted_code
+         where t3.ACCESSORY_SAP_CODE is not null ) t
+</if>
+  left join ACCESSORY_INTENTION_SUPPLIER m
+    on t.intention_supplier_code = m.intention_supplier_code
+  left join SUPPLIER n
+    on t.intention_supplier_code = n.SUPPLIER_CODE
+  left join ACCESSORY_INTENTION a
+    on t.intention_code = a.intention_code
+  left join ACCESSORY_ENQUIRY e
+    on t.enquiry_code = e.enquiry_code
+ 
+
+  left join MERCHANDISE_CENTRE_TYPE c
+    on a.centre_type_code = c.centre_type_code
+  left join MERCHANDISE_SMALL_TYPE s
+    on a.small_type_code = s.small_type_code
+  left join MERCHANDISE_DETAIL_TYPE d
+    on a.detail_type_code = d.detail_type_code
+  left join ACCESSORY_FINE_TYPE f
+    on a.fine_type_code = f.fine_type_code
+
+  left join ACCESSORY_QUOTED_TOTAL k2
+    on k2.quoted_code = t.quoted_code
+
+  left join
+
+(select kk.enquiry_code,
+         kk.unit_price,
+        kk.quoted_code,
+        kk.order_count,
+         kk.supplier_code,
+         rank() over(partition by kk.enquiry_code,kk.order_count order by kk.unit_price) line
+          from 
+          
+          ( select w1.enquiry_code,w1.unit_price,w1.quoted_code,w1.supplier_code,w1.order_count  from ACCESSORY_QUOTED_TOTAL W1
+            inner join(
+            
+            SELECT * FROM ACCESSORY_QUOTED_ELECTRONIC W WHERE NOT EXISTS(SELECT 1 FROM ACCESSORY_QUOTED_ELECTRONIC  WHERE 
+ W.enquiry_code=enquiry_code AND W.INTENTION_SUPPLIER_CODE=INTENTION_SUPPLIER_CODE AND W.quoted_date &lt; quoted_date ) ) W2 on W1.quoted_code= W2.quoted_code
+
+ )kk)z
+ on t.quoted_code=z.quoted_code and t.enquiry_code=z.enquiry_code and t.intention_supplier_code=z.supplier_code and k2.order_count=z.order_count
+ <if test= "isYorN != null and isYorN!=''">
+  left join WL_INFO k3
+    on t.quoted_code = k3.quoted_code
+    </if>
+    <if test= "isYorN == null">
+     inner join WL_INFO k3
+    on t.quoted_code = k3.quoted_code and z.order_count=k3.ENQUIRY_COUNT
+    </if>
+  left join APPLICATION_SCHEDULE_A k4 
+    on t.quoted_code = k4.quoted_code and z.order_count=k4.enquiry_count
+ 
+   left join APPLICATION_QUOTED k6
+    on t.quoted_code = k6.quoted_code
+  left join OA_APPLICATION k7
+    on k6.application_code = k7.application_code
+left join (select ap4.* from (select ap.proofing_code,ap.quoted_code,ap.proofing_evaluate,ap.proofing_cycle,ap.ask_proofing_date from  ACCESSORY_PROOFING   ap  where ap.proofing_type='产前样') ap4
+    inner join 
+ (select ap1.quoted_code ,max(ap1.ask_proofing_date) ask_proofing_date from ACCESSORY_PROOFING ap1 where ap1.proofing_type='产前样' group by ap1.quoted_code) ap3
+ on ap3.quoted_code=ap4.quoted_code and ap3.ask_proofing_date=ap4.ask_proofing_date) k8
+on  t.quoted_code = k8.quoted_code
+left join APPLICATION_REPORT_ACCESSORY k9
+on k9.APPLICATION_CODE=k7.application_code
+      		
+    	<where>
+    		1=1
+			
+			
+			
+	    	
+	    	<if test= "intentionCode != null and intentionCode!=''">
+			AND t.intention_code=#{intentionCode}
+			</if>
+			
+	    	<if test= "intentionSupplierCode != null and intentionSupplierCode!=''">
+			AND t.intention_supplier_code=#{intentionSupplierCode}
+			</if>
+	    	
+	    	
+	    	
+			
+	    	
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.intention_code desc
+    		</if>
+    	</if>
+    </select>
+       <!-- 查询最后一次报价申请列表(可分页)-->
+    <select id="listQuotedForm" resultMap="QuotedFormMap">
+    	SELECT  
+    	<if test="page_count == null">
+         k.production_cycle lastProductionCycle,
+         k.supplier_code supplierCode,
+         rank() over(partition by k.enquiry_code order by k.unit_price) lastQuotedRank
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+          
+            from accessory_quoted_total K
+      		
+    	<where>
+    		1=1
+			<if test= "enquiryCount != null and enquiryCount!=''">
+			AND k.order_count=#{enquiryCount}
+			</if>
+	    	<if test= "enquiryCode != null and enquiryCode!=''">
+			AND k.enquiry_code=#{enquiryCode}
+			</if>
+			<if test= "supplierCode != null and supplierCode!=''">
+			AND k.supplier_code=#{supplierCode}
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby !=null">
+    			ORDER BY k.QUOTED_CODE desc
+    		</if>
+    	</if>
+    </select>
+  
+     <!-- 根据主键查询某个辅料打样(可分页)-->
+    <select id="loadTotalcostanalysisIntentionApplication" resultMap="HistoricalQuoteSupplierMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		 t.enquiry_code            enquiryCode,
+ t.intention_code          intentionCode,
+ t.intention_supplier_code intentionSupplierCode,
+ m.intention_supplier_name intentionSupplierName,
+ n.supplier_name           supplierName,
+ a.INTENTION_NAME          intentionName,
+ (select count(1) from (select aqe.INTENTION_SUPPLIER_CODE, aqe.INTENTION_CODE from ACCESSORY_QUOTED_ELECTRONIC aqe
+ inner join INTENTION_SUPPLIER_ACCESSORY isa on aqe.intention_code=isa.intention_code and (aqe.intention_supplier_code=isa.intention_supplier_code )
+  group by aqe.INTENTION_SUPPLIER_CODE,aqe.INTENTION_CODE) s where s.INTENTION_CODE=t.INTENTION_CODE) supplierCount,
+ c.centre_type_name centreTypeName,
+ s.small_type_name  smallTypeName,
+ d.detail_type_name detailTypeName,
+ f.fine_type_name   fineTypeName,
+ e.created          enquiryCreated,
+ e.createby         enquiryCreateby,
+ z.line
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM (select enquiry_code,
+               intention_code,
+               intention_supplier_code,
+              
+          from accessory_quoted_electronic t1
+         group by enquiry_code,
+                  intention_code,
+                  intention_supplier_code,
+                  ) t
+   inner join INTENTION_SUPPLIER_ACCESSORY isa1 on t.intention_code=isa1.intention_code and (t.intention_supplier_code=isa1.intention_supplier_code)
+  left join ACCESSORY_INTENTION_SUPPLIER m
+    on t.intention_supplier_code = m.intention_supplier_code
+  left join SUPPLIER n
+    on t.intention_supplier_code = n.SUPPLIER_CODE
+  left join ACCESSORY_INTENTION a
+    on t.intention_code = a.intention_code
+  left join ACCESSORY_ENQUIRY e
+    on t.enquiry_code = e.enquiry_code
+
+  left join MERCHANDISE_CENTRE_TYPE c
+    on a.centre_type_code = c.centre_type_code
+  left join MERCHANDISE_SMALL_TYPE s
+    on a.small_type_code = s.small_type_code
+  left join MERCHANDISE_DETAIL_TYPE d
+    on a.detail_type_code = d.detail_type_code
+  left join ACCESSORY_FINE_TYPE f
+    on a.fine_type_code = f.fine_type_code
+  left join
+
+ (select k.enquiry_code,
+         k.unit_price,
+         k.quoted_code,
+         k.supplier_code,
+         rank() over(partition by k.enquiry_code order by k.unit_price) line
+    from (select *
+          
+            from ACCESSORY_QUOTED_TOTAL W
+          
+           where quoted_code =
+                 (select MAX(quoted_code)
+                    from ACCESSORY_QUOTED_TOTAL
+                   where enquiry_code = W.enquiry_code
+                     AND supplier_code = W.supplier_code)) k
+  
+   inner join (select enquiry_code, count(*) num
+                from ACCESSORY_ENQUIRY_QUOTED_COUNT
+               group by enquiry_code) k1
+      on k.enquiry_code = k1.enquiry_code
+     and k1.num = 1
+   group by k.enquiry_code, k.unit_price, k.quoted_code, k.supplier_code) z
+    on t.enquiry_code = z.enquiry_code
+   and (t.intention_supplier_code = z.supplier_code )
+    	<where>
+    		1=1
+	    	<if test= "quotedCode != null and quotedCode!=''">
+			AND  t.quoted_code = #{quotedCode}
+			</if>
+    	</where>
+    	
+    </select>
+    <!-- 修改关联表 -->
+    <update id="updateIntentionSupplierAccessory" parameterType="hashmap">
+		UPDATE	
+				intention_supplier_accessory	
+		   SET	
+		   		merchandise_code=#{accessorySapCode}
+		   		<if test= "supplierSapCode != null and supplierSapCode!=''">
+		   		,
+		   		supplier_code=#{supplierSapCode}
+		   		</if>	   		
+		 WHERE	
+		 		intention_code=#{intentionCode}
+    </update>
+</mapper>

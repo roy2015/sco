@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.peripheral.sap.MerchandiseDetailTypeDao">
+	<resultMap type="com.powere2e.sco.model.peripheral.sap.MerchandiseDetailType" id="merchandiseDetailTypeMap">
+		<result property="detailTypeCode" column="detailTypeCode"/>
+		<result property="detailTypeName" column="detailTypeName"/>
+		<result property="syncDate" column="syncDate"/>
+    </resultMap>
+    
+    <!-- 商品明细类 --> 
+	<insert id="saveMerchandiseDetailType" parameterType="hashmap">
+		INSERT INTO merchandise_detail_type(detail_type_code,detail_type_name,small_type_code,sync_date) 
+			 <foreach collection="list" item="item" index="index" separator="union all" > 
+		         (
+		         SELECT 
+			         #{item.detailTypeCode}, 
+			         #{item.detailTypeName},
+			         #{item.smallTypeCode},
+			         #{app_created}
+		         FROM　DUAL
+		         )
+		     </foreach>      
+    </insert>
+    
+     <!--删除商品明细类-->
+    <delete id="deleteMerchandiseDetailType">
+    	DELETE FROM merchandise_detail_type
+    </delete>
+    
+</mapper>

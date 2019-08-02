@@ -1,0 +1,74 @@
+@charset "utf-8";
+/* CSS Document */
+* {
+	margin: 0;
+	padding: 0;
+}
+.main_tu {
+	background-image: url(../../images/sco/merStandProInfo.jpg);
+	width: 492px;
+	height: 840px;
+	position: relative;
+	margin: 0 auto;
+	background-repeat: no-repeat;
+	background-position: 0 10px;
+}
+.wen01, .wen02, .wen03, .wen04, .wen05, .wen06, .wen07, .wen08, .wen09, .wen10, .wen11, .wen12 {
+	position: absolute;
+	width: 45px;
+	height: 15px;
+}
+.wen01 input, .wen02 input, .wen03 input, .wen04 input, .wen05 input, .wen06 input, .wen07 input, .wen08 input, .wen09 input, .wen10 input, .wen11 input, .wen12 input {
+	width: 45px;
+	height: 15px;
+	line-height:15px;
+	text-align:center;
+}
+.wen01 {
+	top: 146px;
+	left: 150px;
+}
+.wen02 {
+	top: 238px;
+	left: 288px;
+}
+.wen03 {
+	top: 251px;
+	left: 88px;
+}
+.wen04 {
+	top: 251px;
+	left: 202px;
+}
+.wen05 {
+	top: 351px;
+	left: 264px;
+}
+.wen06 {
+	top: 352px;
+	left: 412px;
+}
+.wen07 {
+	top: 460px;
+	left: 26px;
+}
+.wen08 {
+	top: 450px;
+	left: 264px;
+}
+.wen09 {
+	top: 450px;
+	left: 411px;
+}
+.wen10 {
+	top: 553px;
+	left: 302px;
+}
+.wen11 {
+	top: 554px;
+	left: 375px;
+}
+.wen12 {
+	top: 671px;
+	left: 340px;
+}

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.accessoryintention.AccessoryEnquiryMaterialDao">
+	<resultMap type="com.powere2e.sco.model.accessoryintention.AccessoryEnquiryMaterial" id="accessoryEnquiryMaterialMap">
+		<result property="materialCode" column="materialCode"/>
+		<result property="enquiryCode" column="enquiryCode"/>
+		<result property="materialName" column="materialName"/>
+		<result property="material" column="material"/>
+		<result property="materialSize" column="materialSize"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <!-- 查询询价单原材料(可分页)-->
+    <select id="searchAccessoryEnquiryMaterial" resultMap="accessoryEnquiryMaterialMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.material_code materialCode,t.enquiry_code enquiryCode,t.material_name materialName,t.material material,t.material_size materialSize
+       		
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM accessory_enquiry_material t
+    	<where>
+    		1=1
+	    	<if test= "materialCode != null and materialCode!=''">
+			AND t.material_code = #{materialCode}
+			</if>
+	    	<if test= "enquiryCode != null and enquiryCode!=''">
+			AND t.enquiry_code =#{enquiryCode}
+			</if>
+	    	<if test= "materialName != null and materialName!=''">
+			AND UPPER(t.material_name) LIKE UPPER('%'||#{materialName}||'%')
+			</if>
+	    	<if test= "material != null and material!=''">
+			AND UPPER(t.material) LIKE UPPER('%'||#{material}||'%')
+			</if>
+	    	<if test= "materialSize != null and materialSize!=''">
+			AND UPPER(t.material_size) LIKE UPPER('%'||#{materialSize}||'%')
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 根据主键查询某个询价单原材料(可分页)-->
+    <select id="loadAccessoryEnquiryMaterial" resultMap="accessoryEnquiryMaterialMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.material_code materialCode,t.enquiry_code enquiryCode,t.material_name materialName,t.material material,t.material_size materialSize
+       		,t.created,	t.updated 
+		   ,(select u.real_name from pub_user u where u.user_id=t.createby) as createUserName,
+           	(select u.real_name from pub_user u where u.user_id=t.updateby) as updateUserName
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM accessory_enquiry_material t
+    	<where>
+    		1=1
+	    	<if test= "materialCode != null and materialCode!=''">
+			AND  t.MATERIAL_CODE = #{materialCode}
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		
+    	</if>
+    </select>
+    
+    <!-- 增加询价单原材料 --> 
+	<insert id="saveAccessoryEnquiryMaterial" parameterType="hashmap">
+		INSERT INTO accessory_enquiry_material(material_code,enquiry_code,material_name,material,material_size) 
+			 VALUES(s_accessory_enquiry_material.nextval,#{enquiryCode},#{materialName},#{material},#{materialSize})
+    </insert>
+    <!-- 修改询价单原材料  -->
+    <update id="updateAccessoryEnquiryMaterial" parameterType="hashmap">
+		UPDATE	
+				accessory_enquiry_material	
+		   SET	
+		   		enquiry_code=#{enquiryCode},
+		   		material_name=#{materialName},
+		   		material=#{material},
+		   		material_size=#{materialSize}		   		
+		 WHERE	
+		 		MATERIAL_CODE=#{materialCode}
+    </update>
+    <!-- 删除询价单原材料 -->
+    <delete id="deleteAccessoryEnquiryMaterial" parameterType="hashmap">
+        DELETE FROM 
+        			accessory_enquiry_material 
+        WHERE 
+        			ENQUIRY_CODE=#{enquiryCode} <!--AND client_id=#{app_user_clientID}-->
+    </delete>
+</mapper>

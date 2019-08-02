@@ -1,0 +1,1063 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.powere2e.sco.interfaces.dao.sharefunctionanalysis.sellanalysis.merchandisepromotionanalysis.MerchandisePromotionAnalysisDao">
+	<resultMap type="com.powere2e.sco.model.sharefunctionanalysis.sellanalysis.merchandisepromotionanalysis.MerchandisePromotionAnalysis" id="MerchandisePromotionAnalysisMap">
+		<result property="merchandiseCode" column="merchandiseCode" />
+		<result property="merchandiseName" column="merchandiseName" />
+		<result property="supplierCode" column="supplierCode" />
+		<result property="supplierName" column="supplierName" />
+		<result property="wlType" column="wlType" />
+		<result property="sku" column="sku" />
+		<result property="netWeight" column="netWeight" />
+		<result property="centreType" column="centreType" />
+		<result property="smallType" column="smallType" />
+		<result property="detailType" column="detailType" />
+		<result property="centreTypeCode" column="centreTypeCode" />
+		<result property="smallTypeCode" column="smallTypeCode" />
+		<result property="detailTypeCode" column="detailTypeCode" />
+		<result property="centreName" column="centreName" />
+		<result property="smallName" column="smallName" />
+		<result property="detailName" column="detailName" />
+		<result property="fineName" column="fineName" />
+		<result property="purchaseDepartments" column="purchaseDepartments" />
+		<result property="dxRoleCode" column="dxRoleCode" />
+		<result property="dxRoleName" column="dxRoleName" />
+		<result property="dlRoleCode" column="dlRoleCode" />
+		<result property="dlRoleName" column="dlRoleName" />
+		<result property="sellRegion" column="sellRegion" />
+		<result property="sellDate" column="sellDate" />
+		<result property="time" column="time" />
+		<result property="type" column="type"/>
+		<result property="sellPrice" column="sellPrice" />
+		<result property="maxDate" column="maxDate" />
+		<result property="minDate" column="minDate" />
+		<result property="startDate" column="startDate" />
+		<result property="endDate" column="endDate" />
+		<result property="promotionName" column="promotionName" />
+		<result property="sellQuantity" column="sellQuantity" />
+		<result property="sellQuantityDB" column="sellQuantityDB" />
+		<result property="sellTotalPrice" column="sellTotalPrice" />
+		<result property="sellTotalPriceDB" column="sellTotalPriceDB" />
+		<result property="toDaySellTotalPrice" column="toDaySellTotalPrice" />
+		<result property="toDaySellTotalPriceS" column="toDaySellTotalPriceS" />
+		<result property="toDaySellQuantity" column="toDaySellQuantity" />
+		<result property="toDaySellQuantityS" column="toDaySellQuantityS" />
+		<result property="sellProfit" column="sellProfit" />
+		<result property="sellQuantityP" column="sellQuantityP" />
+		<result property="sellTotalPriceP" column="sellTotalPriceP" />
+		<result property="sellProfitP" column="sellProfitP" />
+		<result property="psdSellQuantity" column="psdSellQuantity" />
+		<result property="psdSellTotalPrice" column="psdSellTotalPrice" />
+		<result property="psdSellProfit" column="psdSellProfit" />
+		<result property="sellQuantityS" column="sellQuantityS" />
+		<result property="sellTotalPriceS" column="sellTotalPriceS" />
+		<result property="sellProfitS" column="sellProfitS" />
+		<result property="psdSellQuantityS" column="psdSellQuantityS" />
+		<result property="psdSellTotalPriceS" column="psdSellTotalPriceS" />
+		<result property="psdSellProfitS" column="psdSellProfitS" />
+		<result property="sellQuantityD" column="sellQuantityD" />
+		<result property="sellTotalPriceD" column="sellTotalPriceD" />
+		<result property="sellProfitD" column="sellProfitD" />
+		<result property="psdSellQuantityD" column="psdSellQuantityD" />
+		<result property="psdSellTotalPriceD" column="psdSellTotalPriceD" />
+		<result property="psdSellProfitD" column="psdSellProfitD" />
+		<result property="sellQuantityA" column="sellQuantityA" />
+		<result property="sellTotalPriceA" column="sellTotalPriceA" />
+		<result property="sellProfitA" column="sellProfitA" />
+		<result property="psdSellQuantityA" column="psdSellQuantityA" />
+		<result property="psdSellTotalPriceA" column="psdSellTotalPriceA" />
+		<result property="psdSellProfitA" column="psdSellProfitA" />
+		<result property="sellQuantityProportionM" column="sellQuantityProportionM" />
+		<result property="sellTotalPriceProportionM" column="sellTotalPriceProportionM" />
+		<result property="sellProfitProportionM" column="sellProfitProportionM" />
+		<result property="sellQuantityProportionS" column="sellQuantityProportionS" />
+		<result property="sellTotalPriceProportionS" column="sellTotalPriceProportionS" />
+		<result property="sellProfitProportionS" column="sellProfitProportionS" />
+		<result property="sellQuantityProportionD" column="sellQuantityProportionD" />
+		<result property="sellTotalPriceProportionD" column="sellTotalPriceProportionD" />
+		<result property="sellProfitProportionD" column="sellProfitProportionD" />
+		<result property="sellStoreQuantity" column="sellStoreQuantity" />
+		<result property="permissionStoreQuantity" column="permissionStoreQuantity" />
+		<result property="active" column="active" />
+		<result property="dayS" column="dayS" />
+		<result property="dayD" column="dayD" />
+		<result property="dayA" column="dayA" />
+		<result property="createUserName" column="createUserName" />
+		<result property="updateUserName" column="updateUserName" />
+		<result property="recordCount" column="record_count" />
+	</resultMap>
+	<!-- 查询商品信息 -->
+	<select id="searchMerchandise" resultMap="MerchandisePromotionAnalysisMap">
+	    SELECT
+		<if test="page_count == null">
+			m.merchandise_code merchandiseCode,
+			m.merchandise_name merchandiseName,
+			s.supplier_code supplierCode,
+			s.supplier_name supplierName,
+			dx.role_name dxRoleName,
+			dl.role_name dlRoleName,
+			ct.centre_type_name centreName,
+			st.small_type_name smallName,
+			dt.detail_type_name detailName,
+			ft.fine_type_name fineName,
+			m.purchase_departments purchaseDepartments
+		</if>
+	    <if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		FROM
+		merchandise m
+		LEFT JOIN supplier s ON m.supplier_code = s.supplier_code
+		left join MERCHANDISE_ROLE mr on mr.MERCHANDISE_CODE=m.merchandise_code
+		LEFT JOIN merchandise_dx_role dx ON mr.dx_role_code = dx.role_code
+		LEFT JOIN merchandise_dl_role dl ON mr.dl_role_code = dl.role_code
+		LEFT JOIN merchandise_centre_type ct ON m.centre_type_code = ct.centre_type_code
+		LEFT JOIN merchandise_small_type st ON m.small_type_code = st.small_type_code
+		LEFT JOIN merchandise_detail_type dt ON m.detail_type_code = dt.detail_type_code
+		left join INTENTION_SUPPLIER_MERCHANDISE ism on ism.merchandise_code=m.merchandise_code and ism.SUPPLIER_CODE=m.SUPPLIER_CODE
+		left join MERCHANDISE_INTENTION mi on ism.intention_code=mi.intention_code
+		LEFT JOIN merchandise_fine_type ft ON dt.detail_type_code = ft.detail_type_code AND mi.fine_type_code = ft.fine_type_code	<!-- 细分类 -->
+		<where>
+			1=1
+			<if test="merchandiseCode != null and merchandiseCode !=''">
+				AND UPPER(m.merchandise_code) LIKE UPPER('%'||#{merchandiseCode}||'%')
+			</if>
+			<if test="merchandiseName != null and merchandiseName !=''">
+				AND UPPER(m.merchandise_name) LIKE UPPER('%'||#{merchandiseName}||'%')
+			</if>
+			<if test="supplierCode != null and supplierCode !=''">
+				AND UPPER(m.supplier_code) LIKE UPPER('%'||#{supplierCode}||'%')
+			</if>
+			<if test="show ==1 ">
+				AND m.NET_WEIGHT !=1
+			</if>
+			<if test="show ==2">
+				AND m.NET_WEIGHT =1
+			</if>
+			<if test="supplierName != null and supplierName !=''">
+				AND UPPER(s.supplier_name) LIKE UPPER('%'||#{supplierName}||'%')
+			</if>
+			<if test="centreTypeCode != null and centreTypeCode != ''">
+				AND UPPER(m.centre_type_code) like UPPER(#{centreTypeCode})
+			</if>
+			<if test="smallTypeCode != null and smallTypeCode != ''">
+				AND UPPER(m.small_type_code) like UPPER(#{smallTypeCode})
+			</if>
+			<if test="detailTypeCode != null and detailTypeCode != ''">
+				AND UPPER(m.detail_type_code) like UPPER(#{detailTypeCode})
+			</if>
+			<if test="fineTypeCode != null and fineTypeCode != ''">
+				AND UPPER(ft.fine_type_code) like UPPER(#{fineTypeCode})
+			</if>
+			<if test="dxRoleCode != null and dxRoleCode != ''">
+				AND UPPER(dx.role_code) like UPPER(#{dxRoleCode})
+			</if>
+			<if test="dlRoleCode != null and dlRoleCode != ''">
+				AND UPPER(dl.role_code) like UPPER(#{dlRoleCode})
+			</if>
+			<if test="purchaseDepartments != null and purchaseDepartments != ''">
+				AND UPPER(m.purchase_departments) like UPPER(#{purchaseDepartments})
+			</if>
+		</where>
+		<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			order by ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			order by m.merchandise_code desc
+    		</if>
+    	</if>
+	</select>
+	<!-- 查询商品详情 -->
+	<select id="searchMerchandiseInfo" resultMap="MerchandisePromotionAnalysisMap">
+	    SELECT
+		<if test="page_count == null">
+			m.merchandise_code merchandiseCode,
+			m.merchandise_name merchandiseName,
+			dx.role_name dxRoleName,
+			dl.role_name dlRoleName,
+			s.supplier_code supplierCode,
+			s.supplier_name supplierName,
+			ct.centre_type_name centreName,
+			st.small_type_name smallName,
+			dt.detail_type_name detailName,
+			ft.fine_type_name fineName,
+			m.purchase_departments purchaseDepartments
+		</if>
+	    <if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		FROM
+		merchandise m
+		LEFT JOIN supplier s ON m.supplier_code = s.supplier_code
+		left join MERCHANDISE_ROLE mr on mr.MERCHANDISE_CODE=m.merchandise_code
+		LEFT JOIN merchandise_dx_role dx ON mr.dx_role_code = dx.role_code
+		LEFT JOIN merchandise_dl_role dl ON mr.dl_role_code = dl.role_code
+		LEFT JOIN merchandise_centre_type ct ON m.centre_type_code =ct.centre_type_code
+		LEFT JOIN merchandise_small_type st ON m.small_type_code = st.small_type_code
+		LEFT JOIN merchandise_detail_type dt ON m.detail_type_code = dt.detail_type_code
+		left join INTENTION_SUPPLIER_MERCHANDISE ism on ism.merchandise_code=m.merchandise_code and ism.SUPPLIER_CODE=m.SUPPLIER_CODE
+		left join MERCHANDISE_INTENTION mi on ism.intention_code=mi.intention_code
+		LEFT JOIN merchandise_fine_type ft ON dt.detail_type_code = ft.detail_type_code AND mi.fine_type_code = ft.fine_type_code	<!-- 细分类 -->
+		<where>
+			1=1
+			<if test="merchandiseCode != null and merchandiseCode !=''">
+				AND UPPER(m.merchandise_code) LIKE UPPER(#{merchandiseCode})
+			</if>
+			<if test="merchandiseName != null and merchandiseName !=''">
+				AND UPPER(m.merchandise_name) LIKE UPPER(#{merchandiseName})
+			</if>
+			<if test="supplierCode != null and supplierCode !=''">
+				AND UPPER(m.supplier_code) LIKE UPPER(#{supplierCode})
+			</if>
+			<if test="supplierName != null and supplierName !=''">
+				AND UPPER(s.supplier_name) LIKE UPPER(#{supplierName})
+			</if>
+		</where>
+	</select>
+	<!-- 查询促销信息 -->
+	<select id="searchMerchandisePromotionAnalysis"  resultMap="MerchandisePromotionAnalysisMap">
+	    SELECT
+	    <if test="page_count == null">
+			mpd.price sellPrice,
+			to_char(mpd.start_date,'YYYY-MM-DD') minDate,
+			mpd.start_date startDate,
+			to_char(mpd.end_date,'YYYY-MM-DD') maxDate,
+			mpd.end_date endDate,
+			mpd.PROMOTION_NAME promotionName,
+	      (case
+	      when end_date > sysdate then ROUND(TO_NUMBER(sysdate - start_date)+1) 
+	      else ROUND(TO_NUMBER(end_date - start_date)+1)
+	      end ) dayA,
+	      	ROUND(TO_NUMBER(end_date - start_date)+1) dayS,
+	      	mpd.region_code sellRegion,
+			mpd.merchandise_code merchandiseCode,
+			mpd.supplier_code supplierCode,
+			m.net_weight netWeight ,
+			r.region_name sellRegionName
+	</if>
+	<if test="page_count != null">
+		count(1) AS record_count
+	</if> 
+	 		
+	 	from MERCHANDISE_PROMOTION_SELL mpd 
+  		inner join merchandise m on mpd.merchandise_code=m.merchandise_code and mpd.supplier_code=m.supplier_code
+  		left join REGION r on r.region_code=mpd.region_code
+  		where 1=1
+			<if test="minDate !='' and minDate !=null">
+				and mpd.start_date >= to_date(#{minDate},'yyyy-MM-DD') and to_date(#{maxDate},'yyyy-MM-DD') >= mpd.end_date    
+			</if>
+			<if test="searchTable =='direct' and searchTable !=null and searchTable != '' ">
+				and mjp.store_type='直营'
+			</if>
+			<if test="searchTable =='join'and searchTable !=null and searchTable != '' ">
+				 and mjp.store_type='加盟'
+			</if>
+			<if test="merchandiseCode != null and merchandiseCode !=''">
+				AND UPPER(mpd.merchandise_code) LIKE UPPER(#{merchandiseCode})
+			</if>
+			<if test="supplierCode != null and supplierCode !=''">
+				AND UPPER(mpd.supplier_code) LIKE UPPER(#{supplierCode})
+			</if>
+			<if test="sellRegion != null and sellRegion !='' and sellRegion !='all'">
+				and UPPER(mpd.REGION_CODE) LIKE UPPER(#{sellRegion})
+			</if>
+		order by to_char(mpd.start_date,'YYYY-MM-DD') desc,r.region_name
+	</select>
+	<!-- 查询促销汇总 -->
+<select id="searchMerchandisePromotionAnalysisPool" resultMap="MerchandisePromotionAnalysisMap">
+	select 
+	<if test="page_count == null">
+		zsj.sellRegion,
+		zsj.detailCode,
+		zsj.smallCode,
+		zsj.sellQuantity sellQuantity,
+		zsj.sellTotalPrice sellTotalPrice,
+		zsj.sellProfit sellProfit,
+		zsj.sellQuantityP sellQuantityP,
+		zsj.sellTotalPriceP sellTotalPriceP,
+		zsj.sellProfitP sellProfitP,
+		zsj.psdSellQuantity psdSellQuantity,
+		zsj.psdSellTotalPrice psdSellTotalPrice,
+		zsj.psdSellProfit psdSellProfit,
+		zsj.sellStoreQuantity,
+		zsj.sellQuantity*100/smallType.sellQuantityS sellQuantityProportionS,
+		zsj.sellTotalPrice*100/smallType.sellTotalPriceS sellTotalPriceProportionS,
+		zsj.sellProfit*100/smallType.sellProfitS sellProfitProportionS,
+		zsj.sellQuantity*100/detailType.sellQuantityD sellQuantityProportionD,
+		zsj.sellTotalPrice*100/detailType.sellTotalPriceD sellTotalPriceProportionD,
+		zsj.sellProfit*100/detailType.sellProfitD sellProfitProportionD,
+		zsj.sellQuantity*100/allType.sellQuantityA sellQuantityProportionM,
+		zsj.sellTotalPrice*100/allType.sellTotalPriceA sellTotalPriceProportionM,
+		zsj.sellProfit*100/allType.sellProfitA sellProfitProportionM,
+		nvl(mjp.permissionStoreQuantity,0) permissionStoreQuantity,
+				(case
+					when nvl(mjp.permissionStoreQuantity,0)=0 then 0
+					when zsj.sellStoreQuantity*100/mjp.permissionStoreQuantity >100 then 100
+					else zsj.sellStoreQuantity*100/mjp.permissionStoreQuantity
+				 end) active,
+		nvl(mps.sellPrice,0) sellPrice,
+		smallType.sellQuantityS sellQuantityS,
+		smallType.sellTotalPriceS sellTotalPriceS,
+		smallType.sellProfitS sellProfitS,
+		smallType.sellQuantityPS sellQuantityPS,
+		smallType.sellTotalPricePS sellTotalPricePS,
+		smallType.sellProfitPS sellProfitPS,
+		smallType.psdSellQuantityS psdSellQuantityS,
+		smallType.psdSellTotalPriceS psdSellTotalPriceS,
+		smallType.psdSellProfitS psdSellProfitS,
+		detailType.sellQuantityD sellQuantityD,
+		detailType.sellTotalPriceD sellTotalPriceD,
+		detailType.sellProfitD sellProfitD,
+		detailType.sellQuantityPD sellQuantityPD,
+		detailType.sellTotalPricePD sellTotalPricePD,
+		detailType.sellProfitPD sellProfitPD,
+		detailType.psdSellQuantityD psdSellQuantityD,
+		detailType.psdSellTotalPriceD psdSellTotalPriceD,
+		detailType.psdSellProfitD psdSellProfitD, 
+		allType.sellQuantityA sellQuantityA,
+		allType.sellTotalPriceA sellTotalPriceA,
+		allType.sellProfitA sellProfitA,
+		allType.sellQuantityPA sellQuantityPA,
+		allType.sellTotalPricePA sellTotalPricePA,
+		allType.sellProfitPA sellProfitPA,
+		allType.psdSellQuantityA psdSellQuantityA,
+		allType.psdSellTotalPriceA psdSellTotalPriceA,
+		allType.psdSellProfitA psdSellProfitA
+	</if>
+	<if test="page_count != null">
+		5*#{count} AS record_count
+	</if> 
+	 from (
+	(
+	select
+		MSJD.MERCHANDISE_code merchandiseCode,msjd.supplier_code,
+		<if test="sellRegion !='' and sellRegion !=null and sellRegion !='all'">
+			r.region_code regionCode,r.region_name sellRegion
+		</if>
+		<if test="sellRegion =='all'">
+			'all' regionCode,'全国' sellRegion
+		</if>,
+		m.detail_type_code detailCode,
+		m.small_type_code smallCode,
+		nvl(sum(msjd.sell_quantity*m.net_weight),0) sellQuantity,
+		nvl(sum(msjd.sell_total_price),0) sellTotalPrice,
+		nvl(sum(msjd.sell_profit),0) sellProfit,
+		nvl(sum(msjd.sell_quantity*m.net_weight),0)/nvl(count(to_char(msjd.sell_date,'yyyy-mm-dd')),1) sellQuantityP,
+		nvl(sum(msjd.sell_total_price),0)/nvl(count(to_char(msjd.sell_date,'yyyy-mm-dd')),1) sellTotalPriceP,
+		nvl(sum(msjd.sell_profit),0)/nvl(count(to_char(msjd.sell_date,'yyyy-mm-dd')),1) sellProfitP,
+		nvl(sum(msjd.sell_quantity*m.net_weight),0)/nvl(sum(msjd.sell_store_quantity),1) psdSellQuantity,
+		nvl(sum(msjd.sell_total_price),0)/nvl(sum(msjd.sell_store_quantity),1) psdSellTotalPrice,
+		nvl(sum(msjd.sell_profit),0)/nvl(sum(msjd.sell_store_quantity),1) psdSellProfit,
+		nvl(sum(msjd.sell_store_quantity),0) sellStoreQuantity
+	from
+	<if test="searchTable =='direct' and searchTable !=null and searchTable != '' ">
+		MERCHANDISE_SELL_DIRECT_DAY msjd
+	</if>
+	<if test="searchTable =='join'and searchTable !=null and searchTable != '' ">
+		MERCHANDISE_SELL_JOIN_DAY msjd
+	</if>
+	<if test="searchTable =='all'and searchTable !=null and searchTable != '' ">
+		MERCHANDISE_SELL_D_J_DAY msjd
+	</if>
+	left join merchandise m on m.merchandise_code=msjd.merchandise_code and m.supplier_code=msjd.supplier_code
+	left join region r on r.region_code=msjd.sell_region
+	where
+		1=1
+		<if test="sellRegion != null and sellRegion !='' and sellRegion !='all'">
+			and msjd.SELL_REGION=#{sellRegion}
+		</if>
+		and
+		msjd.sell_date between 
+		<if test="show == 1 and show !='' and show !=null">
+		    (to_date(#{minDate},'yyyy-mm-dd')-#{dayA}) and (to_date(#{maxDate},'yyyy-mm-dd')-#{dayA})
+		</if>
+		<if test="show == 2 and show !='' and show !=null">
+		    (to_date(#{minDate},'yyyy-mm-dd')) and (to_date(#{maxDate},'yyyy-mm-dd'))
+		</if>
+		<if test="show == 3 and show !='' and show !=null">
+		    (to_date(#{minDate},'yyyy-mm-dd')+#{dayA}) and (to_date(#{maxDate},'yyyy-mm-dd')+#{dayA})
+		</if>
+		and
+		m.merchandise_code=#{merchandiseCode} and m.supplier_code=#{supplierCode}
+	group by msjd.MERCHANDISE_code,msjd.supplier_code,m.detail_type_code,m.small_type_code,
+		<if test="sellRegion !='' and sellRegion !=null and sellRegion !='all'">
+			r.region_code,r.region_name
+		</if>
+		<if test="sellRegion =='all'">
+			'all','全国'
+		</if>
+	) zsj
+	left join ( 
+			select 
+			mjp.merchandise_code,
+			<if test="sellRegion !='' and sellRegion !=null and sellRegion !='all'">
+				mjp.region_code
+			</if>
+			<if test="sellRegion =='all'">
+				'all'
+			</if> sell_region,nvl(sum(mjp.permission_store_quantity),0) permissionStoreQuantity
+
+       		from MERCHANDISE_JH_PERMISSION mjp
+      		 where 
+      		 	1=1
+      		 	and mjp.merchandise_code=#{merchandiseCode} and mjp.supplier_code=#{supplierCode}
+				<if test="sellRegion !='' and sellRegion !=null and sellRegion !='all'">
+				 	and mjp.region_code=#{sellRegion}
+				 </if>
+				<if test="searchTable =='direct' ">
+					and mjp.store_type='直营'
+				</if>
+				<if test="searchTable =='join'">
+					 and mjp.store_type='加盟'
+				</if> 
+      		 		and 
+      		 		(mjp.permission_date
+      		 			between 
+      		 			<if test="show == 1 and show !='' and show !=null">
+						    (to_date(#{minDate},'yyyy-mm-dd')-#{dayA}) and (to_date(#{maxDate},'yyyy-mm-dd')-#{dayA})
+						</if>
+						<if test="show == 2 and show !='' and show !=null">
+						    (to_date(#{minDate},'yyyy-mm-dd')) and (to_date(#{maxDate},'yyyy-mm-dd'))
+						</if>
+						<if test="show == 3 and show !='' and show !=null">
+						    (to_date(#{minDate},'yyyy-mm-dd')+#{dayA}) and (to_date(#{maxDate},'yyyy-mm-dd')+#{dayA})
+						</if>
+      		 		)
+			group by 
+			<if test="sellRegion !='' and sellRegion !=null and sellRegion !='all'">
+				mjp.region_code
+			</if>
+			<if test="sellRegion =='all'">
+				'all'
+			</if>,mjp.merchandise_code
+		) mjp on mjp.sell_region=zsj.regionCode and mjp.merchandise_code=zsj.merchandiseCode 
+	<if test="show !=2 and show !='' and show !=null">
+		left join  (select MERCHANDISE_CODE,nvl(avg(sell_price),0) sellPrice from MERCHANDISE_PRICE where 
+		1=1
+		 and PRICE_DATE between 
+		<if test="show == 1 and show !='' and show !=null">
+		    (to_date(#{minDate},'yyyy-mm-dd')-#{dayA}) and (to_date(#{maxDate},'yyyy-mm-dd')-#{dayA})
+		</if>
+		<if test="show == 3 and show !='' and show !=null">
+		    (to_date(#{minDate},'yyyy-mm-dd')+#{dayA}) and (to_date(#{maxDate},'yyyy-mm-dd')+#{dayA})
+		</if>
+		<if test="searchTable =='direct' ">
+			and direct_join='直营'
+		</if>
+		<if test="searchTable =='join'">
+			 and direct_join='加盟'
+		</if> 
+		and
+		   merchandise_code=#{merchandiseCode} 
+		and 
+			supplier_code=#{supplierCode} 
+		and 
+			sell_region=#{sellRegion}
+		 GROUP BY MERCHANDISE_CODE) mps on zsj.merchandiseCode=mps.MERCHANDISE_CODE
+	</if>
+	<if test="show ==2 and show !='' and show !=null">
+		left join  (select merchandise_code,nvl(price,0) sellPrice from MERCHANDISE_PROMOTION_SELL where 
+		1=1
+		and to_char(START_DATE,'yyyy-mm-dd') = #{minDate} and to_char(END_DATE,'yyyy-mm-dd') =#{maxDate}
+		and
+		   merchandise_code=#{merchandiseCode} 
+		and 
+			supplier_code=#{supplierCode} 
+		and 
+			region_code=#{sellRegion}
+			) mps on zsj.merchandiseCode=mps.MERCHANDISE_CODE
+	</if>
+	left join (
+		select 
+			m.small_type_code smallCodeS,
+			nvl(sum(sell_quantity),0) sellQuantityS,
+			nvl(sum(sell_total_price),0) sellTotalPriceS,
+			nvl(sum(sell_profit),0) sellProfitS,
+			nvl(sum(sell_quantity),0)/nvl(count(distinct msjd.merchandise_code),1) sellQuantityPS,
+			nvl(sum(sell_total_price),0)/nvl(count(distinct msjd.merchandise_code),1) sellTotalPricePS,
+			nvl(sum(sell_profit),0)/nvl(count(distinct msjd.merchandise_code),1) sellProfitPS,
+			nvl(sum(sell_quantity),0)/nvl(sum(sell_store_quantity),1) psdSellQuantityS,
+			nvl(sum(sell_total_price),0)/nvl(sum(sell_store_quantity),1) psdSellTotalPriceS,
+			nvl(sum(sell_profit),0)/nvl(sum(sell_store_quantity),1) psdSellProfitS
+		from
+			(
+			select 
+				m.merchandise_code,
+				sell_quantity*m.net_weight sell_quantity,
+				sell_total_price,
+				sell_profit,
+				psd_sell_quantity,
+				psd_sell_total_price,
+				psd_sell_profit,
+				sell_store_quantity
+			from 
+				<if test="searchTable =='direct' and searchTable !=null and searchTable != '' ">
+					MERCHANDISE_SELL_DIRECT_DAY msjd
+				</if>
+				<if test="searchTable =='join'and searchTable !=null and searchTable != '' ">
+					MERCHANDISE_SELL_JOIN_DAY msjd
+				</if>
+				<if test="searchTable =='all'and searchTable !=null and searchTable != '' ">
+					MERCHANDISE_SELL_D_J_DAY msjd
+				</if>
+			inner join merchandise m on m.merchandise_code=msjd.merchandise_code and m.supplier_code=msjd.supplier_code
+			where 1=1
+				<if test="sellRegion != null and sellRegion !='' and sellRegion !='all'">
+					and msjd.SELL_REGION=#{sellRegion}
+				</if>
+				and msjd.sell_date between 
+				<if test="show ==1 and show !='' and show !=null">
+				    (to_date(#{minDate},'yyyy-mm-dd')-#{dayA}) and (to_date(#{maxDate},'yyyy-mm-dd')-#{dayA})
+				</if>
+				<if test="show ==2 and show !='' and show !=null">
+				    (to_date(#{minDate},'yyyy-mm-dd')) and (to_date(#{maxDate},'yyyy-mm-dd'))
+				</if>
+				<if test="show ==3 and show !='' and show !=null">
+				    (to_date(#{minDate},'yyyy-mm-dd')+#{dayA}) and (to_date(#{maxDate},'yyyy-mm-dd')+#{dayA})
+				</if>
+			) msjd
+			left join 
+			(
+			select
+				distinct 
+				merchandise_code,
+				small_type_code 
+			from 
+				merchandise
+			where 
+				small_type_code = (select distinct small_type_code from merchandise where merchandise_code = #{merchandiseCode} and supplier_code=#{supplierCode})
+			) m on m.merchandise_code=msjd.merchandise_code
+		where m.merchandise_code is not null
+		group by m.small_type_code
+		) smallType on zsj.smallCode=smallType.smallCodeS
+	left join (
+		select 
+			m.detail_type_code detailCodeD,
+			nvl(sum(sell_quantity),0) sellQuantityD,
+			nvl(sum(sell_total_price),0) sellTotalPriceD,
+			nvl(sum(sell_profit),0) sellProfitD,
+			nvl(sum(sell_quantity),0)/nvl(count(distinct msjd.merchandise_code),1) sellQuantityPD,
+			nvl(sum(sell_total_price),0)/nvl(count(distinct msjd.merchandise_code),1) sellTotalPricePD,
+			nvl(sum(sell_profit),0)/nvl(count(distinct msjd.merchandise_code),1) sellProfitPD,
+			nvl(sum(sell_quantity),0)/nvl(sum(sell_store_quantity),1) psdSellQuantityD,
+			nvl(sum(sell_total_price),0)/nvl(sum(sell_store_quantity),1) psdSellTotalPriceD,
+			nvl(sum(sell_profit),0)/nvl(sum(sell_store_quantity),1) psdSellProfitD
+		from
+			(
+			select 
+				m.merchandise_code,
+				sell_quantity*m.net_weight sell_quantity,
+				sell_total_price,
+				sell_profit,
+				sell_store_quantity,
+				psd_sell_quantity,
+				psd_sell_total_price,
+				psd_sell_profit  
+			from 
+				<if test="searchTable =='direct' and searchTable !=null and searchTable != '' ">
+					MERCHANDISE_SELL_DIRECT_DAY msjd
+				</if>
+				<if test="searchTable =='join'and searchTable !=null and searchTable != '' ">
+					MERCHANDISE_SELL_JOIN_DAY msjd
+				</if>
+				<if test="searchTable =='all'and searchTable !=null and searchTable != '' ">
+					MERCHANDISE_SELL_D_J_DAY msjd
+				</if>
+			inner join merchandise m on m.merchandise_code=msjd.merchandise_code and m.supplier_code=msjd.supplier_code
+			where 1=1
+				<if test="sellRegion != null and sellRegion !='' and sellRegion !='all'">
+					and msjd.SELL_REGION=#{sellRegion}
+				</if>
+				and msjd.sell_date between 
+				<if test="show ==1 and show !='' and show !=null">
+				    (to_date(#{minDate},'yyyy-mm-dd')-#{dayA}) and (to_date(#{maxDate},'yyyy-mm-dd')-#{dayA})
+				</if>
+				<if test="show ==2 and show !='' and show !=null">
+				    (to_date(#{minDate},'yyyy-mm-dd')) and (to_date(#{maxDate},'yyyy-mm-dd'))
+				</if>
+				<if test="show ==3 and show !='' and show !=null">
+				    (to_date(#{minDate},'yyyy-mm-dd')+#{dayA}) and (to_date(#{maxDate},'yyyy-mm-dd')+#{dayA})
+				</if>
+			) msjd
+			left join 
+			(
+			select 
+				distinct
+				merchandise_code,
+				detail_type_code 
+			from 
+				merchandise
+			where 
+				detail_type_code = (select distinct detail_type_code from merchandise where merchandise_code = #{merchandiseCode} and supplier_code=#{supplierCode})
+			) m on m.merchandise_code=msjd.merchandise_code
+			where m.merchandise_code is not null
+			group by m.detail_type_code		
+		) detailType on zsj.detailCode=detailType.detailCodeD
+	left join (
+		select 
+		<if test="sellRegion !='' and sellRegion !=null and sellRegion !='all'">
+			SELL_REGION 
+		</if>
+		<if test="sellRegion =='all'">
+			'all'
+		</if>
+		sellRegionA,
+		nvl(sum(sell_quantity*m.net_weight),0) sellQuantityA,
+		nvl(sum(sell_total_price),0) sellTotalPriceA,
+		nvl(sum(sell_profit),0) sellProfitA,
+		nvl(sum(sell_quantity*m.net_weight),0)/nvl(count( distinct msjd.merchandise_code),1) sellQuantityPA,
+		nvl(sum(sell_total_price),0)/nvl(count( distinct msjd.merchandise_code),1) sellTotalPricePA,
+		nvl(sum(sell_profit),0)/nvl(count( distinct msjd.merchandise_code),1) sellProfitPA,
+		nvl(sum(sell_quantity*m.net_weight),0)/nvl(sum(sell_store_quantity),1) psdSellQuantityA,
+		nvl(sum(sell_total_price),0)/nvl(sum(sell_store_quantity),1) psdSellTotalPriceA,
+		nvl(sum(sell_profit),0)/nvl(sum(sell_store_quantity),1) psdSellProfitA
+		from
+		<if test="searchTable =='direct' and searchTable !=null and searchTable != '' ">
+			MERCHANDISE_SELL_DIRECT_DAY msjd
+		</if>
+		<if test="searchTable =='join'and searchTable !=null and searchTable != '' ">
+			MERCHANDISE_SELL_JOIN_DAY msjd
+		</if>
+		<if test="searchTable =='all'and searchTable !=null and searchTable != '' ">
+			MERCHANDISE_SELL_D_J_DAY msjd
+		</if>
+		left join merchandise m on m.merchandise_code=msjd.merchandise_code and m.supplier_code=msjd.supplier_code
+		where 
+		1=1
+		<if test="sellRegion != null and sellRegion !='' and sellRegion !='all'">
+			and SELL_REGION=#{sellRegion} 
+		</if>
+		and (
+		              (m.merchandise_code >= 10000 and 59999 >= m.merchandise_code) 
+		              or 
+		              (m.merchandise_code >= 70000 and 79999 >= m.merchandise_code) 
+		              or 
+		              (m.merchandise_code >= 814000000 and 814999999 >= m.merchandise_code) 
+		              or 
+		              (m.merchandise_code >= 900000000 and 999999999 >= m.merchandise_code)
+		             )
+		and 
+		sell_date between 
+		<if test="show ==1 and show !='' and show !=null">
+		    (to_date(#{minDate},'yyyy-mm-dd')-#{dayA}) and (to_date(#{maxDate},'yyyy-mm-dd')-#{dayA})
+		</if>
+		<if test="show ==2 and show !='' and show !=null">
+		    (to_date(#{minDate},'yyyy-mm-dd')) and (to_date(#{maxDate},'yyyy-mm-dd'))
+		</if>
+		<if test="show ==3 and show !='' and show !=null">
+		    (to_date(#{minDate},'yyyy-mm-dd')+#{dayA}) and (to_date(#{maxDate},'yyyy-mm-dd')+#{dayA})
+		</if>
+		group by 
+		<if test="sellRegion !='' and sellRegion !=null and sellRegion !='all'">
+			SELL_REGION 
+		</if>
+		<if test="sellRegion =='all'">
+			'all'
+		</if>
+		) allType on allType.sellRegionA=zsj.regionCode
+	)
+</select>
+<!-- 查询促销明细 -->
+<select id="searchMerchandisePromotionAnalysisPoolInfo" resultMap="MerchandisePromotionAnalysisMap">
+	select 
+	<if test="page_count == null">
+		zsj.merchandiseCode,
+		zsj.regionCode,
+		zsj.sellRegion,
+		zsj.detailCode,
+		zsj.smallCode,
+		zsj.time,
+		nvl(zsj.sellQuantity,0) sellQuantity,
+		nvl(zsj.sellTotalPrice,0) sellTotalPrice,
+		nvl(zsj.sellProfit,0) sellProfit,
+		nvl(zsj.psdSellQuantity,0) psdSellQuantity,
+		nvl(zsj.psdSellTotalPrice,0) psdSellTotalPrice,
+		nvl(zsj.psdSellProfit,0) psdSellProfit,
+		nvl(zsj.sellStoreQuantity,0) sellStoreQuantity,
+		zsj.sellQuantity*100/smallType.sellQuantityS sellQuantityProportionS,
+		zsj.sellTotalPrice*100/smallType.sellTotalPriceS sellTotalPriceProportionS,
+		zsj.sellProfit*100/smallType.sellProfitS sellProfitProportionS,
+		zsj.sellQuantity*100/detailType.sellQuantityD sellQuantityProportionD,
+		zsj.sellTotalPrice*100/detailType.sellTotalPriceD sellTotalPriceProportionD,
+		zsj.sellProfit*100/detailType.sellProfitD sellProfitProportionD,
+		zsj.sellQuantity*100/allType.sellQuantityA sellQuantityProportionM,
+		zsj.sellTotalPrice*100/allType.sellTotalPriceA sellTotalPriceProportionM,
+		zsj.sellProfit*100/allType.sellProfitA sellProfitProportionM,
+		nvl(mjp.permissionStoreQuantity,0) permissionStoreQuantity,
+				(case
+					when nvl(mjp.permissionStoreQuantity,0)=0 then 0
+					when zsj.sellStoreQuantity*100/mjp.permissionStoreQuantity >100 then 100
+					else zsj.sellStoreQuantity*100/mjp.permissionStoreQuantity
+				 end) active,
+		nvl(nvl(mps.price,mp.sellPrice),0) sellPrice,
+		smallType.sellQuantityS sellQuantityS,
+		smallType.sellTotalPriceS,
+		smallType.sellProfitS,
+		smallType.sellQuantityPS,
+		smallType.sellTotalPricePS,
+		smallType.sellProfitPS,
+		smallType.psdSellQuantityS,
+		smallType.psdSellTotalPriceS,
+		smallType.psdSellProfitS,
+		detailType.sellQuantityD sellQuantityD,
+		detailType.sellTotalPriceD,
+		detailType.sellProfitD,
+		detailType.sellQuantityPD,
+		detailType.sellTotalPricePD,
+		detailType.sellProfitPD,
+		detailType.psdSellQuantityD,
+		detailType.psdSellTotalPriceD,
+		detailType.psdSellProfitD,
+		allType.sellQuantityA sellQuantityA,
+		allType.sellTotalPriceA,
+		allType.sellProfitA,
+		allType.sellQuantityPA,
+		allType.sellTotalPricePA,
+		allType.sellProfitPA,
+		allType.psdSellQuantityA,
+		allType.psdSellTotalPriceA,
+		allType.psdSellProfitA,
+		numType.type
+	</if>
+	<if test="page_count != null">
+		count(1) AS record_count
+	</if> 
+	 from (
+	(
+	select
+		MSJD.MERCHANDISE_code merchandiseCode,
+		 msjd.supplier_code,
+		r.region_code regionCode,
+		r.region_name sellRegion,
+		m.detail_type_code detailCode,
+		m.small_type_code smallCode,
+		TO_CHAR(MSJD.SELL_DATE,'yyyy-mm-dd') time,
+		nvl(msjd.sell_quantity*m.net_weight,0) sellQuantity,
+		nvl(msjd.sell_total_price,0) sellTotalPrice,
+		nvl(msjd.sell_profit,0) sellProfit,
+		nvl(msjd.sell_quantity*m.net_weight,0)/nvl(msjd.sell_store_quantity,1) psdSellQuantity,
+		nvl(msjd.sell_total_price,0)/nvl(msjd.sell_store_quantity,1) psdSellTotalPrice,
+		nvl(msjd.sell_profit,0)/nvl(msjd.sell_store_quantity,1) psdSellProfit,
+		nvl(msjd.sell_store_quantity,0) sellStoreQuantity,
+		nvl(msjd.sell_quantity_proportion_m,0) sellQuantityProportionM,
+		nvl(msjd.sell_total_price_proportion_m,0) sellTotalPriceProportionM,
+		nvl(msjd.sell_profit_proportion_m,0) sellProfitProportionM,
+		nvl(msjd.sell_quantity_proportion_s,0) sellQuantityProportionS,
+		nvl(msjd.sell_total_price_proportion_s,0) sellTotalPriceProportionS,
+		nvl(msjd.sell_profit_proportion_s,0) sellProfitProportionS,
+		nvl(msjd.sell_quantity_proportion_d,0) sellQuantityProportionD,
+		nvl(msjd.sell_total_price_proportion_d,0) sellTotalPriceProportionD,
+		nvl(msjd.sell_profit_proportion_d,0) sellProfitProportionD,
+		(case 
+			when to_date(#{maxDate},'yyyy-mm-dd')-#{dayA}+1 > SELL_DATE and  SELL_DATE >= to_date(#{minDate},'yyyy-mm-dd')-#{dayA} then 1
+			when to_date(#{maxDate},'yyyy-mm-dd')+1 > SELL_DATE and  SELL_DATE >= to_date(#{minDate},'yyyy-mm-dd') then 2
+			when to_date(#{maxDate},'yyyy-mm-dd')+#{dayA}+1 > SELL_DATE and SELL_DATE >= to_date(#{minDate},'yyyy-mm-dd') +#{dayA} then 1
+		end) fromType 
+	from
+	<if test="searchTable =='direct' and searchTable !=null and searchTable != '' ">
+		MERCHANDISE_SELL_DIRECT_DAY msjd
+	</if>
+	<if test="searchTable =='join'and searchTable !=null and searchTable != '' ">
+		MERCHANDISE_SELL_JOIN_DAY msjd
+	</if>
+	<if test="searchTable =='all'and searchTable !=null and searchTable != '' ">
+		MERCHANDISE_SELL_D_J_DAY msjd
+	</if>
+	left join merchandise m on m.merchandise_code=msjd.merchandise_code and m.supplier_code=msjd.supplier_code
+	left join region r on r.region_code=msjd.sell_region
+	where
+		1=1
+		<if test="sellRegion != null and sellRegion !='' and sellRegion !='all'">
+		 and msjd.SELL_REGION=#{sellRegion}
+		</if>
+		and
+		msjd.sell_date between 
+		    (to_date(#{minDate},'yyyy-mm-dd')-#{dayA})  and (to_date(#{maxDate},'yyyy-mm-dd')+#{dayA})
+		and
+		m.merchandise_code=#{merchandiseCode} and m.supplier_code=#{supplierCode}
+	) zsj
+	left join ( 
+			select 
+			mjp.merchandise_code,to_char(mjp.permission_date,'yyyy-mm-dd') permissionDate,
+			<if test="sellRegion !='' and sellRegion !=null and sellRegion !='all'">
+				mjp.region_code
+			</if>
+			<if test="sellRegion =='all'">
+				'all'
+			</if> sell_region,nvl(sum(mjp.permission_store_quantity),0) permissionStoreQuantity
+
+       		from MERCHANDISE_JH_PERMISSION mjp
+      		 where 
+      		 	1=1
+      		 	and mjp.merchandise_code=#{merchandiseCode} and mjp.supplier_code=#{supplierCode}
+				<if test="sellRegion !='' and sellRegion !=null and sellRegion !='all'">
+				 	and mjp.region_code=#{sellRegion}
+				 </if>
+				<if test="searchTable =='direct' ">
+					and mjp.store_type='直营'
+				</if>
+				<if test="searchTable =='join'">
+					 and mjp.store_type='加盟'
+				</if> 
+      		 		and 
+      		 		(mjp.permission_date
+      		 			between 
+						    (to_date(#{minDate},'yyyy-mm-dd')-${dayA}) and (to_date(#{maxDate},'yyyy-mm-dd')+${dayA})
+						
+      		 		)
+			group by 
+			<if test="sellRegion !='' and sellRegion !=null and sellRegion !='all'">
+				mjp.region_code
+			</if>
+			<if test="sellRegion =='all'">
+				'all'
+			</if>,mjp.merchandise_code,to_char(mjp.permission_date,'yyyy-mm-dd')
+		) mjp on mjp.sell_region=zsj.regionCode and mjp.merchandise_code=zsj.merchandiseCode and zsj.time=mjp.permissionDate
+		
+		 left join (
+      select 
+        merchandise_code, 
+        supplier_code,
+        to_char(START_DATE,'yyyy-mm-dd') startDate,
+        to_char(end_date,'yyyy-mm-dd') endDate,
+        region_code ,
+        nvl(price, 0) price 
+      from 
+        (select merchandise_code,supplier_code,region_code,start_date,end_date,price from MERCHANDISE_PROMOTION_SELL group by merchandise_code,supplier_code,region_code,start_date,end_date,price )
+      where 
+        1 = 1 
+        and to_char(START_DATE, 'yyyy-mm-dd') = #{minDate}
+        and to_char(END_DATE, 'yyyy-mm-dd') = #{maxDate} 
+        and merchandise_code = #{merchandiseCode}  
+        and supplier_code = #{supplierCode} 
+        and region_code = #{sellRegion}
+    ) mps on zsj.merchandiseCode = mps.MERCHANDISE_CODE 
+          and zsj.supplier_code=mps.supplier_code 
+          and to_date(zsj.time,'yyyy-mm-dd') between to_date(mps.startDate,'yyyy-mm-dd') and to_date(mps.endDate,'yyyy-mm-dd')
+          and zsj.fromType=2 
+          and zsj.regionCode=mps.region_code
+     left join (
+         select 
+            merchandise_code, 
+            supplier_code,
+            to_char(price_date,'yyyy-mm-dd') priceDate,
+            sell_region,
+            nvl(sell_price,0) sellPrice
+          from 
+            MERCHANDISE_PRICE 
+          where 
+            1 = 1 
+           and (PRICE_DATE between 
+            (to_date(#{minDate},'yyyy-mm-dd')-#{dayA}) and (to_date(#{maxDate},'yyyy-mm-dd')-#{dayA})
+            or PRICE_DATE between 
+            (to_date(#{minDate},'yyyy-mm-dd')+#{dayA}) and (to_date(#{maxDate},'yyyy-mm-dd')+#{dayA}))
+            and merchandise_code = #{merchandiseCode}
+            <if test="searchTable =='direct' ">
+				and direct_join='直营'
+			</if>
+			<if test="searchTable =='join'">
+				 and direct_join='加盟'
+			</if> 
+            and supplier_code = #{supplierCode}
+            and sell_region = #{sellRegion}
+        ) mp on zsj.merchandiseCode = mp.MERCHANDISE_CODE 
+              and zsj.supplier_code=mp.supplier_code 
+              and zsj.time=mp.priceDate 
+              and zsj.fromType=1 
+              and zsj.regionCode=mp.sell_region
+	left join (
+		select 
+			TO_CHAR(SELL_DATE,'yyyy-mm-dd') timeS,
+			m.small_type_code smallCodeS,
+			nvl(sum(sell_quantity),0) sellQuantityS,
+			nvl(sum(sell_total_price),0) sellTotalPriceS,
+			nvl(sum(sell_profit),0) sellProfitS,
+			nvl(sum(sell_quantity),0)/nvl(count(distinct msjd.merchandise_code),1) sellQuantityPS,
+			nvl(sum(sell_total_price),0)/nvl(count(distinct msjd.merchandise_code),1) sellTotalPricePS,
+			nvl(sum(sell_profit),0)/nvl(count(distinct msjd.merchandise_code),1) sellProfitPS,
+			nvl(sum(sell_quantity),0)/nvl(sum(sell_store_quantity),1) psdSellQuantityS,
+			nvl(sum(sell_total_price),0)/nvl(sum(sell_store_quantity),1) psdSellTotalPriceS,
+			nvl(sum(sell_profit),0)/nvl(sum(sell_store_quantity),1) psdSellProfitS
+		from
+			(
+			select 
+				sell_date,
+				m.merchandise_code,
+				sell_quantity*m.net_weight sell_quantity,
+				sell_total_price,
+				sell_profit,
+				sell_store_quantity,
+				psd_sell_quantity,
+				psd_sell_total_price,
+				psd_sell_profit 
+			from 
+				<if test="searchTable =='direct' and searchTable !=null and searchTable != '' ">
+					MERCHANDISE_SELL_DIRECT_DAY msjd
+				</if>
+				<if test="searchTable =='join'and searchTable !=null and searchTable != '' ">
+					MERCHANDISE_SELL_JOIN_DAY msjd
+				</if>
+				<if test="searchTable =='all'and searchTable !=null and searchTable != '' ">
+					MERCHANDISE_SELL_D_J_DAY msjd
+				</if>
+			inner join merchandise m on m.supplier_code=msjd.supplier_code and m.merchandise_code=msjd.merchandise_code
+			where 1=1
+				<if test="sellRegion != null and sellRegion !='' and sellRegion !='all'">
+					and msjd.SELL_REGION=#{sellRegion}
+				</if>
+				and msjd.sell_date between 
+				    (to_date(#{minDate},'yyyy-mm-dd')-#{dayA}) and  (to_date(#{maxDate},'yyyy-mm-dd')+#{dayA})
+			) msjd
+			left join 
+			(
+			select 
+				distinct
+				merchandise_code,
+				small_type_code 
+			from 
+				merchandise
+			where 
+				small_type_code = (select distinct small_type_code from merchandise where merchandise_code = #{merchandiseCode} and supplier_code=#{supplierCode})
+			) m on m.merchandise_code=msjd.merchandise_code
+		where m.merchandise_code is not null
+		group by m.small_type_code,TO_CHAR(MSJD.SELL_DATE,'yyyy-mm-dd')
+		) smallType on zsj.smallCode=smallType.smallCodeS and zsj.time=smallType.timeS
+	left join (
+		select 
+			m.detail_type_code detailCodeD,
+			TO_CHAR(MSJD.SELL_DATE,'yyyy-mm-dd') timeD,
+			nvl(sum(sell_quantity),0) sellQuantityD,
+			nvl(sum(sell_total_price),0) sellTotalPriceD,
+			nvl(sum(sell_profit),0) sellProfitD,
+			nvl(sum(sell_quantity),0)/nvl(count(distinct msjd.merchandise_code),1) sellQuantityPD,
+			nvl(sum(sell_total_price),0)/nvl(count(distinct msjd.merchandise_code),1) sellTotalPricePD,
+			nvl(sum(sell_profit),0)/nvl(count(distinct msjd.merchandise_code),1) sellProfitPD,
+			nvl(sum(sell_quantity),0)/nvl(sum(sell_store_quantity),1) psdSellQuantityD,
+			nvl(sum(sell_total_price),0)/nvl(sum(sell_store_quantity),1) psdSellTotalPriceD,
+			nvl(sum(sell_profit),0)/nvl(sum(sell_store_quantity),1) psdSellProfitD
+		from
+			(
+			select 
+				sell_Date,
+				m.merchandise_code,
+				sell_quantity*m.net_weight sell_quantity,
+				sell_total_price,
+				sell_profit,
+				sell_store_quantity,
+				psd_sell_quantity,
+				psd_sell_total_price,
+				psd_sell_profit 
+			from 
+				<if test="searchTable =='direct' and searchTable !=null and searchTable != '' ">
+					MERCHANDISE_SELL_DIRECT_DAY msjd
+				</if>
+				<if test="searchTable =='join'and searchTable !=null and searchTable != '' ">
+					MERCHANDISE_SELL_JOIN_DAY msjd
+				</if>
+				<if test="searchTable =='all'and searchTable !=null and searchTable != '' ">
+					MERCHANDISE_SELL_D_J_DAY msjd
+				</if>
+			inner join merchandise m on m.supplier_code=msjd.supplier_code and m.merchandise_code=msjd.merchandise_code
+			where 1=1
+				<if test="sellRegion != null and sellRegion !='' and sellRegion !='all'">
+					and msjd.SELL_REGION=#{sellRegion}
+				</if>
+				and msjd.sell_date between 
+				    (to_date(#{minDate},'yyyy-mm-dd')-#{dayA}) and (to_date(#{maxDate},'yyyy-mm-dd')+#{dayA})
+			) msjd
+			left join 
+			(
+			select 
+				distinct
+				merchandise_code,
+				detail_type_code 
+			from 
+				merchandise
+			where 
+				detail_type_code = (select distinct detail_type_code from merchandise where merchandise_code = #{merchandiseCode} and supplier_code=#{supplierCode})
+			) m on m.merchandise_code=msjd.merchandise_code
+			where m.merchandise_code is not null
+			group by m.detail_type_code,TO_CHAR(MSJD.SELL_DATE,'yyyy-mm-dd')
+		) detailType on zsj.detailCode=detailType.detailCodeD and zsj.time=detailType.timeD
+	left join (
+		select 
+		<if test="sellRegion !='' and sellRegion !=null and sellRegion !='all'">
+			SELL_REGION
+		</if>
+		<if test="sellRegion =='all'">
+			'all'
+		</if> sellRegionA,
+		TO_CHAR(SELL_DATE,'yyyy-mm-dd') timeA,
+		nvl(sum(sell_quantity*m.net_weight),0) sellQuantityA,
+		nvl(sum(sell_total_price),0) sellTotalPriceA,
+		nvl(sum(sell_profit),0) sellProfitA,
+		nvl(sum(sell_quantity*m.net_weight),0)/nvl(count( distinct msjd.merchandise_code),1) sellQuantityPA,
+		nvl(sum(sell_total_price),0)/nvl(count( distinct msjd.merchandise_code),1) sellTotalPricePA,
+		nvl(sum(sell_profit),0)/nvl(count( distinct msjd.merchandise_code),1) sellProfitPA,
+		nvl(sum(sell_quantity*m.net_weight),0)/nvl(sum(sell_store_quantity),1) psdSellQuantityA,
+		nvl(sum(sell_total_price),0)/nvl(sum(sell_store_quantity),1) psdSellTotalPriceA,
+		nvl(sum(sell_profit),0)/nvl(sum(sell_store_quantity),1) psdSellProfitA
+		from
+		<if test="searchTable =='direct' and searchTable !=null and searchTable != '' ">
+			MERCHANDISE_SELL_DIRECT_DAY msjd
+		</if>
+		<if test="searchTable =='join'and searchTable !=null and searchTable != '' ">
+			MERCHANDISE_SELL_JOIN_DAY msjd
+		</if> 
+		<if test="searchTable =='all'and searchTable !=null and searchTable != '' ">
+			MERCHANDISE_SELL_D_J_DAY msjd
+		</if>
+		left join merchandise m on m.supplier_code=msjd.supplier_code and m.merchandise_code=msjd.merchandise_code
+		where 
+		1=1
+		<if test="sellRegion != null and sellRegion !='' and sellRegion !='all'">
+			and SELL_REGION=#{sellRegion} 
+		</if>
+		 and (
+		              (m.merchandise_code >= 10000 and 59999 >= m.merchandise_code) 
+		              or 
+		              (m.merchandise_code >= 70000 and 79999 >= m.merchandise_code) 
+		              or 
+		              (m.merchandise_code >= 814000000 and 814999999 >= m.merchandise_code) 
+		              or 
+		              (m.merchandise_code >= 900000000 and 999999999 >= m.merchandise_code)
+		             )
+		and 
+		sell_date between 
+		    (to_date(#{minDate},'yyyy-mm-dd')-#{dayA}) and (to_date(#{maxDate},'yyyy-mm-dd')+#{dayA})
+		group by 
+		<if test="sellRegion !='' and sellRegion !=null and sellRegion !='all'">
+			SELL_REGION
+		</if>
+		<if test="sellRegion =='all'">
+			'all'
+		</if>,TO_CHAR(SELL_DATE,'yyyy-mm-dd')
+		) allType on allType.sellRegionA=zsj.regionCode and zsj.time=allType.timeA 
+		left join 
+		(select distinct to_char(SELL_DATE,'yyyy-mm-dd') typeTime,
+		(case 
+			when to_date(#{maxDate},'yyyy-mm-dd')-#{dayA}+1 > SELL_DATE and  SELL_DATE >= to_date(#{minDate},'yyyy-mm-dd')-#{dayA} then 1
+			when to_date(#{maxDate},'yyyy-mm-dd')+1 > SELL_DATE and  SELL_DATE >= to_date(#{minDate},'yyyy-mm-dd') then 2
+			when to_date(#{maxDate},'yyyy-mm-dd')+#{dayA}+1 > SELL_DATE and SELL_DATE >= to_date(#{minDate},'yyyy-mm-dd') +#{dayA} then 3
+		end) type 
+		from 
+		<if test="searchTable =='direct' and searchTable !=null and searchTable != '' ">
+			MERCHANDISE_SELL_DIRECT_DAY
+		</if>
+		<if test="searchTable =='join'and searchTable !=null and searchTable != '' ">
+			MERCHANDISE_SELL_JOIN_DAY
+		</if>
+		<if test="searchTable =='all'and searchTable !=null and searchTable != '' ">
+			MERCHANDISE_SELL_D_J_DAY
+		</if>
+		where merchandise_code=#{merchandiseCode} 
+			and supplier_code=#{supplierCode}
+			<if test="sellRegion != null and sellRegion !='' and sellRegion !='all'">
+				and SELL_REGION=#{sellRegion}
+			</if>
+			and SELL_DATE between  to_date(#{minDate},'yyyy-mm-dd')-#{dayA} and to_date(#{maxDate},'yyyy-mm-dd')+#{dayA}+1 
+		) numType on numType.typeTime=zsj.time  and numType.type is not null
+ 	) order by zsj.time asc
+</select>
+</mapper>

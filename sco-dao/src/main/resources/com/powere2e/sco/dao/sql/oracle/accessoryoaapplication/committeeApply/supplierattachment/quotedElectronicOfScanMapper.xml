@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.accessoryoaapplication.committeeApply.supplierattachment.QuotedElectronicOfScanDao">
+	<resultMap type="com.powere2e.sco.model.accessoryoaapplication.supplierattachment.QuotedElectronicOfScan" id="quotedElectronicOfScanMap">
+		<result property="quotedCodeScan" column="quotedCodeScan"/>
+		<result property="applicationCode" column="applicationCode"/>
+		<result property="intentionCode" column="intentionCode"/>
+		<result property="intentionName" column="intentionName"/>
+		<result property="intentionSupplierCode" column="intentionSupplierCode"/>
+		<result property="intentionSupplierName" column="intentionSupplierName"/>
+		<result property="accessoryCode" column="accessoryCode"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="supplierName" column="supplierName"/>
+		<result property="quotedCodeElectronic" column="quotedCodeElectronic"/>
+		<result property="quotedDate" column="quotedDate"/>
+		<result property="path" column="path"/>
+		<result property="createDate" column="createDate"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <!-- 查询关联辅料报价单-电子和扫描 辅料OA(可分页)-->
+    <select id="searchQuotedElectronicOfScan" resultMap="quotedElectronicOfScanMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		qeos.application_code applicationCode,
+       		qeos.intention_code intentionCode,
+       		ai.intention_name intentionName,
+			qeos.supplier_code supplierCode,
+			aqs.enquiry_code quotedCodeElectronic,
+			ais.intention_supplier_name intentionSupplierName,
+			s.supplier_name supplierName,
+			qeos.quoted_code_scan quotedCodeScan,
+			aqs.path,
+			to_char(aqs.quoted_date,'yyyy-mm-dd hh24-mi') quotedDate,
+			to_char(aqs.created,'yyyy-mm-dd') createDate
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		from QUOTED_ELECTRONIC_OF_SCAN qeos
+      		left join ACCESSORY_INTENTION_SUPPLIER ais on ais.intention_supplier_code=qeos.supplier_code
+			left join ACCESSORY_INTENTION ai on ai.intention_code=qeos.intention_code
+			left join supplier s on qeos.supplier_code=s.supplier_code
+			left join ACCESSORY_QUOTED_SCAN aqs on qeos.quoted_code_scan=aqs.quoted_code
+    	<where>
+    		1=1
+	    	<if test= "applicationCode != null and applicationCode !=''">
+				AND qeos.application_code = #{applicationCode}
+			</if>
+			<if test= "quotedCodeScan != null and quotedCodeScan !=''">
+				AND qeos.quoted_code_scan = #{quotedCodeScan}
+			</if>
+			<if test= "path != null and path !=''">
+				AND aqs.path = #{path}
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 根据主键查询某个关联辅料报价单-电子和扫描辅料OA(可分页)-->
+    <select id="loadQuotedElectronicOfScan" resultMap="quotedElectronicOfScanMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.quoted_code_scan quotedCodeScan,
+       		t.application_code applicationCode,
+       		t.intention_code intentionCode,
+       		t.accessory_code accessoryCode,
+       		t.supplier_code supplierCode,
+       		t.quoted_code_electronic quotedCodeElectronic
+       		
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM quoted_electronic_of_scan t
+    	<where>
+    		1=1
+	    	<if test= "applicationCode != null and applicationCode!=''">
+			AND  t.APPLICATION_CODE = #{applicationCode}
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    	</if>
+    </select>
+    <select id="searchCount" resultType="String">
+		select 
+			distinct qeos.quoted_code_electronic 
+		from 
+			APPLICATION_QUOTED ap 
+		left join 
+			QUOTED_ELECTRONIC_OF_SCAN qeos 
+			on  qeos.application_code=ap.application_code 
+			and qeos.intention_code=ap.intention_code 
+		where 
+			ap.application_code=#{applicationCode}
+    </select>
+    <!-- 增加关联辅料报价单-电子和扫描辅料OA --> 
+	<insert id="saveQuotedElectronicOfScan" parameterType="hashmap">
+		INSERT INTO quoted_electronic_of_scan(QUOTED_CODE_ELECTRONIC,quoted_code_scan,application_code,intention_code,supplier_code) 
+			<foreach collection="list" item="item" separator="union all" >  
+			(
+			  SELECT 
+				#{item.quotedCodeElectronic},#{item.quotedCodeScan},#{item.applicationCode},#{item.intentionCode},#{item.supplierCode}
+			  FROM 
+			  	DUAL 
+		 	)
+	    </foreach> 
+    </insert>
+    <!-- 修改关联辅料报价单-电子和扫描辅料OA  -->
+    <update id="updateQuotedElectronicOfScan" parameterType="hashmap">
+		UPDATE	
+				quoted_electronic_of_scan	
+		   SET	
+		   		quoted_code_scan=#{quotedCodeScan},
+		   		intention_code=#{intentionCode},
+		   		accessory_code=#{accessoryCode},
+		   		supplier_code=#{supplierCode},
+		   		quoted_code_electronic=#{quotedCodeElectronic}		   		
+		 WHERE	
+		 		APPLICATION_CODE=#{applicationCode}
+    </update>
+    <!-- 删除关联辅料报价单-电子和扫描-辅料OA -->
+    <delete id="deleteQuotedElectronicOfScan" parameterType="hashmap">
+        DELETE FROM 
+        			quoted_electronic_of_scan 
+       <where>
+	        <foreach collection="list" item="item" separator="OR" index="index">
+				(
+				application_code=#{item.applicationCode} 
+				and supplier_code=#{item.supplierCode} 
+				and quoted_code_scan=#{item.quotedCodeScan}
+				)
+			</foreach>
+		</where>
+    </delete>
+    <!-- 删除关联辅料报价单-电子和扫描-辅料OA 根据oa申请单号-->
+    <delete id="deleteQuotedElectronicOfScanByCode" parameterType="hashmap">
+        DELETE FROM quoted_electronic_of_scan 
+       <where>
+           application_code=#{applicationCode} 
+		</where>
+    </delete>
+</mapper>

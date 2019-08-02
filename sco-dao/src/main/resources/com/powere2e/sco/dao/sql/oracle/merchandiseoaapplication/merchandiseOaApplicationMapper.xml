@@ -1,0 +1,950 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.merchandiseoaapplication.MerchandiseOaApplicationDao">
+	<resultMap type="com.powere2e.sco.model.merchandiseoaapplication.MerchandiseOaApplication" id="oaApplicationMap">
+		<result property="applicationCode" column="applicationCode"/>
+		<result property="applicationType" column="applicationType"/>
+		<result property="applicationStatus" column="applicationStatus"/>
+		<result property="oaApplicationCode" column="oaApplicationCode"/>
+		<result property="oaContacts" column="oaContacts"/>
+		<result property="oaApproveDate" column="oaApproveDate"/>
+		<result property="oaApplicationUrl" column="oaApplicationUrl"/>
+		<result property="remarks" column="remarks"/>
+		<result property="created" column="created"/>
+		<result property="createby" column="createby"/>
+		<result property="updated" column="updated"/>
+		<result property="updateby" column="updateby"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    
+    <resultMap type="com.powere2e.sco.model.merchandiseintention.MerchandiseIntention" id="merchandiseIntentionMap">
+		<result property="intentionCode" column="intentionCode"/>
+		<result property="intentionName" column="intentionName"/>
+		<result property="centreTypeCode" column="centreTypeCode"/>
+		<result property="smallTypeCode" column="smallTypeCode"/>
+		<result property="detailTypeCode" column="detailTypeCode"/>
+		<result property="fineTypeCode" column="fineTypeCode"/>
+		<result property="purchaseDepartments" column="purchaseDepartments"/>
+		<result property="rationed" column="rationed"/>
+		<result property="purchaseType" column="purchaseType"/>
+		<result property="saleType" column="saleType"/>
+		<result property="orderType" column="orderType"/>
+		<result property="quotedCurrency" column="quotedCurrency"/>
+		<result property="paymentType" column="paymentType"/>
+		<result property="deliveryType" column="deliveryType"/>
+		<result property="specification" column="specification"/>
+		<result property="packingType" column="packingType"/>
+		<result property="created" column="created"/>
+		<result property="createby" column="createby"/>
+		<result property="updated" column="updated"/>
+		<result property="updateby" column="updateby"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="intentionSupplierCode" column="intentionSupplierCode"/>
+		<result property="intentionSupplierName" column="intentionSupplierName"/>
+		<result property="supCompanySite" column="supCompanySite"/>
+		<result property="supContacts" column="supContacts"/>
+		<result property="supContactsPhone" column="supContactsPhone"/>
+		
+		<result property="merchandiseCode" column="merchandiseCode"/>
+		<result property="centreTypeName" column="centreTypeName"/>
+		<result property="smallTypeName" column="smallTypeName"/>
+		<result property="detailTypeName" column="detailTypeName"/>
+		<result property="fineTypeName" column="fineTypeName"/>
+		
+		<result property="purchaseDepartmentsName" column="purchaseDepartmentsName"/>
+		<result property="rationedName" column="rationedName"/>
+		<result property="purchaseTypeName" column="purchaseTypeName"/>
+		<result property="isTrueMerchandise" column="isTrueMerchandise"/><!-- 是否为正式商品 -->
+		<result property="applicationCode" column="applicationCode"/><!-- OA申请单号 -->
+		<result property="applicationStatus" column="applicationStatus"/><!-- OA申请状态 -->
+		<result property="dxRoleCode" column="dxRoleCode"/><!-- 商品定性角色 -->
+		<result property="dlRoleCode" column="dlRoleCode"/><!-- 商品定量角色 -->
+		<result property="oaApplicationCode" column="oaApplicationCode"/><!-- OA系统申请单号 -->
+		<result property="oaContacts" column="oaContacts"/><!-- OA系统联系人 -->
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    
+   	 <!-- 查询新品引进OA申请列表(可分页)-->
+     <select id="queryIntentionApplicationList" resultMap="merchandiseIntentionMap">
+     	SELECT  
+    	<if test="page_count == null">
+       		d1.*
+	   	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      	FROM 
+	     	(SELECT 
+	     	   t1.intention_code intentionCode,
+               t1.intention_name intentionName,
+               t2.merchandise_code merchandiseCode,
+               t2.intention_supplier_code intentionSupplierCode,
+               t3.intention_supplier_name||t4.supplier_name intentionSupplierName,
+<!--                NVL(t4.company_site, mq.company_site) supCompanySite, -->
+<!--                NVL(t4.contacts,mq.contacts_name) supContacts, -->
+<!--                NVL(t4.company_phone,mq.contacts_phone) supContactsPhone, -->
+               
+               t5.applicationCode applicationCode,
+               DECODE(t5.applicationStatus,null,'W',t5.applicationStatus) applicationStatus,
+               (SELECT b5.value_string FROM common_mapping_config b5 WHERE b5.key_type = 'APPLICATION_STATUS' AND b5.code_string =  DECODE(t5.applicationStatus,null,'W',t5.applicationStatus)) applicationStatusName,
+               t5.DxRoleCode dxRoleCode,
+               (SELECT　b6.role_name FROM　merchandise_dx_role b6 WHERE b6.role_code = t5.dxRoleCode) dxRoleName,
+               t5.DlRoleCode dlRoleCode,
+               (SELECT　b7.role_name　FROM merchandise_dl_role b7 WHERE b7.role_code = t5.dlRoleCode) dlRoleName,
+               t1.centre_type_code centreTypeCode,
+               <!-- t6.centre_type_name centreTypeName, -->
+               <!--如果该条记录中有SAP物料号，则取SCO申请单申请报告中的中分类名称,否则取意向品的中分类名称-->
+               DECODE(t2.merchandise_code,null,t6.centre_type_name,t5.centreTypeName) centreTypeName,
+               t1.small_type_code smallTypeCode,
+               <!-- DECODE( t1.small_type_code,'ELSE',t1.else_type_name,t7.small_type_name) smallTypeName, -->
+               <!--如果该条记录中有SAP物料号，则取SCO申请单申请报告中的小分类名称,否则取意向品的小分类名称-->
+               DECODE(t2.merchandise_code,null,DECODE( t1.small_type_code,'ELSE',t1.else_type_name,t7.small_type_name),t5.smallTypeName) smallTypeName,
+               t1.detail_type_code detailTypeCode,
+               <!-- t8.detail_type_name detailTypeName, -->
+               <!--如果该条记录中有SAP物料号，则取SCO申请单申请报告中的明细类名称,否则取意向品的明细类名称-->
+                DECODE(t2.merchandise_code,null,t8.detail_type_name,t5.detailTypeName) detailTypeName,
+               t1.fine_type_code fineTypeCode,
+               <!--  t9.fine_type_name fineTypeName, -->
+               DECODE(t2.merchandise_code,null,t9.fine_type_name,t5.fineTypeName) fineTypeName,
+               t1.purchase_departments purchaseDepartments,
+               (SELECT b1.value_string FROM common_mapping_config b1 WHERE b1.key_type = 'PURCHASE_DEPARTMENTS_TYPE' AND b1.code_string = t1.purchase_departments) purchaseDepartmentsName,
+               t1.rationed rationed,
+               (SELECT b2.value_string FROM common_mapping_config b2 WHERE b2.key_type = 'RATIONED_TYPE' AND b2.code_string = t1.rationed) rationedName,
+               t1.purchase_type purchaseType,
+               (SELECT b3.value_string FROM common_mapping_config b3  WHERE b3.key_type = 'PURCHASE_TYPE' AND b3.code_string = t1.purchase_type) purchaseTypeName,
+               t1.sale_type saleType,
+               t1.else_type_name elseTypeName,
+               t1.created created,
+               t1.createby createby,
+               <if test="exportNew != null">		<!-- 新品引进导出数据时:该OA申请单创建人 -->
+               	   (SELECT b4.real_name from pub_user b4 where b4.user_id=t5.createby) as createUserName,
+               </if>
+			   <if test="exportNew == null">
+	               (SELECT b4.real_name from pub_user b4 where b4.user_id=t1.createby) as createUserName,
+			   </if>
+              
+               t5.oaApplicationCode oaApplicationCode,
+               t5.oaContacts oaContacts,
+               
+               <!--CR新增字段-->
+               t2.foretaste_pass_date foretastePassDate,
+               t5.applicationLink applicationLink,<!--新品引进申请审批环节-->
+               DECODE(t5.visitApplicationStatus,null,'W',t5.visitApplicationStatus) visitApplicationStatus,<!--巡厂申请审批状态-->
+               (SELECT b5.value_string FROM common_mapping_config b5 WHERE b5.key_type = 'VISIT_APPLICATION_STATUS' AND b5.code_string = DECODE(t5.visitApplicationStatus,null,'W',t5.visitApplicationStatus)) visitApplicationStatusName,
+               t5.visitApplicationLink visitApplicationLink,<!-- 巡厂申请审批环节-->
+               DECODE(t5.packageApplicationStatus,null,'W',t5.packageApplicationStatus) packageApplicationStatus,<!--包装设计申请审批状态-->
+               (SELECT b5.value_string FROM common_mapping_config b5 WHERE b5.key_type = 'VISIT_APPLICATION_STATUS' AND b5.code_string = DECODE(t5.packageApplicationStatus,null,'W',t5.packageApplicationStatus)) packageApplicationStatusName,
+               t5.packageApplicationLink packageApplicationLink,<!-- 包装设计申请审批环节-->
+               
+               t5.xcsqtjDate xcsqtjDate,<!--巡厂申请提交日期-->
+               t5.xcsqtjStatus xcsqtjStatus,<!--巡厂申请提交状态-->
+               t5.xcsqtjBzDay xcsqtjBzDay,<!--巡厂申请提交标准天数-->
+               t5.xcsqtjSjDay xcsqtjSjDay,<!--巡厂申请提交实际天数-->
+               
+               t5.xcsqshtgDate xcsqshtgDate,<!--巡厂申请审批通过日期-->
+               t5.xcsqshtgStatus xcsqshtgStatus,<!--巡厂申请审批通过状态-->
+               t5.xcsqshtgBzDay xcsqshtgBzDay,<!--巡厂申请审批通过标准天数-->
+               t5.xcsqshtgSjDay xcsqshtgSjDay,<!--巡厂申请审批通过实际天数-->
+               
+               t5.pksjxcDate pksjxcDate,<!--品控实际巡厂日期-->
+               t5.pksjxcStatus pksjxcStatus,<!--品控实际巡厂状态-->
+               t5.pksjxcBzDay pksjxcBzDay,<!--品控实际巡厂标准天数-->
+               t5.pksjxcSjDay pksjxcSjDay,<!--品控实际巡厂实际天数-->
+               
+               t5.xpyjbgtjDate xpyjbgtjDate,<!--新品引进申请提交日期 -->
+               t5.xpyjbgtjStatus xpyjbgtjStatus,<!--新品引进申请提交状态-->
+               t5.xpyjbgtjBzDay xpyjbgtjBzDay,<!--新品引进申请提交标准天数-->
+               t5.xpyjbgtjSjDay xpyjbgtjSjDay,<!--新品引进申请提交实际天数-->
+               
+               t5.xpyjbgsptgDate xpyjbgsptgDate,<!--新品引进审批通过日期 -->
+               t5.xpyjbgsptgStatus xpyjbgsptgStatus,<!--新品引进审批通过状态-->
+               t5.xpyjbgsptgBzDay xpyjbgsptgBzDay,<!--新品引进审批通过标准天数-->
+               t5.xpyjbgsptgSjDay xpyjbgsptgSjDay,<!--新品引进审批通过实际天数-->
+               
+               t5.zsjsqsptgDate zsjsqsptgDate,<!--物料主数据申请审批通过日期-->
+               t5.zsjsqsptgStatus zsjsqsptgStatus,<!--物料主数据申请审批通过状态-->
+               t5.zsjsqsptgBzDay zsjsqsptgBzDay,<!--物料主数据申请审批通过标准天数-->
+               t5.zsjsqsptgSjDay zsjsqsptgSjDay,<!--物料主数据申请审批通过实际天数-->
+               
+               t5.bzsjsqDate bzsjsqDate,<!--包装设计申请提交日期-->
+               t5.bzsjsqStatus bzsjsqStatus,<!--包装设计申请提交状态-->
+               t5.bzsjsqBzDay bzsjsqBzDay,<!--包装设计申请提交标准天数-->
+               t5.bzsjsqSjDay bzsjsqSjDay,<!--包装设计申请提交实际天数-->
+               
+               t5.bzsjsqwcDate bzsjsqwcDate,<!-- 包装设计审批通过日期-->
+               t5.bzsjsqwcStatus bzsjsqwcStatus,<!--包装设计审批通过状态-->
+               t5.bzsjsqwcBzDay bzsjsqwcBzDay,<!--包装设计审批通过标准天数-->
+               t5.bzsjsqwcSjDay bzsjsqwcSjDay,<!--包装设计审批通过实际天数-->
+               
+               t5.bzsjcgqrDate bzsjcgqrDate,<!--包装设计初稿确认日期-->
+               t5.bzsjcgqrStatus bzsjcgqrStatus,<!--包装设计初稿确认状态-->
+               t5.bzsjcgqrBzDay bzsjcgqrBzDay,<!--包装设计初稿确认标准天数-->
+               t5.bzsjcgqrSjDay bzsjcgqrSjDay,<!--包装设计初稿确认实际天数-->
+               
+               t5.bzsjwgtgDate bzsjwgtgDate,<!--包装设计完稿通过日期-->
+               t5.bzsjwgtgStatus bzsjwgtgStatus,<!--包装设计完稿通过状态-->
+               t5.jlbzsjcgqrBzDay jlbzsjcgqrBzDay,<!--距离包装设计初稿确认日期标准天数-->
+               t5.jlbzsjcgqrSjDay jlbzsjcgqrSjDay,<!--距离包装设计初稿确认日期实际天数-->
+               t5.jlwlzsjsqsptgBzDay jlwlzsjsqsptgBzDay,<!--距离物料主数据申请审批通过日期标准天数-->
+               t5.jlwlzsjsqsptgSjDay jlwlzsjsqsptgSjDay,<!--距离物料主数据申请审批通过日期实际天数-->
+               
+               t5.xpffDate xpffDate,<!--新品发放日期-->
+               t5.xpffStatus xpffStatus,<!--新品发放状态-->
+               t5.xpffBzDay xpffBzDay,<!--新品发放标准天数-->
+               t5.xpffSjDay xpffSjDay,<!--新品发放实际天数-->
+               
+               t5.bzDay bzDay,<!--标准总天数-->
+               t5.sjDay sjDay,<!--实际总天数-->
+               
+               t5.sctgBzDay sctgBzDay,<!--试吃通过标准天数-->
+               t5.sctgSjDay sctgSjDay<!--试吃通过实际天数-->
+               
+			
+		 FROM 		merchandise_intention t1
+		LEFT JOIN   intention_supplier_merchandise t2
+          ON        t1.intention_code=t2.intention_code
+        LEFT JOIN   merchandise_intention_supplier t3
+          ON        t2.intention_supplier_code=t3.intention_supplier_code
+        LEFT JOIN   supplier t4
+          ON        t2.intention_supplier_code=t4.supplier_code
+<!--         LEFT JOIN	merchandise_quoted mq ON t1.intention_code = mq.intention_code  -->
+<!-- 					AND t2.intention_supplier_code = mq.intention_supplier_code -->
+        			    
+	    LEFT JOIN
+			        (SELECT
+                      a3.application_code applicationCode,
+                      a3.application_status applicationStatus,<!--新品引进申请审批状态-->
+                      a3.created created,
+                      a3.createby, <!-- OA申请单创建人 -->
+                      a3.application_type applicationType,
+                      a3.oa_application_code oaApplicationCode,
+                      a3.oa_contacts oaContacts,
+                      a4.merchandise_code intentionCode,
+                      a4.supplier_code supplierCode,
+                      a5.dx_role_code dxRoleCode,
+                      a5.dl_role_code dlRoleCode,
+                      <!--查询申请报告的分类信息-->
+                      a5.centre_type_code centreTypeCode,
+	                  a6.centre_type_name centreTypeName,
+	                  a5.small_type_code smallTypeCode,
+	                  <!-- a7.small_type_name smallTypeName, -->
+	                  DECODE( a5.small_type_code,'ELSE',a5.else_type_name,a7.small_type_name) smallTypeName,
+	                  a5.detail_type_code detailTypeCode,
+	                  a8.detail_type_name detailTypeName,
+	                  a5.fine_type_code fineTypeCode,
+                      a9.fine_type_name fineTypeName,
+                      
+                      <!--查询商品巡厂申请单、商品包装设计申请单和申请进度信息(商品OA)2信息-->
+                      a3.application_link applicationLink,<!--新品引进申请审批环节-->
+                      a11.application_status visitApplicationStatus,<!--巡厂申请审批状态-->
+                      a11.application_link visitApplicationLink,<!-- 巡厂申请审批环节-->
+                      a13.application_status packageApplicationStatus,<!--包装设计申请审批状态-->
+                      a13.application_link packageApplicationLink,<!-- 包装设计申请审批环节-->
+                      a14.xcsqtj_date xcsqtjDate,<!--巡厂申请提交日期-->
+                      a14.xcsqtj_status xcsqtjStatus,<!--巡厂申请提交状态-->
+                      a14.xcsqtj_bz_day xcsqtjBzDay,<!--巡厂申请提交标准天数-->
+                      a14.xcsqtj_sj_day xcsqtjSjDay,<!--巡厂申请提交实际天数-->
+                      
+                      
+                      a14.xcsqshtg_date xcsqshtgDate,<!--巡厂申请审批通过日期-->
+                      a14.xcsqshtg_status xcsqshtgStatus,<!--巡厂申请审批通过状态-->
+                      a14.xcsqshtg_bz_day xcsqshtgBzDay,<!--巡厂申请审批通过标准天数-->
+                      a14.xcsqshtg_sj_day xcsqshtgSjDay,<!--巡厂申请审批通过实际天数-->
+                      
+                      a14.pksjxc_date pksjxcDate,<!--品控实际巡厂日期-->
+                      a14.pksjxc_status pksjxcStatus,<!--品控实际巡厂状态-->
+                      a14.pksjxc_bz_day pksjxcBzDay,<!--品控实际巡厂标准天数-->
+                      a14.pksjxc_sj_day pksjxcSjDay,<!--品控实际巡厂实际天数-->
+                      
+                      a14.xpyjbgtj_date xpyjbgtjDate,<!--新品引进申请提交日期 -->
+                      a14.xpyjbgtj_status xpyjbgtjStatus,<!--新品引进申请提交状态-->
+                      a14.xpyjbgtj_bz_day xpyjbgtjBzDay,<!--新品引进申请提交标准天数-->
+                      a14.xpyjbgtj_sj_day xpyjbgtjSjDay,<!--新品引进申请提交实际天数-->
+                      
+                      a14.xpyjbgsptg_date xpyjbgsptgDate,<!--新品引进审批通过日期 -->
+                      a14.xpyjbgsptg_status xpyjbgsptgStatus,<!--新品引进审批通过状态-->
+                      a14.xpyjbgsptg_bz_day xpyjbgsptgBzDay,<!--新品引进审批通过标准天数-->
+                      a14.xpyjbgsptg_sj_day xpyjbgsptgSjDay,<!--新品引进审批通过实际天数-->
+                      
+                      a14.zsjsqsptg_date zsjsqsptgDate,<!--物料主数据申请审批通过日期-->
+                      a14.zsjsqsptg_status zsjsqsptgStatus,<!--物料主数据申请审批通过状态-->
+                      a14.zsjsqsptg_bz_day zsjsqsptgBzDay,<!--物料主数据申请审批通过标准天数-->
+                      a14.zsjsqsptg_sj_day zsjsqsptgSjDay,<!--物料主数据申请审批通过实际天数-->
+                      
+                      a14.bzsjsq_date bzsjsqDate,<!--包装设计申请提交日期-->
+                      a14.bzsjsq_status bzsjsqStatus,<!--包装设计申请提交状态-->
+                      a14.bzsjsq_bz_day bzsjsqBzDay,<!--包装设计申请提交标准天数-->
+                      a14.bzsjsq_sj_day bzsjsqSjDay,<!--包装设计申请提交实际天数-->
+                      
+                      a14.bzsjsqwc_date bzsjsqwcDate,<!-- 包装设计审批通过日期-->
+                      a14.bzsjsqwc_status bzsjsqwcStatus,<!--包装设计审批通过状态-->
+                      a14.bzsjsqwc_bz_day bzsjsqwcBzDay,<!--包装设计审批通过标准天数-->
+                      a14.bzsjsqwc_sj_day bzsjsqwcSjDay,<!--包装设计审批通过实际天数-->
+                      
+                      a14.bzsjcgqr_date bzsjcgqrDate,<!--包装设计初稿确认日期-->
+                      a14.bzsjcgqr_status bzsjcgqrStatus,<!--包装设计初稿确认状态-->
+                      a14.bzsjcgqr_bz_day bzsjcgqrBzDay,<!--包装设计初稿确认标准天数-->
+                      a14.bzsjcgqr_sj_day bzsjcgqrSjDay,<!--包装设计初稿确认实际天数-->
+                      
+                      a14.bzsjwgtg_date bzsjwgtgDate,<!--包装设计完稿通过日期-->
+                      a14.bzsjwgtg_status bzsjwgtgStatus,<!--包装设计完稿通过状态-->
+                      a14.jlbzsjcgqr_bz_day jlbzsjcgqrBzDay,<!--距离包装设计初稿确认日期标准天数-->
+                      a14.jlbzsjcgqr_sj_day jlbzsjcgqrSjDay,<!--距离包装设计初稿确认日期实际天数-->
+                      a14.jlwlzsjsqsptg_bz_day jlwlzsjsqsptgBzDay,<!--距离物料主数据申请审批通过日期标准天数-->
+                      a14.jlwlzsjsqsptg_sj_day jlwlzsjsqsptgSjDay,<!--距离物料主数据申请审批通过日期实际天数-->
+                      
+                      a14.xpff_date xpffDate,<!--新品发放日期-->
+                      a14.xpff_status xpffStatus,<!--新品发放状态-->
+                      a14.xpff_bz_day xpffBzDay,<!--新品发放标准天数-->
+                      a14.xpff_sj_day xpffSjDay,<!--新品发放实际天数-->
+                      
+                      a14.bz_day bzDay,<!--标准总天数-->
+                      a14.sj_day sjDay,<!--实际总天数-->
+                       
+                      a14.sctg_bz_day sctgBzDay,<!--试吃通过标准天数-->
+                      a14.sctg_sj_day sctgSjDay<!--试吃通过实际天数-->
+	                  
+                    FROM
+                       oa_application  a3
+                  INNER JOIN
+                       application_merchandise  a4
+                  ON  a3.application_code=a4.application_code
+                  <if test= "applicationType != null and applicationType !=''">
+					AND a3.application_type =#{applicationType}
+				  </if>
+                   LEFT JOIN
+                        application_report_new a5  
+                   ON  a4.application_code=a5.application_code
+                   AND a4.merchandise_code=a5.intention_code
+                   AND a4.supplier_code=a5.supplier_code
+                   LEFT JOIN		
+                   		merchandise_centre_type a6
+            	   ON 	a5.centre_type_code = a6.centre_type_code
+			       LEFT JOIN     
+			       		 merchandise_small_type a7
+			        ON 	 a5.small_type_code = a7.small_type_code
+			       LEFT JOIN    merchandise_detail_type a8
+			        ON 	 a5.detail_type_code = a8.detail_type_code
+			       LEFT JOIN 		merchandise_fine_type a9
+           		    ON 	 a5.fine_type_code =a9.fine_type_code 
+           		    
+           		   <!--关联商品巡厂申请单、商品包装设计申请单和申请进度信息(商品OA)2这三张表  -->
+           		   LEFT JOIN     application_visit_factory_m a10
+                   ON    a3.application_code =a10.application_code
+                   AND   a4.merchandise_code=a10.merchandise_code
+                   AND   a4.supplier_code=a10.supplier_code
+                  LEFT JOIN		 application_visit_factory a11
+                   ON    a10.application_vf_code=a11.application_vf_code              
+                  LEFT JOIN     application_package_design_m a12
+                   ON    a3.application_code =a12.application_code
+                   AND   a4.merchandise_code=a12.merchandise_code
+                   AND   a4.supplier_code=a12.supplier_code
+                  LEFT JOIN     application_package_design a13
+                  ON     a12.application_pd_code=a13.application_pd_code
+                  LEFT JOIN     application_schedule_m2 a14
+                   ON    a3.application_code =a14.application_code 
+                   AND   a4.merchandise_code=a14.merchandise_code
+                   AND   a4.supplier_code=a14.supplier_code
+           		    
+			        )  t5
+			ON 		t1.intention_code=t5.intentionCode
+			AND 	t2.intention_supplier_code=t5.supplierCode
+	  LEFT JOIN		merchandise_centre_type t6
+            ON 		
+            		t1.centre_type_code = t6.centre_type_code
+      LEFT JOIN     merchandise_small_type t7
+            ON 		
+            		t1.small_type_code = t7.small_type_code
+     LEFT JOIN 		merchandise_detail_type t8
+            ON 		
+            		t1.detail_type_code = t8.detail_type_code
+    LEFT JOIN 		merchandise_fine_type t9
+           ON 		
+           			t1.fine_type_code = t9.fine_type_code
+		 <where>
+			1=1
+			AND     t2.intention_supplier_code is not null
+			AND		t2.foretaste_status ='是'
+			<!--如果查询"新品引进"记录，需要判断是否已经做了"快速引进"。如果查询"快速引进"记录，需要判断是否已经做了"新品引进"，两者互斥-->
+			AND     NOT EXISTS (SELECT c1.application_code FROM　
+					oa_application  c1,application_merchandise  c2
+                    WHERE  c1.application_code=c2.application_code AND c1.application_type =#{notExistsApplicationType} AND t1.intention_code=c2.merchandise_code
+					AND    t2.intention_supplier_code=c2.supplier_code)
+					
+			<if test= "applicationCode != null and applicationCode !=''">
+			AND UPPER(t5.applicationCode) LIKE UPPER('%'||#{applicationCode}||'%')
+			</if>
+			<if test= "intentionCode != null and intentionCode !=''">
+			AND UPPER(t1.intention_code) LIKE UPPER('%'||#{intentionCode}||'%')
+			</if>
+	    	<if test= "intentionName != null and intentionName !=''">
+			AND UPPER(t1.intention_name) LIKE UPPER('%'||#{intentionName}||'%')
+			</if>
+			<if test= "intentionSupplierCode != null and intentionSupplierCode !=''">
+			AND UPPER(t2.intention_supplier_code) LIKE UPPER('%'||#{intentionSupplierCode}||'%')
+			</if>
+	    	<if test= "intentionSupplierName != null and intentionSupplierName !=''">
+			AND (UPPER(t3.intention_supplier_name) LIKE UPPER('%'||#{intentionSupplierName}||'%') OR UPPER(t4.supplier_name) LIKE UPPER('%'||#{intentionSupplierName}||'%'))
+			</if>
+	    	<if test= "centreTypeCode != null and centreTypeCode !=''">
+			AND t1.centre_type_code = #{centreTypeCode}
+			</if>
+	    	<if test= "smallTypeCode != null and smallTypeCode !=''">
+			AND t1.small_type_code = #{smallTypeCode}
+			</if>
+	    	<if test= "detailTypeCode != null and detailTypeCode!=''">
+			AND t1.detail_type_code =#{detailTypeCode}
+			</if>
+	    	<if test= "fineTypeCode != null and fineTypeCode!=''">
+			AND t1.fine_type_code = #{fineTypeCode}
+			</if>
+	    	<if test= "purchaseDepartments != null and purchaseDepartments !=''">
+			AND t1.purchase_departments = #{purchaseDepartments}
+			</if>
+	    	<if test= "rationed != null and rationed !=''">
+			AND t1.rationed = #{rationed}
+			</if>
+	    	<if test= "purchaseType != null and purchaseType !=''">
+			AND t1.purchase_type = #{purchaseType}
+			</if>
+	    	<if test= "saleType != null and saleType !=''">
+			AND t1.sale_type =#{saleType}
+			</if>
+			<!--意向品创建日期-->
+			<if test="createDateStart != null and createDateStart != '' ">
+			AND t1.created &gt;= to_date(#{createDateStart} || '00:00:00','yyyy-mm-dd HH24:mi:ss')
+			</if>
+			<if test="createDateEnd != null and createDateEnd != '' ">
+			AND t1.created &lt;= to_date(#{createDateEnd} || '23:59:59','yyyy-mm-dd HH24:mi:ss')
+			</if>
+	    	<if test= "dxRoleCode != null and dxRoleCode !=''">
+			AND t5.dxRoleCode = #{dxRoleCode}
+			</if>
+	    	<if test= "dlRoleCode != null and dlRoleCode !=''">
+			AND t5.dlRoleCode =#{dlRoleCode}
+			</if>
+			<if test= "applicationStatus != null and applicationStatus !=''">
+			AND DECODE(t5.applicationStatus,null,'W',t5.applicationStatus) =#{applicationStatus}
+			</if>
+			<!--申请单创建日期 20160728gavin-->
+			<if test="applicationDateStart != null and applicationDateStart != ''">
+			AND t5.xpyjbgtjDate &gt;= to_date(#{applicationDateStart} || '00:00:00','yyyy-mm-dd HH24:mi:ss')
+			</if>
+			<if test="applicationDateEnd != null and applicationDateEnd != ''">
+			AND t5.xpyjbgtjDate &lt;= to_date(#{applicationDateEnd} || '23:59:59','yyyy-mm-dd HH24:mi:ss')
+			</if>
+			
+			<!--巡厂申请单状态-->
+			<if test= "visitApplicationStatus != null and visitApplicationStatus !=''">
+			AND DECODE(t5.visitApplicationStatus,null,'W',t5.visitApplicationStatus)=#{visitApplicationStatus}
+			</if>
+			<!--巡厂申请单提交日期-->
+			<if test="visitDateStart != null and visitDateStart != ''">
+			AND t5.xcsqtjDate &gt;= to_date(#{visitDateStart} || '00:00:00','yyyy-mm-dd HH24:mi:ss')
+			</if>
+			<if test="visitDateEnd != null and visitDateEnd != ''">
+			AND t5.xcsqtjDate &lt;= to_date(#{visitDateEnd} || '23:59:59','yyyy-mm-dd HH24:mi:ss')
+			</if>
+			
+			<!--包装设计申请单状态-->
+			<if test= "packageApplicationStatus != null and packageApplicationStatus !=''">
+			AND DECODE(t5.packageApplicationStatus,null,'W',t5.packageApplicationStatus)=#{packageApplicationStatus}
+			</if>
+			<!--包装设计申请提交日期-->
+			<if test="packageDateStart != null and packageDateStart != ''">
+			AND t5.bzsjsqDate &gt;= to_date(#{packageDateStart} || '00:00:00','yyyy-mm-dd HH24:mi:ss')
+			</if>
+			<if test="packageDateEnd != null and packageDateEnd != ''">
+			AND t5.bzsjsqDate &lt;= to_date(#{packageDateEnd} || '23:59:59','yyyy-mm-dd HH24:mi:ss')
+			</if>
+					
+		 </where>
+		  ) d1
+		  <if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY d1.applicationCode DESC,
+    					 d1.intentionCode DESC, 
+    			         d1.intentionSupplierCode DESC
+    		</if>
+    	 </if>
+     </select>
+    
+    
+     <!-- 查询老品新上、正常调价和快速调价OA申请列表-->
+     <select id="queryMerchandiseApplicationList" resultMap="merchandiseIntentionMap">
+     	SELECT  
+    	<if test="page_count == null">
+       		d1.*
+	   	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      	FROM 
+	     	(SELECT 
+		     		 t1.merchandise_code merchandiseCode,
+				     t1.merchandise_name merchandiseName,
+				     t1.centre_type_code centreTypeCode,
+				     t4.centre_type_name centreTypeName,
+				     t1.small_type_code smallTypeCode,
+				     t5.small_type_name smallTypeName,
+				     t1.detail_type_code detailTypeCode,
+				     t6.detail_type_name detailTypeName,
+				     k2.fine_type_code fineTypeCode,
+				     k3.fine_type_name fineTypeName,
+				     t1.purchase_departments purchaseDepartments,
+		             (SELECT b1.value_string FROM common_mapping_config b1 WHERE b1.key_type = 'PURCHASE_DEPARTMENTS_TYPE' AND b1.code_string = t1.purchase_departments) purchaseDepartmentsName,
+		             DECODE(t1.net_weight, 1, 'GJZ', 'DLZ') rationed,
+		             (SELECT b2.value_string FROM common_mapping_config b2 WHERE b2.key_type = 'RATIONED_TYPE' AND b2.code_string = DECODE(t1.net_weight, 1, 'GJZ', 'DLZ')) rationedName,
+		             k2.purchase_type purchaseType,
+		             (SELECT b3.value_string FROM common_mapping_config b3  WHERE b3.key_type = 'PURCHASE_TYPE' AND b3.code_string = k2.purchase_type) purchaseTypeName,
+		             t1.storage_form saleType,
+		             t2.supplier_code supplierCode,
+		             t2.supplier_name supplierName,
+		             t3.applicationCode applicationCode,
+		             DECODE(t3.applicationStatus,null,'W',t3.applicationStatus) applicationStatus,
+		             (SELECT b5.value_string FROM common_mapping_config b5 WHERE b5.key_type = 'APPLICATION_STATUS' AND b5.code_string =  DECODE(t3.applicationStatus,null,'W',t3.applicationStatus)) applicationStatusName,
+		             t8.dxRoleCode dxRoleCode,
+		             t8.dxRoleName dxRoleName,
+		             t9.dlRoleCode dlRoleCode,
+		             t9.dlRoleName dlRoleName,
+		             t3.oaApplicationCode oaApplicationCode,
+               		 t3.oaContacts oaContacts,
+		             k2.created,
+		             t3.applicationDate oaApplicationDate,
+		             (SELECT b4.real_name from pub_user b4 where b4.user_id = t3.createby) as oaApplicationName,
+		             (SELECT b4.real_name from pub_user b4 where b4.user_id = k2.createby) as createUserName
+		             <!--只有老品新上才需要关联该表-->     		  
+		  			<if test= "applicationType != null and applicationType !='' and applicationType=='MERCHANDISE_OLDUP' ">
+		             ,
+		             <!--进度信息-->
+		             k4.xcsq_date     xcsqDate,
+		             k4.pkxc_date     pkxcDate,
+		             k4.bzsjsq_date     bzsjsqDate,
+		             k4.yjbgtj_date    yjbgtjDate,
+		             k4.yjbgwc_date     yjbgwcDate,
+		             k4.zsjsq_date      zsjsqDate,
+		             k4.zsjsqwc_date    zsjsqwcDate,
+		             k4.htqd_date      htqdDate,
+		             k4.bbtg_date      bbtgDate,
+		             k4.qdgp_date      qdgpDate,
+		             k4.gyssdgp_date    gyssdgpDate,
+		             k4.gzysqr_date    gzysqrDate,
+		             k4.dyqr_date      dyqrDate,
+		             k4.spdddc_date    spdddcDate,
+		             k4.ss_date      ssDate
+		             </if>
+			
+			  FROM MERCHANDISE t1
+			 INNER JOIN supplier t2
+			    ON t1.supplier_code = t2.supplier_code
+			  LEFT JOIN (SELECT a1.application_code   applicationCode,
+			                    a1.application_status applicationStatus,
+			                    a1.oa_application_code oaApplicationCode,
+                     		    a1.oa_contacts oaContacts,
+			                    a2.merchandise_code   merchandiseCode,
+			                    a2.supplier_code      supplierCode,
+			                    a1.created			  applicationDate,
+			                    a1.createby
+			             
+			               FROM oa_application a1, application_merchandise a2
+			              WHERE a1.application_code = a2.application_code
+			                <if test= "applicationType != null and applicationType !=''">
+								AND a1.application_type =#{applicationType}
+							</if>
+			                ) t3
+			    ON       t1.merchandise_code = t3.merchandiseCode
+			   AND       (t2.supplier_code = t3.supplierCode)
+			  LEFT JOIN  merchandise_centre_type t4
+			    ON       t1.centre_type_code = t4.centre_type_code
+			  LEFT JOIN  merchandise_small_type t5
+			    ON       t1.small_type_code = t5.small_type_code
+			  LEFT JOIN  merchandise_detail_type t6
+			    ON       t1.detail_type_code = t6.detail_type_code
+			 LEFT JOIN  (SELECT a5.role_code   dxRoleCode,
+			                    a5.role_name   dxRoleName,
+			                    a6.merchandise_code merchandiseCode
+			               FROM merchandise_dx_role          a5,
+			                     merchandise_role a6
+			              WHERE a5.role_code = a6.dx_role_code) t8
+			    ON 		  t1.merchandise_code = t8.merchandiseCode
+			 LEFT JOIN  (SELECT a7.role_code   dlRoleCode,
+			                    a7.role_name   dlRoleName,
+			                    a8.merchandise_code merchandiseCode
+			               FROM merchandise_dl_role          a7,
+			                    merchandise_role a8
+			              WHERE a7.role_code = a8.dl_role_code) t9
+			    ON 		  t1.merchandise_code = t9.merchandiseCode   
+			 LEFT　JOIN         
+			             intention_supplier_merchandise k1
+         	    ON       t1.merchandise_code=k1.merchandise_code
+         	   AND       t1.supplier_code=k1.supplier_code
+       		LEFT JOIN
+                         merchandise_intention k2
+          		ON       k1.intention_code=k2.intention_code 
+		  LEFT　JOIN
+		      			 merchandise_fine_type k3    
+		     ON  
+		         		 k2.fine_type_code = k3.fine_type_code  
+		  <!--只有老品新上才需要关联该表-->     		  
+		  <if test= "applicationType != null and applicationType !='' and applicationType=='MERCHANDISE_OLDUP' ">
+		  LEFT　JOIN
+		      			 application_schedule_m k4    
+		     ON  
+		         		 t3.applicationCode = k4.application_code   
+		     AND		 t3.merchandiseCode=k4.merchandise_code
+			 AND         t3.supplierCode=k4.supplier_code    
+		  </if>       		 
+			  		     		 
+		 <where>
+			1=1
+			<if test= "applicationCode != null and applicationCode !=''">
+			AND UPPER(t3.applicationCode) LIKE UPPER('%'||#{applicationCode}||'%')
+			</if>
+			<if test= "merchandiseCode != null and merchandiseCode !=''">
+			AND UPPER(t1.merchandise_code) LIKE UPPER('%'||#{merchandiseCode}||'%')
+			</if>
+	    	<if test= "merchandiseName != null and merchandiseName !=''">
+			AND UPPER(t1.merchandise_name) LIKE UPPER('%'||#{merchandiseName}||'%')
+			</if>
+			<if test= "supplierCode != null and supplierCode !=''">
+			AND UPPER(t1.supplier_code) LIKE UPPER('%'||#{supplierCode}||'%')
+			</if>
+	    	<if test= "supplierName != null and supplierName !=''">
+			AND UPPER(t2.supplier_name) LIKE UPPER('%'||#{supplierName}||'%')
+			</if>
+	    	<if test= "centreTypeCode != null and centreTypeCode !=''">
+			AND t1.centre_type_code = #{centreTypeCode}
+			</if>
+	    	<if test= "smallTypeCode != null and smallTypeCode !=''">
+			AND t1.small_type_code = #{smallTypeCode}
+			</if>
+	    	<if test= "detailTypeCode != null and detailTypeCode!=''">
+			AND t1.detail_type_code =#{detailTypeCode}
+			</if>
+	    	<if test= "fineTypeCode != null and fineTypeCode !=''">
+			AND k2.fine_type_code =#{fineTypeCode}
+			</if>
+	    	<if test= "purchaseDepartments != null and purchaseDepartments !=''">
+			<!--AND t1.purchase_departments = #{purchaseDepartments}  -->
+			AND t1.purchase_departments IN (SELECT b1.value_string FROM common_mapping_config b1 WHERE b1.key_type = 'PURCHASE_DEPARTMENTS_TYPE' AND b1.code_string = #{purchaseDepartments})
+			</if>
+	    	<if test= "rationed != null and rationed !=''">
+			AND DECODE(t1.net_weight,1,'GJZ','DLZ') = #{rationed}
+			</if>
+			<if test= "purchaseType != null and purchaseType !=''">
+			AND k2.purchase_type = #{purchaseType}
+			</if>
+	    	<if test= "saleType != null and saleType !=''">
+			AND t1.storage_form =#{saleType}
+			</if>
+	    	<if test= "dxRoleCode != null and dxRoleCode !=''">
+			AND t8.dxRoleCode = #{dxRoleCode}
+			</if>
+	    	<if test= "dlRoleCode != null and dlRoleCode !=''">
+			AND t9.dlRoleCode =#{dlRoleCode}
+			</if>
+			<if test= "applicationStatus != null and applicationStatus !=''">
+			AND DECODE(t3.applicationStatus,null,'W',t3.applicationStatus) =#{applicationStatus}
+			</if>
+			<!--申请单创建日期-->
+			<if test="applicationDateStart != null and applicationDateStart != ''">
+			AND t3.applicationDate &gt;= to_date(#{applicationDateStart} || '00:00:00','yyyy-mm-dd HH24:mi:ss')
+			</if>
+			<if test="applicationDateEnd != null and applicationDateEnd != ''">
+			AND t3.applicationDate &lt;= to_date(#{applicationDateEnd} || '23:59:59','yyyy-mm-dd HH24:mi:ss')
+			</if>			
+		 </where>
+		  ) d1
+		  <if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY d1.merchandiseCode DESC, 
+    			         d1.supplierCode DESC
+    		</if>
+    	 </if>
+     </select>
+    
+    <!-- 增加商品OA申请单 --> 
+	<insert id="saveOaApplication" parameterType="hashmap">
+<!-- 		INSERT INTO oa_application(application_code,application_type,application_status,oa_application_code,oa_contacts,oa_approve_date,oa_application_url,remarks,created,createby) -->	
+			INSERT INTO oa_application(application_code,application_type,application_status,oa_application_code,oa_contacts,oa_approve_date,APPLICATION_LINK,remarks,created,createby) 
+			 VALUES(#{applicationCode},#{applicationType},#{applicationStatus},#{oaApplicationCode},#{oaContacts},#{oaApproveDate},#{oaApplicationUrl},#{remarks},#{app_created},#{app_create_by})
+    </insert>
+    <!-- 删除商品OA申请单 -->
+    <delete id="deleteOaApplicationByCode" parameterType="hashmap">
+        DELETE FROM 
+        			oa_application 
+        WHERE 
+        			APPLICATION_CODE in (${applicationCodes}) 
+    </delete>
+   <!--   申请商品/意向品(商品OA)  -->
+    <resultMap type="com.powere2e.sco.model.merchandiseoaapplication.ApplicationMerchandise" id="applicationMerchandiseMap">
+		<result property="applicationCode" column="applicationCode"/>
+		<result property="merchandiseCode" column="merchandiseCode"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="applicationStatus" column="applicationStatus"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    
+     <!-- 根据意向品编号、供应商编号和OA申请类型查询对应的OA申请-->
+    <select id="listIntentionOaApplication" resultMap="applicationMerchandiseMap">
+	  SELECT 
+	  		 t1.application_code applicationCode,
+             t1.application_status applicationStatus,
+             t1.application_type applicationType,
+             t2.merchandise_code merchandiseCode,
+             t2.supplier_code    supplierCode,
+             t1.createby   createby
+      		 
+        FROM 
+        	 oa_application t1,application_merchandise t2
+       WHERE	t1.application_code=t2.application_code
+       	AND	    t1.application_type=#{applicationType}
+       	<!--查询老品新上、正常调价和快速调价的非"审批通过"的申请单-->
+       <if test="applicationStatus != null and applicationStatus !='' ">
+       	AND	t1.application_status &lt;&gt; #{applicationStatus}
+       </if>
+       AND 
+       (	<foreach collection="list"  item="item" index="index" separator="OR">
+       		(t2.merchandise_code = #{item.merchandiseCode}	 
+       AND
+       		t2.supplier_code = #{item.supplierCode})
+       		</foreach> 	
+       	) 
+    </select>
+    
+     <!-- 增加申请商品/意向品(商品OA) --> 
+	<insert id="saveIntentionOaApplication" parameterType="java.util.List">
+		INSERT INTO application_merchandise(application_code,merchandise_code,supplier_code) 
+			  <foreach collection="list" item="item" index="index" separator="union all" > 
+		         (
+		         SELECT 
+			         #{applicationCode}, 
+			         #{item.merchandiseCode}, 
+			         #{item.supplierCode}
+		         FROM　DUAL
+		         )
+		    </foreach>  
+			 <!-- VALUES <foreach collection="list" item="item" index="index" separator=",">
+			 (#{applicationCode},#{item.intentionCode},#{merchandiseCode},#{item.supplierCode})
+			 </foreach>这种写法只适用于mysql数据库 -->
+    </insert>
+     <!-- 删除申请商品/意向品(商品OA) -->
+    <delete id="deleteApplicationMerhandiseByCode" parameterType="hashmap">
+        DELETE FROM 
+        			application_merchandise 
+        WHERE 
+        			APPLICATION_CODE in (${applicationCodes})  
+    </delete>
+    
+     <!-- 修改OA申请单状态-->
+    <update id="updateOaApplicationStatus" parameterType="hashmap">
+		UPDATE	
+				oa_application	
+		   SET	
+		   		application_status=#{applicationStatus}
+		 WHERE	
+		 		application_code=#{applicationCode}
+    </update>
+    
+    <!-- 增加缺失文件说明 --> 
+	<insert id="insertApplicationLackFileM" parameterType="java.util.List">
+		INSERT INTO application_lack_file_m(application_code,merchandise_code,supplier_code,lack_file_name,lack_file_versions,lack_file_cause) 
+			<foreach collection="list" item="item" index="index" separator="union all" > 
+		         (
+		         SELECT 
+			         #{item.applicationCode}, 
+			         #{item.merchandiseCode}, 
+			         #{item.supplierCode}, 
+			         #{item.lackFileName},
+			         #{item.lackFileVersions},
+			         #{item.lackFileCause}
+		         FROM　DUAL
+		         )
+		    </foreach>  
+    </insert>
+    
+     <!-- 删除缺失文件说明 -->
+    <delete id="deleteApplicationLackFileM" parameterType="hashmap">
+        DELETE FROM 
+        			application_lack_file_m 
+        WHERE 
+        			application_code=#{applicationCode}
+    </delete>
+    
+    <!-- 查看OA系统的申请单号和联系人-->
+    <select id="findApproveOpinion" resultMap="oaApplicationMap">
+	  SELECT 
+	  		 t1.application_code applicationCode,
+             t1.oa_application_code oaApplicationCode,
+             t1.oa_contacts oaContacts
+      
+        FROM 
+        	  oa_application t1
+       WHERE t1.oa_application_code is not null
+       AND   t1.oa_contacts is not null
+       AND	
+       		 t1.application_code=#{applicationCode}
+    </select>
+    
+    
+    <!-- 根据主键查询某个商品OA申请单(可分页)-->
+    <select id="loadOaApplication" resultMap="oaApplicationMap">
+		SELECT 
+			   t.application_code    applicationCode,
+		       t.application_type    applicationType,
+		       t.application_status  applicationStatus,
+		       t.oa_application_code oaApplicationCode,
+		       t.oa_contacts         oaContacts,
+		       t.oa_approve_date     oaApproveDate,
+		       t.application_link  oaApplicationUrl,
+		       t.remarks             remarks,
+		       t.created  			 created
+	
+	  	FROM   oa_application t
+	
+		WHERE
+			   t.application_code = #{applicationCode}
+    </select> 
+    
+     <!-- 根据OA申请单号查询意向品/商品编号和对应的供应商编号-->
+    <select id="findMerchandiseCodeAndSupplierCode" resultMap="applicationMerchandiseMap">
+		SELECT 
+			   t.merchandise_code merchandiseCode,
+               t.supplier_code    supplierCode
+	
+	  	FROM   application_merchandise t
+	
+		WHERE
+			   t.application_code = #{applicationCode}
+    </select> 
+    
+    
+    <!-- 获取sequence值 -->
+	<select id="selectReportNextID" resultType="String">
+		SELECT ${sequenceName}.NEXTVAL from dual
+	</select>
+	
+	
+	
+	<!--CR,巡厂和包装信息-->
+	<!-- 增加商品巡厂申请单 --> 
+	<insert id="insertApplicationVisitFactory" parameterType="hashmap">
+		INSERT INTO application_visit_factory(application_vf_code,application_status,created,createby) 
+			 VALUES(#{applicationVfCode},#{applicationStatus},#{app_created},#{app_create_by})
+    </insert>
+    <!-- 删除商品巡厂申请单 -->
+    <delete id="deleteApplicationVisitFactory" parameterType="hashmap">
+        DELETE FROM 
+        			application_visit_factory 
+        WHERE 
+        			application_vf_code IN  (SELECT application_vf_code FROM application_visit_factory_m WHERE application_code IN (${applicationCodes}) )
+    </delete>
+     <!-- 根据巡查单号删除商品巡厂申请单 -->
+    <delete id="deleteApplicationVisitFactoryByVfCode" parameterType="hashmap">
+        DELETE FROM 
+        			application_visit_factory 
+        WHERE 
+        			application_vf_code IN  
+        			(SELECT application_vf_code 
+        			  FROM  application_visit_factory_m 
+        			  WHERE application_code = #{applicationCode} 
+        			  AND merchandise_code=#{merchandiseCode} 
+        			  AND supplier_code=#{supplierCode} 
+        			 )
+    </delete>
+    
+    <!-- 增加商品巡厂申请单 --> 
+	<insert id="insertApplicationVisitFactoryM" parameterType="hashmap">
+		INSERT INTO application_visit_factory_m(application_vf_code,application_code,merchandise_code,supplier_code) 
+			 VALUES(#{applicationVfCode},#{applicationCode},#{merchandiseCode},#{supplierCode})
+    </insert>
+    <!-- 删除商品巡厂申请单 -->
+    <delete id="deleteApplicationVisitFactoryM" parameterType="hashmap">
+        DELETE FROM 
+        			application_visit_factory_m 
+        WHERE 
+        			application_vf_code IN  (SELECT application_vf_code FROM application_visit_factory_m WHERE application_code IN (${applicationCodes}) )
+    </delete>
+    
+    <!-- 根据巡查单号删除商品巡厂申请单 -->
+    <delete id="deleteApplicationVisitFactoryMByVfCode" parameterType="hashmap">
+        DELETE FROM 
+        			application_visit_factory_m 
+        WHERE 
+        			application_vf_code IN  
+        			(SELECT application_vf_code 
+        			  FROM  application_visit_factory_m 
+        			  WHERE application_code = #{applicationCode} 
+        			  AND merchandise_code=#{merchandiseCode} 
+        			  AND supplier_code=#{supplierCode} 
+        			 )
+    </delete>
+    
+    
+	<!-- 增加商品包装设计申请单 --> 
+	<insert id="insertApplicationPackageDesign" parameterType="hashmap">
+		INSERT INTO application_package_design(application_pd_code,application_status,created,createby) 
+			 VALUES(#{applicationPdCode},#{applicationStatus},#{app_created},#{app_create_by})
+    </insert>
+    <!-- 删除商品包装设计申请单 -->
+    <delete id="deleteApplicationPackageDesign" parameterType="hashmap">
+        DELETE FROM 
+        			application_package_design 
+        WHERE 
+        			application_pd_code IN  (SELECT application_pd_code FROM application_package_design_m WHERE application_code IN (${applicationCodes}) )
+    </delete>
+     <!-- 根据包装设计单号删除商品包装设计申请单 -->
+    <delete id="deleteApplicationPackageDesignByPdCode" parameterType="hashmap">
+        DELETE FROM 
+        			application_package_design 
+        WHERE 
+        			application_pd_code IN  
+        			(SELECT application_pd_code 
+        			  FROM  application_package_design_m 
+        			  WHERE application_code = #{applicationCode} 
+        			  AND merchandise_code=#{merchandiseCode} 
+        			  AND supplier_code=#{supplierCode} 
+        			 )
+    </delete>
+    
+    <!-- 增加商品包装设计申请单 --> 
+	<insert id="insertApplicationPackageDesignM" parameterType="hashmap">
+		INSERT INTO application_package_design_m(application_pd_code,application_code,merchandise_code,supplier_code) 
+			 VALUES(#{applicationPdCode},#{applicationCode},#{merchandiseCode},#{supplierCode})
+    </insert>
+    <!-- 删除商品包装设计申请单 -->
+    <delete id="deleteApplicationPackageDesignM" parameterType="hashmap">
+        DELETE FROM 
+        			application_package_design_m 
+        WHERE 
+        			application_code IN  (${applicationCodes})
+    </delete>
+     <!-- 根据包装设计单号删除商品包装设计申请单 -->
+    <delete id="deleteApplicationPackageDesignMByPdCode" parameterType="hashmap">
+        DELETE FROM 
+        			application_package_design_m 
+         WHERE 		
+         			application_code = #{applicationCode} 
+          AND       merchandise_code=#{merchandiseCode} 
+          AND       supplier_code=#{supplierCode} 
+    </delete>
+    
+     <!-- 删除申请进度信息(商品OA)2 -->
+    <delete id="deleteApplicationScheduleM2" parameterType="hashmap">
+        DELETE FROM 
+        			application_schedule_m2 
+        WHERE 
+        			application_code IN  (${applicationCodes})
+    </delete>
+</mapper>

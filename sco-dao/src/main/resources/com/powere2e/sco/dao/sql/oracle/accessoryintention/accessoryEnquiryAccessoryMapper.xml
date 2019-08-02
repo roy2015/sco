@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.accessoryintention.AccessoryEnquiryAccessoryDao">
+	<resultMap type="com.powere2e.sco.model.accessoryintention.AccessoryEnquiryAccessory" id="accessoryEnquiryAccessoryMap">
+		<result property="accessoryCode" column="accessoryCode"/>
+		<result property="enquiryCode" column="enquiryCode"/>
+		<result property="accessoryName" column="accessoryName"/>
+		<result property="material" column="material"/>
+		<result property="materialSize" column="materialSize"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <!-- 查询询价单原材料(可分页)-->
+    <select id="searchAccessoryEnquiryAccessory" resultMap="accessoryEnquiryAccessoryMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.accessory_code accessoryCode,t.enquiry_code enquiryCode,t.accessory_name accessoryName,t.material material,t.material_size materialSize
+       		
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM accessory_enquiry_accessory t
+    	<where>
+    		1=1
+	    	<if test= "accessoryCode != null and accessoryCode!=''">
+			AND t.accessory_code = #{accessoryCode}
+			</if>
+	    	<if test= "enquiryCode != null and enquiryCode!=''">
+			AND t.enquiry_code = #{enquiryCode}
+			</if>
+	    	<if test= "accessoryName != null and accessoryName!=''">
+			AND UPPER(t.accessory_name) LIKE UPPER('%'||#{accessoryName}||'%')
+			</if>
+	    	<if test= "material != null and material!=''">
+			AND UPPER(t.material) LIKE UPPER('%'||#{material}||'%')
+			</if>
+	    	<if test= "materialSize != null and materialSize!=''">
+			AND UPPER(t.material_size) LIKE UPPER('%'||#{materialSize}||'%')
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 根据主键查询某个询价单原材料(可分页)-->
+    <select id="loadAccessoryEnquiryAccessory" resultMap="accessoryEnquiryAccessoryMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.accessory_code accessoryCode,t.enquiry_code enquiryCode,t.accessory_name accessoryName,t.material material,t.material_size materialSize
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM accessory_enquiry_accessory t
+    	<where>
+    		1=1
+	    	<if test= "accessoryCode != null and accessoryCode!=''">
+			AND  t.ACCESSORY_CODE = #{accessoryCode}
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 增加询价单原材料 --> 
+	<insert id="saveAccessoryEnquiryAccessory" parameterType="hashmap">
+		INSERT INTO accessory_enquiry_accessory(accessory_code,enquiry_code,accessory_name,material,material_size) 
+			 VALUES(s_accessory_enquiry_accessory.nextval,#{enquiryCode},#{accessoryName},#{material},#{materialSize})
+    </insert>
+    <!-- 修改询价单原材料  -->
+    <update id="updateAccessoryEnquiryAccessory" parameterType="hashmap">
+		UPDATE	
+				accessory_enquiry_accessory	
+		   SET	
+		   		enquiry_code=#{enquiryCode},
+		   		accessory_name=#{accessoryName},
+		   		material=#{material},
+		   		material_size=#{materialSize}		   		
+		 WHERE	
+		 		ACCESSORY_CODE=#{accessoryCode}
+    </update>
+    <!-- 删除询价单原材料 -->
+    <delete id="deleteAccessoryEnquiryAccessory" parameterType="hashmap">
+        DELETE FROM 
+        			accessory_enquiry_accessory 
+        WHERE 
+        			ENQUIRY_CODE=#{enquiryCode} <!--AND client_id=#{app_user_clientID}-->
+    </delete>
+</mapper>

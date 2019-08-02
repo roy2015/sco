@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+	<!-- 系统初始化即加载的类 -->
+	<bean id="appInitListeners" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.frame.web.InitListenersImpl">
+				<property name="listeners">
+					<list>
+						<bean class="com.powere2e.sco.common.listener.SystemInitListener"></bean>
+					</list>
+				</property>
+			</bean>
+		</property>
+	</bean>
+	<!-- 设置freeMarker的配置文件路径 -->
+	<bean id="freemarkerConfiguration" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+		<property name="location" value="classpath:freemarker.properties" />
+	</bean>
+	<!-- 系统控制参数 -->
+	<bean id="pageReturnData" class="com.powere2e.frame.web.EasyUIWebReturn" scope="prototype" />
+	<!-- 配置当前系统的数据字典 -->
+	<!-- <bean id="dicUtils" class="com.gdsn.utils.DicUtils" lazy-init="false"> 
+		<property name="dicClassName" value="com.gdsn.utils.Dic" /> </bean> -->
+
+
+	<import resource="classpath*:com/powere2e/services/security.xml" />
+	<import resource="classpath*:applicationContext-shiro.xml" />
+	<import resource="classpath*:com/powere2e/services/bizframe.xml" />
+	<import resource="classpath*:com/powere2e/services/dic.xml" />
+	<import resource="classpath*:com/powere2e/services/gavin.xml" />
+	<import resource="classpath*:com/powere2e/services/joyce.xml" />
+	<import resource="classpath*:com/powere2e/services/matt.xml" />
+	<import resource="classpath*:com/powere2e/services/gavillen.xml" />
+	<import resource="classpath*:com/powere2e/services/xiejiajie.xml" />
+	<import resource="classpath*:com/powere2e/services/lipengjie.xml" />
+	<import resource="classpath*:com/powere2e/services/caoliqiang.xml" />
+	<import resource="classpath*:com/powere2e/services/scoHbxt.xml" />
+
+</beans>

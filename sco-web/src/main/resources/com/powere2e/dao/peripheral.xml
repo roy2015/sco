@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+  
+  <!--BW接口 --> 
+  <!--商品区域销售情况(日直营)-->
+  <bean id="merchandiseSellDirectDayDao" class="com.powere2e.sco.dao.impl.peripheral.bw.MerchandiseSellDirectDayDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  <!--商品区域销售情况(日加盟)-->
+  <bean id="merchandiseSellJoinDayDao" class="com.powere2e.sco.dao.impl.peripheral.bw.MerchandiseSellJoinDayDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  <!--商品区域销售情况(日直营+日加盟)-->
+  <bean id="merchandiseSellDjDayDao" class="com.powere2e.sco.dao.impl.peripheral.bw.MerchandiseSellDjDayDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  
+  <!--商品区域销售情况(月直营)-->
+  <bean id="merchandiseSellDirectMonthDao" class="com.powere2e.sco.dao.impl.peripheral.bw.MerchandiseSellDirectMonthDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  <!--商品区域销售情况(月加盟)-->
+  <bean id="merchandiseSellJoinMonthDao" class="com.powere2e.sco.dao.impl.peripheral.bw.MerchandiseSellJoinMonthDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  <!--商品区域销售情况(月直营+月加盟)-->
+  <bean id="merchandiseSellDjMonthDao" class="com.powere2e.sco.dao.impl.peripheral.bw.MerchandiseSellDjMonthDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  <!--商品订货单信息-->
+  <bean id="merchandiseOrderDao" class="com.powere2e.sco.dao.impl.peripheral.bw.MerchandiseOrderDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  <!--商品收货单信息-->
+  <bean id="merchandiseBwReceiptDao" class="com.powere2e.sco.dao.impl.peripheral.bw.MerchandiseReceiptDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+   <!--商品进货权限-->
+  <bean id="merchandiseJhPermissionDao" class="com.powere2e.sco.dao.impl.peripheral.bw.MerchandiseJhPermissionDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+ 
+  <!--SAP接口 -->
+   <!--商品历史物料号-->
+  <bean id="merchandiseHistoryDao" class="com.powere2e.sco.dao.impl.peripheral.sap.MerchandiseHistoryDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+   <!--商品供应商信息-->
+  <bean id="merchandiseSupplierDao" class="com.powere2e.sco.dao.impl.peripheral.sap.MerchandiseSupplierDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+   <!--商品中分类-->
+  <bean id="merchandiseCentreTypeDao" class="com.powere2e.sco.dao.impl.peripheral.sap.MerchandiseCentreTypeDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+   <!--商品小分类-->
+  <bean id="merchandiseSmallTypeDao" class="com.powere2e.sco.dao.impl.peripheral.sap.MerchandiseSmallTypeDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+   <!--商品明细类-->
+  <bean id="merchandiseDetailTypeDao" class="com.powere2e.sco.dao.impl.peripheral.sap.MerchandiseDetailTypeDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean> 
+  
+   <!--供应商历史物料号-->
+  <bean id="merchandiseSupplierHistoryDao" class="com.powere2e.sco.dao.impl.peripheral.sap.MerchandiseSupplierHistoryDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+   <!--区域信息-->
+  <bean id="regionDao" class="com.powere2e.sco.dao.impl.peripheral.sap.RegionDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+   <!--仓库-->
+  <bean id="warehouseDao" class="com.powere2e.sco.dao.impl.peripheral.sap.WarehouseDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+   <!--仓位-->
+  <bean id="warehouseSiteDao" class="com.powere2e.sco.dao.impl.peripheral.sap.WarehouseSiteDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean> 
+  
+   <!--商品-->
+  <bean id="merchandiseSapDao" class="com.powere2e.sco.dao.impl.peripheral.sap.MerchandiseSapDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+   <!--商品进货价格信息-->
+  <bean id="merchandisePurchasePriceDao" class="com.powere2e.sco.dao.impl.peripheral.sap.MerchandisePurchasePriceDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+   <!--商品销售价格信息-->
+  <bean id="merchandisePriceDao" class="com.powere2e.sco.dao.impl.peripheral.sap.MerchandisePriceDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean> 
+   <!--商品促销进货价-->
+  <bean id="merchandisePromotionPurchaseDao" class="com.powere2e.sco.dao.impl.peripheral.sap.MerchandisePromotionPurchaseDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+   <!--商品促销销售价-->
+  <bean id="merchandisePromotionSellDao" class="com.powere2e.sco.dao.impl.peripheral.sap.MerchandisePromotionSellDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean> 
+  <!--工作日-->
+  <bean id="WorkingDayDao" class="com.powere2e.sco.dao.impl.peripheral.sap.WorkingDayDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean> 
+</beans>

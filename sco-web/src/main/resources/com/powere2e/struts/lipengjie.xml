@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN" "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="lipengjie" extends="pubstruts" namespace="/">
+
+		<!-- 签量提醒设置 -->
+		<action name="qlRemindConfig" method="{1}"
+			class="com.powere2e.sco.action.parameterset.qlremindconfig.QlRemindConfigAction">
+			<interceptor-ref name="mydefault" />
+		</action>
+
+		<!-- 让步接收数据 -->
+		<action name="concessionReceive" method="{1}"
+			class="com.powere2e.sco.action.datamaintenance.inventorydata.concessionreceive.ConcessionReceiveAction">
+			<interceptor-ref name="mydefault" />
+		</action>
+
+		<!-- 供应商质量星级 -->
+		<action name="supplierQualityLevel" method="{1}"
+			class="com.powere2e.sco.action.datamaintenance.gradecontroldata.supplierqualitylevel.SupplierQualityLevelAction">
+			<interceptor-ref name="mydefault" />
+		</action>
+
+		<!-- 供应商年度千万元客诉 -->
+		<action name="supplierComplaints" method="{1}"
+			class="com.powere2e.sco.action.datamaintenance.gradecontroldata.suppliercomplaints.SupplierComplaintsAction">
+			<interceptor-ref name="mydefault" />
+		</action>
+
+		<!-- 供应商年度巡厂得分 -->
+		<action name="supplierVisitFactory" method="{1}"
+			class="com.powere2e.sco.action.datamaintenance.gradecontroldata.suppliervisitfactory.SupplierVisitFactoryAction">
+			<interceptor-ref name="mydefault" />
+		</action>
+
+		<!-- 供应商 -->
+		<action name="supplier" method="{1}"
+			class="com.powere2e.sco.action.masterdata.SupplierAction">
+			<interceptor-ref name="mydefault" />
+		</action>
+
+		<!-- 商品回收记录 -->
+		<action name="merchandiseRecycle" method="{1}"
+			class="com.powere2e.sco.action.datamaintenance.gradecontroldata.merchandiserecycle.MerchandiseRecycleAction">
+			<interceptor-ref name="mydefault" />
+		</action>
+
+		<!-- 商品分项成本类比 -->
+		<action name="merchandiseItemCost" method="{1}"
+			class="com.powere2e.sco.action.merchandisecostanalysis.merchandiseitemcost.MerchandiseItemCostAction">
+			<interceptor-ref name="mydefault" />
+		</action>
+
+		<!-- 商品总成本类比分析 -->
+		<action name="totalCostAnalogyAnalysis" method="{1}"
+			class="com.powere2e.sco.action.merchandisecostanalysis.totalcostanalogyanalysis.TotalCostAnalogyAnalysisAction">
+			<interceptor-ref name="mydefault" />
+		</action>
+		
+		<!-- 首页 -->
+		<action name="home" method="{1}"
+			class="com.powere2e.sco.action.home.HomeAction">
+			<interceptor-ref name="mydefault" />
+		</action>
+	</package>
+</struts>

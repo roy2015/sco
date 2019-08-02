@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.powere2e.sco.interfaces.dao.datamaintenance.purchaserdata.materialrolemaintenance.MaterialDao">
+	<resultMap type="com.powere2e.sco.model.datamaintenance.purchaserdata.materialrolemaintenance.Material" id="materialMap">
+		<result property="materialCode" column="materialCode" />
+		<result property="materialName" column="materialName" />
+		<result property="materialBigTypeCode" column="materialBigTypeCode" />
+		<result property="materialBigTypeName" column="materialBigTypeName" />
+		<result property="materialSmallTypeName" column="materialSmallTypeName" />
+		<result property="materialSmallTypeCode" column="materialSmallTypeCode" />
+		<result property="websiteCode" column="websiteCode" />
+		<result property="websiteName" column="websiteName" />
+		<result property="websiteUrl" column="websiteUrl" />
+		<result property="priceRegionCode" column="priceRegionCode" />
+		<result property="priceRegion" column="priceRegion" />
+		<result property="materialRegionName" column="materialRegionName" />
+		<result property="created" column="created" />
+		<result property="createby" column="createby" />
+		<result property="updated" column="updated" />
+		<result property="updateby" column="updateby" />
+		<result property="createUserName" column="createUserName" />
+		<result property="updateUserName" column="updateUserName" />
+		<result property="recordCount" column="record_count" />
+	</resultMap>
+
+	<!-- 查询原料(可分页) -->
+	<select id="searchMaterial" resultMap="materialMap">
+		SELECT
+		<if test="page_count == null">
+		    m.material_code materialCode,
+			mbt.material_big_type_name materialBigTypeName,
+			mst.material_small_type_name materialSmallTypeName,
+			m.material_name materialName,
+			w.website_name websiteName,
+			mr.website_url websiteUrl,
+			mr.material_region_code priceRegionCode,
+			mr.material_region_name priceRegion,
+			(SELECT u.real_name FROM pub_user u WHERE u.user_id = m.createby) createby,
+			m.created
+		</if>
+		<if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		FROM 
+			material m
+		LEFT JOIN material_region mr ON m.material_code = mr.material_code
+		LEFT JOIN material_big_type mbt ON m.material_big_type_code = mbt.material_big_type_code
+		LEFT JOIN material_small_type mst ON mst.material_small_type_code = m.material_small_type_code
+		LEFT JOIN website w ON m.website_code = w.website_code
+		<where>
+			1=1
+			<if test="materialCode != null and materialCode !=''">
+				AND m.material_code = #{materialCode}
+			</if>
+			<if test="materialName != null and materialName !=''">
+				AND UPPER(m.material_name) = UPPER(#{materialName})
+			</if>
+			<if test="materialBigTypeCode != null and materialBigTypeCode!=''">
+				AND UPPER(mbt.material_big_type_code) LIKE UPPER('%'||#{materialBigTypeCode}||'%')
+			</if>
+			<if test="materialSmallTypeCode != null and materialSmallTypeCode!=''">
+				AND UPPER(mst.material_small_type_code) LIKE UPPER('%'||#{materialSmallTypeCode}||'%')
+			</if>
+			<if test="websiteCode != null and websiteCode!=''">
+				AND UPPER(w.website_code) LIKE UPPER('%'||#{websiteCode}||'%')
+			</if>
+			<if test="websiteName != null and websiteName !=''">
+				AND UPPER(w.website_name) LIKE UPPER('%'||#{websiteName}||'%')
+			</if>
+			<if test="priceRegion != null and priceRegion !=''">
+				AND UPPER(mr.MATERIAL_REGION_NAME) LIKE UPPER('%'||#{priceRegion}||'%')
+			</if>
+			<if test="priceRegionInsert != null and priceRegionInsert !=''">
+				AND UPPER(mr.MATERIAL_REGION_NAME) = #{priceRegionInsert}
+			</if>
+			<if test="created != null and created!=''">
+				AND convert(varchar,m.created,120) LIKE (#{created})
+			</if>
+			<if test="createby != null and createby!=''">
+				AND UPPER(m.createby) LIKE UPPER('%'||#{createby}||'%')
+			</if>
+			<if test="updated != null and updated!=''">
+				AND convert(varchar,m.updated,120) LIKE (#{updated})
+			</if>
+			<if test="updateby != null and updateby!=''">
+				AND UPPER(m.updateby) LIKE UPPER('%'||#{updateby}||'%')
+			</if>
+		</where>
+		<if test="page_count == null">
+			<if test="app_orderby !=null">
+				ORDER BY ${app_orderby}
+			</if>
+			<if test="app_orderby ==null">
+				ORDER BY m.created DESC
+			</if>
+		</if>
+	</select>
+
+	<!-- 根据主键查询某个原料(可分页) -->
+	<select id="loadMaterial" resultMap="materialMap">
+		SELECT
+		<if test="page_count == null">
+			 m.material_code materialCode,
+			mbt.material_big_type_name materialBigTypeName,
+			mst.material_small_type_name materialSmallTypeName,
+			m.material_name materialName,
+			w.website_name websiteName,
+			(SELECT u.real_name FROM pub_user u WHERE u.user_id = m.createby) createby,
+			m.created
+		</if>
+		<if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		from material m
+		left join material_big_type mbt on m.material_big_type_code=mbt.material_big_type_code
+		left join material_small_type mst on mst.material_small_type_code=m.material_small_type_code
+		left join WEBSITE w on m.website_code=w.website_code
+		<where>
+			1=1
+			<if test="materialName != null and materialName !=''">
+				AND m.MATERIAL_NAME = #{materialName}
+			</if>
+			<if test="materialBigTypeCode != null and materialBigTypeCode !=''">
+				AND mbt.material_big_type_code = #{materialBigTypeCode}
+			</if>
+			<if test="materialSmallTypeCode != null and materialSmallTypeCode !=''">
+				AND mst.material_small_type_code = #{materialSmallTypeCode}
+			</if>
+			<if test="websiteCode != null and websiteCode !=''">
+				AND w.website_code = #{websiteCode}
+			</if>
+		</where>
+	</select>
+	
+	<!-- 增加原料 -->
+	<insert id="saveMaterial" parameterType="hashmap">
+		INSERT INTO material(material_code,material_name,material_big_type_code,material_small_type_code,website_code,created,createby)
+			VALUES(S_MATERIAL.NEXTVAL,#{materialName},#{materialBigTypeCode},#{materialSmallTypeCode},#{websiteCode},sysdate,#{app_create_by})
+	</insert>
+	
+	<!-- 增加原料区域信息 -->
+	<insert id="saveMaterialRegion" parameterType="hashmap">
+		INSERT INTO material_region(material_region_code,material_region_name,website_url,material_code,created,createby)
+			VALUES(S_MATERIAL_REGION.NEXTVAL,#{materialRegionName},#{websiteUrl},#{materialCode},sysdate,#{app_create_by})
+	</insert>
+	
+	<!-- 新增原料价格信息 -->
+	<insert id="insertMaterialPrice">
+		INSERT INTO material_price(id,material_code,material_region_code,price_date,price,created,createby)
+			VALUES(S_MATERIAL_PRICE.NEXTVAL,#{materialCode},#{priceRegionCode},#{priceDate},#{price},#{app_created},#{app_create_by})
+	</insert>
+	
+	<!-- 查询原料价格信息 -->
+	<select id="loadMaterialPrice" resultType="Integer">
+		select count(*) from material_price where material_code=#{materialCode} and material_region_code=#{priceRegionCode} and trunc(price_date) = to_date(#{orgName},'yyyy-MM-dd')
+	</select>
+	
+	<select id="searchMaterialId">
+	    select S_MATERIAL.CURRVAL from dual;
+	</select>
+	
+	<!-- 修改原料 -->
+	<update id="updateMaterial" parameterType="hashmap">
+		UPDATE
+			material
+		SET
+			material_name=#{materialName},
+			material_big_type_code=#{materialBigTypeCode},
+			material_small_type_code=#{materialSmallTypeCode},
+			website_code=#{websiteCode}
+		WHERE
+			MATERIAL_CODE=#{materialCode}
+	</update>
+	
+	<!-- 修改原料地区 -->
+	<update id="updateMaterialRegion">
+		UPDATE
+			material_region
+		SET
+			material_region_code = #{priceRegionCode},
+			material_region_name = #{materialRegionName},
+			website_url = #{websiteUrl},
+			updated = #{app_updated},
+	   		updateby = #{app_user_id}
+		WHERE
+			material_code = #{materialCode} 
+	</update>
+	
+	<!-- 修改原料价格 -->
+	<update id="updateMaterialPrice">
+		UPDATE
+			material_price
+		SET
+			price_date = #{priceDate},
+			price = #{price},
+			updated = #{app_updated},
+	   		updateby = #{app_user_id}
+		WHERE
+			material_code = #{materialCode} 
+			AND material_region_code = #{priceRegionCode}
+	</update>
+	
+	<!-- 删除原料 -->
+	<delete id="deleteMaterial" parameterType="hashmap">
+		DELETE FROM
+			material
+		WHERE
+			MATERIAL_CODE in 
+			<foreach collection="materialCode" close=")" open="(" item="materialCode" separator=",">
+				#{materialCode}
+			</foreach>
+	</delete>
+	
+</mapper>

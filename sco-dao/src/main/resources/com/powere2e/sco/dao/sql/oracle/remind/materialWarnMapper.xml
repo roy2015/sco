@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.remind.MaterialWarnDao">
+	<resultMap type="com.powere2e.sco.model.remind.MaterialWarn" id="materialWarnMap">
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    
+    <!-- 查询所有原料预警记录 -->
+    <select id="listMaterialWarn" resultMap="materialWarnMap">
+	    SELECT
+		  mw.warn_code warnCode,
+	      mw.warn_date warnDate,
+	      mw.warn_type warnType,
+	      mw.material_code materialCode,
+	      mw.material_region_code materialRegionCode,
+	      mw.last_month_avg_price lastMonthAvgPrice,
+	      mw.qoq_month_avg_price qoqMonthAvgPrice,
+	      mw.qoq_change qoqChange,
+	      mw.sku_count skuCount
+		FROM material_warn mw
+    </select>
+    
+    <!-- 添加原料预警记录 -->
+    <insert id="insertMaterialWarn">
+	    INSERT INTO material_warn(warn_code,warn_date,warn_type,material_code,material_region_code,last_month_avg_price,qoq_month_avg_price,qoq_change,sku_count)
+		SELECT
+	      S_MATERIAL_WARN.NEXTVAL, 		  <!-- 预警编号 -->
+	      a.warn_date, 					  <!-- 预警日期 -->
+	      a.warn_type, 					  <!-- 预警方式 -->
+	      a.material_code, 				  <!-- 原料编号 -->
+	      a.material_region_code, 		  <!-- 地区编号 -->
+	      ROUND(a.up_month_avg_price,2),  <!-- 上月平均价格 -->
+	      ROUND(a.thb_month_avg_price,2), <!-- 同环比月均价格 -->
+	     to_char(ROUND((NVL(a.up_month_avg_price,0)-NVL(a.thb_month_avg_price,0))/a.thb_month_avg_price*100,2),'fm9999999990.00'), <!-- 同环比变化幅度 -->
+	      (SELECT COUNT(DISTINCT mrm.merchandise_code) FROM merchandise_relevance_material mrm WHERE mrm.material_code = a.material_code AND mrm.material_region_code = a.material_region_code) <!-- 关联SKU数 -->
+	    FROM
+	    (
+	              SELECT
+	                SYSDATE warn_date,
+	                mwc.warn_type,
+	                m.material_code,
+	                mr.material_region_code,
+	                (
+	                SELECT 
+	                SUM(NVL(price,0))/count(1)
+	                FROM material_price 
+	                WHERE TO_CHAR(price_date,'YYYYMM') = to_char(ADD_MONTHS(SYSDATE,-1), 'YYYYMM') AND material_code = m.material_code AND material_region_code = mr.material_region_code
+	                ) AS up_month_avg_price, <!-- 上月月平均价格 -->
+	                
+	                CASE mwc.warn_type
+	                WHEN 'YLJGHBYJ'
+	                
+	                THEN 
+	                (<!-- 上上月的原料月平均价格 -->
+	                SELECT
+	                SUM(NVL(price,0))/count(1)
+	                FROM material_price 
+	                WHERE TO_CHAR(price_date,'YYYYMM') = TO_CHAR(ADD_MONTHS(SYSDATE,-2), 'YYYYMM') AND material_code = m.material_code AND material_region_code = mr.material_region_code
+	                )
+	                
+	                WHEN 'YLJGTBYJ'
+	                THEN 
+	                (<!-- 上月去年同期月平均价格 -->
+	                SELECT 
+	                SUM(NVL(price,0))/count(1)
+	                FROM material_price 
+	                WHERE TO_CHAR(price_date,'YYYYMM') = TO_CHAR(ADD_MONTHS(SYSDATE,-13), 'YYYYMM') AND material_code = m.material_code AND material_region_code = mr.material_region_code
+	                
+	                ) END AS thb_month_avg_price <!-- 同环比月均价格 -->
+	              
+	              FROM material m
+	              INNER JOIN material_region mr ON mr.material_code = m.material_code
+	              INNER JOIN 
+	              (   
+	                  SELECT
+	                  material_code,
+	                  threshold_value,
+	                  warn_type
+	                  FROM material_warn_config
+	                  WHERE warn_type IN ('YLJGTBYJ','YLJGHBYJ')
+	              ) mwc ON mwc.material_code = m.material_code
+	      ) a
+    </insert>
+    
+    
+</mapper>

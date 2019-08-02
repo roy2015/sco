@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.merchandiseoaapplication.reportnewoaapplication.ApplicationReportNewDao">
+	<resultMap type="com.powere2e.sco.model.merchandiseoaapplication.reportnewoaapplication.ApplicationReportNew" id="applicationReportNewMap">
+		<result property="reportCode" column="reportCode"/>
+		<result property="applicationCode" column="applicationCode"/>
+		<result property="intentionCode" column="intentionCode"/>
+		<result property="intentionName" column="intentionName"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="supplierName" column="supplierName"/>
+		<result property="supplierAttribute" column="supplierAttribute"/>
+		<result property="supplierSite" column="supplierSite"/>
+		<result property="dlRoleCode" column="dlRoleCode"/>
+		<result property="dxRoleCode" column="dxRoleCode"/>
+		<result property="centreTypeCode" column="centreTypeCode"/>
+		<result property="smallTypeCode" column="smallTypeCode"/>
+		<result property="elseTypeName" column="elseTypeName"/>
+		<result property="detailTypeCode" column="detailTypeCode"/>
+		<result property="fineTypeCode" column="fineTypeCode"/>
+		<result property="development" column="development"/>
+		<result property="visitFactory" column="visitFactory"/>
+		<result property="smallTypeSku" column="smallTypeSku"/>
+		<result property="detailTypeSku" column="detailTypeSku"/>
+		<result property="foretasteDate" column="foretasteDate"/>
+		<result property="foretasteGrade" column="foretasteGrade"/>
+		<result property="foretasteEvaluate" column="foretasteEvaluate"/>
+		<result property="sameMerchandisePrice" column="sameMerchandisePrice"/>
+		<result property="anticipatedSellStoreQuantit" column="anticipatedSellStoreQuantit"/>
+		<result property="anticipatedSellQuantity" column="anticipatedSellQuantity"/>
+		<result property="purchaseOpinion" column="purchaseOpinion"/>
+		<result property="colour" column="colour"/>
+		<result property="smell" column="smell"/>
+		<result property="form" column="form"/>
+		<result property="moistureContent" column="moistureContent"/>
+		<result property="purchaseAnalysis" column="purchaseAnalysis"/>
+		
+		<result property="created" column="created"/>
+		<result property="createby" column="createby"/>
+		<result property="updated" column="updated"/>
+		<result property="updateby" column="updateby"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    
+    <!--缺失文件说明的resultMap-->
+    <resultMap type="com.powere2e.sco.model.merchandiseoaapplication.ApplicationLackFileM" id="applicationLackFileMMap">
+		<result property="applicationCode" column="applicationCode"/>
+		<result property="merchandiseCode" column="merchandiseCode"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="lackFileName" column="lackFileName"/>
+		<result property="lackFileVersions" column="lackFileVersions"/>
+		<result property="lackFileCause" column="lackFileCause"/>
+    </resultMap>
+    
+   	 <!-- 根据申请单号查询没有报告的商品-->
+     <select id="queryNotHaveReportMerchandiseNew" resultMap="applicationLackFileMMap">
+     		SELECT 
+     			   t2.application_code applicationCode,
+			       t2.merchandise_code   merchandiseCode,
+			       t2.supplier_code    supplierCode 
+			 FROM  oa_application t1, application_merchandise t2
+			 WHERE t1.application_code = t2.application_code 
+			 AND   t1.application_code=#{applicationCode}
+			
+			MINUS
+			
+			SELECT t3.application_code applicationCode,
+			       t3.intention_code   merchandiseCode,
+			       t3.supplier_code    supplierCode
+			FROM   application_report_new t3
+			WHERE  t3.application_code=#{applicationCode}
+     
+     </select>
+    
+    
+     <!-- 根据意向品和供应商编号组查询新增新品引进报告-->
+     <select id="listApplicationReportNew" resultMap="applicationReportNewMap">
+		 SELECT 
+		       t.report_code                    reportCode,
+		       t.application_code               applicationCode,
+		       t.intention_code                 intentionCode,
+		       t.intention_name                 intentionName,
+		       t.supplier_code                  supplierCode,
+		       t.supplier_name                  supplierName,
+		       t.supplier_attribute             supplierAttribute,
+		       t.supplier_site                  supplierSite,
+		       t.dl_role_code                   dlRoleCode,
+		       t.dx_role_code                   dxRoleCode,
+		       t.centre_type_code               centreTypeCode,
+		       t.small_type_code                smallTypeCode,
+		       t.else_type_name                 elseTypeName,<!--自定义小分类名称-->
+		       t.detail_type_code               detailTypeCode,
+		       t.fine_type_code                 fineTypeCode,
+		       t.development                    development,
+		       t.visit_factory                  visitFactory,
+		       t.small_type_sku                 smallTypeSku,
+		       t.detail_type_sku                detailTypeSku,
+		       t.foretaste_date                 foretasteDate,
+		       t.foretaste_grade                foretasteGrade,
+		       t.foretaste_evaluate             foretasteEvaluate,
+		       t.same_merchandise_price         sameMerchandisePrice,
+		       t.anticipated_sell_store_quantit anticipatedSellStoreQuantit,
+		       t.anticipated_sell_quantity      anticipatedSellQuantity,
+		       t.purchase_opinion               purchaseOpinion,
+		       t.anticipated_sell_profit		anticipatedSellProfit,<!-- 预计毛利额(最小单位/单店单天) -->
+		       csn.colour,csn.smell,csn.form,
+		       csn.moisture_content moisturecontent,
+		       t.purchase_analysis purchaseAnalysis,
+		       <!-- 判断申请报告是否有同类商品零售价 -->
+		       t.path							path,
+		       (SELECT a1.report_code FROM same_merchandise_new a1 WHERE a1.report_code=t.report_code and rownum=1)  isHaveSameReport       		
+    	
+      	FROM  application_report_new t 
+      	LEFT  JOIN check_standard_new csn ON t.report_code = csn.report_code
+      	WHERE 1=1
+      			<if test= "applicationCode != null and applicationCode !=''">
+				AND t.application_code = #{applicationCode}
+				</if>
+		AND
+		   		(  <foreach collection="list"  item="item" index="index" separator="OR">
+					(t.intention_code = #{item.merchandiseCode}	 
+					AND
+					t.supplier_code = #{item.supplierCode})
+				</foreach> 	
+				) 
+     </select>
+     
+     <!-- 根据意向品和供应商编号组查询新增新品引进报告-->
+     <select id="queryReportofNew" resultMap="applicationReportNewMap">
+		 SELECT 
+		       t1.intention_code          intentionCode,
+	           t1.intention_name          intentionName,
+	           t1.centre_type_code        centreTypeCode,
+	           t1.small_type_code         smallTypeCode,
+	           t1.detail_type_code        detailTypeCode,
+	           t1.fine_type_code          fineTypeCode,
+	           t1.else_type_name          elseTypeName,
+	           t2.intention_supplier_code supplierCode,
+	           t3.intention_supplier_name||t4.supplier_name supplierName,
+	           (SELECT Max(t6.foretaste_date) FROM foretaste_feedback t6 where t6.intention_code=t1.intention_code and t6.intention_supplier_code=t2.intention_supplier_code group by t6.intention_supplier_code) foretasteDate,
+	           (SELECT t7.foretaste_grade FROM foretaste_feedback t7 where t7.intention_code=t1.intention_code and t7.intention_supplier_code=t2.intention_supplier_code and t7.foretaste_date=(SELECT Max(a1.foretaste_date) FROM foretaste_feedback a1 where a1.intention_code=t1.intention_code and a1.intention_supplier_code=t2.intention_supplier_code group by a1.intention_supplier_code)) foretasteGrade,
+	           (SELECT t8.evaluate FROM foretaste_feedback t8 where t8.intention_code=t1.intention_code and t8.intention_supplier_code=t2.intention_supplier_code and t8.foretaste_date=(SELECT Max(a2.foretaste_date) FROM foretaste_feedback a2 where a2.intention_code=t1.intention_code and a2.intention_supplier_code=t2.intention_supplier_code group by a2.intention_supplier_code)) foretasteEvaluate,
+	           DECODE(t3.intention_supplier_code,null,'老供应商','新供应商') supplierAttribute,
+	           ''||t4.company_site supplierSite,
+	           (SELECT t9.report_code FROM application_report_new t9 WHERE t9.intention_code=t2.intention_code AND t9.supplier_code=t2.intention_supplier_code  and rownum=1) reportCode
+		 FROM      merchandise_intention          t1
+      LEFT JOIN    intention_supplier_merchandise t2
+         ON        t1.intention_code = t2.intention_code
+      LEFT JOIN    merchandise_intention_supplier t3
+         ON        t2.intention_supplier_code = t3.intention_supplier_code
+      LEFT JOIN    supplier t4
+         ON        t2.intention_supplier_code = t4.supplier_code
+       WHERE       1=1
+        AND        t2.intention_supplier_code is not null
+		AND 
+				(	<foreach collection="list"  item="item" index="index" separator="OR">
+				(t2.intention_code = #{item.merchandiseCode}	 
+				AND
+				t2.intention_supplier_code = #{item.supplierCode})
+				</foreach> 	
+				) 
+     </select>
+     
+    
+    <!-- 根据主键查询某个申请报告(新品引进)(可分页)-->
+    <select id="loadApplicationReportNew" resultMap="applicationReportNewMap">
+    	SELECT  
+			   t.report_code                    reportCode,
+		       t.application_code               applicationCode,
+		       t.intention_code                 intentionCode,
+		       t.intention_name                 intentionName,
+		       t.supplier_code                  supplierCode,
+		       t.supplier_name                  supplierName,
+		       t.supplier_attribute             supplierAttribute,
+		       t.supplier_site                  supplierSite,
+		       t.dl_role_code                   dlRoleCode,
+		       t.dx_role_code                   dxRoleCode,
+		       t.centre_type_code               centreTypeCode,
+		       t.small_type_code                smallTypeCode,
+		       t.detail_type_code               detailTypeCode,
+		       t.fine_type_code                 fineTypeCode,
+		       t.development                    development,
+		       t.visit_factory                  visitFactory,
+		       t.small_type_sku                 smallTypeSku,
+		       t.detail_type_sku                detailTypeSku,
+		       t.foretaste_date                 foretasteDate,
+		       t.foretaste_grade                foretasteGrade,
+		       t.foretaste_evaluate             foretasteEvaluate,
+		       t.same_merchandise_price         sameMerchandisePrice,
+		       t.anticipated_sell_store_quantit anticipatedSellStoreQuantit,
+		       t.anticipated_sell_quantity      anticipatedSellQuantity,
+		       t.purchase_opinion               purchaseOpinion,
+		       t.anticipated_sell_profit		anticipatedSellProfit,
+		       t.else_type_name					elseTypeName,
+		       t.path							path,
+		        <!-- 判断申请报告是否有同类商品零售价 -->
+		       (SELECT a1.report_code FROM same_merchandise_new a1 WHERE a1.report_code=t.report_code and rownum=1)  isHaveSameReport        		
+    	
+      		FROM application_report_new t
+    	<where>
+    		1=1
+	    	<if test= "reportCode != null and reportCode != ''">
+			AND  t.report_code = #{reportCode}
+			</if>
+	    	<if test= "applicationCode != null and applicationCode != ''">
+			AND  t.application_code = #{applicationCode}
+			</if>
+	    	<if test= "intentionCode != null and intentionCode != ''">
+			AND  t.intention_code = #{intentionCode}
+			</if>
+	    	<if test= "supplierCode != null and supplierCode != ''">
+			AND  t.supplier_code = #{supplierCode}
+			</if>
+    	</where>
+    	
+    </select>
+    
+    <!-- 增加申请报告(新品引进) --> 
+	<insert id="saveApplicationReportNew" parameterType="hashmap">
+		INSERT INTO application_report_new(report_code,application_code,intention_code,intention_name,supplier_code,supplier_name,supplier_attribute,supplier_site,dl_role_code,dx_role_code,centre_type_code,small_type_code,detail_type_code,fine_type_code,development,visit_factory,small_type_sku,detail_type_sku,foretaste_date,foretaste_grade,foretaste_evaluate,same_merchandise_price,anticipated_sell_store_quantit,anticipated_sell_quantity,purchase_opinion,created,createby,anticipated_sell_profit,else_type_name,purchase_analysis) 
+			 VALUES(#{reportCode},#{applicationCode},#{intentionCode},#{intentionName},#{supplierCode},#{supplierName},#{supplierAttribute},#{supplierSite},#{dlRoleCode},#{dxRoleCode},#{centreTypeCode},#{smallTypeCode},#{detailTypeCode},#{fineTypeCode},#{development},#{visitFactory},#{smallTypeSku},#{detailTypeSku},#{foretasteDate},#{foretasteGrade},#{foretasteEvaluate},#{sameMerchandisePrice},#{anticipatedSellStoreQuantit},#{anticipatedSellQuantity},#{purchaseOpinion},#{app_created},#{app_create_by},#{anticipatedSellProfit},#{elseTypeName},#{purchaseAnalysis})
+    </insert>
+    <!-- 修改申请报告(新品引进)  -->
+    <update id="updateApplicationReportNew" parameterType="hashmap">
+		UPDATE	
+				application_report_new	
+		   SET	
+		   		application_code=#{applicationCode},
+		   		intention_code=#{intentionCode},
+		   		intention_name=#{intentionName},
+		   		supplier_code=#{supplierCode},
+		   		supplier_name=#{supplierName},
+		   		supplier_attribute=#{supplierAttribute},
+		   		supplier_site=#{supplierSite},
+		   		dl_role_code=#{dlRoleCode},
+		   		dx_role_code=#{dxRoleCode},
+		   		centre_type_code=#{centreTypeCode},
+		   		small_type_code=#{smallTypeCode},
+		   		detail_type_code=#{detailTypeCode},
+		   		fine_type_code=#{fineTypeCode},
+		   		development=#{development},
+		   		visit_factory=#{visitFactory},
+		   		small_type_sku=#{smallTypeSku},
+		   		detail_type_sku=#{detailTypeSku},
+		   		foretaste_date=#{foretasteDate},
+		   		foretaste_grade=#{foretasteGrade},
+		   		foretaste_evaluate=#{foretasteEvaluate},
+		   		same_merchandise_price=#{sameMerchandisePrice},
+		   		anticipated_sell_store_quantit=#{anticipatedSellStoreQuantit},
+		   		anticipated_sell_quantity=#{anticipatedSellQuantity},
+		   		purchase_opinion=#{purchaseOpinion},		   		
+		   		anticipated_sell_profit=#{anticipatedSellProfit},		   		
+		   		else_type_name=#{elseTypeName},
+		   		purchase_analysis=#{purchaseAnalysis},
+		   		path=#{path}	   		
+		 WHERE	
+		 		report_code=#{reportCode}
+    </update>
+    <!-- 删除申请报告(新品引进) -->
+    <delete id="deleteApplicationReportNew" parameterType="hashmap">
+        DELETE FROM 
+        			application_report_new 
+        WHERE 
+        			REPORT_CODE=#{reportCode} <!--AND client_id=#{app_user_clientID}-->
+    </delete>
+    
+    <!-- 根据申请单号删除报告 -->
+    <delete id="deleteReportNewByApplicationCode" parameterType="hashmap">
+        DELETE FROM 
+        			application_report_new 
+        WHERE 
+        			APPLICATION_CODE IN (${applicationCodes})
+    </delete>
+
+	<!-- 根据申请编号删除检验标准(新品引进) -->
+	<delete id="deleteCheckStandardNewByApplicationCode" parameterType="hashmap">
+		DELETE FROM
+			check_standard_new
+		WHERE
+			report_code IN (SELECT report_code FROM application_report_new WHERE application_code IN (${applicationCodes}))
+	</delete>
+</mapper>

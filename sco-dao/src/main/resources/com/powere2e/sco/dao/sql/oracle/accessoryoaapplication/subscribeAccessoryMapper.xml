@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.accessoryoaapplication.SubscribeAccessoryDao">
+	<resultMap type="com.powere2e.sco.model.accessoryoaapplication.SubscribeAccessory" id="subscribeAccessoryMap">
+		<result property="applicationCode" column="applicationCode"/>
+		<result property="specificationRequirements" column="specificationRequirements"/>
+		<result property="intentionCode" column="intentionCode"/>
+		<result property="accessoryCode" column="accessoryCode"/>
+		<result property="accessoryName" column="accessoryName"/>
+		<result property="enquiryCode" column="enquiryCode"/>
+		<result property="enquiryCount" column="enquiryCount"/>
+		<result property="purchaseCount" column="purchaseCount"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <!-- 查询申购产品信息(可分页)-->
+    <select id="searchSubscribeAccessory" resultMap="subscribeAccessoryMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.application_code applicationCode,t.specification_requirements specificationRequirements,t.intention_code intentionCode,t.accessory_code accessoryCode,t.accessory_name accessoryName,t.enquiry_code enquiryCode,t.enquiry_count enquiryCount,t.purchase_count purchaseCount
+       		
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM subscribe_accessory t
+    	<where>
+    		1=1
+	    	<if test= "applicationCode != null and applicationCode!=''">
+			AND t.application_code = #{applicationCode}
+			</if>
+	    	<if test= "specificationRequirements != null and specificationRequirements!=''">
+			AND UPPER(t.specification_requirements) LIKE UPPER('%'||#{specificationRequirements}||'%')
+			</if>
+	    	<if test= "intentionCode != null and intentionCode!=''">
+			AND t.intention_code=#{intentionCode}
+			</if>
+	    	<if test= "accessoryCode != null and accessoryCode!=''">
+			AND UPPER(t.accessory_code) LIKE UPPER('%'||#{accessoryCode}||'%')
+			</if>
+	    	<if test= "accessoryName != null and accessoryName!=''">
+			AND UPPER(t.accessory_name) LIKE UPPER('%'||#{accessoryName}||'%')
+			</if>
+	    	<if test= "enquiryCode != null and enquiryCode!=''">
+			AND UPPER(t.enquiry_code) LIKE UPPER('%'||#{enquiryCode}||'%')
+			</if>
+	    	<if test= "enquiryCount != null and enquiryCount!=''">
+			AND t.enquiry_count = #{enquiryCount}
+			</if>
+	    	<if test= "purchaseCount != null and purchaseCount!=''">
+			AND t.purchase_count = #{purchaseCount}
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		
+    	</if>
+    </select>
+    
+    <!-- 根据主键查询某个申购产品信息(可分页)-->
+    <select id="loadSubscribeAccessory" resultMap="subscribeAccessoryMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.application_code applicationCode,t.specification_requirements specificationRequirements,t.intention_code intentionCode,t.accessory_code accessoryCode,t.accessory_name accessoryName,t.enquiry_code enquiryCode,t.enquiry_count enquiryCount,t.purchase_count purchaseCount
+       		
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM subscribe_accessory t
+    	<where>
+    		1=1
+	    	<if test= "applicationCode != null and applicationCode!=''">
+			AND  t.APPLICATION_CODE = #{applicationCode}
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		
+    	</if>
+    </select>
+    
+    <!-- 增加申购产品信息 --> 
+	<insert id="saveSubscribeAccessory" parameterType="hashmap">
+		INSERT INTO subscribe_accessory(application_code,specification_requirements,intention_code,accessory_code,accessory_name,enquiry_code,enquiry_count,purchase_count) 
+			 VALUES(#{applicationCode},#{specificationRequirements},#{intentionCode},#{accessoryCode},#{accessoryName},#{enquiryCode},#{enquiryCount},#{purchaseCount})
+    </insert>
+    <!-- 修改申购产品信息  -->
+    <update id="updateSubscribeAccessory" parameterType="hashmap">
+		UPDATE	
+				subscribe_accessory	
+		   SET	
+		   		specification_requirements=#{specificationRequirements},
+		   		intention_code=#{intentionCode},
+		   		accessory_code=#{accessoryCode},
+		   		accessory_name=#{accessoryName},
+		   		enquiry_code=#{enquiryCode},
+		   		enquiry_count=#{enquiryCount},
+		   		purchase_count=#{purchaseCount}		   		
+		 WHERE	
+		 		APPLICATION_CODE=#{applicationCode}
+    </update>
+    <!-- 删除申购产品信息 -->
+    <delete id="deleteSubscribeAccessory" parameterType="hashmap">
+        DELETE FROM 
+        			subscribe_accessory 
+        WHERE 
+        			APPLICATION_CODE=#{applicationCode} <!--AND client_id=#{app_user_clientID}-->
+    </delete>
+</mapper>

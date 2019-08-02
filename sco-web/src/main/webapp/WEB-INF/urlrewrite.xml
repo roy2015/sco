@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE urlrewrite PUBLIC "-//tuckey.org//DTD UrlRewrite 3.2//EN"
+        "http://tuckey.org/res/dtds/urlrewrite3.2.dtd">
+<urlrewrite>
+	<rule>
+      <from>^/error.jsp$</from>
+      <to>%{context-path}/error.jsp</to>
+     </rule>
+	<rule>
+      <from>^/login.html$</from>
+      <to>%{context-path}/login!run.do?ac=beforeLogin</to>
+     </rule>
+
+	 <rule>
+      <from>^/index.html$</from>
+      <to>%{context-path}/index!run.do?ac=index</to>
+     </rule>
+     
+     <rule>
+      <from>^/go_([a-z]+)_([a-z]+).html$</from>
+      <to>%{context-path}/base!run.do?ac=go&amp;page=$1/$2.ftl</to>
+     </rule>
+     
+     <rule>
+      <from>^/([a-zA-Z0-9]+)_([a-zA-Z]+)_([1-9]+).html$</from>
+      <to>%{context-path}/$1!run.do?ac=$2&amp;dotyp=$3</to>
+     </rule>
+     
+      <rule>
+      <from>^/banner.html$</from>
+      <to>%{context-path}/login!run.do?ac=banner</to>
+     </rule>
+
+ 	 <rule>
+      <from>^/$</from>
+      <to>%{context-path}/index!run.do?ac=index</to>
+     </rule>
+     
+</urlrewrite>

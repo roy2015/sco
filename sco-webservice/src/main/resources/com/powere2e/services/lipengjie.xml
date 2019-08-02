@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<!-- 签量提醒设置 -->
+	<bean id="qlRemindConfigService" parent="baseTxProxy">
+		<property name="target">
+			<bean
+				class="com.powere2e.sco.service.impl.parameterset.qlremindconfig.QlRemindConfigServiceImpl">
+				<property name="qlRemindConfigDao" ref="qlRemindConfigDao" />
+			</bean>
+		</property>
+	</bean>
+
+	<!-- 让步接收数据 -->
+	<bean id="concessionReceiveService" parent="baseTxProxy">
+		<property name="target">
+			<bean
+				class="com.powere2e.sco.service.impl.datamaintenance.inventorydata.concessionreceive.ConcessionReceiveServiceImpl">
+				<property name="concessionReceiveDao" ref="concessionReceiveDao" />
+			</bean>
+		</property>
+	</bean>
+
+	<!-- 供应商质量星级 -->
+	<bean id="supplierQualityLevelService" parent="baseTxProxy">
+		<property name="target">
+			<bean
+				class="com.powere2e.sco.service.impl.datamaintenance.gradecontroldata.supplierqualitylevel.SupplierQualityLevelServiceImpl">
+				<property name="supplierQualityLevelDao" ref="supplierQualityLevelDao" />
+			</bean>
+		</property>
+	</bean>
+
+	<!-- 供应商年度千万元客诉 -->
+	<bean id="supplierComplaintsService" parent="baseTxProxy">
+		<property name="target">
+			<bean
+				class="com.powere2e.sco.service.impl.datamaintenance.gradecontroldata.suppliercomplaints.SupplierComplaintsServiceImpl">
+				<property name="supplierComplaintsDao" ref="supplierComplaintsDao" />
+			</bean>
+		</property>
+	</bean>
+
+	<!-- 供应商年度巡厂得分 -->
+	<bean id="supplierVisitFactoryService" parent="baseTxProxy">
+		<property name="target">
+			<bean
+				class="com.powere2e.sco.service.impl.datamaintenance.gradecontroldata.suppliervisitfactory.SupplierVisitFactoryServiceImpl">
+				<property name="supplierVisitFactoryDao" ref="supplierVisitFactoryDao" />
+			</bean>
+		</property>
+	</bean>
+
+	<!-- 供应商 -->
+	<bean id="supplierManager" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.masterdata.SupplierServiceImpl">
+				<property name="supplierDao" ref="supplierDao" />
+			</bean>
+		</property>
+	</bean>
+
+	<!-- 商品回收记录 -->
+	<bean id="merchandiseRecycleService" parent="baseTxProxy">
+		<property name="target">
+			<bean
+				class="com.powere2e.sco.service.impl.datamaintenance.gradecontroldata.merchandiserecycle.MerchandiseRecycleServiceImpl">
+				<property name="merchandiseRecycleDao" ref="merchandiseRecycleDao" />
+			</bean>
+		</property>
+	</bean>
+
+	<!-- 数据核算 -->
+	<bean id="accountingDataService" parent="baseTxProxy">
+		<property name="target">
+			<bean
+				class="com.powere2e.sco.service.impl.merchandisecostanalysis.accountingingredient.accounting.AccountingDataServiceImpl">
+				<property name="accountingDataDao" ref="accountingDataDao" />
+			</bean>
+		</property>
+	</bean>
+
+	<!-- 商品分项成本类比 -->
+	<bean id="merchandiseItemCostService" parent="baseTxProxy">
+		<property name="target">
+			<bean
+				class="com.powere2e.sco.service.impl.merchandisecostanalysis.merchandiseitemcost.MerchandiseItemCostServiceImpl">
+				<property name="merchandiseItemCostDao" ref="merchandiseItemCostDao" />
+			</bean>
+		</property>
+	</bean>
+
+	<!-- 商品总成本类比分析 -->
+	<bean id="totalCostAnalogyAnalysisService" parent="baseTxProxy">
+		<property name="target">
+			<bean
+				class="com.powere2e.sco.service.impl.merchandisecostanalysis.totalcostanalogyanalysis.TotalCostAnalogyAnalysisServiceImpl">
+				<property name="totalCostAnalogyAnalysisDao" ref="totalCostAnalogyAnalysisDao" />
+				<property name="ingredientDao" ref="ingredientDao" />
+				<property name="accountingDao" ref="accountingDao" />
+			</bean>
+		</property>
+	</bean>
+	
+	<!-- 待办事项提醒 -->
+	<bean id="gtasksRemindService" parent="baseTxProxy">
+		<property name="target">
+			<bean
+				class="com.powere2e.sco.service.impl.remind.GtasksRemindServiceImpl">
+				<property name="gtasksRemindDao" ref="gtasksRemindDao" />
+			</bean>
+		</property>
+	</bean>
+	
+	<!-- 其他提醒 -->
+	<bean id="elseRemindService" parent="baseTxProxy">
+		<property name="target">
+			<bean
+				class="com.powere2e.sco.service.impl.remind.ElseRemindServiceImpl">
+				<property name="elseRemindDao" ref="elseRemindDao" />
+				<property name="supplierCertificateDao" ref="supplierCertificateDao" />
+				<property name="elseRemindFlagDao" ref="elseRemindFlagDao" />
+			</bean>
+		</property>
+	</bean>
+	
+	<!-- 其他提醒-已选清除 -->
+	<bean id="elseRemindFlagService" parent="baseTxProxy">
+		<property name="target">
+			<bean
+				class="com.powere2e.sco.service.impl.remind.ElseRemindFlagServiceImpl">
+				<property name="elseRemindFlagDao" ref="elseRemindFlagDao" />
+				<property name="elseRemindDao" ref="elseRemindDao" />
+			</bean>
+		</property>
+	</bean>
+	
+	<!-- 原料预警记录 -->
+	<bean id="materialWarnService" parent="baseTxProxy">
+		<property name="target">
+			<bean
+				class="com.powere2e.sco.service.impl.remind.MaterialWarnServiceImpl">
+				<property name="materialWarnDao" ref="materialWarnDao" />
+			</bean>
+		</property>
+	</bean>
+	
+	<!-- 商品预警记录 -->
+	<bean id="merchandiseWarnService" parent="baseTxProxy">
+		<property name="target">
+			<bean
+				class="com.powere2e.sco.service.impl.remind.MerchandiseWarnServiceImpl">
+				<property name="merchandiseWarnDao" ref="merchandiseWarnDao" />
+			</bean>
+		</property>
+	</bean>
+	
+	<!-- 辅料商品预警记录 -->
+	<bean id="accessoryWarnService" parent="baseTxProxy">
+		<property name="target">
+			<bean
+				class="com.powere2e.sco.service.impl.remind.AccessoryWarnServiceImpl">
+				<property name="accessoryWarnDao" ref="accessoryWarnDao" />
+			</bean>
+		</property>
+	</bean>
+	
+	<!-- 上下市信息 -->
+	<bean id="getMerchandiseMarketService" parent="baseTxProxy">
+		<property name="target">
+			<bean
+				class="com.powere2e.sco.peripheral.webservice.sco.tbpm.GetMerchandiseMarketServiceImpl">
+				<property name="merchandiseMarketDao" ref="merchandiseMarketDao" />
+			</bean>
+		</property>
+	</bean>
+	
+	<!-- 巡场得分(webservice)-->
+	<bean id="getSupplierVisitFactoryService" parent="baseTxProxy">
+		<property name="target">
+			<bean
+				class="com.powere2e.sco.peripheral.webservice.sco.tbpm.GetSupplierVisitFactoryServiceImpl">
+				<property name="supplierVisitFactoryDao" ref="supplierVisitFactoryDao" />
+			</bean>
+		</property>
+	</bean>
+	
+</beans>

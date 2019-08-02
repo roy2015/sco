@@ -1,0 +1,679 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+	<!-- ==================================定时任务================================ -->
+	<!-- 签量数据统计,每天早上09:00 -->
+	<bean id="calculateTodaySignedQty" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject">
+					<ref bean="signedQuantityService" />
+				</property>
+				<property name="targetMethod">
+					<value>completeQuartzCalculateQty</value>
+				</property>
+				<property name="concurrent" value="false" />
+			</bean>
+		</property>
+		<property name="cronExpression">
+			<value>0 10 9 * * ? </value>
+		</property>
+	</bean>
+
+	<!-- 首页待办事项提醒，每隔一小时 -->
+	<bean id="handleGtasksRemind" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject">
+					<ref bean="gtasksRemindService" />
+				</property>
+				<property name="targetMethod">
+					<value>insertGtasksRemind</value>
+				</property>
+				<property name="concurrent" value="false" />
+			</bean>
+		</property>
+		<property name="cronExpression">
+			<value>0 0 * * * ?</value>
+		</property>
+	</bean>
+
+	<!-- 首页其他提醒，每隔一天需要提醒的数据 每天的凌晨1点 -->
+	<bean id="handleElseRemindByDay" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject">
+					<ref bean="elseRemindService" />
+				</property>
+				<property name="targetMethod">
+					<value>insertElseRemindByDay</value>
+				</property>
+				<property name="concurrent" value="false" />
+			</bean>
+		</property>
+		<property name="cronExpression">
+			<value>0 0 1 * * ?</value>
+		</property>
+	</bean>
+
+	<!-- 首页其他提醒，每隔一月需要提醒的数据 每月1日的凌晨1点 必须晚于预警记录 -->
+	<bean id="handleElseRemindByMonth" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject">
+					<ref bean="elseRemindService" />
+				</property>
+				<property name="targetMethod">
+					<value>insertElseRemindByMonth</value>
+				</property>
+				<property name="concurrent" value="false" />
+			</bean>
+		</property>
+		<property name="cronExpression">
+			<value>0 0 1 1 * ?</value>
+		</property>
+	</bean>
+
+	<!-- 原料预警记录 每月1日的0点30分 -->
+	<bean id="handleMaterialWarn" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject">
+					<ref bean="materialWarnService" />
+				</property>
+				<property name="targetMethod">
+					<value>insertMaterialWarn</value>
+				</property>
+				<property name="concurrent" value="false" />
+			</bean>
+		</property>
+		<property name="cronExpression">
+			<value>0 30 0 1 * ?</value>
+		</property>
+	</bean>
+
+	<!-- 商品预警记录 每月1日的0点30分 -->
+	<bean id="handleMerchandiseWarn" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject">
+					<ref bean="merchandiseWarnService" />
+				</property>
+				<property name="targetMethod">
+					<value>insertMerchandiseWarn</value>
+				</property>
+				<property name="concurrent" value="false" />
+			</bean>
+		</property>
+		<property name="cronExpression">
+			<value>0 30 0 1 * ?</value>
+		</property>
+	</bean>
+
+	<!-- 辅料意向品预警记录 每月1日的0点30分 -->
+	<bean id="handleAccessoryWarn" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject">
+					<ref bean="accessoryWarnService" />
+				</property>
+				<property name="targetMethod">
+					<value>insertAccessoryWarn</value>
+				</property>
+				<property name="concurrent" value="false" />
+			</bean>
+		</property>
+		<property name="cronExpression">
+			<value>0 30 0 1 * ?</value>
+		</property>
+	</bean>
+
+	<!-- BW模块 10分钟一次 -->
+	<!-- 商品区域销售情况(日直营) -->
+	<bean id="merchandiseSellDirectDayTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject">
+					<ref bean="merchandiseSellDirectDayService" />
+				</property>
+				<property name="targetMethod">
+					<value>insertMerchandiseSellDirectDay</value>
+				</property>
+				<property name="concurrent" value="false" />
+			</bean>
+		</property>
+		<property name="cronExpression">
+			<value>0 0/10 * * * ?</value>
+		</property>
+	</bean>
+
+	<!-- 商品区域销售情况(日加盟) -->
+	<bean id="merchandiseSellJoinDayTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject">
+					<ref bean="merchandiseSellJoinDayService" />
+				</property>
+				<property name="targetMethod">
+					<value>insertMerchandiseSellJoinDay</value>
+				</property>
+				<property name="concurrent" value="false" />
+			</bean>
+		</property>
+		<property name="cronExpression">
+			<value>0 0/10 * * * ?</value>
+		</property>
+	</bean>
+
+	<!-- 商品区域销售情况(日直营+日加盟) -->
+	<bean id="merchandiseSellDjDayTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject">
+					<ref bean="merchandiseSellDjDayService" />
+				</property>
+				<property name="targetMethod">
+					<value>insertMerchandiseSellDjDay</value>
+				</property>
+				<property name="concurrent" value="false" />
+			</bean>
+		</property>
+		<property name="cronExpression">
+			<value>0 0/10 * * * ?</value>
+		</property>
+	</bean>
+
+	<!-- 商品区域销售情况(月直营) -->
+	<bean id="merchandiseSellDirectMonthTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject">
+					<ref bean="merchandiseSellDirectMonthService" />
+				</property>
+				<property name="targetMethod">
+					<value>insertMerchandiseSellDirectMonth</value>
+				</property>
+				<property name="concurrent" value="false" />
+			</bean>
+		</property>
+		<property name="cronExpression">
+			<value>0 0/10 * * * ?</value>
+		</property>
+	</bean>
+
+	<!-- 商品区域销售情况(月加盟) -->
+	<bean id="merchandiseSellJoinMonthTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject">
+					<ref bean="merchandiseSellJoinMonthService" />
+				</property>
+				<property name="targetMethod">
+					<value>insertMerchandiseSellJoinMonth</value>
+				</property>
+				<property name="concurrent" value="false" />
+			</bean>
+		</property>
+		<property name="cronExpression">
+			<value>0 0/10 * * * ?</value>
+		</property>
+	</bean>
+
+	<!-- 商品区域销售情况(月直营+月加盟) -->
+	<bean id="merchandiseSellDjMonthTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject">
+					<ref bean="merchandiseSellDjMonthService" />
+				</property>
+				<property name="targetMethod">
+					<value>insertMerchandiseSellDjMonth</value>
+				</property>
+				<property name="concurrent" value="false" />
+			</bean>
+		</property>
+		<property name="cronExpression">
+			<value>0 0/10 * * * ?</value>
+		</property>
+	</bean>
+
+	<!-- 商品订货单信息 -->
+	<bean id="merchandiseOrderTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject">
+					<ref bean="merchandiseOrderService" />
+				</property>
+				<property name="targetMethod">
+					<value>insertMerchandiseOrder</value>
+				</property>
+				<property name="concurrent" value="false" />
+			</bean>
+		</property>
+		<property name="cronExpression">
+			<value>0 0/10 * * * ?</value>
+		</property>
+	</bean>
+
+	<!-- 商品收货单信息 -->
+	<bean id="merchandiseReceiptTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject">
+					<ref bean="merchandiseBwReceiptService" />
+				</property>
+				<property name="targetMethod">
+					<value>insertMerchandiseReceipt</value>
+				</property>
+				<property name="concurrent" value="false" />
+			</bean>
+		</property>
+		<property name="cronExpression">
+			<value>0 0/10 * * * ?</value>
+		</property>
+	</bean>
+
+	<!-- SAP模块 10分钟一次 -->
+	<!-- 商品历史物料号 -->
+	<bean id="merchandiseHistoryTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject">
+					<ref bean="merchandiseHistoryService" />
+				</property>
+				<property name="targetMethod">
+					<value>insertMerchandiseHistory</value>
+				</property>
+				<property name="concurrent" value="false" />
+			</bean>
+		</property>
+		<property name="cronExpression">
+			<value>0 0/10 * * * ?</value>
+		</property>
+	</bean>
+	<!-- 商品供应商信息 -->
+	<bean id="merchandiseSupplierTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject">
+					<ref bean="merchandiseSupplierService" />
+				</property>
+				<property name="targetMethod">
+					<value>insertMerchandiseSupplier</value>
+				</property>
+				<property name="concurrent" value="false" />
+			</bean>
+		</property>
+		<property name="cronExpression">
+			<value>0 0/10 * * * ?</value>
+		</property>
+	</bean>
+	<!-- 商品中分类 -->
+	<bean id="merchandiseCentreTypeTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject">
+					<ref bean="merchandiseCentreTypeService" />
+				</property>
+				<property name="targetMethod">
+					<value>insertMerchandiseCentreType</value>
+				</property>
+				<property name="concurrent" value="false" />
+			</bean>
+		</property>
+		<property name="cronExpression">
+			<value>0 0/10 * * * ?</value>
+		</property>
+	</bean>
+	<!-- 商品小分类 -->
+	<bean id="merchandiseSmallTypeTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject">
+					<ref bean="merchandiseSmallTypeService" />
+				</property>
+				<property name="targetMethod">
+					<value>insertMerchandiseSmallType</value>
+				</property>
+				<property name="concurrent" value="false" />
+			</bean>
+		</property>
+		<property name="cronExpression">
+			<value>0 0/10 * * * ?</value>
+		</property>
+	</bean>
+	<!-- 商品明细类 -->
+	<bean id="merchandiseDetailTypeTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject">
+					<ref bean="merchandiseDetailTypeService" />
+				</property>
+				<property name="targetMethod">
+					<value>insertMerchandiseDetailType</value>
+				</property>
+				<property name="concurrent" value="false" />
+			</bean>
+		</property>
+		<property name="cronExpression">
+			<value>0 0/10 * * * ?</value>
+		</property>
+	</bean>
+	<!-- 供应商历史物料号 -->
+	<bean id="merchandiseSupplierHistoryTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject">
+					<ref bean="merchandiseSupplierHistoryService" />
+				</property>
+				<property name="targetMethod">
+					<value>insertMerchandiseSupplierHistory</value>
+				</property>
+				<property name="concurrent" value="false" />
+			</bean>
+		</property>
+		<property name="cronExpression">
+			<value>0 0/10 * * * ?</value>
+		</property>
+	</bean>
+	<!-- 区域信息 -->
+	<bean id="regionTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject">
+					<ref bean="regionService" />
+				</property>
+				<property name="targetMethod">
+					<value>insertRegion</value>
+				</property>
+				<property name="concurrent" value="false" />
+			</bean>
+		</property>
+		<property name="cronExpression">
+			<value>0 0/10 * * * ?</value>
+		</property>
+	</bean>
+	<!-- 仓库 -->
+	<bean id="warehouseTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject">
+					<ref bean="warehouseService" />
+				</property>
+				<property name="targetMethod">
+					<value>insertWarehouse</value>
+				</property>
+				<property name="concurrent" value="false" />
+			</bean>
+		</property>
+		<property name="cronExpression">
+			<value>0 0/10 * * * ?</value>
+		</property>
+	</bean>
+	<!-- 仓位 -->
+	<bean id="warehouseSiteTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject">
+					<ref bean="warehouseSiteService" />
+				</property>
+				<property name="targetMethod">
+					<value>insertWarehouseSite</value>
+				</property>
+				<property name="concurrent" value="false" />
+			</bean>
+		</property>
+		<property name="cronExpression">
+			<value>0 0/10 * * * ?</value>
+		</property>
+	</bean>
+
+	<!-- 商品 -->
+	<bean id="merchandiseSapTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject">
+					<ref bean="merchandiseSapService" />
+				</property>
+				<property name="targetMethod">
+					<value>insertMerchandiseSap</value>
+				</property>
+				<property name="concurrent" value="false" />
+			</bean>
+		</property>
+		<property name="cronExpression">
+			<value>0 0/10 * * * ?</value>
+		</property>
+	</bean>
+	<!-- 商品进货权限 -->
+	<bean id="merchandiseJhPermissionTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject">
+					<ref bean="merchandiseJhPermissionService" />
+				</property>
+				<property name="targetMethod">
+					<value>insertMerchandiseJhPermission</value>
+				</property>
+				<property name="concurrent" value="false" />
+			</bean>
+		</property>
+		<property name="cronExpression">
+			<value>0 0/10 * * * ?</value>
+		</property>
+	</bean>
+	<!-- 商品进货价格信息 -->
+	<bean id="merchandisePurchasePriceTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject">
+					<ref bean="merchandisePurchasePriceService" />
+				</property>
+				<property name="targetMethod">
+					<value>insertMerchandisePurchasePrice</value>
+				</property>
+				<property name="concurrent" value="false" />
+			</bean>
+		</property>
+		<property name="cronExpression">
+			<value>0 0/10 * * * ?</value>
+		</property>
+	</bean>
+	<!-- 商品销售价格信息 -->
+	<bean id="merchandisePriceTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject">
+					<ref bean="merchandisePriceService" />
+				</property>
+				<property name="targetMethod">
+					<value>insertMerchandisePrice</value>
+				</property>
+				<property name="concurrent" value="false" />
+			</bean>
+		</property>
+		<property name="cronExpression">
+			<value>0 0/10 * * * ?</value>
+		</property>
+	</bean>
+	<!-- 商品促销进货价 -->
+	<bean id="merchandisePromotionPurchaseTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject">
+					<ref bean="merchandisePromotionPurchaseService" />
+				</property>
+				<property name="targetMethod">
+					<value>insertMerchandisePromotionPurchase</value>
+				</property>
+				<property name="concurrent" value="false" />
+			</bean>
+		</property>
+		<property name="cronExpression">
+			<value>0 0/10 * * * ?</value>
+		</property>
+	</bean>
+	<!-- 商品促销销售价 -->
+	<bean id="merchandisePromotionSellTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject">
+					<ref bean="merchandisePromotionSellService" />
+				</property>
+				<property name="targetMethod">
+					<value>insertMerchandisePromotionSell</value>
+				</property>
+				<property name="concurrent" value="false" />
+			</bean>
+		</property>
+		<property name="cronExpression">
+			<value>0 0/10 * * * ?</value>
+		</property>
+	</bean>
+	<!-- 工作日 -->
+	<bean id="workingDayTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject">
+					<ref bean="workingDayService" />
+				</property>
+				<property name="targetMethod">
+					<value>insertWorkingDay</value>
+				</property>
+				<property name="concurrent" value="false" />
+			</bean>
+		</property>
+		<property name="cronExpression">
+			<value>0 0/10 * * * ?</value>
+		</property>
+	</bean>
+	<!-- 抓取数据 11,18点 -->
+	<bean id="materialDataFetchWorkerServiceTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject">
+					<ref bean="materialDataFetchWorkerService" />
+				</property>
+				<property name="targetMethod">
+					<value>execute</value>
+				</property>
+				<property name="concurrent" value="false" />
+			</bean>
+		</property>
+		<property name="cronExpression">
+			<value>0 0 11,18 * * ?</value>
+		</property>
+	</bean>
+
+	<!-- 抓取来伊份用户数据 9点 -->
+	<bean id="fetchUserServiceTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject">
+					<ref bean="fetchUserService" />
+				</property>
+				<property name="targetMethod">
+					<value>completeFetchUser</value>
+				</property>
+				<property name="concurrent" value="false" />
+			</bean>
+		</property>
+		<property name="cronExpression">
+			<value>0 0 9 * * ?</value>
+		</property>
+	</bean>
+	
+	<!-- 抓取来伊份上下市信息数据 8点 -->
+	<bean id="fetchMerchandiseMarketServiceTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject">
+					<ref bean="getMerchandiseMarketService" />
+				</property>
+				<property name="targetMethod">
+					<value>insertMerchandiseMarket</value>
+				</property>
+				<property name="concurrent" value="false" />
+			</bean>
+		</property>
+		<property name="cronExpression">
+			<value>0 0 8 * * ?</value>
+		</property>
+	</bean>
+	
+	<!-- 抓取来伊份巡场得分数据 8点 -->
+	<bean id="fetchSupplierVisitFactoryServiceTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject">
+					<ref bean="getSupplierVisitFactoryService" />
+				</property>
+				<property name="targetMethod">
+					<value>insertSupplierVisitFactoryBPM</value>
+				</property>
+				<property name="concurrent" value="false" />
+			</bean>
+		</property>
+		<property name="cronExpression">
+			<value>0 0/1 * * * ? *</value>
+		</property>
+	</bean>
+
+	<!-- ==================================定时任务 总管理================================ -->
+	<bean id="startQuertz" lazy-init="false" autowire="no"
+		class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<!-- 预警 -->
+				<!--<ref bean="calculateTodaySignedQty" />
+				<ref bean="handleGtasksRemind" />
+				<ref bean="handleMaterialWarn" />
+				<ref bean="handleMerchandiseWarn" />
+				<ref bean="handleAccessoryWarn" />
+				<ref bean="handleElseRemindByDay" />
+				<ref bean="handleElseRemindByMonth" />
+
+				&lt;!&ndash; BW &ndash;&gt;
+				<ref bean="merchandiseSellDirectDayTask" />
+				<ref bean="merchandiseSellJoinDayTask" />
+				<ref bean="merchandiseSellDjDayTask" />
+				<ref bean="merchandiseSellDirectMonthTask" />
+				<ref bean="merchandiseSellJoinMonthTask" />
+				<ref bean="merchandiseSellDjMonthTask" />
+				<ref bean="merchandiseOrderTask" />
+				<ref bean="merchandiseReceiptTask" />
+				<ref bean="merchandiseJhPermissionTask" />
+
+				&lt;!&ndash; SAP &ndash;&gt;
+				<ref bean="merchandiseSapTask" />
+				<ref bean="merchandiseHistoryTask" />
+				<ref bean="merchandiseSupplierTask" />
+				<ref bean="merchandiseSupplierHistoryTask" />
+				<ref bean="merchandiseCentreTypeTask" />
+				<ref bean="merchandiseSmallTypeTask" />
+				<ref bean="merchandiseDetailTypeTask" />
+				<ref bean="merchandisePurchasePriceTask" />
+				<ref bean="merchandisePromotionPurchaseTask" />
+				<ref bean="merchandisePriceTask" />
+				<ref bean="merchandisePromotionSellTask" />
+				<ref bean="regionTask" />
+				<ref bean="warehouseTask" />
+				<ref bean="warehouseSiteTask" />
+				<ref bean="workingDayTask" />
+
+				&lt;!&ndash; EIP &ndash;&gt;
+				<ref bean="fetchUserServiceTask" />
+				
+				&lt;!&ndash; 抓取原料数据 &ndash;&gt;
+				<ref bean="materialDataFetchWorkerServiceTask" />
+				
+				&lt;!&ndash; 抓取来伊份上下市信息数据 &ndash;&gt;
+				<ref bean="fetchMerchandiseMarketServiceTask" />-->
+				<!-- 抓取来伊份巡场得分数据 -->
+				<ref bean="fetchSupplierVisitFactoryServiceTask" />
+			</list>
+		</property>
+	</bean>
+</beans>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.peripheral.sap.MerchandiseCentreTypeDao">
+	<resultMap type="com.powere2e.sco.model.peripheral.sap.MerchandiseCentreType" id="merchandiseCentreTypeMap">
+		<result property="centreTypeCode" column="centreTypeCode"/>
+		<result property="centreTypeName" column="centreTypeName"/>
+		<result property="syncDate" column="syncDate"/>
+    </resultMap>
+    
+    <!-- 商品中分类 --> 
+	<insert id="saveMerchandiseCentreType" parameterType="hashmap">
+		INSERT INTO merchandise_centre_type(centre_type_code,centre_type_name,sync_date) 
+			 <foreach collection="list" item="item" index="index" separator="union all" > 
+		         (
+		         SELECT 
+			         #{item.centreTypeCode}, 
+			         #{item.centreTypeName},
+			         #{app_created}
+		         FROM　DUAL
+		         )
+		     </foreach>      
+    </insert>
+    
+    <!--删除商品中分类-->
+    <delete id="deleteMerchandiseCentreType">
+    	DELETE FROM merchandise_centre_type
+    </delete>
+    
+</mapper>

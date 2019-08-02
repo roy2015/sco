@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.security.dao.SysParamDao">        <!-- 完成 -->
+
+	<resultMap type="com.powere2e.security.model.Param" id="paramMap">
+        <result property="paramId" column="paramId"/>
+        <result property="paramName" column="paramName"/>
+        <result property="paramTyp" column="paramTyp"/>
+    	<result property="paramValue" column="paramValue"/>
+    	
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    
+    <!-- 参数查询-->
+    <select id="listParams" resultMap="paramMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		paramid, paramname, paramtyp, paramvalue 
+    	</if>
+    	<if test="page_count != null">
+       		COUNT(1) AS record_count
+    	</if>
+      		FROM pub_system_param 
+    	<where>
+           client_id = #{app_user_clientID} 
+    	<if test="paramId !=null and paramId !='' ">
+           AND paramid = #{paramId}
+    	</if>
+    	<if test="paramName != null and paramName !='' ">
+           AND paramname = #{paramName}
+    	</if>
+    	</where>
+    </select>
+    
+    <!-- 设置参数值 -->
+    <update id="setSysemParamValue" parameterType="hashmap">
+    	UPDATE 
+    		pub_system_param 
+    	SET 
+    		paramvalue = #{paramValue} 
+    	WHERE 
+    		paramid = #{paramId} 
+    		AND client_id = #{app_user_clientID} 
+    </update>
+</mapper>
+

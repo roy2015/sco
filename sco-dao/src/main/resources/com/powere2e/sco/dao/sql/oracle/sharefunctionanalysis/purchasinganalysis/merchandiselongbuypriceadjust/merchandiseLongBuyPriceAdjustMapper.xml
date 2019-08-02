@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.powere2e.sco.interfaces.dao.sharefunctionanalysis.purchasinganalysis.merchandiselongbuypriceadjust.MerchandiseLongBuyPriceAdjustDao">
+	<resultMap type="com.powere2e.sco.model.sharefunctionanalysis.purchasinganalysis.merchandiselongbuypriceadjust.MerchandiseLongBuyPriceAdjust" id="MerchandiseLongBuyPriceAdjustMap">
+		<result property="merchandiseCode" column="merchandiseCode" />
+		<result property="merchandiseName" column="merchandiseName" />
+		<result property="supplierCode" column="supplierCode" />
+		<result property="supplierName" column="supplierName" />
+		<result property="centreName" column="centreName" />
+		<result property="smallName" column="smallName" />
+		<result property="detailName" column="detailName" />	
+		<result property="fineName" column="fineName" />
+		<result property="dxRoleName" column="dxRoleName" />
+		<result property="dlRoleName" column="dlRoleName" />
+		<result property="maxDate" column="maxDate" />
+		<result property="minDate" column="minDate" />
+		<result property="regionCode" column="regionCode"/>
+		<result property="warehouseCode" column="warehouseCode"/>
+		<result property="regionName" column="regionName"/>
+		<result property="receiptRationed" column="receiptRationed"/>
+		<result property="receiptTotalPrice" column="receiptTotalPrice"/>
+		<result property="realityReceiptDate" column="realityReceiptDate"/>
+		<result property="purchasePrice" column="purchasePrice"/>
+		<result property="priceDate" column="priceDate"/>
+		<result property="createUserName" column="createUserName" />
+		<result property="updateUserName" column="updateUserName" />
+		<result property="recordCount" column="record_count" />
+	</resultMap>
+	<!-- 区域信息查询 -->
+	<select id="searchWarehouseSite" resultType="com.powere2e.security.model.Option">
+		SELECT
+			WAREHOUSE_SITE_CODE id, WAREHOUSE_SITE_NAME text
+		FROM
+			WAREHOUSE_SITE 
+		where WAREHOUSE_SITE_CODE=#{regionCode}
+		ORDER BY WAREHOUSE_SITE_NAME 
+	</select>
+	<!-- 查询商品信息 -->
+	<select id="searchMerchandise" resultMap="MerchandiseLongBuyPriceAdjustMap">
+	    SELECT
+		<if test="page_count == null">
+			m.merchandise_code merchandiseCode,
+			m.merchandise_name merchandiseName,
+			s.supplier_code supplierCode,
+			s.supplier_name supplierName,
+			dx.role_name dxRoleName,
+			dl.role_name dlRoleName,
+			ct.centre_type_name centreName,
+			st.small_type_name smallName,
+			dt.detail_type_name detailName,
+			ft.fine_type_name fineName
+		</if>
+	    <if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		FROM
+		merchandise m
+		left join supplier s on m.supplier_code = s.supplier_code
+		left join merchandise_role mr on mr.merchandise_code=m.merchandise_code
+		left join merchandise_dx_role dx on mr.dx_role_code = dx.role_code
+		left join merchandise_dl_role dl on mr.dl_role_code = dl.role_code
+		left join merchandise_centre_type ct on m.centre_type_code =ct.centre_type_code
+		left join merchandise_small_type st on m.small_type_code = st.small_type_code
+		left join merchandise_detail_type dt on m.detail_type_code = dt.detail_type_code
+		left join intention_supplier_merchandise ism on ism.merchandise_code=m.merchandise_code and ism.supplier_code=m.supplier_code
+		left join merchandise_intention mi on ism.intention_code=mi.intention_code
+		left join merchandise_fine_type ft on dt.detail_type_code = ft.detail_type_code and mi.fine_type_code = ft.fine_type_code	<!-- 细分类 -->
+		<where>
+			1=1
+			<if test="merchandiseCode != null and merchandiseCode !=''">
+				and upper(m.merchandise_code) like upper('%'||#{merchandiseCode}||'%')
+			</if>
+			<if test="merchandiseName != null and merchandiseName !=''">
+				and upper(m.merchandise_name) like upper('%'||#{merchandiseName}||'%')
+			</if>
+			<if test="supplierCode != null and supplierCode !=''">
+				and upper(m.supplier_code) like upper('%'||#{supplierCode}||'%')
+			</if>
+			<if test="supplierName != null and supplierName !=''">
+				AND UPPER(s.supplier_name) LIKE UPPER('%'||#{supplierName}||'%')
+			</if>
+			<if test="show ==1">
+				AND m.NET_WEIGHT != 1
+			</if>
+			<if test="show ==2">
+				AND m.NET_WEIGHT =1
+			</if>
+			<if test="show ==null">
+				and (
+				      (m.merchandise_code is null)
+                      or
+					  (m.merchandise_code >= 60000 and 69999 >= m.merchandise_code) 
+				      or 
+				      (m.merchandise_code >= 810000000 and 810999999 >= m.merchandise_code) 
+				      or 
+				      (m.merchandise_code >= 811000000 and 811999999 >= m.merchandise_code)
+				      or 
+				      (m.merchandise_code >= 812000000 and 812999999 >= m.merchandise_code)
+				      or 
+				      (m.merchandise_code >= 813000000 and 813999999 >= m.merchandise_code)
+		        	)
+			</if>
+			<if test="show !=null">
+				and (
+		           (m.merchandise_code >= 10000 and 59999 >= m.merchandise_code) 
+		           or 
+		           (m.merchandise_code >= 70000 and 79999 >= m.merchandise_code) 
+		           or 
+		           (m.merchandise_code >= 814000000 and 814999999 >= m.merchandise_code) 
+		           or 
+		           (m.merchandise_code >= 900000000 and 999999999 >= m.merchandise_code)
+		        )
+			</if>
+			<if test="centreTypeCode != null and centreTypeCode != ''">
+				AND UPPER(m.centre_type_code) like UPPER(#{centreTypeCode})
+			</if>
+			<if test="smallTypeCode != null and smallTypeCode != ''">
+				AND UPPER(m.small_type_code) like UPPER(#{smallTypeCode})
+			</if>
+			<if test="detailTypeCode != null and detailTypeCode != ''">
+				AND UPPER(m.detail_type_code) like UPPER(#{detailTypeCode})
+			</if>
+			<if test="fineTypeCode != null and fineTypeCode != ''">
+				AND UPPER(ft.fine_type_code) like UPPER(#{fineTypeCode})
+			</if>
+			<if test="dxRoleCode != null and dxRoleCode != ''">
+				AND dx.role_code =  #{dxRoleCode}
+			</if>
+			<if test="dlRoleCode != null and dlRoleCode != ''">
+				AND dl.role_code = #{dlRoleCode}
+			</if>
+		</where>
+		<if test="page_count == null">
+			<if test="app_orderby !=null">
+				ORDER BY ${app_orderby}
+			</if>
+			<if test="app_orderby ==null">
+				ORDER BY m.merchandise_code DESC
+			</if>
+		</if>
+	</select>
+	<!-- 查询汇总 -->
+	<select id="searchMerchandiseSum" resultMap="MerchandiseLongBuyPriceAdjustMap">
+	    SELECT
+		<if test="page_count == null">
+			*
+		</if>
+	    <if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		from(
+	    
+	    select 
+	    	m.merchandise_code merchandiseCode,
+			m.merchandise_name merchandiseName,
+			s.supplier_code supplierCode,
+			s.supplier_name supplierName,
+			dx.role_name dxRoleName,
+			dl.role_name dlRoleName,
+			ct.centre_type_name centreName,
+			st.small_type_name smallName,
+			dt.detail_type_name detailName,
+			ft.fine_type_name fineName,
+			mpp.warehouse_code
+		FROM
+		merchandise m
+		LEFT JOIN supplier s ON m.supplier_code = s.supplier_code
+		left join MERCHANDISE_ROLE mr on mr.MERCHANDISE_CODE=m.merchandise_code
+		LEFT JOIN merchandise_dx_role dx ON mr.dx_role_code = dx.role_code
+		LEFT JOIN merchandise_dl_role dl ON mr.dl_role_code = dl.role_code
+		LEFT JOIN merchandise_centre_type ct ON m.centre_type_code =ct.centre_type_code
+		LEFT JOIN merchandise_small_type st ON m.small_type_code = st.small_type_code
+		LEFT JOIN merchandise_detail_type dt ON m.detail_type_code = dt.detail_type_code
+		left join intention_supplier_merchandise ism on ism.merchandise_code=m.merchandise_code and ism.supplier_code=m.supplier_code
+		left join merchandise_intention mi on ism.intention_code=mi.intention_code
+		LEFT JOIN merchandise_fine_type ft ON dt.detail_type_code = ft.detail_type_code  AND mi.fine_type_code = ft.fine_type_code	<!-- 细分类 -->
+		left join merchandise_p_price_group  mpp on m.merchandise_code=mpp.merchandise_code and m.supplier_code=mpp.supplier_code
+		<where>
+			(<foreach collection="list" item="item" index="index" separator="OR">
+				(
+				m.merchandise_code = #{item.merchandiseCode}
+				AND
+				m.supplier_code =#{item.supplierCode}
+				)
+			</foreach>)
+		and
+	    	mpp.warehouse_code in (${warehouseCode})
+	    and 
+	    	(mpp.PRICE_DATE 
+	    		between 
+	    			to_date(#{minDate},'yyyy-mm-dd') 
+	    		and 
+	    			to_date(#{maxDate},'yyyy-mm-dd'))
+		</where>
+		
+		<if test="page_count == null">
+			<if test="app_orderby !=null">
+				ORDER BY ${app_orderby}
+			</if>
+			<if test="app_orderby ==null">
+				ORDER BY m.merchandise_code asc
+			</if>
+		</if>
+		)
+	</select>
+	<!-- 查看价格变动日期和变动价格 -->
+	<select id="searchPriceOrDate" resultMap="MerchandiseLongBuyPriceAdjustMap">
+	    select 
+	    	
+	    <if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		<if test="page_count == null">
+	    	m.merchandise_code merchandiseCode,
+	    	m.merchandise_name merchandiseName,
+			s.supplier_code supplierCode,
+			s.supplier_name supplierName,
+			dx.role_name dxRoleName,
+			dl.role_name dlRoleName,
+			ct.centre_type_name centreName,
+			st.small_type_name smallName,
+			dt.detail_type_name detailName,
+			ft.fine_type_name fineName,
+	    	to_char(mpp.PRICE_DATE,'yyyy-mm-dd') priceDate,
+	    	mpp.PURCHASE_PRICE purchasePrice,
+	    	mpp.warehouse_code warehouseCode
+	    </if>
+	    from merchandise_p_price_group  mpp
+	    left join merchandise m on m.merchandise_code=mpp.merchandise_code and m.supplier_code=mpp.supplier_code
+	    LEFT JOIN supplier s on m.supplier_code = s.supplier_code
+		left join merchandise_role mr on mr.MERCHANDISE_CODE=m.merchandise_code
+		LEFT JOIN merchandise_dx_role dx ON mr.dx_role_code = dx.role_code
+		LEFT JOIN merchandise_dl_role dl ON mr.dl_role_code = dl.role_code
+		LEFT JOIN merchandise_centre_type ct ON m.centre_type_code =ct.centre_type_code
+		LEFT JOIN merchandise_small_type st ON m.small_type_code = st.small_type_code
+		LEFT JOIN merchandise_detail_type dt ON m.detail_type_code = dt.detail_type_code
+		left join intention_supplier_merchandise ism on ism.merchandise_code=m.merchandise_code and ism.supplier_code=m.supplier_code
+		left join merchandise_intention mi on ism.intention_code=mi.intention_code
+		left join merchandise_fine_type ft ON dt.detail_type_code = ft.detail_type_code 
+				AND mi.fine_type_code = ft.fine_type_code	<!-- 细分类 -->
+	    where 
+	    	(<foreach collection="list" item="item" index="index" separator="OR">
+				(
+				mpp.merchandise_code = #{item.merchandiseCode}
+				AND
+				mpp.supplier_code =#{item.supplierCode}
+				)
+			</foreach>)
+		and
+	    	mpp.warehouse_code in (${warehouseCode})
+	    and 
+	    	(mpp.PRICE_DATE 
+	    		between 
+	    			to_date(#{minDate},'yyyy-mm-dd') 
+	    		and 
+	    			to_date(#{maxDate},'yyyy-mm-dd'))
+	    order by m.merchandise_code,s.supplier_code,to_char(mpp.PRICE_DATE,'yyyy-mm-dd') asc
+	</select>
+	<!-- 查看价格变动日期和变动价格 -->
+	<select id="searchPriceOrDates" resultMap="MerchandiseLongBuyPriceAdjustMap">
+	    select 
+	    <if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		<if test="page_count == null">
+	    	merchandise_code merchandiseCode,
+	    	to_char(PRICE_DATE,'yyyy-mm-dd') priceDate,
+	    	PURCHASE_PRICE purchasePrice 
+	    </if>
+	    from merchandise_p_price_group 
+	    where 
+	    	
+				(
+				merchandise_code = #{merchandiseCode}
+				AND
+				supplier_code =#{supplierCode}
+				)
+		 and
+	    	warehouse_code=#{warehouseCode}
+	    and PRICE_DATE 
+	    	<if test=" search == 1">
+	    		&lt;=(to_date(#{minDate},'yyyy-mm-dd'))
+	    	</if>
+	    	<if test=" search == 2">
+	    		>=(to_date(#{minDate},'yyyy-mm-dd'))
+	    	</if>
+	    order by to_char(PRICE_DATE,'yyyy-mm-dd') 
+	    	<if test=" search == 1">
+	    		desc
+	    	</if>
+	    	<if test=" search == 2">
+	    		asc
+	    	</if>
+	</select>
+	<!-- 查看价格段的进货数据 -->
+	<select id="searchReceiptInfo" resultMap="MerchandiseLongBuyPriceAdjustMap">
+	    select 
+	    <if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		<if test="page_count == null">
+		    warehouse_site_code regionCode,
+	    	nvl(sum(receipt_rationed),0) receiptRationed,
+	    	nvl(sum(receipt_total_price),0) receiptTotalPrice
+	    </if> 
+	    from MERCHANDISE_RECEIPT 
+	    where 
+				(
+				merchandise_code = #{merchandiseCode}
+				AND
+				supplier_code =#{supplierCode}
+				)
+	    and
+	    	WAREHOUSE_SITE_CODE in (${regionCode})
+	    and 
+	    	WAREHOUSE_CODE = #{warehouseCode}
+	    and
+	     	(ORDER_DATE
+	     	between 
+	     		to_date(#{minDate},'yyyy-mm-dd') 
+	     	and 
+	     		to_date(#{maxDate},'yyyy-mm-dd'))
+	     and
+	     	(reality_receipt_date
+	     	between 
+	     		to_date(#{minDateHtml},'yyyy-mm-dd') 
+	     	and 
+	     		to_date(#{maxDateHtml},'yyyy-mm-dd'))
+	    group by warehouse_site_code
+	</select>
+</mapper>

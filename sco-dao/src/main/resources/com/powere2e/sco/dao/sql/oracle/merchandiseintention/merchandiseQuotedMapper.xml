@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.merchandiseintention.MerchandiseQuotedDao">
+    <!-- ===================报价单操作============================ -->
+    <resultMap type="com.powere2e.sco.model.merchandiseintention.MerchandiseQuoted" id="merchandiseQuotedMap">
+		<result property="quotationCode" column="quotationCode"/>
+		<result property="intentionCode" column="intentionCode"/>
+		<result property="intentionName" column="intentionName"/>
+		<result property="intentionSupplierCode" column="intentionSupplierCode"/>
+		<result property="intentionSupplierName" column="intentionSupplierName"/>
+		<result property="companyName" column="companyName"/>
+		<result property="companySite" column="companySite"/>
+		<result property="contactsName" column="contactsName"/>
+		<result property="contactsPhone" column="contactsPhone"/>
+		<result property="contactsEmail" column="contactsEmail"/>
+		<result property="contactsFax" column="contactsFax"/>
+		<result property="quotedCurrency" column="quotedCurrency"/>
+		<result property="quotedDate" column="quotedDate"/>
+		<result property="price" column="price"/>
+		<result property="quotationUnits" column="quotationUnits"/>
+		<result property="minRationed" column="minRationed"/>
+		<result property="quotedEndDate" column="quotedEndDate"/>
+		<result property="packingType" column="packingType"/>
+		<result property="paymentType" column="paymentType"/>
+		<result property="deliveryType" column="deliveryType"/>
+		<result property="remarks" column="remarks"/>
+		<result property="created" column="created"/>
+		<result property="createby" column="createby"/>
+		<result property="updated" column="updated"/>
+		<result property="updateby" column="updateby"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="lastContactsName" column="lastContactsName"/>
+		<result property="lastContactsPhone" column="lastContactsPhone"/>
+		
+		<result property="firstQuotedDate" column="firstQuotedDate"/>
+		<result property="firstPrice" column="firstPrice"/>
+		<result property="priceGap" column="priceGap"/>
+		<result property="priceRange" column="priceRange"/>
+		<result property="supplierQuotedCounts" column="supplierQuotedCounts"/>
+		<result property="supplierNumbers" column="supplierNumbers"/>
+		<result property="priceRank" column="priceRank"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    
+    <!-- 增加供应商报价单 --> 
+	<insert id="saveMerchandiseQuoted" parameterType="hashmap">
+		INSERT INTO merchandise_quoted(quotation_code,intention_code,intention_supplier_code,company_name,company_site,contacts_name,contacts_phone,contacts_email,contacts_fax,quoted_currency,quoted_date,price,quotation_units,min_rationed,quoted_end_date,packing_type,payment_type,delivery_type,remarks,created,createby) 
+			 VALUES(s_merchandise_quoted.nextval,#{intentionCode},#{intentionSupplierCode},#{companyName},#{companySite},#{contactsName},#{contactsPhone},#{contactsEmail},#{contactsFax},#{quotedCurrency},#{quotedDate},#{price},#{quotationUnits},#{minRationed},#{quotedEndDate},#{packingType},#{paymentType},#{deliveryType},#{remarks},#{app_created},#{app_create_by})
+    </insert>
+    
+    <!-- 修改供应商报价单  -->
+    <update id="updateMerchandiseQuoted" parameterType="hashmap">
+		UPDATE	
+				merchandise_quoted	
+		   SET	
+		   		intention_code=#{intentionCode},
+		   		<!--intention_supplier_code=#{intentionSupplierCode},
+		   		supplier_code=#{supplierCode},  修改报价单时，不对供应商这两个字段进行修改-->
+		   		company_name=#{companyName},
+		   		company_site=#{companySite},
+		   		contacts_name=#{contactsName},
+		   		contacts_phone=#{contactsPhone},
+		   		contacts_email=#{contactsEmail},
+		   		contacts_fax=#{contactsFax},
+		   		quoted_currency=#{quotedCurrency},
+		   		quoted_date=#{quotedDate},
+		   		price=#{price},
+		   		quotation_units=#{quotationUnits},
+		   		min_rationed=#{minRationed},
+		   		quoted_end_date=#{quotedEndDate},
+		   		packing_type=#{packingType},
+		   		payment_type=#{paymentType},
+		   		delivery_type=#{deliveryType},
+		   		remarks=#{remarks},
+		   		updated=#{app_updated},
+		   		updateby=#{app_update_by}	   		
+		 WHERE	
+		 		quotation_code=#{quotationCode}
+    </update>
+    
+     <!-- 删除报价单(根据报价日期和供应商编号删除针对"某意向品"的报价) -->
+    <delete id="deleteMerchandiseQuoted" parameterType="hashmap">
+        DELETE FROM 
+        			merchandise_quoted 
+        WHERE 
+        			quoted_date=to_date(substr(to_char(#{quotedDate},'yyyy-mm-dd hh:mi:ss'),0,10),'yyyy-mm-dd')
+		AND         intention_supplier_code = #{intentionSupplierCode}
+		AND         intention_code=#{intentionCode}
+    </delete>
+    
+     <!-- 根据id删除报价单-->
+    <delete id="deleteMerchandiseQuotedById" parameterType="hashmap">
+        DELETE FROM 
+        			merchandise_quoted 
+        WHERE 	
+        	<choose>
+        		<when test="quotationCode != null and quotationCode != '' ">
+        			quotation_code=#{quotationCode}
+        		</when>
+        		<when test=" intentionCode != null and intentionCode != '' ">
+        			intention_code=#{intentionCode}
+        		</when>
+        		<otherwise>
+        			quotation_code=#{quotationCode}
+        		</otherwise>
+        	</choose>
+        		
+    </delete>
+    
+     <!-- 查询已录入的报价单-->
+    <select id="listMerchandiseQuoted" resultMap="merchandiseQuotedMap">
+    		SELECT
+    	     <if test="page_count == null">
+    		   d1.*
+    		 </if>
+	    	 <if test="page_count != null">
+	       		count(1) AS record_count
+	    	 </if>
+    	FROM
+    		(SELECT      
+		           t1.quotation_code          quotationCode,
+	               t1.intention_code          intentionCode,
+	               t1.intention_supplier_code intentionSupplierCode,
+                   t3.intention_supplier_name||t4.supplier_name intentionSupplierName,
+	               t1.company_name            companyName,
+	               t1.company_site            companySite,
+	               t1.contacts_name           contactsName,
+	               t1.contacts_phone          contactsPhone,
+	               t1.contacts_email          contactsEmail,
+	               t1.contacts_fax            contactsFax,
+	               t1.quoted_currency         quotedCurrency,
+	               t1.quoted_date             quotedDate,
+	               ROUND(t1.price,2)                   price,
+	               ROUND(t1.quotation_units,3)        quotationUnits,
+	               t1.min_rationed            minRationed,
+	               t1.quoted_end_date         quotedEndDate,
+	               t1.packing_type            packingType,
+	               t1.payment_type            paymentType,
+	               t1.delivery_type           deliveryType,
+	               t1.remarks                 remarks,
+	               (select a1.contacts_name from merchandise_quoted a1 where a1.intention_code=t1.intention_code and a1.intention_supplier_code=t1.intention_supplier_code  and  a1.quoted_date=  (select max(a2.quoted_date) from merchandise_quoted a2 where a2.intention_code=t1.intention_code and a2.intention_supplier_code=t1.intention_supplier_code  group by a2.intention_supplier_code)) lastContactsName,
+                   (select a3.contacts_phone from merchandise_quoted a3 where a3.intention_code=t1.intention_code and a3.intention_supplier_code=t1.intention_supplier_code and  a3.quoted_date=  (select max(a4.quoted_date) from merchandise_quoted a4 where a4.intention_code=t1.intention_code and a4.intention_supplier_code=t1.intention_supplier_code  group by a4.intention_supplier_code)) lastContactsPhone
+
+			 FROM   merchandise_quoted t1  
+	        LEFT JOIN 
+      			 	intention_supplier_merchandise t2
+        	ON 		t1.intention_code=t2.intention_code
+        	AND 	t1.intention_supplier_code=t2.intention_supplier_code
+	        LEFT JOIN 
+	               	merchandise_intention_supplier t3
+	        ON 	   	t2.intention_supplier_code=t3.intention_supplier_code
+	       	LEFT JOIN
+	               supplier t4
+	       	ON 	   t2.intention_supplier_code=t4.supplier_code
+	        WHERE 1=1
+            AND    t2.intention_supplier_code is not null
+	        AND    t1.intention_code = #{intentionCode}
+    	    ) d1
+    	WHERE 	1=1
+    	    <if test= "intentionSupplierCode != null and intentionSupplierCode != '' ">
+				AND  UPPER(d1.intentionSupplierCode) LIKE UPPER('%'||#{intentionSupplierCode}||'%')
+			</if>
+			<if test= "intentionSupplierName != null and intentionSupplierName != '' ">
+				AND  UPPER(d1.intentionSupplierName) LIKE UPPER('%'||#{intentionSupplierName}||'%')
+			</if>	
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY d1.intentionSupplierCode DESC,
+    					 d1.quotedDate DESC
+    		</if>
+    	</if>   
+    	   
+    </select>
+    
+    <select id="listRefMerchandiseQuoted" resultMap="merchandiseQuotedMap">
+		   select a4.*
+		   from
+		   (
+		   SELECT 
+		            t1.merchandise_code intentionCode,
+		              t2.supplier_code    intentionSupplierCode,
+		              t1.net_weight       quotationUnits
+		       FROM   merchandise t1, merchandise_purchase_price t2
+		       WHERE  t1.merchandise_code = t2.merchandise_code
+		       AND    t2.warehouse_code = 'X001'
+		       AND    t2.price_date = (SELECT MAX(t3.price_date) FROM merchandise_purchase_price t3 
+		                   WHERE t3.merchandise_code = t1.merchandise_code 
+		                   AND   t3.supplier_code = t1.supplier_code
+		                               GROUP BY t3.supplier_code)
+		       
+		       UNION
+		       
+		       SELECT 
+		            t1.intention_code          intentionCode,
+		              t1.intention_supplier_code intentionSupplierCode,
+		              t1.quotation_units         quotationUnits
+		       FROM   merchandise_quoted t1,intention_supplier_merchandise t2
+		       WHERE  t1.intention_code = t2.intention_code
+		       AND    t1.intention_supplier_code = t2.intention_supplier_code
+		         AND    t1.quoted_date =(SELECT MAX(t3.quoted_date) FROM merchandise_quoted t3
+		                       WHERE t3.intention_code = t1.intention_code
+		                          AND  t3.intention_supplier_code = t1.intention_supplier_code
+		                         GROUP BY t3.intention_supplier_code)
+		     ) a4 WHERE a4.intentionCode IN (${compareIntentionCodes})
+    </select>
+    
+     <!-- 查询已录入的报价单-->
+    <select id="listSupplierQuoted" resultMap="merchandiseQuotedMap">
+    	SELECT
+    		   d1.*
+    	FROM
+    		(SELECT
+    			   ROW_NUMBER() OVER (PARTITION BY t1.intention_supplier_code ORDER BY quoted_date DESC) rowNumber,
+		           t1.quotation_code          quotationCode,
+	               t1.intention_code          intentionCode,
+	               t1.intention_supplier_code intentionSupplierCode,
+                   t3.intention_supplier_name||t4.supplier_name intentionSupplierName,
+	               t1.company_name            companyName,
+	               t1.company_site            companySite,
+	               t1.contacts_name           contactsName,
+	               t1.contacts_phone          contactsPhone,
+	               t1.contacts_email          contactsEmail,
+	               t1.contacts_fax            contactsFax,
+	               t1.quoted_currency         quotedCurrency,
+	               t1.quoted_date             quotedDate,
+	               ROUND(t1.price,2)                   price,
+	               ROUND(t1.quotation_units,3)        quotationUnits,
+	               t1.min_rationed            minRationed,
+	               t1.quoted_end_date         quotedEndDate,
+	               t1.packing_type            packingType,
+	               t1.payment_type            paymentType,
+	               t1.delivery_type           deliveryType,
+	               t1.remarks                 remarks,
+	               (select a1.contacts_name from merchandise_quoted a1 where a1.intention_code=t1.intention_code and a1.intention_supplier_code=t1.intention_supplier_code  and  a1.quoted_date=  (select max(a2.quoted_date) from merchandise_quoted a2 where a2.intention_code=t1.intention_code and a2.intention_supplier_code=t1.intention_supplier_code  group by a2.intention_supplier_code)) lastContactsName,
+                   (select a3.contacts_phone from merchandise_quoted a3 where a3.intention_code=t1.intention_code and a3.intention_supplier_code=t1.intention_supplier_code and  a3.quoted_date=  (select max(a4.quoted_date) from merchandise_quoted a4 where a4.intention_code=t1.intention_code and a4.intention_supplier_code=t1.intention_supplier_code  group by a4.intention_supplier_code)) lastContactsPhone
+
+			 FROM   merchandise_quoted t1  
+	        LEFT JOIN 
+      			 	intention_supplier_merchandise t2
+        	ON 		t1.intention_code=t2.intention_code
+        	AND 	t1.intention_supplier_code=t2.intention_supplier_code
+	        LEFT JOIN 
+	               	merchandise_intention_supplier t3
+	        ON 	   	t2.intention_supplier_code=t3.intention_supplier_code
+	       	LEFT JOIN
+	               supplier t4
+	       	ON 	   t2.intention_supplier_code=t4.supplier_code
+	        WHERE 1=1
+            AND    t2.intention_supplier_code is not null
+	        AND    t1.intention_code = #{intentionCode}
+    	    ) d1
+    	WHERE 	1=1 AND rowNumber=1
+    	    <if test= "intentionSupplierCode != null and intentionSupplierCode != '' ">
+				AND  UPPER(d1.intentionSupplierCode) LIKE UPPER('%'||#{intentionSupplierCode}||'%')
+			</if>
+			<if test= "intentionSupplierName != null and intentionSupplierName != '' ">
+				AND  UPPER(d1.intentionSupplierName) LIKE UPPER('%'||#{intentionSupplierName}||'%')
+			</if>
+    </select>
+    
+       <!-- 查询已录入的报价单-->
+    <select id="loadMerchandiseQuoted" resultMap="merchandiseQuotedMap">
+    		SELECT      
+		           t1.quotation_code          quotationCode,
+	               t1.intention_code          intentionCode,
+	               t1.intention_supplier_code intentionSupplierCode,
+	               t1.company_name            companyName,
+	               t1.company_site            companySite,
+	               t1.contacts_name           contactsName,
+	               t1.contacts_phone          contactsPhone,
+	               t1.contacts_email          contactsEmail,
+	               t1.contacts_fax            contactsFax,
+	               t1.quoted_currency         quotedCurrency,
+	               t1.quoted_date             quotedDate,
+	               t1.price                   price,
+	               t1.quotation_units         quotationUnits,
+	               t1.min_rationed            minRationed,
+	               t1.quoted_end_date         quotedEndDate,
+	               t1.packing_type            packingType,
+	               t1.payment_type            paymentType,
+	               t1.delivery_type           deliveryType,
+	               t1.remarks                 remarks,
+	               (select a1.contacts_name from merchandise_quoted a1 where a1.intention_code=t1.intention_code and a1.intention_supplier_code=t1.intention_supplier_code  and  a1.quoted_date=  (select max(a2.quoted_date) from merchandise_quoted a2 where a2.intention_code=t1.intention_code and a2.intention_supplier_code=t1.intention_supplier_code  group by a2.intention_supplier_code)) lastContactsName,
+                   (select a3.contacts_phone from merchandise_quoted a3 where a3.intention_code=t1.intention_code and a3.intention_supplier_code=t1.intention_supplier_code and  a3.quoted_date=  (select max(a4.quoted_date) from merchandise_quoted a4 where a4.intention_code=t1.intention_code and a4.intention_supplier_code=t1.intention_supplier_code  group by a4.intention_supplier_code)) lastContactsPhone
+
+			 FROM   merchandise_quoted t1  
+	        WHERE 1=1
+    	  
+    	  <if test= "quotationCode != null and quotationCode != '' ">
+				AND  t1.quotation_code = #{quotationCode}
+		  </if>
+		  <if test= "intentionSupplierCode != null and intentionSupplierCode != '' and quotedDate != null ">
+				AND  t1.intention_supplier_code = #{intentionSupplierCode}
+				AND  t1.quoted_date =#{quotedDate}
+		  </if>
+    </select>
+    
+</mapper>

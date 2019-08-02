@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" 
+ xmlns:jaxws="http://cxf.apache.org/jaxws"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+ xmlns:cxf="http://cxf.apache.org/core"
+xsi:schemaLocation="http://www.springframework.org/schema/beans
+ http://www.springframework.org/schema/beans/spring-beans.xsd
+ http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd http://cxf.apache.org/core
+http://cxf.apache.org/schemas/core.xsd
+ ">
+	
+   <jaxws:endpoint id="updateAccessoryOaApplicationLinkTbmpService" 
+    implementor="#updateAccessoryOaApplicationLinkTbpmServiceImpl" 
+    address="/updateAccessoryOaApplicationLinkTbmpService">
+    </jaxws:endpoint>
+    
+   <jaxws:endpoint id="updateAccessoryOaApplicationStatusTbmpService" 
+    implementor="#updateAccessoryOaApplicationStatusTbpmServiceImpl" 
+    address="/updateAccessoryOaApplicationStatusTbmpService">
+    </jaxws:endpoint> 
+    <jaxws:endpoint id="getAccessoryApplicationVisitFactoryTbmpService" 
+    implementor="#getAccessoryApplicationVisitFactoryTbmpServiceImpl" 
+    address="/getAccessoryApplicationVisitFactoryTbmpService">
+    </jaxws:endpoint>
+    <jaxws:endpoint id="getAccessoryApplicationTbmpService" 
+    implementor="#getAccessoryApplicationTbmpServiceImpl" 
+    address="/getAccessoryApplicationTbmp">
+    </jaxws:endpoint> 
+	
+	<!-- 审批日期接口 -->
+	<jaxws:endpoint id="applicationDateCheckedTbpmService" 
+    implementor="#applicationDateCheckedTbpmServiceServiceImpl" 
+    address="/applicationDateCheckedTbpmService">
+    </jaxws:endpoint>
+    
+   	<bean id="updateAccessoryOaApplicationLinkTbpmServiceImpl" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.peripheral.tbpm.UpdateAccessoryOaApplicationLinkTbpmServiceImpl">
+			</bean>
+		</property>
+	</bean>
+	<bean id="updateAccessoryOaApplicationStatusTbpmServiceImpl" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.peripheral.tbpm.UpdateAccessoryOaApplicationStatusTbpmServiceImpl">
+			</bean>
+		</property>
+	</bean>
+	<bean id="getAccessoryApplicationVisitFactoryTbmpServiceImpl" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.peripheral.tbpm.GetAccessoryApplicationVisitFactoryTbmpServiceImpl">
+			</bean>
+		</property>
+	</bean>
+	<bean id="getAccessoryApplicationTbmpServiceImpl" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.peripheral.tbpm.GetAccessoryApplicationTbmpServiceImpl">
+			</bean>
+		</property>
+	</bean>
+	
+	<!-- 审批日期接口 -->
+	<bean id="applicationDateCheckedTbpmServiceServiceImpl" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.peripheral.tbpm.appdatechecked.ApplicationDateCheckedTbpmServiceServiceImpl">
+			</bean>
+		</property>
+	</bean>
+	
+	<!--listener-->
+    <cxf:bus>
+        <cxf:properties>
+            <entry key="org.apache.cxf.logging.FaultListener">
+                <bean class="org.apache.cxf.logging.NoOpFaultListener"/>
+            </entry>
+        </cxf:properties>
+    </cxf:bus>
+	<!-- <jaxws:inInterceptors>
+    		<bean class="org.apache.cxf.interceptor.LoggingInInterceptor"/>
+    	</jaxws:inInterceptors> -->
+</beans>

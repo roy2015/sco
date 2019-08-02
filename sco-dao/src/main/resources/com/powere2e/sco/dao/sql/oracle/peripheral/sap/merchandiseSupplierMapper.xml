@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.peripheral.sap.MerchandiseSupplierDao">
+	<resultMap type="com.powere2e.sco.model.peripheral.sap.MerchandiseSupplier" id="merchandiseSupplierMap">
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="supplierName" column="supplierName"/>
+		<result property="companyType" column="companyType"/>
+		<result property="contacts" column="contacts"/>
+		<result property="contactsPhone" column="contactsPhone"/>
+		<result property="companySite" column="companySite"/>
+		<result property="companyPhone" column="companyPhone"/>
+		<result property="companyFax" column="companyFax"/>
+		<result property="postcode" column="postcode"/>
+		<result property="syncDate" column="syncDate"/>
+    </resultMap>
+    
+    <!-- 商品供应商--> 
+	<insert id="saveMerchandiseSupplier" parameterType="hashmap">
+		INSERT INTO supplier(supplier_code,supplier_name,company_type,contacts,contacts_phone,company_site,company_phone,company_fax,postcode,sync_date) 
+			<foreach collection="list" item="item" index="index" separator="union all" > 
+		         (
+		         SELECT 
+			         #{item.supplierCode}, 
+			         #{item.supplierName},
+			         #{item.companyType},
+			         #{item.contacts}, 
+			         #{item.contactsPhone},
+			         #{item.companySite}, 
+			         #{item.companyPhone},
+			         #{item.companyFax}, 
+			         #{item.postcode},
+			         #{app_created}
+		         FROM　DUAL
+		         )
+		     </foreach>      
+    </insert>
+    
+     <!--删除商品供应商-->
+    <delete id="deleteMerchandiseSupplier">
+    	DELETE FROM supplier
+    </delete>
+    
+</mapper>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+	<!-- 证件过期提醒设置 -->
+	<bean id="certificateOutofdateConfigDao" class="com.powere2e.sco.dao.impl.parameterset.certificateoutofdateconfig.CertificateOutofdateConfigDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	<!-- 原料行情预警设置 -->
+	<bean id="materialWarnConfigDao" class="com.powere2e.sco.dao.impl.parameterset.materialwarnconfig.MaterialWarnConfigDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	<!-- 定性角色 -->
+	<bean id="merchandiseDxRoleDao" class="com.powere2e.sco.dao.impl.datamaintenance.assortmentdata.merchandiserole.MerchandiseDxRoleDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	<!-- 定量角色 -->
+	<bean id="merchandiseDlRoleDao" class="com.powere2e.sco.dao.impl.datamaintenance.assortmentdata.merchandiserole.MerchandiseDlRoleDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	<!-- 商品细分类 -->
+	<bean id="merchandiseFineTypeDao" class="com.powere2e.sco.dao.impl.datamaintenance.assortmentdata.merchandisefinetype.MerchandiseFineTypeDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	<!-- 辅助细分类 -->
+	<bean id="accessoryFineTypeDao" class="com.powere2e.sco.dao.impl.datamaintenance.purchaserdata.accessoryfinetype.AccessoryFineTypeDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	<!-- 公示网站名称 -->
+	<bean id="websiteNameMaintenanceDao" class="com.powere2e.sco.dao.impl.datamaintenance.purchaserdata.websitename.WebsiteNameMaintenanceDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	<!-- 原料大类 -->
+	<bean id="materialBigTypeDao" class="com.powere2e.sco.dao.impl.datamaintenance.purchaserdata.materialrolemaintenance.MaterialBigTypeDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	<!-- 原料小类 -->
+	<bean id="materialSmallTypeDao" class="com.powere2e.sco.dao.impl.datamaintenance.purchaserdata.materialrolemaintenance.MaterialSmallTypeDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	<!-- 原料 -->
+	<bean id="materialDao" class="com.powere2e.sco.dao.impl.datamaintenance.purchaserdata.materialrolemaintenance.MaterialDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	<!-- 证件名称 -->
+	<bean id="supplierCertificateTypeDao" class="com.powere2e.sco.dao.impl.datamaintenance.systemmanagerdata.suppliercertificatetype.SupplierCertificateTypeDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	<!-- 供应商附件 -->
+	<bean id="supplierAttachmentMDao" class="com.powere2e.sco.dao.impl.merchandiseoaapplication.reportnewoaapplication.supplierattachment.SupplierAttachmentMDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	<!-- 供应商证件 -->
+	<bean id="supplierCertificateMDao" class="com.powere2e.sco.dao.impl.merchandiseoaapplication.reportnewoaapplication.suppliercertificate.SupplierCertificateMDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	<!-- 供应商附件（辅料OA） -->
+	<bean id="supplierAttachmentADao" class="com.powere2e.sco.dao.impl.accessoryoaapplication.committeeApply.supplierattachment.SupplierAttachmentADaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	<!-- 关联扫描版（辅料OA） -->
+	<bean id="quotedElectronicOfScanDao" class="com.powere2e.sco.dao.impl.accessoryoaapplication.committeeApply.supplierattachment.QuotedElectronicOfScanDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	<!-- 供应商证件（辅料OA） -->
+	<bean id="supplierCertificateADao" class="com.powere2e.sco.dao.impl.accessoryoaapplication.committeeApply.suppliercertificate.SupplierCertificateADaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	<!-- 销售分析 -->
+	<bean id="sellDetailDao" class="com.powere2e.sco.dao.impl.sharefunctionanalysis.sellanalysis.selldetail.SellDetailDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	<!-- 公司大盘促销分析 -->
+	<bean id="marketPromotionAnalysisDao" class="com.powere2e.sco.dao.impl.sharefunctionanalysis.sellanalysis.marketpromotionanalysis.MarketPromotionAnalysisDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	<!-- 商品促销分析 -->
+	<bean id="merchandisePromotionAnalysisDao" class="com.powere2e.sco.dao.impl.sharefunctionanalysis.sellanalysis.merchandisepromotionanalysis.MerchandisePromotionAnalysisDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	<!-- 商品进货明细 -->
+	<bean id="merchandiseStockDetailDao" class="com.powere2e.sco.dao.impl.sharefunctionanalysis.purchasinganalysis.merchandisestockdetail.MerchandiseStockDetailDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	<!-- 商品长期进价调整报表-->
+	<bean id="merchandiseLongBuyPriceAdjustDao" class="com.powere2e.sco.dao.impl.sharefunctionanalysis.purchasinganalysis.merchandiselongbuypriceadjust.MerchandiseLongBuyPriceAdjustDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	<!-- 商品促销进价调整 -->
+	<bean id="merchandisePromotionBuyPriceAdjustDao" class="com.powere2e.sco.dao.impl.sharefunctionanalysis.purchasinganalysis.merchandisepromotionbuypriceadjust.MerchandisePromotionBuyPriceAdjustDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+</beans>

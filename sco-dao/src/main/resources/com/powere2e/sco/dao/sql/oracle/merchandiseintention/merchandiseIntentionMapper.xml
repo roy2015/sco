@@ -1,0 +1,402 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.merchandiseintention.MerchandiseIntentionDao">
+	<resultMap type="com.powere2e.sco.model.merchandiseintention.MerchandiseIntention" id="merchandiseIntentionMap">
+		<result property="intentionCode" column="intentionCode"/>
+		<result property="intentionName" column="intentionName"/>
+		<result property="centreTypeCode" column="centreTypeCode"/>
+		<result property="smallTypeCode" column="smallTypeCode"/>
+		<result property="detailTypeCode" column="detailTypeCode"/>
+		<result property="fineTypeCode" column="fineTypeCode"/>
+		<result property="purchaseDepartments" column="purchaseDepartments"/>
+		<result property="rationed" column="rationed"/>
+		<result property="purchaseType" column="purchaseType"/>
+		<result property="saleType" column="saleType"/>
+		<result property="orderType" column="orderType"/>
+		<result property="quotedCurrency" column="quotedCurrency"/>
+		<result property="paymentType" column="paymentType"/>
+		<result property="deliveryType" column="deliveryType"/>
+		<result property="specification" column="specification"/>
+		<result property="packingType" column="packingType"/>
+		<result property="created" column="created"/>
+		<result property="createby" column="createby"/>
+		<result property="updated" column="updated"/>
+		<result property="updateby" column="updateby"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="intentionSupplierCode" column="intentionSupplierCode"/>
+		<result property="intentionSupplierName" column="intentionSupplierName"/>
+		<result property="merchandiseCode" column="merchandiseCode"/>
+		<result property="centreTypeName" column="centreTypeName"/>
+		<result property="smallTypeName" column="smallTypeName"/>
+		<result property="detailTypeName" column="detailTypeName"/>
+		<result property="fineTypeName" column="fineTypeName"/>
+		
+		<result property="purchaseDepartmentsName" column="purchaseDepartmentsName"/>
+		<result property="rationedName" column="rationedName"/>
+		<result property="purchaseTypeName" column="purchaseTypeName"/>
+		<result property="isTrueMerchandise" column="isTrueMerchandise"/><!-- 是否为正式商品 -->
+		<result property="merchandiseCode" column="merchandiseCode"/><!--同步的SAP物料号-->
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <!-- 查询商品意向品(可分页)-->
+    <select id="searchMerchandiseIntention" resultMap="merchandiseIntentionMap">
+    	SELECT 
+	    	  <if test="page_count == null">
+		    	d1.*,
+		    	(SELECT d2.foretaste_grade FROM foretaste_feedback d2 
+		    	 WHERE  d2.intention_code=d1.intentionCode 
+		    	 AND    d2.intention_supplier_code=d1.intentionSupplierCode 
+		      	 AND    d2.foretaste_date=d1.foretasteDate) foretasteGrade,
+		       	(SELECT d2.evaluate FROM foretaste_feedback d2 
+		       	 WHERE  d2.intention_code=d1.intentionCode 
+		       	 AND    d2.intention_supplier_code=d1.intentionSupplierCode
+		         AND    d2.foretaste_date=d1.foretasteDate) evaluate 
+	    	 </if>
+	    	 <if test="page_count != null">
+	       		count(1) AS record_count
+	    	 </if>
+    	FROM		
+	    	(SELECT  
+	       	   t1.intention_code intentionCode,
+	           t1.intention_name intentionName,
+	           t2.intention_supplier_code intentionSupplierCode,
+	           t3.intention_supplier_name||t4.supplier_name intentionSupplierName,
+	           t2.merchandise_code merchandiseCode,
+	           t1.centre_type_code centreTypeCode,
+	           t5.centre_type_name centreTypeName, 
+	           t1.small_type_code smallTypeCode,
+	           DECODE( t1.small_type_code,'ELSE',t1.else_type_name,t6.small_type_name) smallTypeName,
+	           t1.detail_type_code detailTypeCode,
+	           t7.detail_type_name detailTypeName,
+	           t1.fine_type_code fineTypeCode,
+	           t8.fine_type_name fineTypeName,
+	           t1.purchase_departments purchaseDepartments,
+	           (SELECT a1.value_string FROM common_mapping_config  a1 WHERE a1.code_string=t1.purchase_departments) purchaseDepartmentsName,
+	           t1.rationed rationed,
+	           (SELECT a1.value_string FROM common_mapping_config  a1 WHERE a1.code_string=t1.rationed) rationedName,
+	           t1.purchase_type purchaseType,
+	           (SELECT a1.value_string FROM common_mapping_config  a1 WHERE a1.code_string=t1.purchase_type) purchaseTypeName,
+	           t1.sale_type saleType,
+	           t1.order_type orderType,
+	           t1.quoted_currency quotedCurrency,
+	           t1.payment_type paymentType,
+	           t1.delivery_type deliveryType,
+	           t1.specification specification,
+	           t1.packing_type packingType,
+	           t1.created,  
+	           t1.createby,  
+	           t1.updated,
+	           (SELECT u.real_name FROM pub_user u WHERE u.user_id=t1.createby) as createUserName,
+	           (SELECT u.real_name FROM pub_user u WHERE u.user_id=t1.updateby) as updateUserName,
+	       	   (SELECT MAX(a1.quoted_date) FROM merchandise_quoted a1 
+           		 WHERE a1.intention_code = t1.intention_code
+               	 AND   a1.intention_supplier_code=t2.intention_supplier_code
+             	GROUP BY a1.intention_supplier_code) quotedDate,
+           	  (SELECT MAX(a2.FORETASTE_DATE) FROM foretaste_feedback a2 
+           	    WHERE a2.intention_code = t1.intention_code
+                AND   a2.intention_supplier_code=t2.intention_supplier_code
+               GROUP BY a2.intention_supplier_code) foretasteDate,
+               t2.foretaste_status isForetastePass,<!--是否试吃通过标记-->
+               t2.foretaste_pass_date foretastePassDate<!--试吃通过日期-->
+		 
+	     FROM  	 merchandise_intention t1 
+	   LEFT JOIN intention_supplier_merchandise t2
+         ON      t1.intention_code=t2.intention_code
+       LEFT JOIN merchandise_intention_supplier t3
+         ON 	 t2.intention_supplier_code=t3.intention_supplier_code
+       LEFT JOIN supplier t4
+        ON 		 t2.intention_supplier_code=t4.supplier_code
+      LEFT　JOIN  merchandise_centre_type t5
+         ON      t1.centre_type_code = t5.centre_type_code 
+      LEFT　JOIN  merchandise_small_type t6
+         ON      t1.small_type_code = t6.small_type_code 
+      LEFT　JOIN  merchandise_detail_type t7
+         ON      t1.detail_type_code = t7.detail_type_code 
+      LEFT　JOIN  merchandise_fine_type t8    
+       ON        t1.fine_type_code = t8.fine_type_code 
+		<where>
+    		1=1		
+	    	<if test= "intentionCode != null and intentionCode!=''">
+			AND UPPER(t1.intention_code) LIKE UPPER('%'||#{intentionCode}||'%')
+			</if>
+	    	<if test= "intentionName != null and intentionName!=''">
+			AND UPPER(t1.intention_name) LIKE UPPER('%'||#{intentionName}||'%')
+			</if>
+			<if test= "intentionSupplierCode != null and intentionSupplierCode != ''">
+			AND UPPER(t2.intention_supplier_code) LIKE UPPER('%'||#{intentionSupplierCode}||'%')
+			</if>
+	    	<if test= "intentionSupplierName != null and intentionSupplierName != ''">
+			AND (UPPER(t3.intention_supplier_name) LIKE UPPER('%'||#{intentionSupplierName}||'%') OR UPPER(t4.supplier_name) LIKE UPPER('%'||#{intentionSupplierName}||'%'))
+			</if>
+	    	<if test= "centreTypeCode != null and centreTypeCode!=''">
+			AND t1.centre_type_code = #{centreTypeCode}
+			</if>
+	    	<if test= "smallTypeCode != null and smallTypeCode!=''">
+			AND t1.small_type_code = #{smallTypeCode}
+			</if>
+	    	<if test= "detailTypeCode != null and detailTypeCode!=''">
+			AND t1.detail_type_code =#{detailTypeCode}
+			</if>
+	    	<if test= "fineTypeCode != null and fineTypeCode!=''">
+			AND t1.fine_type_code = #{fineTypeCode}
+			</if>
+	    	<if test= "purchaseDepartments != null and purchaseDepartments!=''">
+			AND t1.purchase_departments = #{purchaseDepartments}
+			</if>
+	    	<if test= "rationed != null and rationed!=''">
+			AND t1.rationed = #{rationed}
+			</if>
+	    	<if test= "purchaseType != null and purchaseType!=''">
+			AND t1.purchase_type = #{purchaseType}
+			</if>
+	    	<if test= "saleType != null and saleType!=''">
+			AND t1.sale_type =#{saleType}
+			</if>
+			<!-- 需要去掉时分秒来比较日起大小-->
+			<if test=" createDateStart != null and createDateEnd != null ">
+			AND  t1.created &gt;= to_date(#{createDateStart} || '00:00:00','yyyy-mm-dd HH24:mi:ss')
+			AND  t1.created &lt;= to_date(#{createDateEnd} || '23:59:59','yyyy-mm-dd HH24:mi:ss')
+			</if>
+			<!-- 是否试吃通过-->
+			<if test= "isForetastePass != null and isForetastePass !='' ">
+				AND nvl(t2.foretaste_status,'否')=DECODE(#{isForetastePass},'Y','是','N','否')
+			</if>
+	    </where>) d1
+	    <where>
+	    	1=1
+	    	<if test=" eatDateStart != null and eatDateEnd != null ">
+			AND   d1.foretasteDate &gt;= to_date(#{eatDateStart} || '00:00:00','yyyy-mm-dd HH24:mi:ss')
+			AND   d1.foretasteDate &lt;= to_date(#{eatDateEnd} || '23:59:59','yyyy-mm-dd HH24:mi:ss')
+			</if>
+	    </where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY d1.quotedDate DESC nulls last,
+    					d1.intentionCode DESC
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 根据主键查询某个商品意向品(可分页)-->
+    <select id="loadMerchandiseIntention" resultMap="merchandiseIntentionMap">
+    	SELECT  
+    	<if test="page_count == null">
+       	   t.intention_code       intentionCode,
+	       t.intention_name       intentionName,
+	       t.centre_type_code     centreTypeCode,
+	       t.small_type_code      smallTypeCode,
+	       t.detail_type_code     detailTypeCode,
+	       t.fine_type_code       fineTypeCode,
+	       t.purchase_departments purchaseDepartments,
+	       t.rationed             rationed,
+	       t.purchase_type        purchaseType,
+	       t.sale_type            saleType,
+	       t.order_type           orderType,
+	       t.quoted_currency      quotedCurrency,
+	       t.payment_type         paymentType,
+	       t.delivery_type        deliveryType,
+	       t.specification        specification,
+	       t.packing_type         packingType,
+	       t.else_type_name       elseTypeName,
+	       <!-- 查询该意向品对应的SAP物料号,如果有多个供应商就有多个，只有存在，同步字段就不能修改 -->
+    	  (SELECT MIN(t1.merchandise_code) FROM intention_supplier_merchandise t1 WHERE  t1.merchandise_code is not null and t1.intention_code=t.intention_code),
+    	   (SELECT u.real_name FROM pub_user u WHERE u.user_id=t.createby) as createUserName,
+           (SELECT u.real_name FROM pub_user u WHERE u.user_id=t.updateby) as updateUserName
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM merchandise_intention t
+    	<where>
+    		1=1
+	    	<if test= "intentionCode != null and intentionCode!=''">
+			AND  t.INTENTION_CODE = #{intentionCode}
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.created DESC
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 增加商品意向品 --> 
+	<insert id="saveMerchandiseIntention" parameterType="hashmap">
+		INSERT INTO merchandise_intention(intention_code,intention_name,centre_type_code,small_type_code,detail_type_code,fine_type_code,purchase_departments,rationed,purchase_type,sale_type,order_type,quoted_currency,payment_type,delivery_type,specification,packing_type,created,createby,else_type_name) 
+			 VALUES(#{intentionCode},#{intentionName},#{centreTypeCode},#{smallTypeCode},#{detailTypeCode},#{fineTypeCode},#{purchaseDepartments},#{rationed},#{purchaseType},#{saleType},#{orderType},#{quotedCurrency},#{paymentType},#{deliveryType},#{specification},#{packingType},#{app_created},#{app_create_by},#{elseTypeName})
+    </insert>
+    <!-- 修改商品意向品  -->
+    <update id="updateMerchandiseIntention" parameterType="hashmap">
+		UPDATE	
+				merchandise_intention	
+		   SET	
+		   		intention_name=#{intentionName},
+		   		centre_type_code=#{centreTypeCode},
+		   		small_type_code=#{smallTypeCode},
+		   		detail_type_code=#{detailTypeCode},
+		   		fine_type_code=#{fineTypeCode},
+		   		purchase_departments=#{purchaseDepartments},
+		   		rationed=#{rationed},
+		   		purchase_type=#{purchaseType},
+		   		sale_type=#{saleType},
+		   		order_type=#{orderType},
+		   		quoted_currency=#{quotedCurrency},
+		   		payment_type=#{paymentType},
+		   		delivery_type=#{deliveryType},
+		   		specification=#{specification},
+		   		packing_type=#{packingType},		   		
+		   		else_type_name=#{elseTypeName},
+		   		updated=#{app_created},
+		   		updateby=#{app_create_by}	   		
+		 WHERE	
+		 		INTENTION_CODE=#{intentionCode}
+    </update>
+    <!-- 删除商品意向品 -->
+    <delete id="deleteMerchandiseIntention" parameterType="hashmap">
+        DELETE FROM 
+        			merchandise_intention 
+        WHERE 
+        			INTENTION_CODE=#{intentionCode} <!--AND client_id=#{app_user_clientID}-->
+    </delete>
+    
+    <resultMap type="com.powere2e.sco.model.merchandiseintention.IntentionSupplierMerchandise" id="intentionSupplierMerchandiseMap">
+		<result property="intentionCode" column="intentionCode"/>
+		<result property="intentionSupplierCode" column="intentionSupplierCode"/>
+		<result property="intentionSupplierName" column="intentionSupplierName"/>
+		<result property="merchandiseCode" column="merchandiseCode"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="supplierAddress" column="supplierAddress"/><!-- 供应商地址 -->
+		<result property="isForetastePass" column="isForetastePass"/><!-- 是否试吃通过 -->
+		<result property="foretastePassDate" column="foretastePassDate"/><!-- 试吃通过日期 -->
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    
+    <!-- 根据主键查询某个意向品供应商关联表-->
+    <select id="listIntentionSupplierMerchandise" resultMap="intentionSupplierMerchandiseMap">
+    	SELECT
+    	     <if test="page_count == null">
+			     t1.intention_code          intentionCode,
+			     t1.merchandise_code        merchandiseCode,
+			     t1.intention_supplier_code intentionSupplierCode,
+			     t2.intention_supplier_name||t3.supplier_name intentionSupplierName,
+			     ''||t3.company_site        supplierAddress,
+			     t1.foretaste_status  isForetastePass,
+			     t1.foretaste_pass_date foretastePassDate
+    		 </if>
+	    	 <if test="page_count != null">
+	       		count(1) AS record_count
+	    	 </if>
+    	FROM   	  intention_supplier_merchandise t1 
+		LEFT JOIN merchandise_intention_supplier t2 
+		   ON     t1.intention_supplier_code = t2.intention_supplier_code
+		LEFT JOIN supplier t3 
+		   ON     t1.intention_supplier_code = t3.supplier_code
+		    
+		    <where>
+		     1=1
+		     AND     t1.intention_code=#{intentionCode}	
+		     <if test= "intentionSupplierCode != null and intentionSupplierCode != '' ">
+				AND  t1.intention_supplier_code=#{intentionSupplierCode}
+			  </if>
+		    </where>
+    </select>
+    
+    <!-- 增加意向品供应商关联表 --> 
+	<insert id="saveIntentionSupplierMerchandise" parameterType="hashmap">
+		INSERT INTO intention_supplier_merchandise(intention_code,intention_supplier_code,merchandise_code,supplier_code,created,createby) 
+			 VALUES(#{intentionCode},#{intentionSupplierCode},#{merchandiseCode},#{supplierCode},#{app_created},#{app_create_by})
+    </insert>
+    
+     <!-- 删除供应商关联数据 -->
+    <delete id="deleteIntentionSupplierMerchandise" parameterType="hashmap">
+        DELETE FROM 
+        			intention_supplier_merchandise 
+        WHERE 
+        			intention_code=#{intentionCode} 
+        			
+        <if test= "intentionSupplierCode != null and intentionSupplierCode != ''">
+			AND    intention_supplier_code = #{intentionSupplierCode}
+		</if>
+    </delete>
+    
+    <resultMap type="com.powere2e.sco.model.merchandiseintention.MerchandiseIntentionSupplier" id="merchandiseIntentionSupplier">
+		<result property="intentionSupplierCode" column="intentionSupplierCode"/>
+		<result property="intentionSupplierName" column="intentionSupplierName"/>
+    </resultMap>
+    
+      <!-- 判断供应商是否为意向供应商-->
+    <select id="findSupplierIsTrue" resultMap="merchandiseIntentionSupplier">
+    	SELECT  
+       			t1.intention_supplier_code intentionSupplierCode,
+       			t1.intention_supplier_name intentionSupplierName
+    	
+      	FROM 	merchandise_intention_supplier t1 
+      	
+      	WHERE
+      			t1.intention_supplier_code=#{intentionSupplierCode}			
+    </select>
+    
+    <!-- 增加意向供应商 --> 
+	<insert id="saveIntentionSupplier" parameterType="hashmap">
+		INSERT INTO merchandise_intention_supplier(intention_supplier_code,intention_supplier_name,created,createby) 
+			 VALUES(#{intentionSupplierCode},#{intentionSupplierName},#{app_created},#{app_create_by})
+    </insert>
+    
+     <!-- 判断供应商名称是否已经存在-->
+    <select id="findSupplierNameIsExists" resultMap="merchandiseIntentionSupplier">
+	    	SELECT  
+	       			t1.intention_supplier_code intentionSupplierCode,
+	       			t1.intention_supplier_name intentionSupplierName
+	    	
+	      	FROM 	merchandise_intention_supplier t1 
+	      	
+	      	WHERE
+	      			t1.intention_supplier_name=#{intentionSupplierName}	
+      UNION
+	      	SELECT  
+	       			t2.supplier_code intentionSupplierCode,
+	       			t2.supplier_name intentionSupplierName
+	    	
+	      	FROM 	supplier t2
+	      	
+	      	WHERE
+	      			t2.supplier_name=#{intentionSupplierName}						
+    </select>
+    
+     <!-- 根据供应商编号判断该供应商在关联表中是否已存在,已经废弃-->
+    <select id="findSupplierMerchandiseIsExists" resultMap="intentionSupplierMerchandiseMap">
+    	SELECT  
+       		t1.intention_code intentionCode,
+       		t1.intention_supplier_code intentionSupplierCode
+    	
+      		FROM 	intention_supplier_merchandise t1 
+      	WHERE	
+      	    t1.intention_code=#{intentionCode}				
+      	AND	t1.intention_supplier_code=#{intentionSupplierCode}
+    </select>
+    
+     <!-- 根据意向品编号查询是否已经OA申请-->
+    <select id="findApplicationByIntentionCode" resultMap="merchandiseIntentionMap">
+		SELECT
+			t.application_code applicationCode,
+			t.merchandise_code　merchandiseCode,
+			t.supplier_code supplierCode
+
+		FROM
+			application_merchandise t
+    	WHERE  
+    		t.merchandise_code IN (${intentionCodes})
+    	<!--  判断供应商是否为空-->	
+    	 <if test= "supplierCodes != null and supplierCodes != ''">
+			 AND   t.supplier_code IN  (${supplierCodes})
+		</if>
+    </select>
+    
+</mapper>

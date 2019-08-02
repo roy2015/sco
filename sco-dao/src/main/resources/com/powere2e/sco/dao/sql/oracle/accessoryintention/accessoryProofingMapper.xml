@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.accessoryintention.AccessoryProofingDao">
+	<resultMap type="com.powere2e.sco.model.accessoryintention.AccessoryProofing" id="accessoryProofingMap">
+		<result property="proofingCode" column="proofingCode"/>
+		<result property="enquiryCode" column="enquiryCode"/>
+		<result property="quotedCode" column="quotedCode"/>
+		<result property="intentionCode" column="intentionCode"/>
+		<result property="intentionSupplierCode" column="intentionSupplierCode"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="intentionSupplierName" column="intentionSupplierName"/>
+		<result property="supplierName" column="supplierName"/>
+		<result property="path" column="path"/>
+		<result property="proofingType" column="proofingType"/>
+		<result property="askProofingDate" column="askProofingDate"/>
+		<result property="proofingDate" column="proofingDate"/>
+		<result property="proofingCycle" column="proofingCycle"/>
+		<result property="proofingContent" column="proofingContent"/>
+		<result property="proofingEvaluate" column="proofingEvaluate"/>
+		<result property="proofingStatus" column="proofingStatus"/>
+		<result property="remarks" column="remarks"/>
+		<result property="quotedDate" column="quotedDate"/>
+		<result property="quotedCreateDate" column="quotedCreateDate"/>
+		<result property="created" column="created"/>
+		<result property="createby" column="createby"/>
+		<result property="updated" column="updated"/>
+		<result property="updateby" column="updateby"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <!-- 查询辅料打样(可分页)-->
+    <select id="searchAccessoryProofing" resultMap="accessoryProofingMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.proofing_code proofingCode,t.enquiry_code enquiryCode,t.quoted_code quotedCode,t.intention_code intentionCode,t.intention_supplier_code intentionSupplierCode,t.proofing_type proofingType,t.ask_proofing_date askProofingDate,t.proofing_date proofingDate,t.proofing_cycle proofingCycle,t.proofing_content proofingContent,t.proofing_evaluate proofingEvaluate,t.proofing_status proofingStatus,t.remarks remarks,t.path path
+       		,t.created,	t.updated ,m.intention_supplier_name intentionSupplierName,n.supplier_name supplierName,k.QUOTED_DATE quotedDate,k.created quotedCreateDate
+			,(select u.real_name from pub_user u where u.user_id=t.createby) as createUserName,
+           	(select u.real_name from pub_user u where u.user_id=t.updateby) as updateUserName
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM accessory_proofing t
+      		left join ACCESSORY_INTENTION_SUPPLIER m on t.intention_supplier_code=m.intention_supplier_code
+      		left join SUPPLIER n on t.intention_supplier_code=n.SUPPLIER_CODE
+      		left join accessory_quoted_electronic k on t.quoted_code=k.quoted_code
+      		inner join INTENTION_SUPPLIER_ACCESSORY f on (t.intention_supplier_code=f.intention_supplier_code  and t.intention_code=f.intention_code)
+    	<where>
+    		1=1
+	    	<if test= "proofingCode != null and proofingCode!=''">
+			AND t.proofing_code = #{proofingCode}
+			</if>
+	    	<if test= "enquiryCode != null and enquiryCode!=''">
+			AND t.enquiry_code =#{enquiryCode}
+			</if>
+	    	<if test= "quotedCode != null and quotedCode!=''">
+			AND t.quoted_code = #{quotedCode}
+			</if>
+	    	<if test= "intentionCode != null and intentionCode!=''">
+			AND t.intention_code=#{intentionCode}
+			</if>
+	    	<if test= "intentionSupplierCode != null and intentionSupplierCode!=''">
+			AND t.intention_supplier_code=#{intentionSupplierCode}
+			</if>
+	    	<if test= "proofingType != null and proofingType!=''">
+			AND t.proofing_type= #{proofingType}
+			</if>
+	    	<if test= "askProofingDate != null and askProofingDate!=''">
+			AND	convert(varchar,t.ask_proofing_date,120) LIKE (#{askProofingDate})
+			</if>
+	    	<if test= "proofingDate != null and proofingDate!=''">
+			AND	convert(varchar,t.proofing_date,120) LIKE (#{proofingDate})
+			</if>
+	    	<if test= "proofingCycle != null and proofingCycle!=''">
+			AND t.proofing_cycle = #{proofingCycle}
+			</if>
+	    	<if test= "proofingContent != null and proofingContent!=''">
+			AND UPPER(t.proofing_content) LIKE UPPER('%'||#{proofingContent}||'%')
+			</if>
+	    	<if test= "proofingEvaluate != null and proofingEvaluate!=''">
+			AND UPPER(t.proofing_evaluate) LIKE UPPER('%'||#{proofingEvaluate}||'%')
+			</if>
+	    	<if test= "proofingStatus != null and proofingStatus!=''">
+			AND UPPER(t.proofing_status) LIKE UPPER('%'||#{proofingStatus}||'%')
+			</if>
+	    	<if test= "remarks != null and remarks!=''">
+			AND UPPER(t.remarks) LIKE UPPER('%'||#{remarks}||'%')
+			</if>
+	    	<if test= "created != null and created!=''">
+			AND	convert(varchar,t.created,120) LIKE (#{created})
+			</if>
+	    	<if test= "createby != null and createby!=''">
+			AND UPPER(t.createby) LIKE UPPER('%'||#{createby}||'%')
+			</if>
+	    	<if test= "updated != null and updated!=''">
+			AND	convert(varchar,t.updated,120) LIKE (#{updated})
+			</if>
+	    	<if test= "updateby != null and updateby!=''">
+			AND UPPER(t.updateby) LIKE UPPER('%'||#{updateby}||'%')
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.proofing_date DESC nulls last
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 根据主键查询某个辅料打样(可分页)-->
+    <select id="loadAccessoryProofing" resultMap="accessoryProofingMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.proofing_code proofingCode,t.enquiry_code enquiryCode,t.quoted_code quotedCode,t.intention_code intentionCode,t.intention_supplier_code intentionSupplierCode,t.proofing_type proofingType,t.ask_proofing_date askProofingDate,t.proofing_date proofingDate,t.proofing_cycle proofingCycle,t.proofing_content proofingContent,t.proofing_evaluate proofingEvaluate,t.proofing_status proofingStatus,t.remarks remarks,t.path path
+       		,t.created,	t.updated 
+		   ,(select u.real_name from pub_user u where u.user_id=t.createby) as createUserName,
+           	(select u.real_name from pub_user u where u.user_id=t.updateby) as updateUserName
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM accessory_proofing t
+    	<where>
+    		1=1
+	    	<if test= "proofingCode != null and proofingCode!=''">
+			AND  t.PROOFING_CODE = #{proofingCode}
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.created DESC
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 增加辅料打样 --> 
+	<insert id="saveAccessoryProofing" parameterType="hashmap">
+		INSERT INTO accessory_proofing(proofing_code,enquiry_code,quoted_code,intention_code,intention_supplier_code,proofing_type,ask_proofing_date,proofing_date,proofing_cycle,proofing_content,proofing_evaluate,proofing_status,remarks,path,created,createby) 
+			 VALUES(s_accessory_proofing.nextval,#{enquiryCode},#{quotedCode},#{intentionCode},#{intentionSupplierCode},#{proofingType},#{askProofingDate},#{proofingDate},#{proofingCycle},#{proofingContent},#{proofingEvaluate},#{proofingStatus},#{remarks},#{path},#{app_created},#{app_create_by})
+    </insert>
+    <!-- 修改辅料打样  -->
+    <update id="updateAccessoryProofing" parameterType="hashmap">
+		UPDATE	
+				accessory_proofing	
+		   SET	
+		   		enquiry_code=#{enquiryCode},
+		   		quoted_code=#{quotedCode},
+		   		intention_code=#{intentionCode},
+		   		intention_supplier_code=#{intentionSupplierCode},
+		   		supplier_code=#{supplierCode},
+		   		proofing_type=#{proofingType},
+		   		ask_proofing_date=#{askProofingDate},
+		   		proofing_date=#{proofingDate},
+		   		proofing_cycle=#{proofingCycle},
+		   		proofing_content=#{proofingContent},
+		   		proofing_evaluate=#{proofingEvaluate},
+		   		proofing_status=#{proofingStatus},
+		   		path=#{path},
+		   		remarks=#{remarks}		   		
+		 WHERE	
+		 		PROOFING_CODE=#{proofingCode}
+    </update>
+    <!-- 删除辅料打样 -->
+    <delete id="deleteAccessoryProofing" parameterType="hashmap">
+        DELETE FROM 
+        			accessory_proofing 
+        WHERE 
+        			PROOFING_CODE=#{proofingCode} <!--AND client_id=#{app_user_clientID}-->
+    </delete>
+</mapper>

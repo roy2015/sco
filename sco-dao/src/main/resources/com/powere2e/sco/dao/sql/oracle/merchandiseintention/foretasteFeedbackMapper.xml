@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.merchandiseintention.ForetasteFeedbackDao">
+    <resultMap type="com.powere2e.sco.model.merchandiseintention.ForetasteFeedback" id="foretasteFeedbackMap">
+		<result property="feedbackCode" column="feedbackCode"/>
+		<result property="intentionCode" column="intentionCode"/>
+		<result property="intentionSupplierCode" column="intentionSupplierCode"/>
+		<result property="foretasteDate" column="foretasteDate"/>
+		<result property="foretasteNumber" column="foretasteNumber"/>
+		<result property="foretasteFull" column="foretasteFull"/>
+		<result property="foretasteGrade" column="foretasteGrade"/>
+		<result property="evaluate" column="evaluate"/>
+		<result property="created" column="created"/>
+		<result property="createby" column="createby"/>
+		<result property="updated" column="updated"/>
+		<result property="updateby" column="updateby"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    
+    <!-- 查询所有试吃反馈(可分页)-->
+    <select id="listForetasteFeedback" resultMap="foretasteFeedbackMap">
+    	SELECT  
+    	<if test="page_count == null">
+			t1.feedback_code feedbackCode,
+			t1.intention_code intentionCode,
+			t1.foretaste_date foretasteDate,
+			t1.foretaste_number foretasteNumber,
+			t1.foretaste_full foretasteFull,
+			t1.foretaste_grade foretasteGrade,
+			t1.evaluate evaluate,
+			t1.created, 
+			t1.updated,
+			t1.intention_supplier_code intentionSupplierCode,
+      		t3.intention_supplier_name||t4.supplier_name intentionSupplierName
+		   
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      	FROM 	  foretaste_feedback t1
+      	LEFT JOIN 
+      			 intention_supplier_merchandise t2
+        ON 		 t1.intention_code=t2.intention_code
+        AND 	 t1.intention_supplier_code=t2.intention_supplier_code
+        LEFT JOIN 
+               	merchandise_intention_supplier t3
+        ON 	   	t2.intention_supplier_code=t3.intention_supplier_code
+       	LEFT JOIN
+               supplier t4
+       	ON 	   t2.intention_supplier_code=t4.supplier_code
+        WHERE  1=1
+    	AND    t2.intention_supplier_code is not null
+	    <if test= "intentionCode != null and intentionCode != ''">
+			AND  t1.intention_code = #{intentionCode}
+		</if>
+   
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t1.intention_supplier_code,t1.foretaste_date DESC
+    		</if>
+    	</if>
+    </select>
+    
+     <!-- 根据主键查询某个试吃反馈-->
+    <select id="loadForetasteFeedback" resultMap="foretasteFeedbackMap">
+    	SELECT  
+       		   t.feedback_code           feedbackCode,
+		       t.intention_code          intentionCode,
+		       t.intention_supplier_code intentionSupplierCode,
+		       t.foretaste_date          foretasteDate,
+		       t.foretaste_number        foretasteNumber,
+		       t.foretaste_full          foretasteFull,
+		       t.foretaste_grade         foretasteGrade,
+		       t.evaluate                evaluate,
+		       t.created,
+		       t.updated
+		   
+      	FROM 
+      		   foretaste_feedback t
+    	<where>
+    		1=1
+	    	<if test= "feedbackCode != null and feedbackCode!=''">
+			AND  t.FEEDBACK_CODE = #{feedbackCode}
+			</if>
+    	</where>
+    </select>
+    
+     <!-- 增加试吃反馈 --> 
+	<insert id="saveForetasteFeedback" parameterType="hashmap">
+		INSERT INTO foretaste_feedback(feedback_code,intention_code,intention_supplier_code,foretaste_date,foretaste_number,foretaste_full,foretaste_grade,evaluate,created,createby) 
+			 VALUES(s_foretaste_feedback.nextval,#{intentionCode},#{intentionSupplierCode},#{foretasteDate},#{foretasteNumber},#{foretasteFull},#{foretasteGrade},#{evaluate},#{app_created},#{app_create_by})
+    </insert>
+    <!-- 修改试吃反馈  -->
+    <update id="updateForetasteFeedback" parameterType="hashmap">
+		UPDATE	
+				foretaste_feedback	
+		   SET	
+		   		foretaste_date=#{foretasteDate},
+		   		foretaste_number=#{foretasteNumber},
+		   		foretaste_full=#{foretasteFull},
+		   		foretaste_grade=#{foretasteGrade},
+		   		evaluate=#{evaluate},
+		   		updated=#{app_created},
+		   		updateby=#{app_create_by}
+		   				   		
+		 WHERE	
+		 		FEEDBACK_CODE=#{feedbackCode}
+    </update>
+    <!-- 删除试吃反馈 -->
+    <delete id="deleteForetasteFeedback" parameterType="hashmap">
+        DELETE FROM 
+        			foretaste_feedback 
+        WHERE 
+			 <choose>
+        		<when test="feedbackCodes != null and feedbackCodes != '' ">
+        			feedback_code IN (${feedbackCodes})
+        		</when>
+        		<when test=" intentionCode != null and intentionCode != '' ">
+        			intention_code=#{intentionCode}
+        		</when>
+        		<otherwise>
+        			feedback_code = #{feedbackCode}
+        		</otherwise>
+        	</choose>
+    </delete>
+    
+    
+    <!-- 修改试吃反馈是否 通过-->
+    <update id="updateForetasteFeedbackIsPass" parameterType="hashmap">
+		UPDATE	
+				intention_supplier_merchandise	
+		   SET	
+		   		foretaste_status=#{isForetastePass},
+		   		foretaste_pass_date=#{foretastePassDate},
+		   		updated=#{app_created},
+		   		updateby=#{app_create_by}
+		   				   		
+		 WHERE	
+		 		intention_code=#{intentionCode}
+		 AND	intention_supplier_code=#{intentionSupplierCode}	
+    </update>
+    
+    
+    <!--   申请商品/意向品(商品OA)  -->
+    <resultMap type="com.powere2e.sco.model.merchandiseoaapplication.ApplicationMerchandise" id="applicationMerchandiseMap">
+		<result property="applicationCode" column="applicationCode"/>
+		<result property="merchandiseCode" column="merchandiseCode"/>
+		<result property="supplierCode" column="supplierCode"/>
+    </resultMap>
+    
+     <!-- 根据意向品编号和供应商编号查询是否已经做的OA申请-->
+    <select id="queryIsOaApplicationNew" resultMap="applicationMerchandiseMap">
+		SELECT
+			t1.application_code applicationCode,
+			t1.merchandise_code　merchandiseCode,
+			t1.supplier_code supplierCode
+
+		FROM
+			application_merchandise t1
+    	 <where>
+			1=1
+			 AND 
+			  (<foreach collection="codeList"  item="item" index="index" separator="OR">
+			   		(t1.merchandise_code = #{item.merchandiseCode}	 
+			 	AND
+			   		t1.supplier_code = #{item.supplierCode})
+			  </foreach> 	
+			  ) 
+		 </where>
+    </select>
+    
+</mapper>

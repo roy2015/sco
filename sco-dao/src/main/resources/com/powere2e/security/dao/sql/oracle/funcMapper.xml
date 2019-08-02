@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.security.dao.FuncDao">
+	<resultMap type="com.powere2e.security.model.Func" id="funcMap">
+		<result property="funcId" column="funcId "/>
+		<result property="funcKey" column="funcKey "/>
+		<result property="name" column="name "/>
+		<result property="description" column="description "/>
+		<result property="funcType" column="funcType "/>
+		<result property="iconcls" column="iconcls "/>
+		<result property="src" column="src "/>
+		<result property="funcPid" column="funcPid "/>
+		<result property="orderNo" column="orderNo "/>
+		<result property="active" column="active "/>
+		<result property="roleId" column="roleId "/>
+		<result property="disableMsg" column="disableMsg "/>
+		<result property="created" column="created "/>
+		<result property="createby" column="createby "/>
+		<result property="updated" column="updated "/>
+		<result property="updateby" column="updateby "/>
+		<result property="clientId" column="clientId "/>
+		<result property="isFree" column="isFree "/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    
+    <!-- 查询功能权限基础信息(可分页)-->
+    <select id="listFunc" resultMap="funcMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.func_id funcId,t.func_key funcKey,t.name name,
+       		t.description description,t.func_type funcType,
+       		t.iconcls iconcls,t.src src,t.func_pid funcPid,
+       		t.active active,t.order_no orderNo,t.disable_msg disableMsg,
+       		t.client_id clientId,t.created,	t.updated, t.isFree isFree
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM pub_func t
+    	<where>
+    		1=1
+	    	<if test= "funcId != null and funcId!=''">
+			AND t.func_id = #{funcId}
+			</if>
+	    	<if test= "funcKey != null and funcKey!=''">
+			AND UPPER(t.func_key) LIKE UPPER('%'||#{funcKey}||'%')
+			</if>
+	    	<if test= "name != null and name!=''">
+			AND UPPER(t.name) LIKE UPPER('%'||#{name}||'%')
+			</if>
+	    	<if test= "description != null and description!=''">
+			AND UPPER(t.description) LIKE UPPER('%'||#{description}||'%')
+			</if>
+	    	<if test= "funcType != null and funcType!=''">
+			AND UPPER(t.func_type) LIKE UPPER('%'||#{funcType}||'%')
+			</if>
+	    	<if test= "iconcls != null and iconcls!=''">
+			AND UPPER(t.iconcls) LIKE UPPER('%'||#{iconcls}||'%')
+			</if>
+	    	<if test= "src != null and src!=''">
+			AND UPPER(t.src) LIKE UPPER('%'||#{src}||'%')
+			</if>
+	    	<if test= "funcPid != null and funcPid!=''">
+			AND UPPER(t.func_pid) LIKE UPPER('%'||#{funcPid}||'%')
+			</if>
+	    	<if test= "active != null and active!=''">
+			AND UPPER(t.active) LIKE UPPER('%'||#{active}||'%')
+			</if>
+	    	<if test= "created != null and created!=''">
+			AND	to_char(t.created,'YYYY-MM-DD HH24:MI:SS') LIKE (#{created})
+			</if>
+	    	<if test= "createby != null and createby!=''">
+			AND UPPER(t.createby) LIKE UPPER('%'||#{createby}||'%')
+			</if>
+	    	<if test= "updated != null and updated!=''">
+			AND	to_char(t.updated,'YYYY-MM-DD HH24:MI:SS') LIKE (#{updated})
+			</if>
+	    	<if test= "updateby != null and updateby!=''">
+			AND UPPER(t.updateby) LIKE UPPER('%'||#{updateby}||'%')
+			</if>
+	    	<if test= "clientId != null and clientId!=''">
+			AND UPPER(t.client_id) LIKE UPPER('%'||#{clientId}||'%')
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.func_pid,t.order_no
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 根据功能键加载一个功能（带缓存）-->
+    <select id="loadFuncByFuncKey" resultMap="funcMap">
+    	SELECT  
+       		t.func_id funcId,t.func_key funcKey,t.name name,t.description description,
+       		t.func_type funcType,t.iconcls iconcls,t.src src,t.func_pid funcPid,t.active active,
+       		t.order_no orderNo,t.disable_msg disableMsg,t.client_id clientId,t.created,	t.updated
+  		FROM pub_func t
+    	<where>
+    		t.func_key=#{funcKey} 
+    		AND t.client_id = #{app_user_clientID} 
+    	</where>
+    </select>
+    
+    <!-- 增加功能权限基础信息 --> 
+	<insert id="insertFunc" parameterType="hashmap">
+		INSERT INTO pub_func(func_id,func_key,name,description,func_type,iconcls,src,func_pid,order_no,active,client_id,created,createby,isFree)
+			VALUES(#{funcId},#{funcKey},#{name},#{description},#{funcType},#{iconcls},#{src},#{funcPid},#{orderNo},'Y',#{app_user_clientID},#{app_created},#{app_create_by},#{isFree})
+   </insert>
+    
+    <!-- 修改功能权限基础信息  -->
+    <update id="updateFunc" parameterType="hashmap">
+		UPDATE	
+				pub_func	
+		   SET	
+		   		func_key=#{funcKey},
+		   		name=#{name},
+		   		description=#{description},
+		   		func_type=#{funcType},
+		   		iconcls=#{iconcls},
+		   		src=#{src},
+		   		order_no=#{orderNo},
+		   		func_pid=#{funcPid},
+		   		disable_msg=#{disableMsg},
+		   		isFree=#{isFree}
+		 WHERE	
+		 		FUNC_ID=#{funcId}
+		  		AND client_id=#{app_user_clientID} 
+    </update>
+    
+    <!-- 删除功能权限基础信息 -->
+    <delete id="deleteFunc" parameterType="hashmap">
+        DELETE FROM 
+  			pub_func 
+        WHERE 
+   			FUNC_ID=#{funcId} 
+   			AND client_id = #{app_user_clientID} 
+    </delete>
+    
+    <!-- 列出某用户的功能权限菜单列表-->
+       <select id="loadMenuByUser" resultMap="funcMap">
+    	SELECT       
+			a.func_id as funcId,a.name,a.iconcls,a.func_key as funcKey,
+			a.func_pid as funcPid, a.src 
+      	FROM 
+			pub_func a ,
+			pub_user_func b 
+		  <if test="agentTargetId !=null">
+			,pub_user_func c 
+		  </if>
+    	WHERE 
+			a.func_id=b.func_id 
+			AND a.func_type = 'M'
+			AND b.user_id=#{userId} 
+			AND a.client_id = #{app_user_clientID} 
+		  <if test="agentTargetId !=null">
+			AND b.func_id=c.func_id
+			AND c.user_id=#{agentTargetId}
+		  </if>
+    	ORDER BY 	
+			a.func_pid,a.order_no			
+    </select>
+    
+    <!-- 列出所有功能，某角色拥有的功能（勾选中的）-->
+    <select id="loadFuncByRole" resultMap="funcMap">
+    	SELECT       
+			a.func_id as funcId,a.name,a.iconcls,a.func_key funcKey,
+			a.func_pid as funcPid, a.src,b.role_id roleId
+     	FROM 
+			<if test="app_user_id !='admin'">
+				pub_func a INNER JOIN pub_user_func c
+				ON a.func_id = c.func_id and c.user_Id = #{app_user_id}
+			</if>
+			<if test="app_user_id =='admin'">
+				pub_func a 
+			</if>
+		LEFT JOIN pub_role_func b 
+			ON a.func_id=b.func_id 
+			AND b.role_id=#{roleId} AND b.client_id = #{app_user_clientID}
+    	WHERE 
+			a.client_id = #{app_user_clientID} 
+    	ORDER BY 
+			a.func_pid,a.order_no 
+    </select>
+    
+    <!-- 找到某节点的最大孩子节点的序号 -->
+	<select id="getMaxChildOrderNo" resultType="Integer">
+		SELECT 
+			MAX(order_no) as maxOrderNo
+		FROM  
+			pub_func
+		WHERE 
+				func_pid=#{funcId} 
+			AND client_id=#{app_user_clientID}
+	</select>
+	
+	<!-- 将某个节点的孩子序号排在orderNo之后的所有节点序号加inc个值 -->
+	<update id="moveNode">
+		UPDATE	
+				pub_func 
+		   SET	
+		   		order_no=order_no+#{inc} 
+		WHERE 
+			client_id = #{app_user_clientID} 
+			AND func_pid=#{funcId} 
+			<![CDATA[AND order_no>=#{orderNo}]]>
+			AND client_id=#{app_user_clientID}
+	</update>
+	
+	<!-- 设置功能的激活禁用状态 -->
+    <update id="toggleActive">
+    	UPDATE
+    			pub_func
+    	   SET
+    	   		active=#{active},
+    	   		disable_msg=#{disableMsg}
+    	 WHERE
+    	 		func_id in (${funcIds}) 
+    	 		AND client_id = #{app_user_clientID} 
+    </update>
+    
+     <!--  查出所有功能，并且以FUNC_KEY倒排序，主要用在根据一个FUNC_KEY来查到所属模块（菜单）名-->
+    <select id="listFuncOrderbyFuncKeyDesc" resultMap="funcMap">
+    	SELECT  
+       		t.func_id funcId,t.func_key funcKey,t.name name,t.description description,
+       		t.func_type funcType,t.iconcls iconcls,t.src src,t.func_pid funcPid,t.active active,
+       		t.order_no orderNo,t.disable_msg disableMsg,t.client_id clientId,t.created,	t.updated
+      	FROM 
+      		pub_func t
+      	<!--  
+      	WHERE 
+    		t.client_id = #{app_user_clientID}
+    	--> 
+    	ORDER BY 
+    		func_key DESC
+    </select>
+</mapper>

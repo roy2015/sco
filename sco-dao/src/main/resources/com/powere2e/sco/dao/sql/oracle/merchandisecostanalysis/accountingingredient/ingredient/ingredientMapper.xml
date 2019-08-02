@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.powere2e.sco.interfaces.dao.merchandisecostanalysis.accountingingredient.ingredient.IngredientDao">
+	<resultMap type="com.powere2e.sco.model.merchandisecostanalysis.accountingingredient.ingredient.Ingredient" id="ingredientMap">
+		<result property="ingredientCode" column="ingredientCode"/>
+		<result property="intentionCode" column="intentionCode"/>
+		<result property="intentionSupplierCode" column="intentionSupplierCode"/>
+		<result property="merchandiseCode" column="merchandiseCode"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="productCount" column="productCount"/>
+		<result property="yield" column="yield"/>
+		<result property="moisture" column="moisture"/>
+		<result property="created" column="created"/>
+		<result property="createby" column="createby"/>
+		<result property="updated" column="updated"/>
+		<result property="updateby" column="updateby"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+    </resultMap>
+	<resultMap type="com.powere2e.sco.model.merchandisecostanalysis.accountingingredient.ingredient.IngredientItem" id="ingredientItemMap">
+		<result property="ingredientCode" column="ingredientCode" />
+		<result property="materialType" column="materialType" />
+		<result property="materialCode" column="materialCode" />
+		<result property="materialName" column="materialName" />
+		<result property="materialOrigin" column="materialOrigin" />
+		<result property="materialBrand" column="materialBrand" />
+		<result property="materialLevelSpecification" column="materialLevelSpecification" />
+		<result property="purchasePrice" column="purchasePrice" />
+		<result property="inputCount" column="inputCount" />
+		<result property="inputCost" column="inputCost" />
+		<result property="avgCost" column="avgCost" />
+		<result property="inputCountProportion" column="inputCountProportion" />
+		<result property="inputCostProportion" column="inputCostProportion" />
+		<result property="moisture" column="moisture" />
+		<result property="remarks" column="remarks" />
+		<result property="materialTypeName" column="materialTypeName" />
+	</resultMap>
+
+	<!-- 根据主键查询某个核算表-总价各地区(可分页) -->
+	<select id="loadIngredient" resultMap="ingredientMap">
+		SELECT
+			t.ingredient_code ingredientCode,
+			t.intention_code intentionCode,
+			t.intention_supplier_code intentionSupplierCode,
+			t.merchandise_code merchandiseCode,
+			t.supplier_code supplierCode,
+			t.product_count productCount,
+			t.yield yield,
+			t.moisture moisture,
+			t.created,
+			t.updated,
+			(select u.login_name from pub_user u where u.user_id=t.createby) as createUserName,
+			(select u.login_name from pub_user u where u.user_id=t.updateby) as updateUserName
+		FROM ingredient t
+		<where>
+			1=1
+			<if test="ingredientCode != null and ingredientCode!=''">
+				AND t.ingredient_code = #{ingredientCode}
+			</if>
+		</where>
+	</select>
+
+	<!-- 增加投料表 -->
+	<insert id="saveIngredient" parameterType="hashmap">
+		INSERT INTO ingredient(ingredient_code,intention_code,intention_supplier_code,merchandise_code,supplier_code,product_count,yield,moisture,created,createby,updated,updateby)
+			VALUES(#{ingredient.ingredientCode},#{ingredient.intentionCode},#{ingredient.intentionSupplierCode},#{ingredient.merchandiseCode},#{ingredient.supplierCode},#{ingredient.productCount},#{ingredient.yield},#{ingredient.moisture},#{app_created},#{app_create_by},#{app_created},#{app_create_by})
+	</insert>
+
+	<!-- 修改投料表 -->
+	<update id="updateIngredient" parameterType="hashmap">
+		UPDATE
+			ingredient
+		SET
+			intention_code=#{intentionCode},
+			intention_supplier_code=#{intentionSupplierCode},
+			merchandise_code=#{merchandiseCode},
+			supplier_code=#{supplierCode},
+			product_count=#{productCount},
+			yield=#{yield},
+			moisture=#{moisture},
+			updated=#{app_created},
+			updateby=#{app_create_by}
+		WHERE
+			ingredient_code = #{ingredientCode}
+	</update>
+
+	<!-- 删除投料表 -->
+	<delete id="deleteIngredient" parameterType="hashmap">
+		DELETE FROM ingredient WHERE ingredient_code = #{ingredientCode}
+	</delete>
+
+	<!-- 查询商品投料表明细(可分页) -->
+	<select id="searchIngredientItem" resultMap="ingredientItemMap">
+		SELECT
+			t.ingredient_code ingredientCode,
+			t.material_code materialCode,
+			t.material_type materialType,
+			t.material_name materialName,
+			t.material_origin materialOrigin,
+			t.material_brand materialBrand,
+			t.material_level_specification materialLevelSpecification,
+			t.purchase_price purchasePrice,
+			<if test="quantity != null and convertAfterQuantity != null">
+			round(t.avg_cost/${quantity}*${convertAfterQuantity},3) avgCost,
+			</if>
+			<if test="quantity == null or convertAfterQuantity == null">
+			t.avg_cost avgCost,
+			</if>
+			t.input_count inputCount,
+			t.input_cost inputCost,
+			t.input_count_proportion inputCountProportion,
+			t.input_cost_proportion inputCostProportion,
+			t.moisture moisture,
+			t.remarks remarks,
+			t1.value_string materialTypeName
+		FROM 
+			(select * from ingredient_item
+		<where>
+			<if test="ingredientCode != null and ingredientCode!=''">
+				AND ingredient_code = #{ingredientCode}
+			</if>
+		</where>
+		) t
+		left join (select * from common_mapping_config where key_type = 'MATERIAL_TYPE') t1 on t1.code_string = t.material_type
+		ORDER BY t.material_type DESC,avg_cost DESC
+	</select>
+
+	<!-- 增加商品投料表明细 -->
+	<insert id="saveIngredientItem" parameterType="hashmap">
+		INSERT INTO ingredient_item(material_code,ingredient_code,material_type,material_name,material_origin,material_brand,material_level_specification,purchase_price,input_count,input_cost,avg_cost,input_count_proportion,input_cost_proportion,moisture,remarks)
+			SELECT S_INGREDIENT_ITEM.NEXTVAL, t.* from (
+			<foreach collection="ingredientItemList" item="item" index="index" separator="UNION">
+				SELECT 
+					#{item.ingredientCode,jdbcType=VARCHAR},
+					#{item.materialType,jdbcType=VARCHAR},
+					#{item.materialName,jdbcType=VARCHAR},
+					#{item.materialOrigin,jdbcType=VARCHAR},
+					#{item.materialBrand,jdbcType=VARCHAR},
+					#{item.materialLevelSpecification,jdbcType=VARCHAR},
+					#{item.purchasePrice,jdbcType=NUMERIC},
+					#{item.inputCount,jdbcType=NUMERIC},
+					#{item.inputCost,jdbcType=NUMERIC},
+					#{item.avgCost,jdbcType=NUMERIC},
+					#{item.inputCountProportion,jdbcType=NUMERIC},
+					#{item.inputCostProportion,jdbcType=NUMERIC},
+					#{item.moisture,jdbcType=VARCHAR},
+					#{item.remarks,jdbcType=VARCHAR} 
+				FROM dual
+			</foreach>
+		) t
+	</insert>
+	
+	<!-- 删除商品投料表明细 -->
+	<delete id="deleteIngredientItem" parameterType="hashmap">
+		DELETE FROM ingredient_item WHERE ingredient_code = #{ingredientCode}
+	</delete>
+</mapper>

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN" "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="xiejiajie" extends="pubstruts" namespace="/">
+		<!-- 证件过期提醒设置 -->
+		<action name="certificateOutofdateConfig" method="{1}" class="com.powere2e.sco.action.parameterset.certificateoutofdateconfig.CertificateOutofdateConfigAction">
+			<interceptor-ref name="mydefault" />
+		</action>
+		<!-- 原料行情预警设置 -->
+		<action name="materialWarnConfig" method="{1}" class="com.powere2e.sco.action.parameterset.materialwarnconfig.MaterialWarnConfigAction">
+			<interceptor-ref name="mydefault" />
+		</action>
+		<!-- 商品定性角色维护 -->
+		<action name="merchandiseDxRole" method="{1}" class="com.powere2e.sco.action.datamaintenance.assortmentdata.merchandiserole.MerchandiseDxRoleAction">
+			<interceptor-ref name="mydefault" />
+		</action>
+		<!-- 商品定量角色 -->
+		<action name="merchandiseDlRole" method="{1}" class="com.powere2e.sco.action.datamaintenance.assortmentdata.merchandiserole.MerchandiseDlRoleAction">
+			<interceptor-ref name="mydefault" />
+		</action>
+		<!-- 商品细分类 -->
+		<action name="merchandiseFineType" method="{1}" class="com.powere2e.sco.action.datamaintenance.assortmentdata.merchandisefinetype.MerchandiseFineTypeAction">
+			<interceptor-ref name="mydefault" />
+		</action>
+		<!-- 辅助细分类 -->
+		<action name="accessoryFineType" method="{1}" class="com.powere2e.sco.action.datamaintenance.purchaserdata.accessoryfinetype.AccessoryFineTypeAction">
+			<interceptor-ref name="mydefault" />
+		</action>
+		<!-- 辅助细分类 -->
+		<action name="merchandisePromotionPurchaseData" method="{1}" class="com.powere2e.sco.action.datamaintenance.purchaserdata.merchandisepromotionpurchasedata.MerchandisePromotionPurchaseDataAction">
+			<interceptor-ref name="mydefault" />
+		</action>
+		<!-- 公示网站名称 -->
+		<action name="websiteNameMaintenance" method="{1}" class="com.powere2e.sco.action.datamaintenance.purchaserdata.websitename.WebsiteNameMaintenanceAction">
+			<interceptor-ref name="mydefault" />
+		</action>
+		<!-- 原料大类 -->
+		<action name="materialBigType" method="{1}" class="com.powere2e.sco.action.datamaintenance.purchaserdata.materialrolemaintenance.MaterialBigTypeAction">
+			<interceptor-ref name="mydefault" />
+		</action>
+		<!-- 原料小类 -->
+		<action name="materialSmallType" method="{1}" class="com.powere2e.sco.action.datamaintenance.purchaserdata.materialrolemaintenance.MaterialSmallTypeAction">
+			<interceptor-ref name="mydefault" />
+		</action>
+		<!-- 原料 -->
+		<action name="material" method="{1}" class="com.powere2e.sco.action.datamaintenance.purchaserdata.materialrolemaintenance.MaterialAction">
+			<interceptor-ref name="mydefault" />
+		</action>
+		<!-- 证件名称 -->
+		<action name="supplierCertificateType" method="{1}" class="com.powere2e.sco.action.datamaintenance.systemmanagerdata.suppliercertificatetype.SupplierCertificateTypeAction">
+			<interceptor-ref name="mydefault" />
+		</action>
+		<!-- 供应商附件 -->
+		<action name="supplierAttachmentM" method="{1}" class="com.powere2e.sco.action.merchandiseoaapplication.reportnewoaapplication.supplierattachment.SupplierAttachmentMAction">
+			<interceptor-ref name="mydefault" />
+		</action>
+		<!-- 供应商证件 -->
+		<action name="supplierCertificateM" method="{1}" class="com.powere2e.sco.action.merchandiseoaapplication.reportnewoaapplication.suppliercertificate.SupplierCertificateMAction">
+			<interceptor-ref name="mydefault" />
+		</action>
+		<!-- 供应商附件（辅料OA） -->
+		<action name="supplierAttachmentA" method="{1}" class="com.powere2e.sco.action.accessoryoaapplication.committeeApply.supplierattachment.SupplierAttachmentAAction">
+			<interceptor-ref name="mydefault" />
+		</action>
+		<!-- 关联扫描版（辅料OA） -->
+		<action name="quotedElectronicOfScan" method="{1}" class="com.powere2e.sco.action.accessoryoaapplication.committeeApply.supplierattachment.QuotedElectronicOfScanAction">
+			<interceptor-ref name="mydefault" />
+		</action>
+		<!-- 供应商证件（辅料OA） -->
+		<action name="supplierCertificateA" method="{1}" class="com.powere2e.sco.action.accessoryoaapplication.committeeApply.suppliercertificate.SupplierCertificateAAction">
+			<interceptor-ref name="mydefault" />
+		</action>
+		<!-- 销售分析 -->
+		<action name="sellDetail" method="{1}" class="com.powere2e.sco.action.sharefunctionanalysis.sellanalysis.selldetail.SellDetailAction">
+			<interceptor-ref name="mydefault" />
+		</action>
+		<!-- 公司大盘促销分析 -->
+		<action name="marketPromotionAnalysis" method="{1}" class="com.powere2e.sco.action.sharefunctionanalysis.sellanalysis.marketpromotionanalysis.MarketPromotionAnalysisAction">
+			<interceptor-ref name="mydefault" />
+		</action>
+		<!-- 商品促销分析 -->
+		<action name="merchandisePromotionAnalysis" method="{1}" class="com.powere2e.sco.action.sharefunctionanalysis.sellanalysis.merchandisepromotionanalysis.MerchandisePromotionAnalysisAction">
+			<interceptor-ref name="mydefault" />
+		</action>
+		<!-- 商品进货明细 -->
+		<action name="merchandiseStockDetail" method="{1}" class="com.powere2e.sco.action.sharefunctionanalysis.purchasinganalysis.merchandisestockdetail.MerchandiseStockDetailAction">
+			<interceptor-ref name="mydefault" />
+		</action>
+		<!-- 商品长期进价调整报表 -->
+		<action name="merchandiseLongBuyPriceAdjust" method="{1}" class="com.powere2e.sco.action.sharefunctionanalysis.purchasinganalysis.merchandiselongbuypriceadjust.MerchandiseLongBuyPriceAdjustAction">
+			<interceptor-ref name="mydefault" />
+		</action>
+		<!-- 商品促销进价调整 -->
+		<action name="merchandisePromotionBuyPriceAdjust" method="{1}"
+			class="com.powere2e.sco.action.sharefunctionanalysis.purchasinganalysis.merchandisepromotionbuypriceadjust.MerchandisePromotionBuyPriceAdjustAction">
+			<interceptor-ref name="mydefault" />
+		</action>
+		<!-- 辅料进货明细 -->
+		<action name="accessoryStockDetail" method="{1}" class="com.powere2e.sco.action.sharefunctionanalysis.purchasinganalysis.accessorystockdetail.AccessoryStockDetailAction">
+			<interceptor-ref name="mydefault" />
+		</action>
+		<!-- 商品长期进价调整报表 -->
+		<action name="accessoryLongBuyPriceAdjust" method="{1}" class="com.powere2e.sco.action.sharefunctionanalysis.purchasinganalysis.accessorylongbuypriceadjust.AccessoryLongBuyPriceAdjustAction">
+			<interceptor-ref name="mydefault" />
+		</action>
+	</package>
+</struts>

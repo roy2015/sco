@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.peripheral.webservice.ApplicationVisitFactoryMDao">
+	<resultMap type="com.powere2e.sco.model.peripheral.webservice.ApplicationVisitFactoryM" id="applicationVisitFactoryMMap">
+		<result property="applicationVfCode" column="applicationVfCode"/>
+		<result property="applicationCode" column="applicationCode"/>
+		<result property="merchandiseCode" column="merchandiseCode"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <!-- 查询商品包装设计申请单(可分页)-->
+    <select id="searchApplicationVisitFactoryM" resultMap="applicationVisitFactoryMMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.application_vf_code applicationVfCode,t.application_code applicationCode,t.merchandise_code merchandiseCode,t.supplier_code supplierCode
+       		
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM application_visit_factory_m t
+    	<where>
+    		1=1
+	    	<if test= "applicationVfCode != null and applicationVfCode!=''">
+			AND t.application_vf_code = #{applicationVfCode}
+			</if>
+	    	<if test= "applicationCode != null and applicationCode!=''">
+			AND UPPER(t.application_code) LIKE UPPER('%'||#{applicationCode}||'%')
+			</if>
+	    	<if test= "merchandiseCode != null and merchandiseCode!=''">
+			AND UPPER(t.merchandise_code) LIKE UPPER('%'||#{merchandiseCode}||'%')
+			</if>
+	    	<if test= "supplierCode != null and supplierCode!=''">
+			AND UPPER(t.supplier_code) LIKE UPPER('%'||#{supplierCode}||'%')
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 根据主键查询某个商品包装设计申请单(可分页)-->
+    <select id="loadApplicationVisitFactoryM" resultMap="applicationVisitFactoryMMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.application_vf_code applicationVfCode,t.application_code applicationCode,t.merchandise_code merchandiseCode,t.supplier_code supplierCode
+       		
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM application_visit_factory_m t
+    	<where>
+    		1=1
+	    	<if test= "applicationVfCode != null and applicationVfCode!=''">
+			AND  t.APPLICATION_VF_CODE = #{applicationVfCode}
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 增加商品包装设计申请单 --> 
+	<insert id="saveApplicationVisitFactoryM" parameterType="hashmap">
+		INSERT INTO application_visit_factory_m(application_vf_code,application_code,merchandise_code,supplier_code) 
+			 VALUES(#{applicationVfCode},#{applicationCode},#{merchandiseCode},#{supplierCode})
+    </insert>
+    <!-- 修改商品包装设计申请单  -->
+    <update id="updateApplicationVisitFactoryM" parameterType="hashmap">
+		UPDATE	
+				application_visit_factory_m	
+		   SET	
+		   		application_code=#{applicationCode},
+		   		merchandise_code=#{merchandiseCode},
+		   		supplier_code=#{supplierCode}		   		
+		 WHERE	
+		 		APPLICATION_VF_CODE=#{applicationVfCode}
+    </update>
+    <!-- 删除商品包装设计申请单 -->
+    <delete id="deleteApplicationVisitFactoryM" parameterType="hashmap">
+        DELETE FROM 
+        			application_visit_factory_m 
+        WHERE 
+        			APPLICATION_VF_CODE=#{applicationVfCode} <!--AND client_id=#{app_user_clientID}-->
+    </delete>
+</mapper>

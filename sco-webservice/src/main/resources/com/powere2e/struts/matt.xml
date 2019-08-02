@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN" "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="matt" extends="pubstruts" namespace="/">
+		<!-- 商品核算表 -->
+		<action name="accounting" method="{1}" class="com.powere2e.sco.action.merchandisecostanalysis.accountingingredient.accounting.AccountingAction">
+			<interceptor-ref name="mydefault" />
+		</action>
+		<!-- 商品投料表 -->
+		<action name="ingredient" method="{1}" class="com.powere2e.sco.action.merchandisecostanalysis.accountingingredient.ingredient.IngredientAction">
+			<interceptor-ref name="mydefault" />
+		</action>
+		<!-- 商品价格趋势 -->
+		<action name="merchandisePriceTrend" method="{1}" class="com.powere2e.sco.action.categoryanalysis.merchandisepricetrend.MerchandisePriceTrendAction">
+			<interceptor-ref name="mydefault" />
+		</action>
+	</package>
+</struts>

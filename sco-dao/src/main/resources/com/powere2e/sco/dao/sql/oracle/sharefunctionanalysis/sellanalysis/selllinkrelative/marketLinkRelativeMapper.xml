@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.sharefunctionanalysis.sellanalysis.selllinkrelative.MarketLinkRelativeDao">
+    <resultMap type="com.powere2e.sco.model.sharefunctionanalysis.sellanalysis.selllinkrelative.SellLinkRelativeAnalysis" id="linkRelativeAnalysisMap">
+		<result property="merchandiseCode" column="merchandiseCode"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="directJoin" column="directJoin"/>
+		<result property="sellRegion" column="sellRegion"/>
+		<result property="sellMonth" column="sellMonth"/>
+		<result property="sellQuantity" column="sellQuantity"/>
+		<result property="sellTotalPrice" column="sellTotalPrice"/>
+		<result property="sellProfit" column="sellProfit"/>
+		<result property="psdSellQuantity" column="psdSellQuantity"/>
+		<result property="psdSellTotalPrice" column="psdSellTotalPrice"/>
+		<result property="psdSellProfit" column="psdSellProfit"/>
+		<result property="sellQuantityChange" column="sellQuantityChange"/>
+		<result property="sellTotalPriceChange" column="sellTotalPriceChange"/>
+		<result property="sellProfitChange" column="sellProfitChange"/>
+		<result property="psdSellQuantityChange" column="psdSellQuantityChange"/>
+		<result property="psdSellTotalPriceChange" column="psdSellTotalPriceChange"/>
+		<result property="psdSellProfitChange" column="psdSellProfitChange"/>
+		<!--去年同比信息  -->
+		<result property="lastSellMonth" column="lastSellMonth"/>
+		<result property="lastSellQuantity" column="lastSellQuantity"/>
+		<result property="lastSellQuantityChange" column="lastSellQuantityChange"/>
+		<result property="lastSellTotalPrice" column="lastSellTotalPrice"/>
+		<result property="lastSellTotalPriceChange" column="lastSellTotalPriceChange"/>
+		<result property="lastSellProfit" column="lastSellProfit"/>
+		<result property="lastSellProfitChange" column="lastSellProfitChange"/>
+		<result property="lastPsdSellQuantity" column="lastPsdSellQuantity"/>
+		<result property="lastPsdSellQuantityChange" column="lastPsdSellQuantityChange"/>
+		<result property="lastPsdSellTotalPrice" column="lastPsdSellTotalPrice"/>
+		<result property="lastPsdSellTotalPriceChange" column="lastPsdSellTotalPriceChange"/>
+		<result property="lastPsdSellProfit" column="lastPsdSellProfit"/>
+		<result property="lastPsdSellProfitChange" column="lastPsdSellProfitChange"/>
+		<!--前年-->
+		<result property="beforeSellMonth" column="beforeSellMonth"/>
+		<result property="beforeSellQuantity" column="beforeSellQuantity"/>
+		<result property="beforeSellQuantityChange" column="beforeSellQuantityChange"/>
+		<result property="beforeSellTotalPrice" column="beforeSellTotalPrice"/>
+		<result property="beforeSellTotalPriceChange" column="beforeSellTotalPriceChange"/>
+		<result property="beforeSellProfit" column="beforeSellProfit"/>
+		<result property="beforeSellProfitChange" column="beforeSellProfitChange"/>
+		<result property="beforePsdSellQuantity" column="beforePsdSellQuantity"/>
+		<result property="beforePsdSellQuantityChange" column="beforePsdSellQuantityChange"/>
+		<result property="beforePsdSellTotalPrice" column="beforePsdSellTotalPrice"/>
+		<result property="beforePsdSellTotalPriceChange" column="beforePsdSellTotalPriceChange"/>
+		<result property="beforePsdSellProfit" column="beforePsdSellProfit"/>
+		<result property="beforePsdSellProfitChange" column="beforePsdSellProfitChange"/>
+		
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+    </resultMap>
+    
+     <select id="queryMarketSellLinkRelative" resultMap="linkRelativeAnalysisMap">
+     	<foreach collection="list" item="item" index="index" separator="UNION ALL">
+     	SELECT
+     		sellDate,
+
+			ROUND(sellQuantity,2) sellQuantity,
+			ROUND(beforeSellQuantity,2) beforeSellQuantity,
+			ROUND(sellQuantityChange,2) sellQuantityChange,
+			
+			ROUND(sellTotalPrice,2) sellTotalPrice,
+			ROUND(beforeSellTotalPrice,2) beforeSellTotalPrice,
+			ROUND(sellTotalPriceChange,2) sellTotalPriceChange,
+			
+			ROUND(sellProfit,2) sellProfit,
+			ROUND(beforeSellProfit,2) beforeSellProfit,
+			ROUND(sellProfitChange,2) sellProfitChange,
+			
+			ROUND(psdSellQuantity,2) psdSellQuantity,
+			ROUND(beforePsdSellQuantity,2) beforePsdSellQuantity,
+			ROUND(DECODE(beforePsdSellQuantity,NULL,NULL,0,0,DECODE(psdSellQuantity,NULL,NULL,0,-1,psdSellQuantity/beforePsdSellQuantity-1))*100,2) psdSellQuantityChange,
+			
+			ROUND(psdSellTotalPrice,2) psdSellTotalPrice,
+			ROUND(beforePsdSellTotalPrice,2) beforePsdSellTotalPrice,
+			ROUND(DECODE(beforePsdSellTotalPrice,NULL,NULL,0,0,DECODE(psdSellTotalPrice,NULL,NULL,0,-1,psdSellTotalPrice/beforePsdSellTotalPrice-1))*100,2) psdSellTotalPriceChange,
+			
+			ROUND(psdSellProfit,2) psdSellProfit,
+			ROUND(beforePsdSellProfit,2) beforePsdSellProfit,
+			ROUND(DECODE(beforePsdSellProfit,NULL,NULL,0,0,DECODE(psdSellProfit,NULL,NULL,0,-1,psdSellProfit/beforePsdSellProfit-1))*100,2) psdSellProfitChange
+     	FROM
+     	(
+     		 SELECT 
+	  			 d1.sellDate,
+             
+	             d1.sellQuantity,
+	             d2.beforeSellQuantity,
+	             DECODE(d2.beforeSellQuantity,NULL,NULL,0,0,DECODE(d1.sellQuantity,NULL,NULL,0,-1,d1.sellQuantity/d2.beforeSellQuantity-1))*100 sellQuantityChange,
+	              
+	             d1.sellTotalPrice,
+	             d2.beforeSellTotalPrice,
+	             DECODE(d2.beforeSellTotalPrice,NULL,NULL,0,0,DECODE(d1.sellTotalPrice,NULL,NULL,0,-1,d1.sellTotalPrice/d2.beforeSellTotalPrice-1))*100 sellTotalPriceChange,
+	              
+	             d1.sellProfit,
+	             d2.beforeSellProfit,
+	             DECODE(d2.beforeSellProfit,NULL,NULL,0,0,DECODE(d1.sellProfit,NULL,NULL,0,-1,d1.sellProfit/d2.beforeSellProfit-1))*100 sellProfitChange,
+	              
+	             DECODE(d1.sellStoreQuantity,NULL,NULL,0,0,d1.sellQuantity/d1.sellStoreQuantity) psdSellQuantity,
+	             DECODE(d2.beforeSellStoreQuantity,NULL,NULL,0,0,d2.beforeSellQuantity/beforeSellStoreQuantity) beforePsdSellQuantity,
+	             
+	             DECODE(d1.sellStoreQuantity,NULL,NULL,0,0,d1.sellTotalPrice/d1.sellStoreQuantity) psdSellTotalPrice,
+	             DECODE(d2.beforeSellStoreQuantity,NULL,NULL,NULL,NULL,d2.beforeSellTotalPrice/beforeSellStoreQuantity) beforePsdSellTotalPrice,
+	             
+	             DECODE(d1.sellStoreQuantity,0,NULL,0,0,d1.sellProfit/d1.sellStoreQuantity) psdSellProfit,
+	             DECODE(d2.beforeSellStoreQuantity,NULL,NULL,0,0,d2.beforeSellProfit/beforeSellStoreQuantity) beforePsdSellProfit
+			 FROM 
+			 
+			(SELECT 
+			       <!--MIN(t1.sell_date) minDate, -->
+			       <!--MAX(t1.sell_date) maxDate,-->
+			       #{item.minDate} minDate,
+			       #{item.maxDate} maxDate,
+			       #{item.minDate}||'~'||#{item.maxDate} sellDate,
+			        <if test= "rationed != null and rationed !='' and rationed=='gjz' ">
+					SUM(t1.sell_quantity) sellQuantity,
+				   </if>
+				   <if test= "rationed != null and rationed !='' and rationed=='dlz' ">
+					SUM(t1.sell_quantity) sellQuantity,
+			       </if>
+			       <if test= "rationed != null and rationed !='' and rationed=='gjzAndDlz' ">
+			        SUM(t1.sell_quantity*NVL(t2.net_weight,1)) sellQuantity,
+				   </if>		
+			       SUM(t1.sell_total_price) sellTotalPrice,
+			       SUM(t1.sell_profit) sellProfit,
+			       <!-- SUM(t1.psd_sell_quantity) psdSellQuantity,
+			       SUM(t1.psd_sell_total_price) psdSellTotalPrice,
+			       SUM(t1.psd_sell_profit) psdSellProfit -->
+			       SUM(t1.sell_store_quantity) sellStoreQuantity <!--销售店天数-->
+			       
+			 FROM  
+			      <if test= "directJoin != null and directJoin !='' and directJoin =='direct' ">
+			 	   merchandise_sell_direct_day t1
+			 	  </if>
+			 	  <if test= "directJoin != null and directJoin !='' and directJoin =='join' ">
+			 	   merchandise_sell_join_day t1
+			 	  </if>
+			 	  <if test= "directJoin != null and directJoin !='' and directJoin =='all' ">
+			 	   merchandise_sell_d_j_day t1
+			 	  </if>
+	   INNER JOIN  merchandise t2
+		  	   ON  t1.merchandise_code=t2.merchandise_code
+		  	  AND  t1.supplier_code=t2.supplier_code 	 	  
+			WHERE  1=1
+			  
+				  <if test= "sellRegion != null and sellRegion !='' and sellRegion !='all' ">
+				 	   AND  t1.sell_region =#{sellRegion}
+				  </if>
+				  <if test= "rationed != null and rationed !='' and rationed=='gjz' ">
+						AND t2.net_weight =1
+				  </if>
+				  <if test= "rationed != null and rationed !='' and rationed=='dlz' ">
+						AND t2.net_weight !=1
+			      </if>
+			      <if test= "rationed != null and rationed !='' and rationed=='gjzAndDlz' ">
+				  </if>		
+			      AND   t1.sell_date &gt;=to_date((#{item.minDate}||'00:00:00'),'yyyy-mm-dd HH24:mi:ss')
+			      AND   t1.sell_date &lt;=to_date((#{item.maxDate}||'23:59:59'),'yyyy-mm-dd HH24:mi:ss')
+			) d1
+			
+			 LEFT JOIN      
+			(SELECT 
+			       TO_DATE(#{item.beforeMinDate},'yyyy-mm-dd') beforeMinDate,
+             	   TO_DATE(#{item.beforeMaxDate},'yyyy-mm-dd') beforeMaxDate,
+			       <!--只有同时查看公斤装和定量装时，才进行单位转换-->
+			       <if test= "rationed != null and rationed !='' and rationed=='gjz' ">
+					SUM(t1.sell_quantity) beforeSellQuantity,
+				   </if>
+				   <if test= "rationed != null and rationed !='' and rationed=='dlz' ">
+					SUM(t1.sell_quantity) beforeSellQuantity,
+			       </if>
+			       <if test= "rationed != null and rationed !='' and rationed=='gjzAndDlz' ">
+			        SUM(t1.sell_quantity*NVL(t2.net_weight,1)) beforeSellQuantity,
+				   </if>	
+			       SUM(t1.sell_total_price) beforeSellTotalPrice,
+			       SUM(t1.sell_profit) beforeSellProfit,
+			        <!--  SUM(t1.psd_sell_quantity) beforePsdSellQuantity,
+			       SUM(t1.psd_sell_total_price) beforePsdSellTotalPrice,
+			       SUM(t1.psd_sell_profit) beforePsdSellProfit -->
+			       SUM(t1.sell_store_quantity) beforeSellStoreQuantity <!--销售店天数-->
+			       
+			 FROM  
+			      <if test= "directJoin != null and directJoin !='' and directJoin =='direct' ">
+			 	   merchandise_sell_direct_day t1
+			 	  </if>
+			 	  <if test= "directJoin != null and directJoin !='' and directJoin =='join' ">
+			 	   merchandise_sell_join_day t1
+			 	  </if>
+			 	  <if test= "directJoin != null and directJoin !='' and directJoin =='all' ">
+			 	   merchandise_sell_d_j_day t1
+			 	  </if>
+	   INNER JOIN  merchandise t2
+		  	   ON  t1.merchandise_code=t2.merchandise_code
+		  	  AND  t1.supplier_code=t2.supplier_code 	 	  
+			WHERE  1=1
+			  
+				  <if test= "sellRegion != null and sellRegion !='' and sellRegion !='all' ">
+				 	   AND  t1.sell_region =#{sellRegion}
+				  </if>
+				  <if test= "rationed != null and rationed !='' and rationed=='gjz' ">
+						AND t2.net_weight =1
+				  </if>
+				  <if test= "rationed != null and rationed !='' and rationed=='dlz' ">
+						AND t2.net_weight !=1
+			      </if>
+			      <if test= "rationed != null and rationed !='' and rationed=='gjzAndDlz' ">
+				  </if>		
+			      AND   t1.sell_date &gt;=to_date((#{item.beforeMinDate}||'00:00:00'),'yyyy-mm-dd HH24:mi:ss')
+			      AND   t1.sell_date &lt;=to_date((#{item.beforeMaxDate}||'23:59:59'),'yyyy-mm-dd HH24:mi:ss')
+			) d2      
+			 <!-- ON  d1.minDate=(d2.beforeMinDate+4)  -->
+			  <!-- AND d1.maxDate=(d2.beforeMaxDate+4)  -->   
+			 ON  d1.minDate=SUBSTR(to_char((d2.beforeMinDate+${linkRelativeCycle}),'yyyy-mm-dd hh24:mi:ss'),0,10)
+			 AND d1.maxDate=SUBSTR(to_char((d2.beforeMaxDate+${linkRelativeCycle}),'yyyy-mm-dd hh24:mi:ss'),0,10)
+		)
+     	</foreach>
+     </select>
+    
+</mapper>

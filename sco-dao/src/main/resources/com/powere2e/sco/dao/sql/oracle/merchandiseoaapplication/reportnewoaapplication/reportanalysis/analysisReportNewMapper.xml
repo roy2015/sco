@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.merchandiseoaapplication.reportnewoaapplication.reportanalysis.AnalysisReportNewDao">
+	<resultMap type="com.powere2e.sco.model.reports.Reports" id="rp">
+		<result property="applicationCode" column="applicationCode"/>
+		<result property="reportsCode" column="reportsCode"/>
+		<result property="reportsTypeCode" column="reportsTypeCode"/>
+		<result property="reportsTypeName" column="reportsTypeName"/>
+		<result property="reportsName" column="reportsName"/>
+		<result property="reportsUrl" column="reportsUrl"/>
+		
+		<result property="created" column="created"/>
+		<result property="createby" column="createby"/>
+		
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    
+    <!-- 缺失文件说明实体类 -->
+    <resultMap type="com.powere2e.sco.model.merchandiseoaapplication.ApplicationLackFileM" id="appM">
+		<result property="applicationCode" column="applicationCode"/>
+		<result property="merchandiseCode" column="merchandiseCode"/>
+		<result property="merchandiseName" column="merchandiseName"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="supplierName" column="supplierName"/>
+		
+		<result property="lackFileName" column="lackFileName"/>
+		<result property="lackFileVersions" column="lackFileVersions"/>
+	</resultMap>
+	
+    <!-- 显示已关联的报表 -->
+    <select id="listAnalysisReportNew" resultMap="rp">
+    	SELECT
+    	<if test="page_count == null">
+			ar.reports_code reportsCode,
+			r.reports_type_code reportsTypeCode,t.reports_type_name reportsTypeName,
+			r.reports_name reportsName,r.reports_url reportsUrl,
+			(SELECT u.real_name FROM pub_user u WHERE u.user_id = r.createby) createby,
+			r.created 
+		</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+    	FROM
+    		 analysis_reports_m ar 
+    		 INNER JOIN reports r ON ar.reports_code = r.reports_code 
+    		 INNER JOIN reports_type t ON r.reports_type_code = t.reports_type_code 
+    	WHERE 
+    	1=1
+    	<if test="app_create_by != '00038441'">
+    		AND	r.createby = #{app_create_by}
+    		</if>
+			AND UPPER(ar.application_code) = UPPER(#{applicationCode}) 
+			<if test="reportsTypeName != null and reportsTypeName != ''">
+				AND UPPER(r.reports_type_code) LIKE UPPER(#{reportsTypeName})
+			</if>
+			<if test="reportsName != null and reportsName != ''">
+				AND UPPER(r.reports_name) LIKE UPPER('%'||#{reportsName}||'%')
+			</if>
+		<if test="page_count == null">
+    		<if test="app_orderby != null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby == null">
+    			ORDER BY r.created DESC 
+    		</if>
+    	</if>	
+    </select>
+    
+    <!-- 查询已关联的成本分析报表 -->
+    <select id="searchMCAData" resultType="String">
+    	SELECT 
+    		ar.reports_code reportsCode 
+    	FROM 
+    		 analysis_reports_m ar 
+    		 INNER JOIN reports r ON ar.reports_code = r.reports_code 
+    		 INNER JOIN reports_type t ON r.reports_type_code = t.reports_type_code 
+    	WHERE 
+			UPPER(ar.application_code) = UPPER(#{applicationCode}) 
+			AND UPPER(t.reports_type_code ) = UPPER(#{reportsTypeCode}) 
+    </select>
+    
+    <!-- 查询未关联成本分析的签量单及其下商品 -->
+    <select id="listNoLinkReportApplication" resultMap="appM">
+		(	
+			SELECT * FROM (		
+				SELECT 												<!-- 成本分析表 -->
+				     a.application_code applicationCode,arr.reports_type_code,
+				     DECODE(s.supplier_code,NULL,mis.intention_supplier_code,s.supplier_code) supplierCode,
+				     DECODE(s.supplier_code,NULL,mis.intention_supplier_name,s.supplier_name) supplierName,
+				     DECODE(m.merchandise_code,NULL,mi.intention_code,m.merchandise_code) merchandiseCode,
+				     DECODE(m.merchandise_code,NULL,mi.intention_name,m.merchandise_name) merchandiseName,
+				     '成本分析表' lackFileName,'电子版' lackFileVersions 
+				FROM 
+			     (SELECT * FROM application_merchandise WHERE application_code = #{applicationCode})  a
+			     LEFT JOIN merchandise_intention_supplier mis ON a.supplier_code  = mis.intention_supplier_code 
+			     LEFT JOIN supplier s ON a.supplier_code = s.supplier_code 
+			     LEFT JOIN merchandise m ON a.merchandise_code = m.merchandise_code 
+			     	AND a.supplier_code = m.supplier_code  
+			     LEFT JOIN merchandise_intention mi ON a.merchandise_code = mi.intention_code 
+			     LEFT JOIN 
+			     (
+		             SELECT 
+		             	ar.application_code,ar.reports_code,r.reports_type_code  
+				     FROM  
+	               	 	analysis_reports_m ar 
+				     INNER JOIN 
+				     	(SELECT * FROM reports WHERE reports_type_code = 'MCA') r ON ar.reports_code = r.reports_code 
+					 WHERE ar.application_code = #{applicationCode}
+			     ) arr ON a.application_code = arr.application_code 
+			)t 
+			WHERE t.reports_type_code IS NULL 
+		)												
+		UNION ALL 
+		(	
+			SELECT * FROM (									
+				SELECT 													<!-- 核算表 -->
+				     a.application_code applicationCode,ais.accounting_scan_path,
+				     DECODE(s.supplier_code,NULL,mis.intention_supplier_code,s.supplier_code) supplierCode,
+				     DECODE(s.supplier_code,NULL,mis.intention_supplier_name,s.supplier_name) supplierName,
+				     DECODE(m.merchandise_code,NULL,mi.intention_code,m.merchandise_code) merchandiseCode,
+				     DECODE(m.merchandise_code,NULL,mi.intention_name,m.merchandise_name) merchandiseName,
+				     '核算表' lackFileName,'扫描版' lackFileVersions 
+				FROM 
+			      (SELECT * FROM application_merchandise WHERE application_code = #{applicationCode})  a      
+			     LEFT JOIN merchandise_intention_supplier mis ON a.supplier_code = mis.intention_supplier_code  
+			     LEFT JOIN supplier s ON a.supplier_code = s.supplier_code                                     
+			     LEFT JOIN merchandise m ON a.merchandise_code = m.merchandise_code 
+			     	AND a.supplier_code = m.supplier_code            
+			     LEFT JOIN merchandise_intention mi ON mi.intention_code = a.merchandise_code  
+			     LEFT JOIN 
+			     (
+		             SELECT 
+		             	ar.application_code,ar.reports_code,r.reports_type_code  
+				     FROM  
+	               	 	analysis_reports_m ar 
+				     INNER JOIN 
+				     	(SELECT * FROM reports WHERE reports_type_code = 'MCA') r ON ar.reports_code = r.reports_code 
+					 WHERE ar.application_code = #{applicationCode}
+			     ) arr ON a.application_code = arr.application_code 
+		    	LEFT JOIN cost_analysis_merchandise cm ON arr.reports_code = cm.reports_code 
+		     	 	AND a.merchandise_code = cm.merchandise_code AND a.supplier_code = cm.supplier_code
+		     	LEFT JOIN accounting_ingredient_scan ais ON cm.accounting_code = ais.accounting_code 
+			     	AND NVL(ais.merchandise_code,ais.intention_code) = a.merchandise_code 
+           			AND NVL(ais.supplier_code,ais.intention_supplier_code) = a.supplier_code 
+			)t 
+			WHERE t.accounting_scan_path IS NULL 
+		)												
+		UNION ALL 
+		(
+			SELECT * FROM (                                                                                  
+				SELECT                                                   <!-- 投料表 -->                              
+				     a.application_code applicationCode,ais.ingredient_scan_path,                                  
+				     DECODE(s.supplier_code,NULL,mis.intention_supplier_code,s.supplier_code) supplierCode,  
+				     DECODE(s.supplier_code,NULL,mis.intention_supplier_name,s.supplier_name) supplierName,  
+				     DECODE(m.merchandise_code,NULL,mi.intention_code,m.merchandise_code) merchandiseCode,   
+				     DECODE(m.merchandise_code,NULL,mi.intention_name,m.merchandise_name) merchandiseName,   
+				     '投料表' lackFileName,'扫描版' lackFileVersions                           
+				FROM                                                                                         
+			     (SELECT * FROM application_merchandise WHERE application_code = #{applicationCode})  a      
+			     LEFT JOIN merchandise_intention_supplier mis ON a.supplier_code = mis.intention_supplier_code  
+			     LEFT JOIN supplier s ON a.supplier_code = s.supplier_code                                     
+			     LEFT JOIN merchandise m ON a.merchandise_code = m.merchandise_code                            
+			     	AND a.supplier_code = m.supplier_code 
+			     LEFT JOIN merchandise_intention mi ON a.merchandise_code =  mi.intention_code   
+			     LEFT JOIN 
+			     (
+		             SELECT 
+		             	ar.application_code,ar.reports_code,r.reports_type_code  
+				     FROM  
+	               	 	analysis_reports_m ar 
+				     INNER JOIN 
+				     	(SELECT * FROM reports WHERE reports_type_code = 'MCA') r ON ar.reports_code = r.reports_code 
+					 WHERE ar.application_code = #{applicationCode}
+			     ) arr ON a.application_code = arr.application_code 
+			     LEFT JOIN cost_analysis_merchandise cm ON arr.reports_code = cm.reports_code 
+			     	 AND a.merchandise_code = cm.merchandise_code AND a.supplier_code = cm.supplier_code
+			     LEFT JOIN accounting_ingredient_scan ais ON cm.accounting_code = ais.accounting_code 
+			     	AND NVL(ais.merchandise_code,ais.intention_code) = a.merchandise_code 
+           			AND NVL(ais.supplier_code,ais.intention_supplier_code) = a.supplier_code 
+			)t                                                                                
+			WHERE t.ingredient_scan_path IS NULL                                                          
+		)												
+    </select>
+    
+    <!-- 验证当前选择成本分析报表是否已被其他申请单关联 -->
+    <select id="validateAnalysisReportNew" resultType="String">
+		SELECT 
+			application_code 
+		FROM
+			analysis_reports_m t 
+		WHERE t.reports_code IN
+		(
+			SELECT 
+				t1.reports_code 
+			FROM
+				cost_analysis_merchandise t1,
+			(
+				SELECT 
+					accounting_code,
+					max(quoted_date) 
+				FROM 
+					accounting 
+				WHERE 
+					accounting_code IN
+					(
+						SELECT 
+							accounting_code 
+						FROM 
+							cost_analysis_merchandise 
+						WHERE reports_code = #{reportsCode}
+					)
+				GROUP BY accounting_code
+			) t2 WHERE t1.accounting_code = t2.accounting_code
+		) AND ROWNUM = 1
+    </select>
+    
+    <!-- 添加关联报表 -->
+    <insert id="insertLinkAnalysisReportNew">
+    	<choose>
+    		<when test="MCACode == null">    <!-- 非成本分析报表判断条件 -->
+    			MERGE INTO analysis_reports_m T1
+		      	USING (
+					SELECT 
+						s1.c,s2.applicationCode,s2.reportsCode 
+					FROM 
+					 (
+						 SELECT 
+						 	ROWNUM c,
+							ar.application_code applicationCode,
+							ar.reports_code reportsCode 
+			             FROM analysis_reports_m ar 
+			             WHERE 
+			             	ar.application_code = #{applicationCode} 
+			             	AND ar.reports_code = #{reportsCode}
+		           	 ) s1 
+		            RIGHT JOIN 
+		            (
+		            	 SELECT 
+							#{applicationCode} applicationCode,
+							#{reportsCode} reportsCode 
+			             FROM dual  
+		            ) s2 
+		           	ON s1.applicationCode = s2.applicationCode 
+		           		AND s1.reportsCode = s2.reportsCode 
+		           ) T2 
+					ON (T2.c > 0)  
+				WHEN MATCHED THEN															 <!-- 更新 -->
+				     UPDATE SET 
+				     	T1.reports_code = #{reportsCode}
+            		 WHERE 
+            			T1.application_code = #{applicationCode} 
+		             	AND T1.reports_code = #{reportsCode}
+				WHEN NOT MATCHED THEN 
+				      INSERT (application_code, reports_code)         <!-- 新增 -->
+		   			VALUES(T2.applicationCode, T2.reportsCode)
+    		</when>
+    		<when test="MCACode != ''">								  <!-- 已关联成本分析报表 -->
+    			UPDATE 
+    				analysis_reports_m 
+    			SET 
+    				reports_code = #{reportsCode} 
+    			WHERE	
+    				application_code = #{applicationCode} 
+    				AND reports_code = #{MCACode} 
+    		</when>
+    		<otherwise>												   <!-- 未关联成本分析报表 -->
+    			 INSERT INTO analysis_reports_m(application_code, reports_code)        
+   					VALUES(#{applicationCode}, #{reportsCode})
+    		</otherwise>
+    	</choose>
+    </insert>
+    
+    <!-- 取消报表关联 -->
+    <delete id="deleteAnalysisReportNew">
+    	DELETE 
+    		analysis_reports_m 
+    	WHERE 
+    		application_code = #{applicationCode} 
+    	<if test="reportsCode != null and reportsCode != ''">
+	    	AND reports_code in (${reportsCode})
+    	</if>
+    </delete>
+    
+</mapper>

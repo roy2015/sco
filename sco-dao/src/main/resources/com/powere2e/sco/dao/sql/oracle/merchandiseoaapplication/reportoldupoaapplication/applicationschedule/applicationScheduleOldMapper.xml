@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.powere2e.sco.interfaces.dao.merchandiseoaapplication.reportoldupoaapplication.applicationschedule.ApplicationScheduleOldDao">
+	<resultMap type="com.powere2e.sco.model.merchandiseoaapplication.reportoldupoaapplication.applicatonSchedule.ApplicationScheduleaOld" id="acs">
+		<result property="applicationCode" column="applicationCode"/>
+		<result property="merchandiseCode" column="merchandiseCode"/>
+		<result property="merchandiseName" column="merchandiseName"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="supplierName" column="supplierName"/>
+		<result property="xcsqDate" column="xcsqDate"/>
+		<result property="pkxcDate" column="pkxcDate"/>
+		<result property="bzsjsqDate" column="bzsjsqDate"/>
+		<result property="yjbgtjDate" column="yjbgtjDate"/>
+		<result property="yjbgwcDate" column="yjbgwcDate"/>
+		<result property="zsjsqDate" column="zsjsqDate"/>
+		<result property="zsjsqwcDate" column="zsjsqwcDate"/>
+		<result property="htqdDate" column="htqdDate"/>
+		<result property="bbtgDate" column="bbtgDate"/>
+		<result property="qdgpDate" column="qdgpDate"/>
+		<result property="gyssdgpDate" column="gyssdgpDate"/>
+		<result property="gzysqrDate" column="gzysqrDate"/>
+		<result property="dyqrDate" column="dyqrDate"/>
+		<result property="spdddcDate" column="spdddcDate"/>
+		<result property="ssDate" column="ssDate"/>
+		<result property="remarks" column="remarks"/>
+
+		<result property="recordCount" column="record_count" />
+	</resultMap>
+	
+	<!-- 进度信息列表 -->
+	<select id="listApplicationScheduleOld" resultMap="acs">
+		SELECT  
+    	<if test="page_count == null">
+			 a.application_code applicationCode,
+             DECODE(m.merchandise_code,NULL,mi.intention_code,m.merchandise_code) merchandiseCode,
+		     DECODE(m.merchandise_code,NULL,mi.intention_name,m.merchandise_name) merchandiseName,
+		     DECODE(s.supplier_code,NULL,mis.intention_supplier_code,s.supplier_code) supplierCode,
+		     DECODE(s.supplier_code,NULL,mis.intention_supplier_name,s.supplier_name) supplierName,
+			 asm.xcsq_date xcsqDate,asm.pkxc_date pkxcDate,asm.bzsjsq_date bzsjsqDate,
+			 asm.yjbgtj_date yjbgtjDate,asm.yjbgwc_date yjbgwcDate,asm.zsjsq_date zsjsqDate,
+			 asm.zsjsqwc_date zsjsqwcDate,asm.htqd_date htqdDate,asm.bbtg_date bbtgDate,
+			 asm.qdgp_date qdgpDate,asm.gyssdgp_date gyssdgpDate,asm.gzysqr_date gzysqrDate,
+			 asm.dyqr_date dyqrDate,asm.spdddc_date spdddcDate,asm.ss_date ssDate,asm.remarks 
+		</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM 
+				 (SELECT * FROM application_merchandise WHERE application_code = #{applicationCode})  a      
+	     LEFT JOIN merchandise_intention_supplier mis ON a.supplier_code = mis.intention_supplier_code  
+	     LEFT JOIN supplier s ON a.supplier_code = s.supplier_code                                     
+	     LEFT JOIN merchandise m ON a.merchandise_code = m.merchandise_code 
+	     	AND a.supplier_code = m.supplier_code 
+	     LEFT JOIN merchandise_intention mi ON a.merchandise_code = mi.intention_code   
+ 
+         LEFT JOIN application_schedule_m asm ON a.application_code = asm.application_code 
+         	AND DECODE(m.merchandise_code,NULL,mi.intention_code,m.merchandise_code) = asm.merchandise_code
+		    AND DECODE(s.supplier_code,NULL,mis.intention_supplier_code,s.supplier_code) = asm.supplier_code
+    	<if test="page_count == null">
+   			ORDER BY DECODE(m.merchandise_code,NULL,mi.intention_code,m.merchandise_code),
+   				DECODE(s.supplier_code,NULL,mis.intention_supplier_code,s.supplier_code)
+    	</if>
+	</select>
+	
+	<!-- 保存进度信息 -->
+	<update id="insertApplicationScheduleOld">
+		MERGE INTO application_schedule_m T1
+      	USING (
+			(
+				SELECT 
+				s1.c,s2.applicationCode,s2.merchandiseCode,s2.supplierCode,
+				s2.xcsqDate,s2.pkxcDate,s2.bzsjsqDate,s2.yjbgtjDate,s2.yjbgwcDate,
+				s2.zsjsqDate,s2.zsjsqwcDate,s2.htqdDate,s2.bbtgDate,s2.qdgpDate,
+				s2.gyssdgpDate,s2.gzysqrDate,s2.dyqrDate,s2.spdddcDate,s2.ssDate,s2.remarks,
+				s2.created,s2.createby 
+			FROM 
+				(
+				 SELECT 										<!-- 表中是否有该数据 -->
+				 	ROWNUM c,
+					ar.application_code applicationCode,
+					ar.merchandise_code merchandiseCode, 
+					ar.supplier_code supplierCode 
+	             FROM 
+	             	application_schedule_m ar 
+	             WHERE 
+	             	ar.application_code = #{applicationCode}
+					AND ar.merchandise_code = #{merchandiseCode} 
+					AND ar.supplier_code = #{supplierCode}
+	           	 ) s1 
+	            RIGHT JOIN 
+	            (
+            	 SELECT 
+					#{applicationCode} applicationCode,
+					#{merchandiseCode} merchandiseCode,
+					#{supplierCode} supplierCode,
+					#{xcsqDate} xcsqDate,
+					#{pkxcDate} pkxcDate,
+					#{bzsjsqDate} bzsjsqDate,
+					#{yjbgtjDate} yjbgtjDate,
+					#{yjbgwcDate} yjbgwcDate,
+					#{zsjsqDate} zsjsqDate,
+					#{zsjsqwcDate} zsjsqwcDate,
+					#{htqdDate} htqdDate,
+					#{bbtgDate} bbtgDate,
+					#{qdgpDate} qdgpDate,
+					#{gyssdgpDate} gyssdgpDate,
+					#{gzysqrDate} gzysqrDate,
+					#{dyqrDate} dyqrDate,
+					#{spdddcDate} spdddcDate,
+					#{ssDate} ssDate,
+					#{remarks} remarks,
+					#{app_created} created,
+					#{app_create_by} createby 
+	             FROM dual  
+            	) s2 
+           		ON s1.applicationCode = s2.applicationCode 
+	           		AND s1.merchandiseCode = s2.merchandiseCode 
+	           		AND s1.supplierCode = s2.supplierCode 
+	         )
+           ) T2 
+		ON (T2.c > 0)  
+		WHEN MATCHED THEN															 <!-- 更新 -->
+		     UPDATE SET 
+		     	T1.xcsq_date = T2.xcsqDate,
+		 		T1.pkxc_date = T2.pkxcDate,
+		 		T1.bzsjsq_date = T2.bzsjsqDate,
+		 		T1.yjbgtj_date = T2.yjbgtjDate,
+		 		T1.yjbgwc_date = T2.yjbgwcDate,
+		 		T1.zsjsq_date = T2.zsjsqDate,
+		 		T1.zsjsqwc_date = T2.zsjsqwcDate,
+		 		T1.htqd_date = T2.htqdDate,
+		 		T1.bbtg_date = T2.bbtgDate,
+		 		T1.qdgp_date = T2.qdgpDate,
+		 		T1.gyssdgp_date = T2.gyssdgpDate,
+		 		T1.gzysqr_date = T2.gzysqrDate,
+		 		T1.dyqr_date = T2.dyqrDate,
+		 		T1.spdddc_date = T2.spdddcDate,
+		 		T1.ss_date = T2.ssDate,
+		 		T1.remarks = T2.remarks,
+				T1.updated = T2.created,
+				T1.updateby = T2.createby 
+          		 WHERE 
+          			T1.application_code = T2.applicationCode
+					AND T1.merchandise_code = T2.merchandiseCode 
+					AND T1.supplier_code = T2.supplierCode
+		WHEN NOT MATCHED THEN 
+		      INSERT (application_code,merchandise_code,supplier_code,xcsq_date,pkxc_date,bzsjsq_date,
+			      	yjbgtj_date,yjbgwc_date,zsjsq_date,zsjsqwc_date,htqd_date,bbtg_date,qdgp_date,
+			      	gyssdgp_date,gzysqr_date,dyqr_date,spdddc_date,ss_date,remarks,created,createby) 
+ 			  VALUES(T2.applicationCode,T2.merchandiseCode,T2.supplierCode,T2.xcsqDate,T2.pkxcDate,T2.bzsjsqDate,
+ 			  		T2.yjbgtjDate,T2.yjbgwcDate,T2.zsjsqDate,T2.zsjsqwcDate,T2.htqdDate,T2.bbtgDate,T2.qdgpDate,
+ 			  		T2.gyssdgpDate,T2.gzysqrDate,T2.dyqrDate,T2.spdddcDate,T2.ssDate,T2.remarks,T2.created,T2.createby
+ 			  		)
+	</update>
+	
+</mapper>

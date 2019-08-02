@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.powere2e.sco.interfaces.dao.datamaintenance.gradecontroldata.merchandiseunqualified.MerchandiseUnqualifiedDao">
+	<resultMap type="com.powere2e.sco.model.datamaintenance.gradecontroldata.merchandiseunqualified.MerchandiseUnqualified" id="merchandiseUnqualifiedMap">
+		<result property="merchandiseCode" column="merchandiseCode" />
+		<result property="merchandiseName" column="merchandiseName" />
+		<result property="supplierCode" column="supplierCode" />
+		<result property="supplierName" column="supplierName" />
+		<result property="spotCheckDate" column="spotCheckDate" />
+		<result property="spotCheckBatch" column="spotCheckBatch" />
+		<result property="remarks" column="remarks" />
+		<result property="created" column="created" />
+		<result property="createby" column="createby" />
+		<result property="updated" column="updated" />
+		<result property="updateby" column="updateby" />
+		<result property="createUserName" column="createUserName" />
+		<result property="updateUserName" column="updateUserName" />
+		<result property="recordCount" column="record_count" />
+		<result property="centreTypeCode" column="centreTypeCode" />
+		<result property="centreName" column="centreName" />
+		<result property="smallTypeCode" column="smallTypeCode" />
+		<result property="smallName" column="smallName" />
+		<result property="detailTypeCode" column="detailTypeCode" />
+		<result property="fineTypeCode" column="fineTypeCode" />
+		<result property="dxRoleName" column="dxRoleName" />
+		<result property="dlRoleName" column="dlRoleName" />
+		<result property="centreName" column="centreName" />
+		<result property="smallName" column="smallName" />
+		<result property="detailName" column="detailName" />
+		<result property="fineName" column="fineName" />
+		<result property="minSpotCheckDate" column="minSpotCheckDate" />
+		<result property="maxSpotCheckDate" column="maxSpotCheckDate" />
+	</resultMap>
+	<!-- 查询商品抽检不合格记录(可分页) -->
+	<select id="searchMerchandiseUnqualified" resultMap="merchandiseUnqualifiedMap">
+		SELECT
+		<if test="page_count == null">
+			d.spot_check_date spotCheckDate,
+			d.spot_check_batch spotCheckBatch,
+			d.remarks,
+			m.merchandise_code merchandiseCode,
+			m.merchandise_name merchandiseName,
+
+			s.supplier_code supplierCode,
+			s.supplier_name supplierName,
+
+			mdx.role_name dxRoleName,
+			mdl.role_name dlRoleName,
+
+			ct.centre_type_name centreName,
+			sm.small_type_name smallName,
+
+			dt.detail_type_name detailName,
+			ft.fine_type_name fineName
+		</if>
+		<if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		FROM merchandise_unqualified d
+		LEFT JOIN merchandise m ON d.merchandise_code = m.merchandise_code AND d.supplier_code = m.supplier_code <!-- 商品表 -->
+		LEFT JOIN supplier s ON m.supplier_code = s.supplier_code  <!-- 供应商表 -->
+		LEFT JOIN intention_supplier_merchandise ism ON (ism.merchandise_code=m.merchandise_code AND ism.supplier_code = s.supplier_code)
+		LEFT JOIN merchandise_role md ON md.merchandise_code = m.merchandise_code<!-- 商品角色关联表 -->
+		LEFT JOIN merchandise_dx_role mdx ON mdx.role_code = md.dx_role_code<!-- 定性角色表 -->
+		LEFT JOIN merchandise_dl_role mdl ON mdl.role_code = md.dl_role_code<!-- 定量角色表 -->
+		LEFT JOIN merchandise_centre_type ct ON m.centre_type_code = ct.centre_type_code <!-- 中分类 -->
+		LEFT JOIN merchandise_small_type sm ON m.small_type_code = sm.small_type_code <!-- 小分类 -->
+		LEFT JOIN merchandise_detail_type dt ON m.detail_type_code = dt.detail_type_code <!-- 明细类 -->
+		LEFT JOIN merchandise_intention mi ON ism.intention_code=mi.intention_code
+		LEFT JOIN merchandise_fine_type ft ON mi.fine_type_code = ft.fine_type_code<!-- 细分类 -->
+		<where>
+			1=1
+			<if test="merchandiseName != null and merchandiseName != ''">
+				AND UPPER(m.merchandise_name) like UPPER('%'||#{merchandiseName}||'%')
+			</if>
+			<if test="merchandiseCode != null and merchandiseCode!=''">
+				AND UPPER(m.merchandise_code) LIKE UPPER('%'||#{merchandiseCode}||'%')
+			</if>
+			<if test="supplierName != null and supplierName != ''">
+				AND UPPER(s.supplier_name) like UPPER('%'||#{supplierName}||'%')
+			</if>
+			<if test="supplierCode != null and supplierCode != ''">
+				AND UPPER(s.supplier_code) LIKE UPPER('%'||#{supplierCode}||'%')
+			</if>
+			<if test="minSpotCheckDate != null">
+				AND d.spot_check_date >= TO_DATE(#{minSpotCheckDate},'YYYY-MM-DD')
+			</if>
+			<if test="maxSpotCheckDate != null">
+				AND d.spot_check_date <![CDATA[<=]]>
+				TO_DATE(#{maxSpotCheckDate},'YYYY-MM-DD')
+			</if>
+			<if test="dlRoleCode != null and dlRoleCode != ''">
+				AND UPPER(md.dl_role_code) like UPPER(#{dlRoleCode})
+			</if>
+			<if test="dxRoleCode != null and dxRoleCode != ''">
+				AND UPPER(md.dx_role_code) like UPPER(#{dxRoleCode})
+			</if>
+			<if test="dxRoleName != null and dxRoleName != ''">
+				AND UPPER(mdx.role_name) like UPPER(#{dxRoleName})
+			</if>
+			<if test="dlRoleName != null and dlRoleName != ''">
+				AND UPPER(mdl.role_name) like UPPER(#{dlRoleName})
+			</if>
+			<if test="centreTypeCode != null and centreTypeCode != ''">
+				AND UPPER(m.centre_type_code) like UPPER(#{centreTypeCode})
+			</if>
+			<if test="smallTypeCode != null and smallTypeCode != ''">
+				AND UPPER(m.small_type_code) like UPPER(#{smallTypeCode})
+			</if>
+			<if test="detailTypeCode != null and detailTypeCode != ''">
+				AND UPPER(m.detail_type_code) like UPPER(#{detailTypeCode})
+			</if>
+			<if test="fineTypeCode != null and fineTypeCode != ''">
+				AND UPPER(ft.fine_type_code) like UPPER(#{fineTypeCode})
+			</if>
+			<if test="created != null and created != ''">
+				AND convert(varchar,d.created,120) LIKE (#{created})
+			</if>
+			<if test="createby != null and createby != ''">
+				AND UPPER(d.createby) LIKE UPPER('%'||#{createby}||'%')
+			</if>
+			<if test="updated != null and updated != ''">
+				AND convert(varchar,d.updated,120) LIKE (#{updated})
+			</if>
+			<if test="updateby != null and updateby != ''">
+				AND UPPER(d.updateby) LIKE UPPER('%'||#{updateby}||'%')
+			</if>
+		</where>
+		<if test="page_count == null">
+			<if test="app_orderby != null">
+				ORDER BY ${app_orderby}
+			</if>
+			<if test="app_orderby == null">
+				ORDER BY s.supplier_code ASC,m.merchandise_code DESC,d.spot_check_date DESC
+			</if>
+		</if>
+	</select>
+
+	<!-- 根据商品编号、供应商编号、抽检日期查询一条记录 -->
+	<select id="getMerchandiseUnqualified" resultMap="merchandiseUnqualifiedMap">
+		SELECT
+			merchandise_code merchandiseCode,
+			supplier_code supplierCode,
+			spot_check_date spotCheckDate,
+			spot_check_batch spotCheckBatch
+		FROM
+			merchandise_unqualified
+		WHERE
+			merchandise_code=#{merchandiseCode}
+		AND
+			supplier_code=#{supplierCode}
+		AND
+			spot_check_date=#{spotCheckDate}
+		AND
+			spot_check_batch=#{spotCheckBatch}
+	</select>
+
+	<!-- 批量增加商品抽检不合格记录 -->
+	<insert id="saveMerchandiseUnqualified">
+		INSERT INTO
+		merchandise_unqualified(merchandise_code,supplier_code,spot_check_date,spot_check_batch,remarks)
+		<foreach collection="list" item="item" separator="union all">
+			(
+			SELECT
+			#{item.merchandiseCode}, #{item.supplierCode}, #{item.spotCheckDate}, #{item.spotCheckBatch},#{item.remarks}
+			FROM
+			dual
+			)
+		</foreach>
+	</insert>
+
+	<!-- 覆盖抽检批次 -->
+	<update id="updateMerchandiseUnqualified" parameterType="hashmap">
+		UPDATE
+			merchandise_unqualified
+		SET
+			remarks=#{remarks}
+		WHERE
+			merchandise_code=#{merchandiseCode}
+		AND
+			supplier_code=#{supplierCode}
+		AND
+			spot_check_date=#{spotCheckDate}
+		and 
+			spot_check_batch=#{spotCheckBatch}
+	</update>
+	<!-- 查询商品(可分页) -->
+	<select id="searchMerchandise" resultMap="merchandiseUnqualifiedMap">
+		select
+			merchandise_code merchandiseCode,
+			supplier_code supplierCode
+		from
+			merchandise
+		where
+			merchandise_code=#{merchandiseCode}
+		AND
+			supplier_code=#{supplierCode}
+	</select>
+</mapper>

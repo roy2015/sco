@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.accessoryintention.AccessoryQuotedElectronicDao">
+	<resultMap type="com.powere2e.sco.model.accessoryintention.AccessoryQuotedElectronic" id="accessoryQuotedElectronicMap">
+		<result property="quotedCode" column="quotedCode"/>
+		<result property="enquiryCode" column="enquiryCode"/>
+		<result property="enquiryName" column="enquiryName"/>
+		<result property="intentionCode" column="intentionCode"/>
+		<result property="intentionSupplierName" column="intentionSupplierName"/>
+		<result property="supplierName" column="supplierName"/>
+		<result property="intentionSupplierCode" column="intentionSupplierCode"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="quotedDate" column="quotedDate"/>
+		<result property="path" column="path"/>
+		<result property="remarks" column="remarks"/>
+		<result property="companyName" column="companyName"/>
+		<result property="contacts" column="contacts"/>
+		<result property="phone" column="phone"/>
+		<result property="email" column="email"/>
+		<result property="fax" column="fax"/>
+		<result property="companySite" column="companySite"/>
+		<result property="factorySite" column="factorySite"/>
+		<result property="invoiceType" column="invoiceType"/>
+		<result property="taxRate" column="taxRate"/>
+		<result property="registerCapital" column="registerCapital"/>
+		<result property="yearTurnover" column="yearTurnover"/>
+		<result property="staffCount" column="staffCount"/>
+		<result property="hzgpp" column="hzgpp"/>
+		<result property="paymentType" column="paymentType"/>
+		<result property="deliveryType" column="deliveryType"/>
+		<result property="dailyCapacity" column="dailyCapacity"/>
+		<result property="quotedCurrency" column="quotedCurrency"/>
+		<result property="created" column="created"/>
+		<result property="createby" column="createby"/>
+		<result property="updated" column="updated"/>
+		<result property="updateby" column="updateby"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <!-- 查询辅料报价单-电子版(可分页)-->
+    <select id="searchAccessoryQuotedElectronic" resultMap="accessoryQuotedElectronicMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.quoted_code quotedCode,t.enquiry_code enquiryCode,e.enquiry_name enquiryName,e.quoted_currency quotedCurrency,t.intention_code intentionCode,t.intention_supplier_code intentionSupplierCode,t.quoted_date quotedDate,t.path path,t.remarks remarks,t.company_name companyName,t.contacts contacts,t.phone phone,t.email email,t.fax fax,t.company_site companySite,t.factory_site factorySite,t.invoice_type invoiceType,t.tax_rate taxRate,t.register_capital registerCapital,t.year_turnover yearTurnover,t.factory_area factoryArea,t.staff_count staffCount,t.hzgpp hzgpp,t.payment_type paymentType,t.delivery_type deliveryType,t.daily_capacity dailyCapacity
+       		,t.created,	t.updated  ,m.intention_supplier_name intentionSupplierName,n.supplier_name supplierName
+			,(select u.real_name from pub_user u where u.user_id=t.createby) as createUserName,
+           	(select u.real_name from pub_user u where u.user_id=t.updateby) as updateUserName
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM accessory_quoted_electronic t
+      		left join ACCESSORY_INTENTION_SUPPLIER m on t.intention_supplier_code=m.intention_supplier_code
+      		left join SUPPLIER n on t.intention_supplier_code=n.SUPPLIER_CODE
+      		inner join INTENTION_SUPPLIER_ACCESSORY f on ((t.intention_supplier_code=f.intention_supplier_code ) and t.intention_code=f.intention_code)
+      		inner join accessory_enquiry e on t.enquiry_code=e.enquiry_code
+    	<where>
+    		1=1
+	    	<if test= "quotedCode != null and quotedCode!=''">
+			AND t.quoted_code = #{quotedCode}
+			</if>
+	    	<if test= "enquiryCode != null and enquiryCode!=''">
+			AND t.enquiry_code =#{enquiryCode}
+			</if>
+	    	<if test= "intentionCode != null and intentionCode!=''">
+			AND t.intention_code=#{intentionCode}
+			</if>
+	    	<if test= "intentionSupplierCode != null and intentionSupplierCode!=''">
+			AND t.intention_supplier_code=#{intentionSupplierCode}
+			</if>
+	    	
+	    	<if test= "quotedDate != null and quotedDate!=''">
+			AND	to_char(quoted_date,'yyyy-mm-dd hh24:mi:ss') =#{quotedDate}
+			</if>
+	    	<if test= "remarks != null and remarks!=''">
+			AND UPPER(t.remarks) LIKE UPPER('%'||#{remarks}||'%')
+			</if>
+	    	<if test= "created != null and created!=''">
+			AND	convert(varchar,t.created,120) LIKE (#{created})
+			</if>
+	    	<if test= "createby != null and createby!=''">
+			AND UPPER(t.createby) LIKE UPPER('%'||#{createby}||'%')
+			</if>
+	    	<if test= "updated != null and updated!=''">
+			AND	convert(varchar,t.updated,120) LIKE (#{updated})
+			</if>
+	    	<if test= "updateby != null and updateby!=''">
+			AND UPPER(t.updateby) LIKE UPPER('%'||#{updateby}||'%')
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.quoted_date DESC
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 根据主键查询某个辅料报价单-电子版(可分页)-->
+    <select id="loadAccessoryQuotedElectronic" resultMap="accessoryQuotedElectronicMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.quoted_code quotedCode,t.enquiry_code enquiryCode,t.intention_code intentionCode,t.intention_supplier_code intentionSupplierCode,t.quoted_date quotedDate,t.path path,t.remarks remarks,t.company_name companyName,t.contacts contacts,t.phone phone,t.email email,t.fax fax,t.company_site companySite,t.factory_site factorySite,t.invoice_type invoiceType,t.tax_rate taxRate,t.register_capital registerCapital,t.year_turnover yearTurnover,t.factory_area factoryArea,t.staff_count staffCount,t.hzgpp hzgpp,t.payment_type paymentType,t.delivery_type deliveryType,t.daily_capacity dailyCapacity
+       		,t.created,	t.updated  
+		   ,(select u.real_name from pub_user u where u.user_id=t.createby) as createUserName,
+           	(select u.real_name from pub_user u where u.user_id=t.updateby) as updateUserName
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM accessory_quoted_electronic t
+    	<where>
+    		1=1
+	    	<if test= "quotedCode != null and quotedCode!=''">
+			AND  t.QUOTED_CODE = #{quotedCode}
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.created DESC
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 增加辅料报价单-电子版 --> 
+	<insert id="saveAccessoryQuotedElectronic" parameterType="hashmap">
+		INSERT INTO accessory_quoted_electronic(quoted_code,enquiry_code,intention_code,intention_supplier_code,quoted_date,path,remarks,company_name,contacts,phone,email,fax,company_site,factory_site,invoice_type,tax_rate,register_capital,year_turnover,factory_area,staff_count,hzgpp,payment_type,delivery_type,daily_capacity,created,createby) 
+			 VALUES(#{quotedCode},#{enquiryCode},#{intentionCode},#{intentionSupplierCode},#{quotedDate},#{path},#{remarks},#{companyName},#{contacts},#{phone},#{email},#{fax}
+			 ,#{companySite},#{factorySite},#{invoiceType},#{taxRate},#{registerCapital},#{yearTurnover},
+			 #{factoryArea},#{staffCount},#{hzgpp},#{paymentType},#{deliveryType},#{dailyCapacity},#{app_created},#{app_create_by})
+    </insert>
+   <!--  <update id="saveAccessoryQuotedElectronic" parameterType="hashmap">
+		MERGE INTO accessory_quoted_electronic T1
+         USING (
+     
+         SELECT 
+     
+     #{quotedCode} quotedCode,
+     #{enquiryCode} enquiryCode ,
+     #{intentionCode} intentionCode,
+     #{intentionSupplierCode} intentionSupplierCode,
+     #{quotedDate} quotedDate,
+     #{path} path,
+     #{remarks} remarks,
+     #{companyName} companyName,
+     #{contacts} contacts ,
+     #{phone} phone,
+     #{email} email,
+     #{fax} fax,
+     #{companySite} companySite,
+     #{factorySite} factorySite,
+     #{invoiceType} invoiceType,
+     #{taxRate} taxRate,
+     #{registerCapital} registerCapital,
+     #{yearTurnover} yearTurnover,
+     #{factoryArea} factoryArea,
+     #{staffCount} staffCount,
+     #{hzgpp} hzgpp,
+     #{paymentType} paymentType,
+     #{deliveryType} deliveryType,
+     #{dailyCapacity} dailyCapacity
+     
+    
+                FROM dual 
+               
+             ) T2 
+     ON (T1.quoted_code = T2.quotedCode )  判断条件
+    WHEN MATCHED THEN                更新
+         UPDATE SET 
+		   		T1.INTENTION_CODE=T2.intentionCode,
+		   		T1.PATH=T2.path,
+		   		T1.REMARKS=T2.remarks
+               WHERE 
+               T1.ENQUIRY_CODE = #{enquiryCode} and T1.INTENTION_SUPPLIER_CODE=#{intentionSupplierCode} and T1.QUOTED_DATE=#{quotedDate}
+    WHEN NOT MATCHED THEN 
+         INSERT (quoted_code,enquiry_code,intention_code,intention_supplier_code,quoted_date,path,remarks,company_name,contacts,phone,email,fax,company_site,factory_site,invoice_type,tax_rate,register_capital,year_turnover,factory_area,staff_count,hzgpp,payment_type,delivery_type,daily_capacity,created,createby) 
+			 VALUES(T2.quotedCode,T2.enquiryCode,T2.intentionCode,T2.intentionSupplierCode,T2.quotedDate,T2.path,T2.remarks,T2.companyName,T2.contacts,T2.phone,T2.email,T2.fax
+			 ,T2.companySite,T2.factorySite,T2.invoiceType,T2.taxRate,T2.registerCapital,T2.yearTurnover,
+			 T2.factoryArea,T2.staffCount,T2.hzgpp,T2.paymentType,T2.deliveryType,T2.dailyCapacity,#{app_created},#{app_create_by})
+    </update>  -->
+    <!-- 修改辅料报价单-电子版 -->
+    <update id="updateAccessoryQuotedElectronic" parameterType="hashmap">
+		UPDATE	
+				accessory_quoted_electronic	
+		   SET	
+		   		path=#{path}  		
+		 WHERE	
+		 		QUOTED_CODE=#{quotedCode}
+    </update>
+    <!-- 删除辅料报价单-电子版 -->
+    <delete id="deleteAccessoryQuotedElectronic" parameterType="hashmap">
+        DELETE FROM 
+        			accessory_quoted_electronic 
+        WHERE 
+        			QUOTED_CODE=#{quotedCode} <!--AND client_id=#{app_user_clientID}-->
+    </delete>
+</mapper>

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<!-- 签量提醒设置 -->
+	<bean id="qlRemindConfigDao"
+		class="com.powere2e.sco.dao.impl.parameterset.qlremindconfig.QlRemindConfigDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+
+	<!-- 让步接收数据 -->
+	<bean id="concessionReceiveDao"
+		class="com.powere2e.sco.dao.impl.datamaintenance.inventorydata.concessionreceive.ConcessionReceiveDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+
+	<!-- 供应商质量星级 -->
+	<bean id="supplierQualityLevelDao"
+		class="com.powere2e.sco.dao.impl.datamaintenance.gradecontroldata.supplierqualitylevel.SupplierQualityLevelDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+
+	<!-- 供应商年度千万元客诉 -->
+	<bean id="supplierComplaintsDao"
+		class="com.powere2e.sco.dao.impl.datamaintenance.gradecontroldata.suppliercomplaints.SupplierComplaintsDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+
+	<!-- 供应商 -->
+	<bean id="supplierDao" class="com.powere2e.sco.dao.impl.masterdata.SupplierDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+
+	<!-- 供应商年度巡厂得分 -->
+	<bean id="supplierVisitFactoryDao"
+		class="com.powere2e.sco.dao.impl.datamaintenance.gradecontroldata.suppliervisitfactory.SupplierVisitFactoryDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+
+	<!-- 商品回收记录 -->
+	<bean id="merchandiseRecycleDao"
+		class="com.powere2e.sco.dao.impl.datamaintenance.gradecontroldata.merchandiserecycle.MerchandiseRecycleDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+
+	<!-- 核算数据 -->
+	<bean id="accountingDataDao"
+		class="com.powere2e.sco.dao.impl.merchandisecostanalysis.accountingIngredient.accounting.AccountingDataDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+
+	<!-- 商品分项成本类比 -->
+	<bean id="merchandiseItemCostDao"
+		class="com.powere2e.sco.dao.impl.merchandisecostanalysis.merchandiseitemcost.MerchandiseItemCostDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+
+	<!-- 商品总成本类比分析 -->
+	<bean id="totalCostAnalogyAnalysisDao"
+		class="com.powere2e.sco.dao.impl.merchandisecostanalysis.totalcostanalogyanalysis.TotalCostAnalogyAnalysisDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	
+	<!-- 待办事项 提醒-->
+	<bean id="gtasksRemindDao"
+		class="com.powere2e.sco.dao.impl.remind.GtasksRemindDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	
+	<!-- 其他提醒 -->
+	<bean id="elseRemindDao"
+		class="com.powere2e.sco.dao.impl.remind.ElseRemindDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	
+	<!-- 其他提醒-已阅清除 -->
+	<bean id="elseRemindFlagDao"
+		class="com.powere2e.sco.dao.impl.remind.ElseRemindFlagDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	
+	<!-- 原料预警记录 -->
+	<bean id="materialWarnDao"
+		class="com.powere2e.sco.dao.impl.remind.MaterialWarnDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	
+	<!-- 商品预警记录 -->
+	<bean id="merchandiseWarnDao"
+		class="com.powere2e.sco.dao.impl.remind.MerchandiseWarnDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	
+	<!-- 辅料商品预警记录 -->
+	<bean id="accessoryWarnDao"
+		class="com.powere2e.sco.dao.impl.remind.AccessoryWarnDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	
+	<!-- 上下市信息 -->
+	<bean id="merchandiseMarketDao"
+		class="com.powere2e.sco.dao.impl.masterdata.MerchandiseMarketDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+</beans>

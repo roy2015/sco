@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.datamaintenance.purchaserdata.relevancematerialandwebsite.RelevanceMaterialAndWebsiteDao">
+	<resultMap type="com.powere2e.sco.model.datamaintenance.purchaserdata.relevancematerialandwebsite.RelevanceMaterialAndWebsite" id="relMateAndWebMap">
+		<result property="id" column="id"/>
+		<result property="merchandiseCode" column="merchandiseCode"/>
+		<result property="merchandiseName" column="merchandiseName"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="supplierName" column="supplierName"/>
+		<result property="dxRoleName" column="dxRoleName"/>
+		<result property="dlRoleName" column="dlRoleName"/>
+		<result property="centreName" column="centreName"/>
+		<result property="smallName" column="smallName"/>
+		<result property="detailName" column="detailName"/>
+		<result property="fineName" column="fineName"/>
+		<result property="materialTypeName" column="materialTypeName"/>
+		<result property="ingredientCode" column="ingredientCode"/>
+		<result property="ingredientCodeName" column="ingredientCodeName"/>
+		<result property="materialCode" column="materialCode"/>
+		<result property="materialName" column="materialName"/>
+		<result property="websiteName" column="websiteName"/>
+		<result property="websiteUrl" column="websiteUrl"/>
+		<result property="priceRegion" column="priceRegion"/>
+		<result property="materialBigTypeName" column="materialBigTypeName"/>
+		<result property="materialSmallTypeName" column="materialSmallTypeName"/>
+		<result property="created" column="created"/>
+		<result property="createby" column="createby"/>
+		
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    
+    <!-- 查询(可分页)-->
+    <select id="listRelevanceMaterialAndWebsite" resultMap="relMateAndWebMap">
+    	SELECT  
+    	<if test="page_count == null">
+    		m.merchandise_code merchandiseCode,m.merchandise_name merchandiseName,
+    		s.supplier_code supplierCode,s.supplier_name supplierName,
+    		
+    		dx.role_name dxRoleName,dl.role_name dlRoleName, 
+    		ct.centre_type_name centreName, sm.small_type_name smallName, 
+			dt.detail_type_name detailName, ft.fine_type_name fineName,
+			
+			mc.value_string materialTypeName,
+			ii.ingredient_code ingredientCode,ii.material_name ingredientCodeName, 
+			mt.material_name materialName,wr.material_region_name priceRegion,
+			ii.material_code materialCode,
+			w.website_name websiteName,wr.website_url websiteUrl,
+			b.material_big_type_name materialBigTypeName,s.material_small_type_name materialSmallTypeName,
+	       	
+	       	DECODE(t.material_code,NULL,DECODE(ii.relation_status, 'Y', 'NOT', 'N'), 'Y') ifRelevanced,
+			ii.input_cost_proportion inputCost,
+			u.real_name createby,t.created,t.id 
+	   	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM 
+			(
+				SELECT 
+					g4.accounting_code,g.merchandise_code merchandise_code, g.supplier_code supplier_code,
+					max(g.imCode) imCode, max(g.isCode) isCode
+				FROM
+	             (  SELECT 
+	             		MAX(oa2.application_code) application_code, oa2.merchandise_code, oa2.supplier_code,
+	             		max(oa2.imCode)imCode,max(oa2.isCode)isCode
+	             	FROM 
+		               (  SELECT 										<!-- 最新记录 -->
+			                am.merchandise_code,
+			                am.supplier_code,
+			                max(oa.oa_approve_date) maxDate
+			              FROM oa_application oa, 
+			              <if test='oaType != "" and oaType != "NEW"'>application_merchandise</if>
+			              <if test='oaType == "" or oaType == "NEW"'>
+							<include refid="merchandiseOrIntention" />
+			              </if>
+			               am
+			              WHERE
+			              	UPPER(oa.application_type) LIKE 'MERCHANDISE%'
+			              	AND oa.application_code = am.application_code AND UPPER(oa.application_status) = 'SPTG' <!-- 审批通过 -->
+			              GROUP BY am.merchandise_code, am.supplier_code
+			            )oa1
+	               	INNER JOIN 
+		               (
+		                   SELECT 										<!-- 最新记录的其他字段 -->			
+		   	                am.application_code,
+		   	                am.merchandise_code,
+		   	                am.supplier_code,
+		   	                max(oa.oa_approve_date) maxDate,
+		   	                <if test='oaType == "" or oaType == "NEW"'>MAX(am.imCode) imCode,MAX(am.isCode) isCode</if>
+		   	                <if test='oaType != "" and oaType != "NEW"'>am.merchandise_code imCode, am.supplier_code isCode</if>
+		   	              FROM oa_application oa, 
+		   	              <if test='oaType != "" and oaType != "NEW"'>application_merchandise</if>
+			              <if test='oaType == "" or oaType == "NEW"'>
+							<include refid="merchandiseOrIntention" />
+			              </if> am
+		   	              WHERE 
+		   	              	UPPER(oa.application_type) LIKE 'MERCHANDISE%' 
+	   	              		AND oa.application_code = am.application_code and UPPER(oa.application_status) = 'SPTG' 
+		   	              GROUP BY am.merchandise_code, am.supplier_code, am.application_code
+		                  ORDER BY am.merchandise_code, am.supplier_code, am.application_code      
+		               ) oa2 
+	               ON oa1.merchandise_code = oa2.merchandise_code AND oa1.supplier_code = oa2.supplier_code 
+	               		AND oa1.maxDate = oa2.maxDate
+	               GROUP BY oa2.merchandise_code, oa2.supplier_code 	<!-- 审批通过日期一致时选择审批号较大的那个 -->
+	              ) g 
+            	INNER JOIN analysis_reports_m g3 ON g.application_code = g3.application_code
+            	INNER JOIN cost_analysis_merchandise g4 ON g3.reports_code = g4.reports_code 
+            		AND g.imCode = g4.merchandise_code AND g.isCode = g4.supplier_code	<!-- 成本分析-商品 -->
+			  	GROUP BY g4.accounting_code,g.merchandise_code,g.supplier_code 
+			) au 
+			INNER JOIN ingredient_item ii ON au.accounting_code = ii.ingredient_code <!-- 投料表-细 -->
+			LEFT JOIN intention_supplier_merchandise ism  <!-- 意向品供应商关联表 -->
+			ON 
+			 ( 
+			 	(au.merchandise_code = ism.merchandise_code AND au.supplier_code = ism.supplier_code) 
+		 		<if test="oaType == 'OLD' or oaType == 'ADJ'">
+		 			OR  (au.merchandise_code = ism.intention_code AND au.supplier_code = ism.intention_supplier_code)
+		 		</if>
+		 	 ) 
+			AND 	
+			  (au.imCode = ism.intention_code AND au.isCode = ism.intention_supplier_code) 
+			<!-- 关联意向品 -->
+			LEFT JOIN merchandise_intention mi ON ism.intention_code = mi.intention_code
+			INNER JOIN merchandise m ON au.merchandise_code = m.merchandise_code	
+				AND au.supplier_code = m.supplier_code	<!-- 商品表 -->
+				
+			LEFT JOIN merchandise_relevance_material t ON ii.material_code = t.merchandise_material_code  	
+				AND au.merchandise_code = t.merchandise_code AND au.supplier_code = t.supplier_code<!-- 商品原料关联表 -->
+			
+			LEFT JOIN material mt ON t.material_code = mt.material_code <!-- 原料 -->
+			LEFT JOIN website w ON mt.website_code = w.website_code   <!-- 公示网站 -->
+			LEFT JOIN material_region wr ON t.material_code = wr.material_code 
+				AND t.material_region_code = wr.material_region_code  <!-- 原料对应地区 -->
+				
+			INNER JOIN supplier s ON m.supplier_code = s.supplier_code <!-- 供应商表 -->
+			LEFT JOIN merchandise_role mr on m.merchandise_code = mr.merchandise_code <!-- 商品角色关联 -->
+			LEFT JOIN merchandise_dx_role dx ON mr.dx_role_code = dx.role_code <!-- 定性角色表 -->
+			LEFT JOIN merchandise_dl_role dl ON mr.dl_role_code = dl.role_code <!-- 定量角色表 -->
+			LEFT JOIN merchandise_centre_type ct ON m.centre_type_code = ct.centre_type_code <!-- 中分类 -->
+			LEFT JOIN merchandise_small_type sm ON m.small_type_code = sm.small_type_code <!-- 小分类 -->
+			
+			LEFT JOIN merchandise_detail_type dt ON m.detail_type_code = dt.detail_type_code <!-- 明细类 -->
+			LEFT JOIN merchandise_fine_type ft ON dt.detail_type_code = ft.detail_type_code 
+				AND mi.fine_type_code = ft.fine_type_code 	<!-- 关联商品意向品细分类 -->
+			
+			LEFT JOIN common_mapping_config mc ON ii.material_type = mc.code_string 
+				AND UPPER(mc.key_type) = 'MATERIAL_TYPE' 	<!-- 类型配置表 -->
+			LEFT JOIN material_big_type b ON mt.material_big_type_code = b.material_big_type_code <!-- 原料大类 -->
+			LEFT JOIN material_small_type s ON mt.material_small_type_code = s.material_small_type_code 
+				AND mt.material_big_type_code = s.material_big_type_code <!-- 原料小类 -->
+			LEFT JOIN pub_user u ON u.user_id = t.createby 
+    	<where>
+    		1=1
+	    	<if test= "supplierCode != null and supplierCode != ''">
+				AND UPPER(s.supplier_code) LIKE UPPER('%'||#{supplierCode}||'%')
+			</if>
+	    	<if test= "supplierName != null and supplierName != ''">
+				AND UPPER(s.supplier_name) LIKE UPPER('%'||#{supplierName}||'%')
+			</if>
+	    	<if test= "merchandiseCode != null and merchandiseCode != ''">
+				AND UPPER(m.merchandise_code) LIKE UPPER('%'||#{merchandiseCode}||'%')
+			</if>
+	    	<if test= "merchandiseName != null and merchandiseName != ''">
+				AND UPPER(m.merchandise_name) LIKE UPPER('%'||#{merchandiseName}||'%')
+			</if>
+	    	<if test= "dxRoleCode != null and dxRoleCode != ''">
+				AND UPPER(dx.role_code) LIKE UPPER(#{dxRoleCode})
+			</if>
+	    	<if test= "dlRoleCode != null and dlRoleCode != ''">
+				AND UPPER(dl.role_code) LIKE UPPER(#{dlRoleCode})
+			</if>
+	    	<if test= "centreType != null and centreType != ''">
+				AND UPPER(ct.centre_type_code) LIKE UPPER(#{centreType})
+			</if>
+	    	<if test= "smallType != null and smallType != ''">
+				AND UPPER(sm.small_type_code) LIKE UPPER(#{smallType})
+			</if>
+	    	<if test= "detailType != null and detailType != ''">
+				AND UPPER(dt.detail_type_code) LIKE UPPER(#{detailType})
+			</if>
+	    	<if test= "fineType != null and fineType != ''">
+				AND UPPER(ft.fine_type_code) LIKE UPPER(#{fineType})
+			</if>
+	    	<if test= "materialType != null and materialType != ''">
+				AND UPPER(ii.material_type) LIKE UPPER(#{materialType})
+			</if>
+	    	<if test= "ingredientCodeName != null and ingredientCodeName != ''">
+				AND UPPER(ii.material_name) LIKE UPPER('%'||#{ingredientCodeName}||'%')
+			</if>
+	    	<if test= "ifRelevanced != null and ifRelevanced != '' and ifRelevanced != 'ALL'">
+	    		<if test= 'ifRelevanced == "Y"'>
+					AND t.material_code	IS NOT NULL 	
+	    		</if>
+	    		<if test= 'ifRelevanced == "N"'>
+	    			AND t.material_code IS NULL 
+	    			AND (ii.relation_status　!= 'Y' OR ii.relation_status IS NULL)
+	    		</if>
+	    		<if test= 'ifRelevanced == "NOT"'>
+	    			AND　ii.relation_status　= 'Y' AND t.material_code IS NULL  
+	    		</if>
+			</if>
+	    	<if test= "materialName != null and materialName != ''">
+				AND	UPPER(mt.material_name) LIKE UPPER('%'||#{materialName}||'%')
+			</if>
+	    	<if test= "websiteCode != null and websiteCode != ''">
+				AND	UPPER(w.website_code) LIKE UPPER(#{websiteCode})
+			</if>
+	    	<if test= "priceRegion != null and priceRegion != ''">
+				AND	UPPER(wr.material_region_name) LIKE UPPER('%'||#{priceRegion}||'%')
+			</if>
+	    	<if test= "materialBigTypeName != null and materialBigTypeName != ''">
+				AND	UPPER(b.material_big_type_name) LIKE UPPER('%'||#{materialBigTypeName}||'%')
+			</if>
+	    	<if test= "materialSmallTypeName != null and materialSmallTypeName != ''">
+				AND	UPPER(s.material_small_type_name) LIKE UPPER('%'||#{materialSmallTypeName}||'%')
+			</if>
+			
+	    	<if test= "createby != null and createby!=''">
+				AND UPPER(u.real_name) LIKE UPPER('%'||#{createby}||'%')
+			</if>
+			<if test="paraArr != null">
+				AND 
+				(
+				<foreach collection="paraArr" index="index" separator="OR" > 
+					<if test="(index%2) == 0 and (index &lt; sizeOfArr)">
+					<if test='index > 0 '>
+					OR 
+					</if>
+					<if test='oaType != "NEW"'>
+						(	
+							UPPER(au.imCode) IN UPPER(${paraArr[index]})
+							AND UPPER(au.isCode) IN UPPER(${paraArr[index+1]})
+						)
+					</if>
+					<if test='oaType == "NEW"'>
+						(	
+							UPPER(au.merchandise_code) IN UPPER(${paraArr[index]})
+							AND UPPER(au.supplier_code) IN UPPER(${paraArr[index+1]})
+						)
+					</if>
+					</if>
+				</foreach>
+				)
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY m.merchandise_code DESC,rownum DESC
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 直接进入页面或点击清空查询后 -->
+    <sql id="merchandiseOrIntention">
+    	(SELECT 											<!-- 新品引进 -->
+		    t1.application_code,
+		    t3.merchandise_code merchandise_code,
+		    t3.supplier_code supplier_code,
+		    t1.merchandise_code imCode,t1.supplier_code isCode
+	    FROM 
+	    	(SELECT 
+	    		application_code 
+    		FROM oa_application 
+   			WHERE 
+   				UPPER(application_type) = 'MERCHANDISE_NEW' 
+	    		AND UPPER(application_status) = 'SPTG'
+	    	) t2
+		INNER JOIN application_merchandise t1 ON t2.application_code = t1.application_code 
+		INNER JOIN intention_supplier_merchandise t3 ON t3.intention_code = t1.merchandise_code
+		 AND t3.intention_supplier_code = t1.supplier_code AND t3.merchandise_code IS NOT NULL 
+		 AND t3.supplier_code is not null
+	 UNION 
+		SELECT 												<!-- 非新品引进 -->		
+	        t1.application_code,
+	        t1.merchandise_code merchandise_code,
+	        t1.supplier_code supplier_code,
+	        t1.merchandise_code imCode,t1.supplier_code isCode
+        FROM 
+        	(
+       		SELECT 
+       			application_code FROM oa_application 
+       		WHERE 
+       			UPPER(application_type) LIKE 'MERCHANDISE%' 
+        	AND	UPPER(application_type) != 'MERCHANDISE_NEW' 
+        	AND UPPER(application_status) = 'SPTG' 
+       	) t2 
+    	INNER JOIN application_merchandise t1 ON t2.application_code = t1.application_code 
+		)
+    </sql>
+    
+    <!-- 验证是否存在重复数据 -->
+    <select id="ifExistsReleMateAndWeb" resultType="String">
+    	SELECT 
+    		id 
+    	FROM 
+    		merchandise_relevance_material t
+    		<!-- ,material m,material_region mr --> 
+    	WHERE	
+    		t.merchandise_code = #{merchandiseCode}
+    		AND t.merchandise_material_code = #{ingredientCode}
+    		AND t.supplier_code = #{supplierCode}
+    		AND t.material_code = #{materialCode} 
+    		<if test="priceRegion != null and priceRegion != ''">
+	    		AND t.material_region_code = #{priceRegion} 
+    		</if>
+    		AND rownum = 1
+    </select>
+    
+    <!-- 关联原料和网站 --> 
+	<insert id="saveRelevanceMaterialAndWebsite" parameterType="hashmap">
+		INSERT INTO merchandise_relevance_material(id,merchandise_code,merchandise_material_code,supplier_code,material_code,material_region_code,created,createby) 
+			 VALUES(#{id},#{merchandiseCode},#{ingredientCode},#{supplierCode},#{materialCode},#{priceRegion},#{app_created},#{app_create_by})
+    </insert>
+    
+    <!-- 暂不关联公示网站 -->
+    <update id="completeNotLinkMaterialAndWebsite">
+    	UPDATE 
+    		ingredient_item 
+    	SET
+    		RELATION_STATUS = 'Y' 
+    	WHERE 
+    		( 
+    		<foreach collection="list" item="item" separator="OR" >  
+    			ingredient_code = #{item.ingredientCode} AND material_code = #{item.materialCode} 
+    		</foreach>
+    		)
+    </update>
+    
+    <!-- 取消原料与网站关联 -->
+    <delete id="deleteRelevanceMaterialAndWebsite" parameterType="hashmap">
+        DELETE FROM 
+			merchandise_relevance_material 
+        WHERE 
+   			id in (${ids})
+    </delete>
+    
+</mapper>

@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.powere2e.sco.interfaces.dao.materialmarketanalysis.accessoryintentionrecord.AccessoryIntentionRecordDao">
+	<resultMap type="com.powere2e.sco.model.materialmarketanalysis.accessoryintentionrecord.AccessoryIntentionRecord" id="accIntRecMap">
+		<result property="merchandiseCode" column="merchandiseCode"/>
+		<result property="merchandiseName" column="merchandiseName"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="supplierName" column="supplierName"/>
+		<result property="fineName" column="fineName"/>
+		<result property="materialName" column="materialName"/>
+		<result property="websiteName" column="websiteName"/>
+		<result property="regionName" column="regionName"/>
+		<result property="materialBigName" column="materialBigName"/>
+		<result property="materialSmallName" column="materialSmallName"/>
+		<result property="accessoryName" column="accessoryName"/>
+		<result property="merPurPrice" column="merPurPrice"/>
+		<result property="supPurPrice" column="supPurPrice"/>
+		<result property="paperWeight" column="paperWeight"/>
+		<result property="supInpPrice" column="supInpPrice"/>
+		<result property="websitePrice" column="websitePrice"/>
+		<result property="webLmPrice" column="webLmPrice"/>
+		<result property="supInpCom" column="supInpCom"/>
+		<result property="merPriceCom" column="merPriceCom"/>
+		<result property="merPriceGrowth" column="merPriceGrowth"/>
+		<result property="merPricePro" column="merPricePro"/>
+		<result property="created" column="created"/>
+		
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    
+    <!-- 查看商品预警记录 -->
+	<select id="listAccessoryIntentionRecord" resultMap="accIntRecMap">
+		SELECT 
+		<if test="page_count == null">
+	       aw.warn_date created,am.intention_code merchandiseCode,ai.intention_name merchandiseName,
+	       am.intention_supplier_code supplierCode,NVL(s.supplier_name,ais.intention_supplier_name) supplierName, 
+	       ft.fine_type_name fineName, m.material_name materialName,w.website_name websiteName,
+	       mr.material_region_name regionName, b.material_big_type_name materialBigName,
+	       s.material_small_type_name materialSmallName,acc.material_name accessoryName,
+	       ROUND(aw.merchandise_purchase_price,2) merPurPrice,ROUND(aw.supplier_purchase_price,2) supPurPrice,
+	       ROUND(aw.paper_weight,2) paperWeight,ROUND(aw.supplier_input_price,2) supInpPrice,
+	       ROUND(aw.website_price,2) websitePrice, ROUND(aw.website_lm_price,2) webLmPrice,
+	       ROUND(aw.supplier_input_price_compute,2) supInpCom,ROUND(aw.merchandise_price_compute,2) merPriceCom,
+	       ROUND(aw.merchandise_price_growth,2) merPriceGrowth,ROUND(aw.merchandise_price_proportion,2) merPricePro
+		</if>
+		<if test="page_count != null">
+   			count(1) AS record_count
+		</if>
+  		FROM
+  			 (SELECT * FROM accessory_warn WHERE UPPER(warn_type) LIKE UPPER(#{warType})) aw 
+		LEFT JOIN accessory_relevance_materia am ON aw.relevance_id = am.id 
+      	LEFT JOIN accessory_intention_supplier ais ON am.intention_supplier_code = ais.intention_supplier_code <!-- 意向品供应商编号 -->
+       	LEFT JOIN supplier s ON am.intention_supplier_code = s.supplier_code
+       	LEFT JOIN (SELECT DISTINCT material_name,material_code FROM accessory_enquiry_material) acc ON am.accessory_material_code = acc.material_code
+      	LEFT JOIN accessory_intention ai ON am.intention_code = ai.intention_code  <!-- 辅料意向品 -->
+		LEFT JOIN accessory_fine_type ft ON ai.fine_type_code = ft.fine_type_code  <!-- 辅料细分类 -->
+		
+		LEFT JOIN material m ON am.material_code = m.material_code <!-- 原料表 -->
+		LEFT JOIN website w ON m.website_code = w.website_code <!-- 公示网站 -->
+		LEFT JOIN material_region mr ON m.material_code = mr.material_code 
+			AND am.material_region_code = mr.material_region_code <!-- 价格地区 -->
+		LEFT JOIN material_big_type b ON m.material_big_type_code = b.material_big_type_code <!-- 原料大类 -->
+		LEFT JOIN material_small_type s ON m.material_small_type_code = s.material_small_type_code 
+			AND m.material_big_type_code = s.material_big_type_code 
+       	INNER JOIN (SELECT * FROM material_warn_config WHERE UPPER(warn_type) LIKE UPPER(#{warType})) mwc ON am.material_code = mwc.material_code 
+			AND m.material_big_type_code = mwc.material_big_type_code 
+			AND m.material_small_type_code = mwc.material_small_type_code
+			AND w.website_code = mwc.website_code 
+		WHERE 1=1 
+		<if test="start != null">
+	       	AND #{start} <![CDATA[<=]]> aw.warn_date AND　#{end} > aw.warn_date 
+       	</if>	
+       	<if test= "supplierCode != null and supplierCode != ''">
+			AND UPPER(am.intention_supplier_code) LIKE UPPER('%'||#{supplierCode}||'%')
+		</if>
+    	<if test= "supplierName != null and supplierName != ''">
+			AND (UPPER(ais.intention_supplier_name) LIKE UPPER('%'||#{supplierName}||'%')
+			OR UPPER(s.supplier_name) LIKE UPPER('%'||#{supplierName}||'%')
+			)
+		</if>
+    	<if test= "merchandiseCode != null and merchandiseCode != ''">
+			AND UPPER(am.intention_code) LIKE UPPER('%'||#{merchandiseCode}||'%')
+		</if>
+    	<if test= "merchandiseName != null and merchandiseName != ''">
+			AND UPPER(ai.intention_name) LIKE UPPER('%'||#{merchandiseName}||'%')
+		</if>
+    	<if test= "fineType != null and fineType != '' and fineType != 'ALL'">
+			AND UPPER(ft.fine_type_code) LIKE UPPER(#{fineType})
+		</if>
+		<if test="fineType == null or fineType == '' or fineType =='ALL'">
+   			AND UPPER(ft.fine_type_code) IN ('PS', 'PB', 'PL')
+   		</if>
+    	<if test="accessoryName != null and accessoryName != ''">
+   			AND UPPER(acc.material_name ) LIKE UPPER('%'||#{accessoryName}||'%')
+   		</if>
+		<if test= "materialBigTypeCode != null and materialBigTypeCode!=''">
+			AND UPPER(mwc.material_big_type_code) LIKE UPPER(#{materialBigTypeCode})
+			AND UPPER(m.material_big_type_code) LIKE UPPER(#{materialBigTypeCode})
+		</if>
+    	<if test= "materialSmallTypeCode != null and materialSmallTypeCode!=''">
+			AND UPPER(mwc.material_small_type_code) LIKE UPPER(#{materialSmallTypeCode})
+			AND UPPER(m.material_small_type_code) LIKE UPPER(#{materialSmallTypeCode})
+		</if>
+    	<if test= "materialCode != null and materialCode!=''">
+			AND UPPER(m.material_name) LIKE UPPER('%'||#{materialCode}||'%')
+		</if>
+    	<if test= "websiteCode != null and websiteCode!=''">
+			AND UPPER(m.website_code) LIKE UPPER(#{websiteCode})
+		</if>
+		<if test= "region != null and region != ''">
+			AND	UPPER(mr.material_region_name) LIKE UPPER(#{region})
+		</if>
+		<if test='recordType == "warn"'>
+			AND ABS(aw.merchandise_price_proportion) >= mwc.threshold_value
+		</if>
+		<if test='recordType == "unWarn"'>
+			AND ABS(aw.merchandise_price_proportion) <![CDATA[<]]> mwc.threshold_value
+		</if>
+		<if test="page_count == null">
+       		ORDER BY aw.warn_date DESC, mwc.created DESC, w.website_code 
+       </if>
+	</select>
+</mapper>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.merchandiseoaapplication.fastimportoaapplication.attachment.FastImportAttachmentDao">
+	<resultMap type="com.powere2e.sco.model.merchandiseoaapplication.reportnewoaapplication.supplierattachment.SupplierAttachmentM" id="fiAttachment">
+		<result property="applicationCode" column="applicationCode" />
+		<result property="reportCode" column="reportCode" />
+		<result property="path" column="path" />
+	</resultMap>
+    
+    <!-- 查询上传的申请文件 -->
+    <select id="loadUploadAttachment" resultMap="fiAttachment">
+    	SELECT  
+       		t.application_code applicationCode,
+       		t.report_code reportCode,t.path path 
+   		FROM 
+   			application_fastadjustprice t 
+		WHERE
+			t.application_code = #{applicationCode} 
+			AND report_file_name = #{attachmentName} 
+			<if test="intentionCode != null and intentionCode != ''">
+				AND merchandise_code = #{intentionCode}
+			</if>
+			<if test="intentionSupplierCode != null and intentionSupplierCode != ''">
+				AND supplier_code = #{intentionSupplierCode}
+			</if>
+			<if test="list != null">
+				AND 
+				(
+					<foreach collection="list"  item="item" index="index" separator="OR">
+			       		(
+				       		t1.merchandise_code = #{item.merchandiseCode} 
+				       		AND t1.supplier_code = #{item.supplierCode}
+			       		)
+			       	</foreach>
+		       	)
+			</if>
+    </select>
+    
+    <!-- 保存或更新上传的申请文件 -->
+    <update id="completeUploadAttachment">
+ 		MERGE INTO application_fastadjustprice T1
+		USING (
+			SELECT 
+				s1.c,s1.reportCode,s2.applicationCode,s2.merchandise_code,
+				s2.supplier_code,s2.report_file_name,s2.path 
+			FROM 
+			 (
+				SELECT                                          
+					ROWNUM c,
+					ar.application_code applicationCode,ar.report_code reportCode,
+					ar.merchandise_code,ar.supplier_code,ar.report_file_name 
+				FROM 
+					application_fastadjustprice ar 
+				WHERE 
+					ar.application_code = #{applicationCode} 
+					AND merchandise_code = #{intentionCode}
+					AND supplier_code = #{intentionSupplierCode}
+					AND report_file_name = #{attachmentName}
+			) s1 
+			RIGHT JOIN 
+			(
+				SELECT 
+					#{applicationCode} applicationCode,
+					#{intentionCode} merchandise_code,
+					#{intentionSupplierCode} supplier_code,
+					#{attachmentName} report_file_name,
+					#{path} path
+				FROM dual  
+			) s2 
+			ON s1.applicationCode = s2.applicationCode 
+				AND s1.merchandise_code = s2.merchandise_code
+				AND s1.supplier_code = s2.supplier_code
+				AND s1.report_file_name = s2.report_file_name
+		) T2 
+		ON (T2.c > 0)  
+		WHEN MATCHED THEN				<!-- 更新 -->
+			UPDATE SET 
+				T1.path = T2.path,
+				T1.updated = #{app_updated},
+				T1.updateby = #{app_user_id} 
+			WHERE 
+				T1.application_code = T2.applicationCode
+				AND T1.report_code = T2.reportCode
+				AND T1.merchandise_code= T2.merchandise_code
+				AND T1.supplier_code = T2.supplier_code
+		WHEN NOT MATCHED THEN			<!-- 新增 -->
+			INSERT (report_code,application_code,merchandise_code,supplier_code,
+				report_file_name,path,upload_date,created,createby)         
+			VALUES(s_application_fastadjustprice.nextval, T2.applicationCode,T2.MERCHANDISE_CODE,T2.supplier_code,
+				T2.REPORT_FILE_NAME,T2.path,#{app_created},#{app_created},#{app_create_by})
+    </update>
+</mapper>

@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+	<!-- 证件过期提醒设置 -->
+	<bean id="certificateOutofdateConfigService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.parameterset.certificateoutofdateconfig.CertificateOutofdateConfigServiceImpl">
+				<property name="certificateOutofdateConfigDao" ref="certificateOutofdateConfigDao" />
+			</bean>
+		</property>
+	</bean>
+	<!-- 原料行情预警设置 -->
+	<bean id="materialWarnConfigService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.parameterset.materialwarnconfig.MaterialWarnConfigServiceImpl">
+				<property name="materialWarnConfigDao" ref="materialWarnConfigDao" />
+			</bean>
+		</property>
+	</bean>
+	<!-- 定性角色 -->
+	<bean id="merchandiseDxRoleService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.datamaintenance.assortmentdata.merchandiserole.MerchandiseDxRoleServiceImpl">
+				<property name="merchandiseDxRoleDao" ref="merchandiseDxRoleDao" />
+			</bean>
+		</property>
+	</bean>
+	<!-- 定量角色 -->
+	<bean id="merchandiseDlRoleService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.datamaintenance.assortmentdata.merchandiserole.MerchandiseDlRoleServiceImpl">
+				<property name="merchandiseDlRoleDao" ref="merchandiseDlRoleDao" />
+			</bean>
+		</property>
+	</bean>
+	<!-- 商品细分类 -->
+	<bean id="merchandiseFineTypeService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.datamaintenance.assortmentdata.merchandisefinetype.MerchandiseFineTypeServiceImpl">
+				<property name="merchandiseFineTypeDao" ref="merchandiseFineTypeDao" />
+			</bean>
+		</property>
+	</bean>
+	<!-- 辅助细分类 -->
+	<bean id="accessoryFineTypeService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.datamaintenance.purchaserdata.accessoryfinetype.AccessoryFineTypeServiceImpl">
+				<property name="accessoryFineTypeDao" ref="accessoryFineTypeDao" />
+			</bean>
+		</property>
+	</bean>
+	<!-- 公示网站名称 -->
+	<bean id="websiteService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.datamaintenance.purchaserdata.websitename.WebsiteNameMaintenanceServiceImpl">
+				<property name="websiteNameMaintenanceDao" ref="websiteNameMaintenanceDao" />
+			</bean>
+		</property>
+	</bean>
+	<!-- 原料大类 -->
+	<bean id="materialBigTypeService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.datamaintenance.purchaserdata.materialrolemaintenance.MaterialBigTypeServiceImpl">
+				<property name="materialBigTypeDao" ref="materialBigTypeDao" />
+			</bean>
+		</property>
+	</bean>
+	<!-- 原料小类 -->
+	<bean id="materialSmallTypeService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.datamaintenance.purchaserdata.materialrolemaintenance.MaterialSmallTypeServiceImpl">
+				<property name="materialSmallTypeDao" ref="materialSmallTypeDao" />
+			</bean>
+		</property>
+	</bean>
+	<!-- 原料 -->
+	<bean id="materialService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.datamaintenance.purchaserdata.materialrolemaintenance.MaterialServiceImpl">
+				<property name="materialDao" ref="materialDao" />
+			</bean>
+		</property>
+	</bean>
+	<!-- 证件名称 -->
+	<bean id="supplierCertificateTypeService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.datamaintenance.systemmanagerdata.suppliercertificatetype.SupplierCertificateTypeServiceImpl">
+				<property name="supplierCertificateTypeDao" ref="supplierCertificateTypeDao" />
+			</bean>
+		</property>
+	</bean>
+	<!-- 供应商附件 -->
+	<bean id="supplierAttachmentMService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.merchandiseoaapplication.reportnewoaapplication.supplierattachment.SupplierAttachmentMServiceImpl">
+				<property name="supplierAttachmentMDao" ref="supplierAttachmentMDao" />
+			</bean>
+		</property>
+	</bean>
+	<!-- 供应商证件 -->
+	<bean id="supplierCertificateMService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.merchandiseoaapplication.reportnewoaapplication.suppliercertificate.SupplierCertificateMServiceImpl">
+				<property name="supplierCertificateMDao" ref="supplierCertificateMDao" />
+			</bean>
+		</property>
+	</bean>
+	<!-- 供应商附件（辅料OA） -->
+	<bean id="supplierAttachmentAService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.accessoryoaapplication.committeeApply.supplierattachment.SupplierAttachmentAServiceImpl">
+				<property name="supplierAttachmentADao" ref="supplierAttachmentADao" />
+			</bean>
+		</property>
+	</bean>
+	<!-- 关联扫描版（辅料OA） -->
+	<bean id="quotedElectronicOfScanService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.accessoryoaapplication.committeeApply.supplierattachment.QuotedElectronicOfScanServiceImpl">
+				<property name="quotedElectronicOfScanDao" ref="quotedElectronicOfScanDao" />
+			</bean>
+		</property>
+	</bean>
+	<!-- 供应商证件（辅料OA） -->
+	<bean id="supplierCertificateAService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.accessoryoaapplication.committeeApply.suppliercertificate.SupplierCertificateAServiceImpl">
+				<property name="supplierCertificateADao" ref="supplierCertificateADao" />
+			</bean>
+		</property>
+	</bean>
+	<!-- 销售分析 -->
+	<bean id="sellDetailService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.sharefunctionanalysis.sellanalysis.selldetail.SellDetailServiceImpl">
+				<property name="sellDetailDao" ref="sellDetailDao" />
+			</bean>
+		</property>
+	</bean>
+	<!-- 公司大盘促销分析 -->
+	<bean id="marketPromotionAnalysisService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.sharefunctionanalysis.sellanalysis.marketpromotionanalysis.MarketPromotionAnalysisServiceImpl">
+				<property name="marketPromotionAnalysisDao" ref="marketPromotionAnalysisDao" />
+			</bean>
+		</property>
+	</bean>
+	<!-- 商品促销分析 -->
+	<bean id="merchandisePromotionAnalysisService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.sharefunctionanalysis.sellanalysis.merchandisepromotionanalysis.MerchandisePromotionAnalysisServiceImpl">
+				<property name="merchandisePromotionAnalysisDao" ref="merchandisePromotionAnalysisDao" />
+			</bean>
+		</property>
+	</bean>
+	<!-- 商品进货明细 -->
+	<bean id="merchandiseStockDetailService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.sharefunctionanalysis.purchasinganalysis.merchandisestockdetail.MerchandiseStockDetailServiceImpl">
+				<property name="merchandiseStockDetailDao" ref="merchandiseStockDetailDao" />
+			</bean>
+		</property>
+	</bean>
+	<!-- 商品长期进价调整报表 -->
+	<bean id="merchandiseLongBuyPriceAdjustService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.sharefunctionanalysis.purchasinganalysis.merchandiselongbuypriceadjust.MerchandiseLongBuyPriceAdjustServiceImpl">
+				<property name="merchandiseLongBuyPriceAdjustDao" ref="merchandiseLongBuyPriceAdjustDao" />
+			</bean>
+		</property>
+	</bean>
+	<!-- 商品促销进价调整 -->
+	<bean id="merchandisePromotionBuyPriceAdjustService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.sharefunctionanalysis.purchasinganalysis.merchandisepromotionbuypriceadjust.MerchandisePromotionBuyPriceAdjustServiceImpl">
+				<property name="merchandisePromotionBuyPriceAdjustDao" ref="merchandisePromotionBuyPriceAdjustDao" />
+			</bean>
+		</property>
+	</bean>
+</beans>

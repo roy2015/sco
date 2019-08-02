@@ -1,0 +1,461 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.merchandiseoaapplication.reportadjustpriceoaapplication.reportadjustprice.HistoryPriceAdjustpriceDao">
+	<resultMap type="com.powere2e.sco.model.merchandiseoaapplication.reportadjustpriceoaapplication.reportadjustprice.HistoryPriceAdjustprice" id="historyPriceAdjustpriceMap">
+		<result property="reportCode" column="reportCode"/>
+		<result property="piceType" column="piceType"/>
+		<result property="stockSite" column="stockSite"/>
+		<result property="purchasePrice" column="purchasePrice"/>
+		<result property="purchaseUnits" column="purchaseUnits"/>
+		<result property="sellRegion" column="sellRegion"/>
+		<result property="sellPrice" column="sellPrice"/>
+		<result property="sellUnits" column="sellUnits"/>
+		<result property="profitRate" column="profitRate"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <!-- 查询历史与本次价格(调价)(可分页)-->
+    <select id="searchHistoryPriceAdjustprice" resultMap="historyPriceAdjustpriceMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		   t1.report_code reportCode,
+           	   t1.pice_type piceType,
+		       t1.stock_site stockSite,
+		       t1.purchase_price purchasePrice,
+		       t1.purchase_units purchaseUnits,
+       		   t1.sell_region sellRegion,
+		       t1.sell_price sellPrice,
+		       t1.sell_units sellUnits,
+		       t1.profit_rate profitRate,
+		       CONCAT(t1.profit_rate*100,'%') profitRatePercent,
+		       t2.application_code applicationCode,
+		       t2.merchandise_code merchandiseCode,
+		       t2.supplier_code supplierCode
+	    </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      FROM 	  history_price_adjustprice t1,application_report_adjustprice t2
+  	   WHERE  t1.report_code=t2.report_code
+  	  AND 	  UPPER(t1.pice_type) = UPPER(#{piceType})
+      AND      t2.application_code=#{applicationCode}		
+   		<if test= "intentionCode != null and intentionCode !=''">
+		AND t2.merchandise_code= #{intentionCode}
+		</if>
+	    <if test= "supplierCode != null and supplierCode !=''">
+		AND t2.supplier_code= #{supplierCode}
+		</if>
+    </select>
+    
+    <!-- 查询本次价格比历史价格高(正常调价)(可分页)-->
+    <select id="searchComparePriceAdjustprice" resultMap="historyPriceAdjustpriceMap">
+    	SELECT  
+    	<if test="page_count == null">
+           	   d2.stockSite stockSite,
+       		   d2.purchaseUnits purchaseUnits,
+		       d2.purchasePrice - d1.purchasePrice  purchasePrice,
+		       to_char(ROUND((d2.purchasePrice - d1.purchasePrice)*100 /DECODE(d1.purchasePrice,0,1,d1.purchasePrice),2),'fm9999999990.00')||'%' purchasePricePercent,
+		       d2.sellRegion sellRegion,
+		       d2.sellUnits sellUnits,
+		       (d2.sellPrice - d1.sellPrice) sellPrice,
+		       to_char(ROUND((d2.sellPrice - d1.sellPrice)*100 /DECODE(d1.sellPrice,0,1,d1.sellPrice),2),'fm9999999990.00')||'%' sellPricePercent,
+		       to_char(ROUND((d2.profitRate - d1.profitRate)*100 /DECODE(d1.profitRate,0,1,d1.profitRate),2),'fm9999999990.00')||'%'  profitRatePercent
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      FROM 	 (SELECT rownum        priceIndex,
+               t1.report_code      reportCode,
+               t1.pice_type        piceType,
+               t1.stock_site       stockSite,
+               t1.purchase_price   purchasePrice,
+               t1.purchase_units   purchaseUnits,
+               t1.sell_region      sellRegion,
+               t1.sell_price       sellPrice,
+               t1.sell_units       sellUnits,
+               t1.profit_rate      profitRate,
+               t2.application_code applicationCode,
+               t2.merchandise_code merchandiseCode,
+               t2.supplier_code    supplierCode
+        
+          FROM history_price_adjustprice t1, application_report_adjustprice t2
+         WHERE t1.report_code = t2.report_code
+           AND t1.pice_type = 'old'
+           AND    t2.application_code=#{applicationCode}
+           
+            <if test= "intentionCode != null and intentionCode !=''">
+			AND t2.merchandise_code= #{intentionCode}
+			</if>
+		    <if test= "supplierCode != null and supplierCode !=''">
+			AND t2.supplier_code= #{supplierCode}
+			</if>
+           ) d1,
+           (SELECT rownum        priceIndex,
+               t1.report_code      reportCode,
+               t1.pice_type        piceType,
+               t1.stock_site       stockSite,
+               t1.purchase_price   purchasePrice,
+               t1.purchase_units   purchaseUnits,
+               t1.sell_region      sellRegion,
+               t1.sell_price       sellPrice,
+               t1.sell_units       sellUnits,
+               t1.profit_rate      profitRate,
+               t2.application_code applicationCode,
+               t2.merchandise_code merchandiseCode,
+               t2.supplier_code    supplierCode
+        
+          FROM history_price_adjustprice t1, application_report_adjustprice t2
+         WHERE t1.report_code = t2.report_code
+           AND t1.pice_type = 'now'
+           AND    t2.application_code=#{applicationCode}
+           
+            <if test= "intentionCode != null and intentionCode !=''">
+			AND t2.merchandise_code= #{intentionCode}
+			</if>
+		    <if test= "supplierCode != null and supplierCode !=''">
+			AND t2.supplier_code= #{supplierCode}
+			</if>
+           ) d2
+      WHERE 
+      		d1.priceIndex = d2.priceIndex   
+    </select>
+    
+    <!-- 增加历史与本次价格(调价) --> 
+	<insert id="saveHistoryPriceAdjustprice" parameterType="hashmap">
+		INSERT INTO history_price_adjustprice(report_code,pice_type,stock_site,purchase_price,purchase_units,sell_region,sell_price,sell_units,profit_rate) 
+			 VALUES(#{reportCode},#{piceType},#{stockSite},#{purchasePrice},#{purchaseUnits},#{sellRegion},#{sellPrice},#{sellUnits},#{profitRate})
+    </insert>
+    <!-- 删除历史与本次价格(调价) -->
+    <delete id="deleteHistoryPriceAdjustprice" parameterType="hashmap">
+        DELETE FROM 
+        			history_price_adjustprice 
+        WHERE 
+        			REPORT_CODE=#{reportCode} <!--AND client_id=#{app_user_clientID}-->
+    </delete>
+    <!-- 删除历史与本次价格(调价) -->
+    <delete id="deleteHistoryPriceAdjustpriceByCode" parameterType="hashmap">
+        DELETE FROM 
+        			history_price_adjustprice 
+        WHERE 
+        			REPORT_CODE IN (SELECT report_code FROM　application_report_adjustprice　WHERE APPLICATION_CODE IN (${applicationCodes}))
+    </delete>
+    
+    <!-- 报告检验标准 -->
+    <resultMap type="com.powere2e.sco.model.merchandiseoaapplication.reportadjustpriceoaapplication.reportadjustprice.CheckStandardAdjustprice" id="checkStandardAdjustpriceMap">
+		<result property="reportCode" column="reportCode"/>
+		<result property="oldStandardColour" column="oldStandardColour"/>
+		<result property="newStandardColour" column="newStandardColour"/>
+		<result property="oldStandardSmell" column="oldStandardSmell"/>
+		<result property="newStandardSmell" column="newStandardSmell"/>
+		<result property="oldStandardFrom" column="oldStandardFrom"/>
+		<result property="newStandardForm" column="newStandardForm"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <!-- 查询报告检验标准(调价)(可分页)-->
+    <select id="searchCheckStandardAdjustprice" resultMap="checkStandardAdjustpriceMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		   t1.report_code         reportCode,
+		       t1.old_standard_colour oldStandardColour,
+		       t1.new_standard_colour newStandardColour,
+		       t1.old_standard_smell  oldStandardSmell,
+		       t1.new_standard_smell  newStandardSmell,
+		       t1.old_standard_from   oldStandardFrom,
+		       t1.new_standard_form   newStandardForm,
+		       t2.application_code    applicationCode,
+		       t2.merchandise_code    merchandiseCode,
+		       t2.supplier_code       supplierCode
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM check_standard_adjustprice t1,application_report_adjustprice t2
+  	   WHERE  t1.report_code=t2.report_code
+    		
+    		<if test= "intentionCode != null and intentionCode !=''">
+			AND t2.merchandise_code= #{intentionCode}
+			</if>
+		    <if test= "supplierCode != null and supplierCode !=''">
+			AND t2.supplier_code= #{supplierCode}
+			</if>
+    </select>
+    
+    <!-- 增加报告检验标准(调价) --> 
+	<insert id="saveCheckStandardAdjustprice" parameterType="hashmap">
+		INSERT INTO check_standard_adjustprice(report_code,old_standard_colour,new_standard_colour,old_standard_smell,
+			new_standard_smell,old_standard_from,new_standard_form,old_moisture_content,new_moisture_content) 
+	 	VALUES(#{reportCode},#{oldStandardColour},#{newStandardColour},#{oldStandardSmell},
+	 		#{newStandardSmell},#{oldStandardFrom},#{newStandardForm},#{oldMoistureContent},#{newMoistureContent})
+    </insert>
+    <!-- 删除报告检验标准(调价) -->
+    <delete id="deleteCheckStandardAdjustprice" parameterType="hashmap">
+        DELETE FROM 
+        			check_standard_adjustprice 
+        WHERE 
+        			REPORT_CODE=#{reportCode} <!--AND client_id=#{app_user_clientID}-->
+    </delete>
+    <!-- 删除报告检验标准(调价) -->
+    <delete id="deleteCheckStandardAdjustpriceByCode" parameterType="hashmap">
+        DELETE FROM 
+        			check_standard_adjustprice 
+        WHERE 
+        			REPORT_CODE IN (SELECT report_code FROM　application_report_adjustprice　WHERE APPLICATION_CODE IN (${applicationCodes}))
+    </delete>
+    
+    
+    <!-- 商品原料情况 -->
+    <resultMap type="com.powere2e.sco.model.merchandiseoaapplication.reportadjustpriceoaapplication.reportadjustprice.MerchandiseMaterial" id="merchandiseMaterialMap">
+		<result property="reportCode" column="reportCode"/>
+		<result property="reportType" column="reportType"/>
+		<result property="materialName" column="materialName"/>
+		<result property="materialSite" column="materialSite"/>
+		<result property="materialDate" column="materialDate"/>
+		<result property="materialCount" column="materialCount"/>
+		<result property="sellDate" column="sellDate"/>
+		<result property="remarks" column="remarks"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <!-- 查询商品原料情况(调价)(可分页)-->
+    <select id="searchMerchandiseMaterial" resultMap="merchandiseMaterialMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		   t1.report_code    reportCode,
+		       t1.report_type    reportType,
+		       t1.material_name  materialName,
+		       t1.material_site  materialSite,
+		       t1.material_date  materialDate,
+		       t1.material_count materialCount,
+		       t1.sell_date      sellDate,
+		       t1.remarks        remarks,
+		        t2.application_code    applicationCode,
+		       t2.merchandise_code    merchandiseCode,
+		       t2.supplier_code       supplierCode
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM merchandise_material t1,application_report_adjustprice t2
+  	   WHERE  t1.report_code=t2.report_code
+    AND    t2.application_code=#{applicationCode}	
+    		<if test= "intentionCode != null and intentionCode !=''">
+			AND t2.merchandise_code= #{intentionCode}
+			</if>
+		    <if test= "supplierCode != null and supplierCode !=''">
+			AND t2.supplier_code= #{supplierCode}
+			</if>
+    </select>
+    
+    
+    <!-- 增加商品原料情况(调价) --> 
+	<insert id="saveMerchandiseMaterial" parameterType="hashmap">
+		INSERT INTO merchandise_material(report_code,report_type,material_name,material_site,material_date,material_count,sell_date,remarks) 
+			 VALUES(#{reportCode},#{reportType},#{materialName},#{materialSite},#{materialDate},#{materialCount},#{sellDate},#{remarks})
+    </insert>
+    <!-- 删除商品原料情况(调价) -->
+    <delete id="deleteMerchandiseMaterial" parameterType="hashmap">
+        DELETE FROM 
+        			merchandise_material 
+        WHERE 
+        			REPORT_CODE=#{reportCode} <!--AND client_id=#{app_user_clientID}-->
+    </delete>
+    <!-- 删除商品原料情况(调价) -->
+    <delete id="deleteMerchandiseMaterialByCode" parameterType="hashmap">
+        DELETE FROM 
+        			merchandise_material 
+        WHERE 
+        			REPORT_CODE IN (SELECT report_code FROM　application_report_adjustprice　WHERE APPLICATION_CODE IN (${applicationCodes}))
+    </delete>
+    
+    <!--商品签量总计  -->
+    <resultMap type="com.powere2e.sco.model.merchandiseoaapplication.reportadjustpriceoaapplication.reportadjustprice.AtpTotalAdjustprice" id="atpTotalAdjustpriceMap">
+		<result property="reportCode" column="reportCode"/>
+		<result property="atpQuantitySum" column="atpQuantitySum"/>
+		<result property="atpQuantitySumAccomplish" column="atpQuantitySumAccomplish"/>
+		<result property="atpQuantitySumUnfinished" column="atpQuantitySumUnfinished"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <!-- 查询商品签量情况-总(可分页)-->
+    <select id="searchAtpTotalAdjustprice" resultMap="atpTotalAdjustpriceMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		 	t1.report_code                 reportCode,
+		       t1.atp_quantity_sum            atpQuantitySum,
+		       t1.atp_quantity_sum_accomplish atpQuantitySumAccomplish,
+		       t1.atp_quantity_sum_unfinished atpQuantitySumUnfinished,
+		        t2.application_code    applicationCode,
+		       t2.merchandise_code    merchandiseCode,
+		       t2.supplier_code       supplierCode
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM atp_total_adjustprice t1,application_report_adjustprice t2
+  	   WHERE  t1.report_code=t2.report_code
+    		
+    		<if test= "intentionCode != null and intentionCode !=''">
+			AND t2.merchandise_code= #{intentionCode}
+			</if>
+		    <if test= "supplierCode != null and supplierCode !=''">
+			AND t2.supplier_code= #{supplierCode}
+			</if>
+    </select>
+    <!-- 增加商品签量情况-总 --> 
+	<insert id="saveAtpTotalAdjustprice" parameterType="hashmap">
+		INSERT INTO atp_total_adjustprice(report_code,ql_date,atp_quantity_sum,atp_quantity_sum_accomplish,atp_quantity_sum_unfinished,remarks) 
+			 VALUES(#{reportCode},#{qlDate},#{atpQuantitySum},#{atpQuantitySumAccomplish},#{atpQuantitySumUnfinished},#{remarks})
+    </insert>
+    <!-- 删除商品签量情况-总 -->
+    <delete id="deleteAtpTotalAdjustprice" parameterType="hashmap">
+        DELETE FROM 
+        			atp_total_adjustprice 
+        WHERE 
+        			REPORT_CODE=#{reportCode} <!--AND client_id=#{app_user_clientID}-->
+    </delete>
+    <!-- 删除商品签量情况-总 -->
+    <delete id="deleteAtpTotalAdjustpriceByCode" parameterType="hashmap">
+        DELETE FROM 
+        			atp_total_adjustprice 
+        WHERE 
+        			REPORT_CODE IN (SELECT report_code FROM　application_report_adjustprice　WHERE APPLICATION_CODE IN (${applicationCodes}))
+    </delete>
+    
+    
+    <!-- 品签量情况-明细 -->
+    <resultMap type="com.powere2e.sco.model.merchandiseoaapplication.reportadjustpriceoaapplication.reportadjustprice.AtpItemAdjustprice" id="atpItemAdjustpriceMap">
+		<result property="reportCode" column="reportCode"/>
+		<result property="atpQuantityDate" column="atpQuantityDate"/>
+		<result property="atpQuantityCount" column="atpQuantityCount"/>
+		<result property="remarks" column="remarks"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <!-- 查询商品签量情况-明细(调价)(可分页)-->
+    <select id="searchAtpItemAdjustprice" resultMap="atpItemAdjustpriceMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		   t1.report_code        reportCode,
+		       t1.atp_quantity_date  atpQuantityDate,
+		       t1.atp_quantity_count atpQuantityCount,
+		       t1.remarks            remarks,
+		        t2.application_code    applicationCode,
+		       t2.merchandise_code    merchandiseCode,
+		       t2.supplier_code       supplierCode
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM atp_item_adjustprice t1,application_report_adjustprice t2
+  	   WHERE  t1.report_code=t2.report_code
+    		
+    		<if test= "intentionCode != null and intentionCode !=''">
+			AND t2.merchandise_code= #{intentionCode}
+			</if>
+		    <if test= "supplierCode != null and supplierCode !=''">
+			AND t2.supplier_code= #{supplierCode}
+			</if>
+    </select>
+    
+    <!-- 增加商品签量情况-明细(调价) --> 
+	<insert id="saveAtpItemAdjustprice" parameterType="hashmap">
+		INSERT INTO atp_item_adjustprice(report_code,atp_quantity_date,atp_quantity_count,remarks) 
+			 VALUES(#{reportCode},#{atpQuantityDate},#{atpQuantityCount},#{remarks})
+    </insert>
+    <!-- 删除商品签量情况-明细(调价) -->
+    <delete id="deleteAtpItemAdjustprice" parameterType="hashmap">
+        DELETE FROM 
+        			atp_item_adjustprice 
+        WHERE 
+        			REPORT_CODE=#{reportCode} <!--AND client_id=#{app_user_clientID}-->
+    </delete>
+    <!-- 删除商品签量情况-明细(调价) -->
+    <delete id="deleteAtpItemAdjustpriceByCode" parameterType="hashmap">
+        DELETE FROM 
+        			atp_item_adjustprice 
+        WHERE 
+        			REPORT_CODE IN (SELECT report_code FROM　application_report_adjustprice　WHERE APPLICATION_CODE IN (${applicationCodes}))
+    </delete>
+    
+    <!-- 同类商品市场零售价 -->
+    <resultMap type="com.powere2e.sco.model.merchandiseoaapplication.reportadjustpriceoaapplication.reportadjustprice.SameMerchandiseAdjustprice" id="sameMerchandiseAdjustpriceMap">
+		<result property="reportCode" column="reportCode"/>
+		<result property="reportType" column="reportType"/>
+		<result property="trademark" column="trademark"/>
+		<result property="merchandiseName" column="merchandiseName"/>
+		<result property="sellChannel" column="sellChannel"/>
+		<result property="sellUnits" column="sellUnits"/>
+		<result property="sellPrice" column="sellPrice"/>
+		<result property="kgPrice" column="kgPrice"/>
+		<result property="remarks" column="remarks"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <!-- 查询同类商品市场零售价(调价)(可分页)-->
+    <select id="searchSameMerchandiseAdjustprice" resultMap="sameMerchandiseAdjustpriceMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		   t1.report_code      reportCode,
+		       t1.report_type      reportType,
+		       t1.trademark        trademark,
+		       t1.merchandise_name merchandiseName,
+		       t1.sell_channel     sellChannel,
+		       t1.sell_units       sellUnits,
+		       t1.sell_price       sellPrice,
+		       t1.kg_price         kgPrice,
+		       t1.remarks,
+		       t2.application_code    applicationCode,
+		       t2.merchandise_code    merchandiseCode,
+		       t2.supplier_code       supplierCode
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM same_merchandise_adjustprice t1,application_report_adjustprice t2
+  	   WHERE  t1.report_code=t2.report_code
+  	   AND    t2.application_code=#{applicationCode}
+    		
+    		<if test= "intentionCode != null and intentionCode !=''">
+			AND t2.merchandise_code= #{intentionCode}
+			</if>
+		    <if test= "supplierCode != null and supplierCode !=''">
+			AND t2.supplier_code= #{supplierCode}
+			</if>
+    </select>
+        
+    <!-- 增加同类商品市场零售价(调价) --> 
+	<insert id="saveSameMerchandiseAdjustprice" parameterType="hashmap">
+		INSERT INTO same_merchandise_adjustprice(report_code,report_type,trademark,merchandise_name,sell_channel,sell_units,sell_price,kg_price,remarks) 
+			 VALUES(#{reportCode},#{reportType},#{trademark},#{merchandiseName},#{sellChannel},#{sellUnits},#{sellPrice},#{kgPrice},#{remarks})
+    </insert>
+    <!-- 删除同类商品市场零售价(调价) -->
+    <delete id="deleteSameMerchandiseAdjustprice" parameterType="hashmap">
+        DELETE FROM 
+        			same_merchandise_adjustprice 
+        WHERE 
+        			REPORT_CODE=#{reportCode} <!--AND client_id=#{app_user_clientID}-->
+    </delete>
+    <!-- 删除同类商品市场零售价(调价) -->
+    <delete id="deleteSameMerchandiseAdjustpriceByCode" parameterType="hashmap">
+        DELETE FROM 
+        			same_merchandise_adjustprice 
+        WHERE 
+        			REPORT_CODE IN (SELECT report_code FROM　application_report_adjustprice　WHERE APPLICATION_CODE IN (${applicationCodes}))
+    </delete>
+    
+     <!-- 根据申请单号删除关联分析报表(商品OA) -->
+    <delete id="deleteAnalysisReportsMByApplicationCode" parameterType="hashmap">
+        DELETE FROM 
+        			analysis_reports_m 
+        WHERE 
+        			APPLICATION_CODE IN  (${applicationCodes})
+    </delete>
+    
+</mapper>

@@ -1,0 +1,739 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.suppliercomprehensiveanalysis.SupplierComprehensiveAnalysisDao">
+	<resultMap type="com.powere2e.sco.model.suppliercomprehensiveanalysis.SupplierComprehensiveAnalysis" id="SupplierComprehensiveAnalysisMap">
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="supplierName" column="supplierName"/>
+		<result property="supplierSite" column="supplierSite"/>
+		<result property="goodsName" column="goodsName"/>
+		<result property="goodsCode" column="goodsCode"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <resultMap type="com.powere2e.sco.model.suppliercomprehensiveanalysis.SupplierComprehensiveAnalysisForm" id="SupplierComprehensiveAnalysisFormMap">
+    	<result property="supplierCode" column="supplierCode"/>
+    	<result property="supplierName" column="supplierName"/>
+        <result property="sjsjfw" column="sjsjfw"/>
+		<result property="xsl" column="xsl"/>
+		<result property="xsje" column="xsje"/>
+		<result property="mle" column="mle"/>
+		<result property="xslzball" column="xslzball"/>
+		<result property="xsjezball" column="xsjezball"/>
+		<result property="mlezball" column="mlezball"/>
+		<result property="xslzbxfl" column="xslzbxfl"/>
+		<result property="xsjezbxfl" column="xsjezbxfl"/>
+		<result property="mlezbxfl" column="mlezbxfl"/>
+		<result property="xslzbmxl" column="xslzbmxl"/>
+		<result property="xsjezbmxl" column="xsjezbmxl"/>
+		<result property="mlezbmxl" column="mlezbmxl"/>
+		<result property="psdxl" column="psdxl"/>
+		<result property="psdxsje" column="psdxsje"/>
+		<result property="psdml" column="psdml"/>
+		<result property="qxs" column="qxs"/>
+		<result property="qxdt" column="qxdt"/>
+		<result property="xsdt" column="xsdt"/>
+		<result property="hyd" column="hyd"/>
+		<result property="amds" column="amds"/>
+		<result property="bmds" column="bmds"/>
+		<result property="cmds" column="cmds"/>
+		<result property="dmds" column="dmds"/>
+		<result property="jhl" column="jhl"/>
+		<result property="jhe" column="jhe"/>
+		<result property="ddjsl" column="ddjsl"/>
+		<result property="ddmzl" column="ddmzl"/>
+		<result property="rbjssl" column="rbjssl"/>
+		<result property="rbjscs" column="rbjscs"/>
+		<result property="gyssjkc" column="gyssjkc"/>
+		<result property="gysaqkc" column="gysaqkc"/>
+		<result property="zlxj" column="zlxj"/>
+		<result property="zhcs" column="zhcs"/>
+		<result property="zhsl" column="zhsl"/>
+		<result property="zhskugs" column="zhskugs"/>
+		<result property="cjbhgcs" column="cjbhgcs"/>
+		<result property="cjbhgskus" column="cjbhgskus"/>
+		<result property="rchgl" column="rchgl"/>
+		<result property="gysndqwyks" column="gysndqwyks"/>
+		<result property="gysxcpf" column="gysxcpf"/>
+		<result property="gyskpdf" column="gyskpdf"/>
+		<result property="gyskpdfph" column="gyskpdfph"/>
+		<result property="gysyxps" column="gysyxps"/>
+		<result property="zdmj" column="zdmj"/>
+		<result property="cjmj" column="cjmj"/>
+		<result property="nzcz" column="nzcz"/>
+		<result property="qyzrs" column="qyzrs"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    
+     <!-- 查询采购委员会竞价单OA申请列表(可分页)-->
+    <select id="listSupplierComprehensiveAnalysis" resultMap="SupplierComprehensiveAnalysisMap">
+    	SELECT  
+    	<if test="page_count == null">
+ 			g.* 
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+    	from
+    	(SELECT 
+       		 t.SUPPLIER_CODE supplierCode,t.SUPPLIER_NAME supplierName,t.COMPANY_SITE supplierSite
+    	
+      		FROM supplier t
+      		left join merchandise t1 on t1.SUPPLIER_CODE=t.SUPPLIER_CODE
+      		
+    	<where>
+    		1=1
+			 <if test= "supplierCode != null and supplierCode!=''">
+			AND UPPER(t.SUPPLIER_CODE) LIKE UPPER('%'||#{supplierCode}||'%')
+			</if>
+			 <if test= "supplierName != null and supplierName!=''">
+			AND UPPER(t.SUPPLIER_NAME) LIKE UPPER('%'||#{supplierName}||'%')
+			</if>
+			<if test= "goodsCode != null and goodsCode!=''">
+			AND UPPER(t1.MERCHANDISE_CODE) LIKE UPPER('%'||#{goodsCode}||'%')
+			</if>
+			<if test= "goodsName != null and goodsName!=''">
+			AND UPPER(t1.MERCHANDISE_NAME) LIKE UPPER('%'||#{goodsName}||'%')
+			</if>
+    	</where>
+    	group by  t.SUPPLIER_CODE,t.SUPPLIER_NAME,t.COMPANY_SITE
+    	) g 
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY g.supplierCode desc
+    		</if>
+    	</if>
+    </select>
+    
+    
+    <!-- 查询采购委员会竞价单OA申请列表(可分页)-->
+    <select id="listSupplierComprehensiveAnalysisForm" resultMap="SupplierComprehensiveAnalysisFormMap">
+    SELECT  
+    	<if test="page_count == null">
+ 			g.* 
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+    	from
+    	(SELECT   
+       		 (#{minDate}||'-'||#{maxDate}) sjsjfw,t.SUPPLIER_CODE supplierCode,t.SUPPLIER_NAME supplierName,
+       		 round(t1.xsl,2) xsl, round(t1.xsje,2) xsje,round(t1.mle,2) mle,
+       		 to_char(round((t1.xsl*100.00/(case when t1.zxsl=0 then 1 else t1.zxsl end)),2),'fm9999999990.00')||'%' as  xslzball,
+       		 to_char(round ((t1.xsje*100.00/t1.zxsje),2),'fm9999999990.00')||'%' as xsjezball,
+			to_char(round ((t1.mle*100.00/t1.zmle),2),'fm9999999990.00')||'%' as mlezball, 
+		<if test= "smallTypeCode != null and smallTypeCode!='' and detailTypeCode != null and detailTypeCode!=''">
+			to_char(round ((t1.xsl*100.00/t1.xflzxl),2),'fm9999999990.00')||'%' as xslzbxfl,
+			to_char(round ((t1.xsje*100.00/t1.xflzxsje),2),'fm9999999990.00')||'%' as xsjezbxfl,
+			to_char(round ((t1.mle*100.00/t1.xflzmle),2),'fm9999999990.00')||'%' as mlezbxfl,
+			to_char(round ((t1.xsl*100.00/t1.mxlzxl),2),'fm9999999990.00')||'%' as xslzbmxl,
+			to_char(round ((t1.xsje*100.00/t1.mxlzxsje),2),'fm9999999990.00')||'%' as xsjezbmxl,
+			to_char(round ((t1.mle*100.00/t1.mxlzmle),2),'fm9999999990.00')||'%' as mlezbmxl,
+		</if>
+		<if test= "smallTypeCode != null and smallTypeCode!=''  and (detailTypeCode == null ||detailTypeCode=='')">
+			to_char(round ((t1.xsl*100.00/t1.xflzxl),2),'fm9999999990.00')||'%' as xslzbxfl,
+			to_char(round ((t1.xsje*100.00/t1.xflzxsje),2),'fm9999999990.00')||'%' as xsjezbxfl,
+			to_char(round ((t1.mle*100.00/t1.xflzmle),2),'fm9999999990.00')||'%' as mlezbxfl,
+			'' as xslzbmxl,'' as xsjezbmxl,'' as mlezbmxl,
+		</if>
+		<if test= "(smallTypeCode == null || smallTypeCode=='')and(detailTypeCode == null || detailTypeCode=='')">
+			'' as xslzbxfl,'' as xsjezbxfl,'' as mlezbxfl,'' as xslzbmxl,'' as xsjezbmxl,'' as mlezbmxl,
+		</if>
+			to_char(round ((t1.xsl*1.00/t1.xsdt),2),'fm9999999990.00') psdxl,
+			to_char(round ((t1.xsje*1.00/t1.xsdt),2),'fm9999999990.00') psdxsje,
+			to_char(round ((t1.mle*1.00/t1.xsdt),2),'fm9999999990.00') psdml,
+			t2.mdszh qxs,t2.qxdt,t1.xsdt,
+			to_char(round ((CASE WHEN (t1.xsdt*100.00/t2.qxdt)>100 then 100 else (t1.xsdt*100.00/t2.qxdt)  END),2),'fm9999999990.00')||'%' as hyd,
+			t2.amds,t2.bmds,t2.cmds,t2.dmds,t3.jhl,t3.jhe,to_char(round ((t14.jsdhsl*100.00/t12.ddzs),2),'fm9999999990.00')||'%' as ddjsl,
+			to_char(round ((t13.shzl*100.00/t12.dhzl),2),'fm9999999990.00')||'%' as ddmzl,
+			t11.rbjssl,t11.rbjscs,t5.zlxj,
+			t6.zhcs,t6.zhsl,t7.zhskugs,t8.gysndqwyks,t9.gysxcpf,round(t9.zdmj,2) zdmj,
+			round(t9.cjmj,2) cjmj,round(t9.nzcz,2) nzcz,round(t9.qyzrs,0) qyzrs,t10.gyskpdf,
+			t10.gyskpdfph,(nvl(t4.gysyxps1,0)+nvl(t41.gysyxps2,0)) gysyxps,t15.cjbhgcs,t15.cjbhgcs cjbhgskus
+    
+    	 
+    	from SUPPLIER t
+    	 
+      		left join  (select supplierCode,--供应商编号
+       sum(SELL_QUANTITY) xsl,--供应商销售量
+       sum(SELL_TOTAL_PRICE) xsje,--供应商销售金额
+       sum(SELL_PROFIT) mle,--供应商毛利额
+       sum(SELL_STORE_QUANTITY) xsdt, --供应商总销售店天
+      ( select sum(SELL_QUANTITY) from (select k.SELL_QUANTITY * nvl(k1.NET_WEIGHT, 1) SELL_QUANTITY,
+               SELL_TOTAL_PRICE,
+               SELL_PROFIT,
+               k.supplier_code supplierCode
+          from MERCHANDISE_SELL_D_J_MONTH k
+          inner join MERCHANDISE k1
+            on (k.merchandise_code = k1.merchandise_code and k.supplier_code=k1.supplier_code)
+         where k.sell_month <![CDATA[>=]]> #{minDate}
+           and k.sell_month <![CDATA[<=]]> #{maxDate}
+            and ( (k.MERCHANDISE_CODE<![CDATA[>=]]>10000 and k.MERCHANDISE_CODE<![CDATA[<=]]>59999)
+           or (k.MERCHANDISE_CODE<![CDATA[>=]]>70000 and k.MERCHANDISE_CODE<![CDATA[<=]]>79999)
+           or (k.MERCHANDISE_CODE<![CDATA[>=]]>814000000 and k.MERCHANDISE_CODE<![CDATA[<=]]>814999999)
+           or (k.MERCHANDISE_CODE<![CDATA[>=]]>900000000 and k.MERCHANDISE_CODE<![CDATA[<=]]>999999999) )
+           )) zxsl,
+      ( select sum(SELL_TOTAL_PRICE) from MERCHANDISE_SELL_D_J_MONTH k inner join MERCHANDISE k1
+            on (k.merchandise_code = k1.merchandise_code and k.supplier_code=k1.supplier_code) where k.sell_month <![CDATA[>=]]>#{minDate} and  k.sell_month <![CDATA[<=]]>#{maxDate} and ( (k.MERCHANDISE_CODE<![CDATA[>=]]>10000 and k.MERCHANDISE_CODE<![CDATA[<=]]>59999)
+           or (k.MERCHANDISE_CODE<![CDATA[>=]]>70000 and k.MERCHANDISE_CODE<![CDATA[<=]]>79999)
+           or (k.MERCHANDISE_CODE<![CDATA[>=]]>814000000 and k.MERCHANDISE_CODE<![CDATA[<=]]>814999999)
+           or (k.MERCHANDISE_CODE<![CDATA[>=]]>900000000 and k.MERCHANDISE_CODE<![CDATA[<=]]>999999999) )) zxsje, --总销售金额
+       ( select sum(SELL_PROFIT) from MERCHANDISE_SELL_D_J_MONTH k inner join MERCHANDISE k1
+            on (k.merchandise_code = k1.merchandise_code and k.supplier_code=k1.supplier_code) where k.sell_month <![CDATA[>=]]>#{minDate} and  k.sell_month <![CDATA[<=]]>#{maxDate} and ( (k.MERCHANDISE_CODE<![CDATA[>=]]>10000 and k.MERCHANDISE_CODE<![CDATA[<=]]>59999)
+           or (k.MERCHANDISE_CODE<![CDATA[>=]]>70000 and k.MERCHANDISE_CODE<![CDATA[<=]]>79999)
+           or (k.MERCHANDISE_CODE<![CDATA[>=]]>814000000 and k.MERCHANDISE_CODE<![CDATA[<=]]>814999999)
+           or (k.MERCHANDISE_CODE<![CDATA[>=]]>900000000 and k.MERCHANDISE_CODE<![CDATA[<=]]>999999999) )) zmle, --总毛利额
+       (select sum(SELL_QUANTITY) xflzxl from (select k.SELL_QUANTITY * nvl(k1.net_weight, 1) SELL_QUANTITY
+                        from MERCHANDISE_SELL_D_J_MONTH k
+                        inner  join MERCHANDISE k1
+                          on (k.merchandise_code = k1.merchandise_code and k.supplier_code=k1.supplier_code) where k1.small_type_code=#{smallTypeCode} and  k.sell_month <![CDATA[>=]]> #{minDate}
+           and k.sell_month <![CDATA[<=]]> #{maxDate}) ) xflzxl,--小分类总销量
+         (select sum(SELL_QUANTITY) mxlzxl from (select k.SELL_QUANTITY * nvl(k1.net_weight, 1) SELL_QUANTITY
+                        from MERCHANDISE_SELL_D_J_MONTH k
+                        inner  join MERCHANDISE k1
+                          on (k.merchandise_code = k1.merchandise_code and k.supplier_code=k1.supplier_code) where k1.small_type_code=#{smallTypeCode} and k1.detail_type_code=#{detailTypeCode}  and  k.sell_month <![CDATA[>=]]> #{minDate}
+           and k.sell_month <![CDATA[<=]]> #{maxDate}) ) mxlzxl,--明细类总销量
+         (select sum(SELL_TOTAL_PRICE) from MERCHANDISE_SELL_D_J_MONTH k inner  join MERCHANDISE k1
+                          on (k.merchandise_code = k1.merchandise_code and k.supplier_code=k1.supplier_code) where k1.small_type_code=#{smallTypeCode} and  k.sell_month <![CDATA[>=]]> #{minDate}
+           and k.sell_month <![CDATA[<=]]> #{maxDate}) xflzxsje ,--小分类总销售金额
+            (select sum(SELL_TOTAL_PRICE) from MERCHANDISE_SELL_D_J_MONTH k inner  join MERCHANDISE k1
+                          on (k.merchandise_code = k1.merchandise_code and k.supplier_code=k1.supplier_code) where k1.small_type_code=#{smallTypeCode} and k1.detail_type_code=#{detailTypeCode} and  k.sell_month <![CDATA[>=]]> #{minDate}
+           and k.sell_month <![CDATA[<=]]> #{maxDate}) mxlzxsje, --明细类总销售金额
+           (select sum(SELL_PROFIT) from MERCHANDISE_SELL_D_J_MONTH k inner  join MERCHANDISE k1
+                          on (k.merchandise_code = k1.merchandise_code and k.supplier_code=k1.supplier_code) where k1.small_type_code=#{smallTypeCode} and k1.detail_type_code=#{detailTypeCode} and  k.sell_month <![CDATA[>=]]> #{minDate}
+           and k.sell_month <![CDATA[<=]]> #{maxDate}) mxlzmle, --明细类总毛利
+           (select sum(SELL_PROFIT) from MERCHANDISE_SELL_D_J_MONTH k inner  join MERCHANDISE k1
+                          on (k.merchandise_code = k1.merchandise_code and k.supplier_code=k1.supplier_code) where k1.small_type_code=#{smallTypeCode} and  k.sell_month <![CDATA[>=]]> #{minDate}
+           and k.sell_month <![CDATA[<=]]> #{maxDate}) xflzmle --小分类总毛利
+  from (select k.SELL_QUANTITY * nvl(k1.NET_WEIGHT, 1) SELL_QUANTITY,
+               SELL_TOTAL_PRICE,
+               SELL_PROFIT,
+               SELL_STORE_QUANTITY,
+               k.supplier_code supplierCode
+          from MERCHANDISE_SELL_D_J_MONTH k
+          inner join MERCHANDISE k1
+            on (k.merchandise_code = k1.merchandise_code and k.supplier_code=k1.supplier_code)
+         where k.sell_month <![CDATA[>=]]> #{minDate}
+           and k.sell_month <![CDATA[<=]]> #{maxDate}
+        ) where supplierCode in (${supplierCode})
+	group by supplierCode) t1 on t.SUPPLIER_CODE=t1.supplierCode
+		left join 
+		
+		(select mer.supplier_code supplierCode,(sum(A_STORE_QUANTITY)+sum(B_STORE_QUANTITY)+sum(C_STORE_QUANTITY)+sum(D_STORE_QUANTITY)) mdszh ,sum(PERMISSION_STORE_QUANTITY) qxdt,sum(A_STORE_QUANTITY) amds,sum(B_STORE_QUANTITY) bmds,sum(C_STORE_QUANTITY) cmds,sum(D_STORE_QUANTITY) dmds from MERCHANDISE_JH_PERMISSION mjp
+		inner join MERCHANDISE mer on mjp.merchandise_code=mer.merchandise_code
+		where  to_char(mjp.permission_date,'YYYY-MM')<![CDATA[>=]]>#{minDate} and  to_char(mjp.permission_date,'YYYY-MM')<![CDATA[<=]]>#{maxDate} AND mer.supplier_code in (${supplierCode})
+		group by mer.supplier_code ) t2 on t.SUPPLIER_CODE=t2.supplierCode--门店数总和，权限店天，ABCD门店数（分别)
+		left join 
+		(select mr.supplier_code supplierCode,sum(mr.receipt_rationed) jhl,sum(mr.receipt_total_price) jhe from  ( select (mer.receipt_rationed * nvl(k1.net_weight, 1)) receipt_rationed,mer.receipt_total_price,mer.reality_receipt_date,mer.supplier_code from  MERCHANDISE_RECEIPT mer
+		 inner join MERCHANDISE k1
+		 on (mer.merchandise_code = k1.merchandise_code and mer.supplier_code=k1.supplier_code)) mr where  to_char(mr.reality_receipt_date,'YYYY-MM')<![CDATA[>=]]>#{minDate} and  to_char(mr.reality_receipt_date,'YYYY-MM')<![CDATA[<=]]>#{maxDate}  AND mr.supplier_code in (${supplierCode})
+		group by mr.supplier_code) t3 on t.SUPPLIER_CODE=t3.supplierCode--进货量，进货额
+		left join 
+		(select ism.INTENTION_SUPPLIER_CODE supplierCode,count(1) gysyxps1 from(select INTENTION_SUPPLIER_CODE,INTENTION_CODE from  ACCESSORY_QUOTED_ELECTRONIC where  to_char(created,'YYYY-MM')<![CDATA[>=]]>#{minDate} and  to_char(created,'YYYY-MM')<![CDATA[<=]]>#{maxDate}  AND intention_supplier_code in (${supplierCode}) group by INTENTION_SUPPLIER_CODE,INTENTION_CODE) ism 
+		group by ism.INTENTION_SUPPLIER_CODE) t4 on t.SUPPLIER_CODE=t4.supplierCode--供应商意向品数辅料
+		left join 
+		(select ism1.INTENTION_SUPPLIER_CODE supplierCode,count(1) gysyxps2 from(select INTENTION_SUPPLIER_CODE,INTENTION_CODE from  MERCHANDISE_QUOTED where  to_char(created,'YYYY-MM')<![CDATA[>=]]>#{minDate} and  to_char(created,'YYYY-MM')<![CDATA[<=]]>#{maxDate}  AND intention_supplier_code in (${supplierCode}) group by INTENTION_SUPPLIER_CODE,INTENTION_CODE) ism1 
+		group by ism1.INTENTION_SUPPLIER_CODE) t41 on t.SUPPLIER_CODE=t41.supplierCode--供应商意向品数商品
+		left join 
+		(select sl.supplier_code supplierCode ,sl.quality_level zlxj from SUPPLIER_QUALITY_LEVEL sl where sl.quality_level_year=#{lastYear}  AND sl.supplier_code in (${supplierCode}))t5 on t.SUPPLIER_CODE=t5.supplierCode--供应商质量星级
+		left join 
+		(select mrec.supplier_code supplierCode,count(1) zhcs,sum(RECYCLE_COUNT)zhsl from MERCHANDISE_RECYCLE mrec where  to_char(mrec.recycle_date,'YYYY-MM')<![CDATA[>=]]>#{minDate} and   to_char(mrec.recycle_date,'YYYY-MM')<![CDATA[<=]]>#{maxDate} AND mrec.supplier_code in (${supplierCode})
+		group by mrec.supplier_code)t6 on t.SUPPLIER_CODE=t6.supplierCode--供应商召回次数，召回数量
+		left join 
+		(select merc1.supplier_code  supplierCode,count(merc1.merchandise_code) zhskugs from( select mrec.supplier_code,mrec.merchandise_code from MERCHANDISE_RECYCLE mrec where  to_char(mrec.recycle_date,'YYYY-MM')<![CDATA[>=]]>#{minDate} and   to_char(mrec.recycle_date,'YYYY-MM')<![CDATA[<=]]>#{maxDate}  AND mrec.supplier_code in (${supplierCode})group by mrec.supplier_code,mrec.merchandise_code)merc1
+		group by  merc1.supplier_code ) t7 on t.SUPPLIER_CODE=t7.supplierCode--供应商召回sku个数
+		left join 
+		(select scom.supplier_code supplierCode,sum(COMPLAINTS_COUNT) gysndqwyks from SUPPLIER_COMPLAINTS scom where scom.complaints_year=#{lastYear} AND scom.supplier_code in (${supplierCode}) group by scom.supplier_code) t8 on t.SUPPLIER_CODE=t8.supplierCode--供应商千万元客诉
+		left join 
+		(select svf.supplier_code supplierCode,avg(svf.score) gysxcpf,avg(svf.FLOOR_AREA) zdmj,avg(svf.PLANT_AREA) cjmj,avg(svf.YEAR_TOTAL_OUTPUT) nzcz,avg(svf.ENTERPRISE_COUNT_PEOPLE) qyzrs from SUPPLIER_VISIT_FACTORY svf where  to_char(svf.visit_factory_date,'YYYY-MM')<![CDATA[>=]]>#{minDate} and    to_char(svf.visit_factory_date,'YYYY-MM')<![CDATA[<=]]>#{maxDate} AND svf.supplier_code in (${supplierCode}) group by svf.supplier_code)t9 on t.SUPPLIER_CODE=t9.supplierCode--供应商巡查评分
+		left join 
+		(select ses1.supplier_code supplierCode,ses1.evaluate_item_score gyskpdf,rank() over(order by ses1.evaluate_item_score desc) as gyskpdfph from SUPPLIER_EVALUATE_SCORE ses1
+		where created =(select max(created) from SUPPLIER_EVALUATE_SCORE ses2 where ses2.supplier_code=ses1.supplier_code and  to_char(ses2.created,'YYYY-MM')<![CDATA[>=]]>#{minDate} and    to_char(ses2.created,'YYYY-MM')<![CDATA[<=]]>#{maxDate} AND ses1.supplier_code in (${supplierCode}))) t10 on t.SUPPLIER_CODE=t10.supplierCode--供应商考评得分及排名
+		left join 
+		(select conre.supplier_code supplierCode ,sum(CONCESSION_RECEIVE_COUNT) rbjssl,count(1) rbjscs from CONCESSION_RECEIVE conre where  to_char(conre.APPLICATION_DATE,'YYYY-MM')<![CDATA[>=]]>#{minDate} and   to_char(conre.APPLICATION_DATE,'YYYY-MM')<![CDATA[<=]]>#{maxDate} AND conre.supplier_code in (${supplierCode}) group by conre.supplier_code) t11 on t.SUPPLIER_CODE=t11.supplierCode--让步接收数量，次数
+		left join 
+		(select supplier_code supplierCode,sum(ORDER_QUANTITY) dhzl,count(1) ddzs from MERCHANDISE_ORDER where  to_char(EXPECT_ARRIVE_DATE,'YYYY-MM')<![CDATA[>=]]>#{minDate} and    to_char(EXPECT_ARRIVE_DATE,'YYYY-MM')<![CDATA[<=]]>#{maxDate} AND ORDER_QUANTITY <![CDATA[>=]]>0 AND supplier_code in (${supplierCode}) group by supplier_code ) t12 on t.SUPPLIER_CODE=t12.supplierCode--供应商订货总量,订单总数
+		left join 
+		(select MR.supplier_code supplierCode,sum(MR.RECEIPT_RATIONED) shzl from MERCHANDISE_RECEIPT  MR
+		  inner join MERCHANDISE_ORDER MO  on MR.ORDER_CODE=MO.ORDER_CODE and MR.SUPPLIER_CODE = MO.SUPPLIER_CODE
+		   and MR.MERCHANDISE_CODE = MO.MERCHANDISE_CODE where MR.RECEIPT_RATIONED<![CDATA[>=]]>0 AND  MO.ORDER_QUANTITY<![CDATA[>=]]>0 AND  to_char(MR.REALITY_RECEIPT_DATE,'YYYY-MM')<![CDATA[>=]]>#{minDate} and    to_char(MR.REALITY_RECEIPT_DATE,'YYYY-MM')<![CDATA[<=]]>#{maxDate} AND MR.supplier_code in (${supplierCode}) group by MR.supplier_code ) t13 on t.SUPPLIER_CODE=t13.supplierCode--供应商收货总量
+		left join 
+		(select mero.supplier_code supplierCode,count(1) jsdhsl from (select * from  MERCHANDISE_ORDER where  to_char(EXPECT_ARRIVE_DATE,'YYYY-MM')<![CDATA[>=]]>#{minDate} and    to_char(EXPECT_ARRIVE_DATE,'YYYY-MM')<![CDATA[<=]]>#{maxDate} AND supplier_code in (${supplierCode})) mero inner join MERCHANDISE_RECEIPT merr on mero.order_code=merr.order_code and mero.SUPPLIER_CODE=merr.SUPPLIER_CODE and mero.MERCHANDISE_CODE=merr.MERCHANDISE_CODE AND mero.ORDER_QUANTITY<![CDATA[>=]]>0 and to_char(merr.reality_receipt_date,'YYYY-MM-DD')<![CDATA[<=]]>to_char(mero.expect_arrive_date,'YYYY-MM-DD') group by mero.supplier_code ) t14 on t.SUPPLIER_CODE=t14.supplierCode--供应商及时到货订单数
+		left join 
+		(select merunq.supplier_code supplierCode,count(1) cjbhgcs from MERCHANDISE_UNQUALIFIED merunq where  to_char(merunq.SPOT_CHECK_DATE,'YYYY-MM')<![CDATA[>=]]>#{minDate} and   to_char(merunq.SPOT_CHECK_DATE,'YYYY-MM')<![CDATA[<=]]>#{maxDate} AND merunq.supplier_code in (${supplierCode})
+		group by merunq.supplier_code)t15 on t.SUPPLIER_CODE=t15.supplierCode--供应商抽检不合格次数，抽检不合格数量
+
+      		
+    	<where>
+    		1=1
+			<if test= "supplierCode != null and supplierCode!=''">
+			AND t.supplier_code in (${supplierCode})
+			</if>
+			
+    	</where>
+    
+    	
+    <if test= "lastYear1 != null and lastYear1!=''">	
+    	Union 
+		SELECT  
+    	
+			(#{minDate1}||'-'||#{maxDate1}) sjsjfw,t.SUPPLIER_CODE supplierCode,t.SUPPLIER_NAME supplierName,round(t1.xsl,2) xsl, round(t1.xsje,2) xsje,round(t1.mle,2) mle,to_char(round((t1.xsl*100.00/(case when t1.zxsl=0 then 1 else t1.zxsl end)),2),'fm9999999990.00')||'%' as  xslzball,to_char(round ((t1.xsje*100.00/t1.zxsje),2),'fm9999999990.00')||'%' as xsjezball,
+			to_char(round ((t1.mle*100.00/t1.zmle),2),'fm9999999990.00')||'%' as mlezball, 
+		<if test= "smallTypeCode != null and smallTypeCode!='' and detailTypeCode != null and detailTypeCode!=''">to_char(round ((t1.xsl*100.00/t1.xflzxl),2),'fm9999999990.00')||'%' as xslzbxfl,to_char(round ((t1.xsje*100.00/t1.xflzxsje),2),'fm9999999990.00')||'%' as xsjezbxfl,
+			to_char(round ((t1.mle*100.00/t1.xflzmle),2),'fm9999999990.00')||'%' as mlezbxfl,to_char(round ((t1.xsl*100.00/t1.mxlzxl),2),'fm9999999990.00')||'%' as xslzbmxl,to_char(round ((t1.xsje*100.00/t1.mxlzxsje),2),'fm9999999990.00')||'%' as xsjezbmxl,
+			to_char(round ((t1.mle*100.00/t1.mxlzmle),2),'fm9999999990.00')||'%' as mlezbmxl,
+		</if><if test= "smallTypeCode != null and smallTypeCode!=''  and (detailTypeCode == null ||detailTypeCode=='')">to_char(round ((t1.xsl*100.00/t1.xflzxl),2),'fm9999999990.00')||'%' as xslzbxfl,to_char(round ((t1.xsje*100.00/t1.xflzxsje),2),'fm9999999990.00')||'%' as xsjezbxfl,
+			to_char(round ((t1.mle*100.00/t1.xflzmle),2),'fm9999999990.00')||'%' as mlezbxfl,'' as xslzbmxl,'' as xsjezbmxl,
+			'' as mlezbmxl,</if>
+		<if test= "(smallTypeCode == null || smallTypeCode=='')and(detailTypeCode == null || detailTypeCode=='')">
+			'' as xslzbxfl,'' as xsjezbxfl,'' as mlezbxfl,'' as xslzbmxl,'' as xsjezbmxl,'' as mlezbmxl,
+		</if>
+		to_char(round ((t1.xsl*1.00/t1.xsdt),2),'fm9999999990.00') psdxl,to_char(round ((t1.xsje*1.00/t1.xsdt),2),'fm9999999990.00') psdxsje,to_char(round ((t1.mle*1.00/t1.xsdt),2),'fm9999999990.00') psdml,t2.mdszh qxs,t2.qxdt,t1.xsdt,
+		to_char(round ((CASE WHEN (t1.xsdt*100.00/t2.qxdt)>100 then 100 else (t1.xsdt*100.00/t2.qxdt)  END),2),'fm9999999990.00')||'%' as hyd,t2.amds,t2.bmds,t2.cmds,t2.dmds,t3.jhl,t3.jhe,to_char(round ((t14.jsdhsl*100.00/t12.ddzs),2),'fm9999999990.00')||'%' as ddjsl,to_char(round ((t13.shzl*100.00/t12.dhzl),2),'fm9999999990.00')||'%' as ddmzl,t11.rbjssl,t11.rbjscs,t5.zlxj,
+		t6.zhcs,t6.zhsl,t7.zhskugs,t8.gysndqwyks,t9.gysxcpf,round(t9.zdmj,2) zdmj,round(t9.cjmj,2) cjmj,round(t9.nzcz,2) nzcz,round(t9.qyzrs,0) qyzrs,t10.gyskpdf,t10.gyskpdfph,(nvl(t4.gysyxps1,0)+nvl(t41.gysyxps2,0)) gysyxps,t15.cjbhgcs,t15.cjbhgcs cjbhgskus
+    
+    	  
+    	from SUPPLIER t
+    	 
+      		left join  (select supplierCode,--供应商编号
+       sum(SELL_QUANTITY) xsl,--供应商销售量
+       sum(SELL_TOTAL_PRICE) xsje,--供应商销售金额
+       sum(SELL_PROFIT) mle,--供应商毛利额
+       sum(SELL_STORE_QUANTITY) xsdt, --供应商总销售店天
+      ( select sum(SELL_QUANTITY) from (select k.SELL_QUANTITY * nvl(k1.NET_WEIGHT, 1) SELL_QUANTITY,
+               SELL_TOTAL_PRICE,
+               SELL_PROFIT,
+               k.supplier_code supplierCode
+          from MERCHANDISE_SELL_D_J_MONTH k
+          inner join MERCHANDISE k1
+            on (k.merchandise_code = k1.merchandise_code and k.supplier_code=k1.supplier_code)
+         where k.sell_month <![CDATA[>=]]> #{minDate1}
+           and k.sell_month <![CDATA[<=]]> #{maxDate1}
+           and ( (k.MERCHANDISE_CODE<![CDATA[>=]]>10000 and k.MERCHANDISE_CODE<![CDATA[<=]]>59999)
+           or (k.MERCHANDISE_CODE<![CDATA[>=]]>70000 and k.MERCHANDISE_CODE<![CDATA[<=]]>79999)
+           or (k.MERCHANDISE_CODE<![CDATA[>=]]>814000000 and k.MERCHANDISE_CODE<![CDATA[<=]]>814999999)
+           or (k.MERCHANDISE_CODE<![CDATA[>=]]>900000000 and k.MERCHANDISE_CODE<![CDATA[<=]]>999999999) )
+           )) zxsl,
+      ( select sum(SELL_TOTAL_PRICE) from MERCHANDISE_SELL_D_J_MONTH k inner join MERCHANDISE k1
+            on (k.merchandise_code = k1.merchandise_code and k.supplier_code=k1.supplier_code) where k.sell_month <![CDATA[>=]]>#{minDate1} and  k.sell_month <![CDATA[<=]]>#{maxDate1} and ( (k.MERCHANDISE_CODE<![CDATA[>=]]>10000 and k.MERCHANDISE_CODE<![CDATA[<=]]>59999)
+           or (k.MERCHANDISE_CODE<![CDATA[>=]]>70000 and k.MERCHANDISE_CODE<![CDATA[<=]]>79999)
+           or (k.MERCHANDISE_CODE<![CDATA[>=]]>814000000 and k.MERCHANDISE_CODE<![CDATA[<=]]>814999999)
+           or (k.MERCHANDISE_CODE<![CDATA[>=]]>900000000 and k.MERCHANDISE_CODE<![CDATA[<=]]>999999999) )) zxsje, --总销售金额
+       ( select sum(SELL_PROFIT) from MERCHANDISE_SELL_D_J_MONTH k inner join MERCHANDISE k1
+            on (k.merchandise_code = k1.merchandise_code and k.supplier_code=k1.supplier_code) where k.sell_month <![CDATA[>=]]>#{minDate1} and  k.sell_month <![CDATA[<=]]>#{maxDate1} and ( (k.MERCHANDISE_CODE<![CDATA[>=]]>10000 and k.MERCHANDISE_CODE<![CDATA[<=]]>59999)
+           or (k.MERCHANDISE_CODE<![CDATA[>=]]>70000 and k.MERCHANDISE_CODE<![CDATA[<=]]>79999)
+           or (k.MERCHANDISE_CODE<![CDATA[>=]]>814000000 and k.MERCHANDISE_CODE<![CDATA[<=]]>814999999)
+           or (k.MERCHANDISE_CODE<![CDATA[>=]]>900000000 and k.MERCHANDISE_CODE<![CDATA[<=]]>999999999) )) zmle, --总毛利额
+       (select sum(SELL_QUANTITY) xflzxl from (select k.SELL_QUANTITY * nvl(k1.net_weight, 1) SELL_QUANTITY
+                        from MERCHANDISE_SELL_D_J_MONTH k
+                        inner  join MERCHANDISE k1
+                          on (k.merchandise_code = k1.merchandise_code and k.supplier_code=k1.supplier_code) where k1.small_type_code=#{smallTypeCode} and  k.sell_month <![CDATA[>=]]> #{minDate1}
+           and k.sell_month <![CDATA[<=]]> #{maxDate1}) ) xflzxl,--小分类总销量
+         (select sum(SELL_QUANTITY) mxlzxl from (select k.SELL_QUANTITY * nvl(k1.net_weight, 1) SELL_QUANTITY
+                        from MERCHANDISE_SELL_D_J_MONTH k
+                        inner  join MERCHANDISE k1
+                          on (k.merchandise_code = k1.merchandise_code and k.supplier_code=k1.supplier_code) where k1.small_type_code=#{smallTypeCode} and k1.detail_type_code=#{detailTypeCode}  and  k.sell_month <![CDATA[>=]]> #{minDate1}
+           and k.sell_month <![CDATA[<=]]> #{maxDate1}) ) mxlzxl,--明细类总销量
+         (select sum(SELL_TOTAL_PRICE) from MERCHANDISE_SELL_D_J_MONTH k inner  join MERCHANDISE k1
+                          on (k.merchandise_code = k1.merchandise_code and k.supplier_code=k1.supplier_code) where k1.small_type_code=#{smallTypeCode} and  k.sell_month <![CDATA[>=]]> #{minDate1}
+           and k.sell_month <![CDATA[<=]]> #{maxDate1}) xflzxsje ,--小分类总销售金额
+            (select sum(SELL_TOTAL_PRICE) from MERCHANDISE_SELL_D_J_MONTH k inner  join MERCHANDISE k1
+                          on (k.merchandise_code = k1.merchandise_code and k.supplier_code=k1.supplier_code) where k1.small_type_code=#{smallTypeCode} and k1.detail_type_code=#{detailTypeCode} and  k.sell_month <![CDATA[>=]]> #{minDate1}
+           and k.sell_month <![CDATA[<=]]> #{maxDate1}) mxlzxsje, --明细类总销售金额
+           (select sum(SELL_PROFIT) from MERCHANDISE_SELL_D_J_MONTH k inner  join MERCHANDISE k1
+                          on (k.merchandise_code = k1.merchandise_code and k.supplier_code=k1.supplier_code) where k1.small_type_code=#{smallTypeCode} and k1.detail_type_code=#{detailTypeCode} and  k.sell_month <![CDATA[>=]]> #{minDate1}
+           and k.sell_month <![CDATA[<=]]> #{maxDate1}) mxlzmle, --明细类总毛利
+           (select sum(SELL_PROFIT) from MERCHANDISE_SELL_D_J_MONTH k inner  join MERCHANDISE k1
+                          on (k.merchandise_code = k1.merchandise_code and k.supplier_code=k1.supplier_code) where k1.small_type_code=#{smallTypeCode} and  k.sell_month <![CDATA[>=]]> #{minDate1}
+           and k.sell_month <![CDATA[<=]]> #{maxDate1}) xflzmle --小分类总毛利
+  from (select k.SELL_QUANTITY * nvl(k1.NET_WEIGHT, 1) SELL_QUANTITY,
+               SELL_TOTAL_PRICE,
+               SELL_PROFIT,
+               SELL_STORE_QUANTITY,
+               k.supplier_code supplierCode
+          from MERCHANDISE_SELL_D_J_MONTH k
+          inner  join MERCHANDISE k1
+            on (k.merchandise_code = k1.merchandise_code and k.supplier_code=k1.supplier_code)
+         where k.sell_month <![CDATA[>=]]> #{minDate1}
+           and k.sell_month <![CDATA[<=]]> #{maxDate1}) where supplierCode in (${supplierCode})
+ group by supplierCode) t1 on t.SUPPLIER_CODE=t1.supplierCode
+left join 
+
+(select mer.supplier_code supplierCode,(sum(A_STORE_QUANTITY)+sum(B_STORE_QUANTITY)+sum(C_STORE_QUANTITY)+sum(D_STORE_QUANTITY)) mdszh ,sum(PERMISSION_STORE_QUANTITY) qxdt,sum(A_STORE_QUANTITY) amds,sum(B_STORE_QUANTITY) bmds,sum(C_STORE_QUANTITY) cmds,sum(D_STORE_QUANTITY) dmds from MERCHANDISE_JH_PERMISSION mjp
+inner join MERCHANDISE mer on mjp.merchandise_code=mer.merchandise_code
+where  to_char(mjp.permission_date,'YYYY-MM')<![CDATA[>=]]>#{minDate1} and  to_char(mjp.permission_date,'YYYY-MM')<![CDATA[<=]]>#{maxDate1} AND mer.supplier_code in (${supplierCode})
+group by mer.supplier_code ) t2 on t.SUPPLIER_CODE=t2.supplierCode--门店数总和，权限店天，ABCD门店数（分别)
+left join 
+(select mr.supplier_code supplierCode,sum(mr.receipt_rationed) jhl,sum(mr.receipt_total_price) jhe from  ( select (mer.receipt_rationed * nvl(k1.net_weight, 1)) receipt_rationed,mer.receipt_total_price,mer.reality_receipt_date,mer.supplier_code from  MERCHANDISE_RECEIPT mer
+ inner  join MERCHANDISE k1
+ on (mer.merchandise_code = k1.merchandise_code and mer.supplier_code=k1.supplier_code)) mr where  to_char(mr.reality_receipt_date,'YYYY-MM')<![CDATA[>=]]>#{minDate1} and  to_char(mr.reality_receipt_date,'YYYY-MM')<![CDATA[<=]]>#{maxDate1}  AND mr.supplier_code in (${supplierCode})
+group by mr.supplier_code) t3 on t.SUPPLIER_CODE=t3.supplierCode--进货量，进货额
+left join 
+(select ism.INTENTION_SUPPLIER_CODE supplierCode,count(1) gysyxps1 from(select INTENTION_SUPPLIER_CODE,INTENTION_CODE from  ACCESSORY_QUOTED_ELECTRONIC where  to_char(created,'YYYY-MM')<![CDATA[>=]]>#{minDate1} and  to_char(created,'YYYY-MM')<![CDATA[<=]]>#{maxDate1}  AND intention_supplier_code in (${supplierCode}) group by INTENTION_SUPPLIER_CODE,INTENTION_CODE) ism 
+group by ism.INTENTION_SUPPLIER_CODE) t4 on t.SUPPLIER_CODE=t4.supplierCode--供应商意向品数辅料
+left join 
+(select ism1.INTENTION_SUPPLIER_CODE supplierCode,count(1) gysyxps2 from(select INTENTION_SUPPLIER_CODE,INTENTION_CODE from  MERCHANDISE_QUOTED where  to_char(created,'YYYY-MM')<![CDATA[>=]]>#{minDate1} and  to_char(created,'YYYY-MM')<![CDATA[<=]]>#{maxDate1}  AND intention_supplier_code in (${supplierCode}) group by INTENTION_SUPPLIER_CODE,INTENTION_CODE) ism1 
+group by ism1.INTENTION_SUPPLIER_CODE) t41 on t.SUPPLIER_CODE=t41.supplierCode--供应商意向品数商品
+left join 
+(select sl.supplier_code supplierCode ,sl.quality_level zlxj from SUPPLIER_QUALITY_LEVEL sl where sl.quality_level_year=#{lastYear1}  AND sl.supplier_code in (${supplierCode}))t5 on t.SUPPLIER_CODE=t5.supplierCode--供应商质量星级
+left join 
+(select mrec.supplier_code supplierCode,count(1) zhcs,sum(RECYCLE_COUNT)zhsl from MERCHANDISE_RECYCLE mrec where  to_char(mrec.recycle_date,'YYYY-MM')<![CDATA[>=]]>#{minDate1} and   to_char(mrec.recycle_date,'YYYY-MM')<![CDATA[<=]]>#{maxDate1} AND mrec.supplier_code in (${supplierCode})
+group by mrec.supplier_code)t6 on t.SUPPLIER_CODE=t6.supplierCode--供应商召回次数，召回数量
+left join 
+(select merc1.supplier_code  supplierCode,count(merc1.merchandise_code) zhskugs from( select mrec.supplier_code,mrec.merchandise_code from MERCHANDISE_RECYCLE mrec where  to_char(mrec.recycle_date,'YYYY-MM')<![CDATA[>=]]>#{minDate1} and   to_char(mrec.recycle_date,'YYYY-MM')<![CDATA[<=]]>#{maxDate1}  AND mrec.supplier_code in (${supplierCode})group by mrec.supplier_code,mrec.merchandise_code)merc1
+group by  merc1.supplier_code ) t7 on t.SUPPLIER_CODE=t7.supplierCode--供应商召回sku个数
+left join 
+(select scom.supplier_code supplierCode,sum(COMPLAINTS_COUNT) gysndqwyks from SUPPLIER_COMPLAINTS scom where scom.complaints_year=#{lastYear1} AND scom.supplier_code in (${supplierCode}) group by scom.supplier_code) t8 on t.SUPPLIER_CODE=t8.supplierCode--供应商千万元客诉
+left join 
+(select svf.supplier_code supplierCode,avg(svf.score) gysxcpf,avg(svf.FLOOR_AREA) zdmj,avg(svf.PLANT_AREA) cjmj,avg(svf.YEAR_TOTAL_OUTPUT) nzcz,avg(svf.ENTERPRISE_COUNT_PEOPLE) qyzrs from SUPPLIER_VISIT_FACTORY svf where  to_char(svf.visit_factory_date,'YYYY-MM')<![CDATA[>=]]>#{minDate1} and    to_char(svf.visit_factory_date,'YYYY-MM')<![CDATA[<=]]>#{maxDate1} AND svf.supplier_code in (${supplierCode}) group by svf.supplier_code)t9 on t.SUPPLIER_CODE=t9.supplierCode--供应商巡查评分
+left join 
+(select ses1.supplier_code supplierCode,ses1.evaluate_item_score gyskpdf,rank() over(order by ses1.evaluate_item_score desc) as gyskpdfph from SUPPLIER_EVALUATE_SCORE ses1
+where created =(select max(created) from SUPPLIER_EVALUATE_SCORE ses2 where ses2.supplier_code=ses1.supplier_code and  to_char(ses2.created,'YYYY-MM')<![CDATA[>=]]>#{minDate1} and    to_char(ses2.created,'YYYY-MM')<![CDATA[<=]]>#{maxDate1} AND ses1.supplier_code in (${supplierCode}))) t10 on t.SUPPLIER_CODE=t10.supplierCode--供应商考评得分及排名
+left join 
+(select conre.supplier_code supplierCode ,sum(CONCESSION_RECEIVE_COUNT) rbjssl,count(1) rbjscs from CONCESSION_RECEIVE conre where  to_char(conre.APPLICATION_DATE,'YYYY-MM')<![CDATA[>=]]>#{minDate1} and   to_char(conre.APPLICATION_DATE,'YYYY-MM')<![CDATA[<=]]>#{maxDate1} AND conre.supplier_code in (${supplierCode}) group by conre.supplier_code) t11 on t.SUPPLIER_CODE=t11.supplierCode--让步接收数量，次数
+left join 
+(select supplier_code supplierCode,sum(ORDER_QUANTITY) dhzl,count(1) ddzs from MERCHANDISE_ORDER where  to_char(EXPECT_ARRIVE_DATE,'YYYY-MM')<![CDATA[>=]]>#{minDate1} and    to_char(EXPECT_ARRIVE_DATE,'YYYY-MM')<![CDATA[<=]]>#{maxDate1} AND ORDER_QUANTITY <![CDATA[>=]]>0 AND supplier_code in (${supplierCode}) group by supplier_code ) t12 on t.SUPPLIER_CODE=t12.supplierCode--供应商订货总量,订单总数
+left join 
+(select MR.supplier_code supplierCode,sum(MR.RECEIPT_RATIONED) shzl from MERCHANDISE_RECEIPT  MR
+  inner join MERCHANDISE_ORDER MO  on MR.ORDER_CODE=MO.ORDER_CODE and MR.SUPPLIER_CODE = MO.SUPPLIER_CODE
+   and MR.MERCHANDISE_CODE = MO.MERCHANDISE_CODE where MR.RECEIPT_RATIONED<![CDATA[>=]]>0 AND  MO.ORDER_QUANTITY<![CDATA[>=]]>0 AND  to_char(MR.REALITY_RECEIPT_DATE,'YYYY-MM')<![CDATA[>=]]>#{minDate1} and    to_char(MR.REALITY_RECEIPT_DATE,'YYYY-MM')<![CDATA[<=]]>#{maxDate1} AND MR.supplier_code in (${supplierCode}) group by MR.supplier_code ) t13 on t.SUPPLIER_CODE=t13.supplierCode--供应商收货总量
+left join 
+(select mero.supplier_code supplierCode,count(1) jsdhsl from (select * from  MERCHANDISE_ORDER where  to_char(EXPECT_ARRIVE_DATE,'YYYY-MM')<![CDATA[>=]]>#{minDate1} and    to_char(EXPECT_ARRIVE_DATE,'YYYY-MM')<![CDATA[<=]]>#{maxDate1} AND supplier_code in (${supplierCode})) mero inner join MERCHANDISE_RECEIPT merr on mero.order_code=merr.order_code and mero.SUPPLIER_CODE=merr.SUPPLIER_CODE and mero.MERCHANDISE_CODE=merr.MERCHANDISE_CODE AND mero.ORDER_QUANTITY<![CDATA[>=]]>0 and to_char(merr.reality_receipt_date,'YYYY-MM-DD')<![CDATA[<=]]>to_char(mero.expect_arrive_date,'YYYY-MM-DD') group by mero.supplier_code ) t14 on t.SUPPLIER_CODE=t14.supplierCode--供应商及时到货订单数
+left join 
+(select merunq.supplier_code supplierCode,count(1) cjbhgcs from MERCHANDISE_UNQUALIFIED merunq where  to_char(merunq.SPOT_CHECK_DATE,'YYYY-MM')<![CDATA[>=]]>#{minDate1} and   to_char(merunq.SPOT_CHECK_DATE,'YYYY-MM')<![CDATA[<=]]>#{maxDate1} AND merunq.supplier_code in (${supplierCode})
+group by merunq.supplier_code)t15 on t.SUPPLIER_CODE=t15.supplierCode--供应商抽检不合格次数，抽检不合格数量
+      		
+    	<where>
+    		1=1
+			<if test= "supplierCode != null and supplierCode!=''">
+			AND t.supplier_code in (${supplierCode})
+			</if>
+			
+    	</where>
+    
+    	
+    </if>
+    <if test="lastYear2 != null and lastYear2!=''">	
+    	Union 
+    	SELECT  
+    	
+    		(#{minDate2}||'-'||#{maxDate2}) sjsjfw,t.SUPPLIER_CODE supplierCode,t.SUPPLIER_NAME supplierName,round(t1.xsl,2) xsl, 
+    		round(t1.xsje,2) xsje,round(t1.mle,2) mle,
+    		to_char(round((t1.xsl*100.00/(case when t1.zxsl=0 then 1 else t1.zxsl end)),2),'fm9999999990.00')||'%' as  xslzball,
+    		to_char(round ((t1.xsje*100.00/t1.zxsje),2),'fm9999999990.00')||'%' as xsjezball,
+			to_char(round ((t1.mle*100.00/t1.zmle),2),'fm9999999990.00')||'%' as mlezball, 
+		<if test= "smallTypeCode != null and smallTypeCode!='' and detailTypeCode != null and detailTypeCode!=''">
+			to_char(round ((t1.xsl*100.00/t1.xflzxl),2),'fm9999999990.00')||'%' as xslzbxfl,
+			to_char(round ((t1.xsje*100.00/t1.xflzxsje),2),'fm9999999990.00')||'%' as xsjezbxfl,
+			to_char(round ((t1.mle*100.00/t1.xflzmle),2),'fm9999999990.00')||'%' as mlezbxfl,
+			to_char(round ((t1.xsl*100.00/t1.mxlzxl),2),'fm9999999990.00')||'%' as xslzbmxl,
+			to_char(round ((t1.xsje*100.00/t1.mxlzxsje),2),'fm9999999990.00')||'%' as xsjezbmxl,
+			to_char(round ((t1.mle*100.00/t1.mxlzmle),2),'fm9999999990.00')||'%' as mlezbmxl,
+		</if>
+		<if test= "smallTypeCode != null and smallTypeCode!=''  and (detailTypeCode == null ||detailTypeCode=='')">to_char(round ((t1.xsl*100.00/t1.xflzxl),2),'fm9999999990.00')||'%' as xslzbxfl,to_char(round ((t1.xsje*100.00/t1.xflzxsje),2),'fm9999999990.00')||'%' as xsjezbxfl,
+			to_char(round ((t1.mle*100.00/t1.xflzmle),2),'fm9999999990.00')||'%' as mlezbxfl,
+			'' as xslzbmxl,'' as xsjezbmxl,'' as mlezbmxl,
+		</if>
+		<if test= "(smallTypeCode == null || smallTypeCode=='')and(detailTypeCode == null || detailTypeCode=='')">'' as xslzbxfl,'' as xsjezbxfl,
+			'' as mlezbxfl,'' as xslzbmxl,'' as xsjezbmxl,'' as mlezbmxl,
+		</if>
+			to_char(round ((t1.xsl*1.00/t1.xsdt),2),'fm9999999990.00') psdxl,
+			to_char(round ((t1.xsje*1.00/t1.xsdt),2),'fm9999999990.00') psdxsje,
+			to_char(round ((t1.mle*1.00/t1.xsdt),2),'fm9999999990.00') psdml,
+			t2.mdszh qxs,t2.qxdt,t1.xsdt,
+			to_char(round ((CASE WHEN (t1.xsdt*100.00/t2.qxdt)>100 then 100 else (t1.xsdt*100.00/t2.qxdt)  END),2),'fm9999999990.00')||'%' as hyd,
+			t2.amds,t2.bmds,t2.cmds,t2.dmds,t3.jhl,t3.jhe,
+			to_char(round ((t14.jsdhsl*100.00/t12.ddzs),2),'fm9999999990.00')||'%' as ddjsl,
+			to_char(round ((t13.shzl*100.00/t12.dhzl),2),'fm9999999990.00')||'%' as ddmzl,t11.rbjssl,
+			t11.rbjscs,t5.zlxj,t6.zhcs,t6.zhsl,t7.zhskugs,t8.gysndqwyks,t9.gysxcpf,round(t9.zdmj,2) zdmj,
+			round(t9.cjmj,2) cjmj,round(t9.nzcz,2) nzcz,round(t9.qyzrs,0) qyzrs,t10.gyskpdf,t10.gyskpdfph,
+			(nvl(t4.gysyxps1,0)+nvl(t41.gysyxps2,0)) gysyxps,t15.cjbhgcs,t15.cjbhgcs cjbhgskus
+    
+    	  
+    	from SUPPLIER t
+    	 
+      		left join  (select supplierCode,--供应商编号
+       sum(SELL_QUANTITY) xsl,--供应商销售量
+       sum(SELL_TOTAL_PRICE) xsje,--供应商销售金额
+       sum(SELL_PROFIT) mle,--供应商毛利额
+       sum(SELL_STORE_QUANTITY) xsdt, --供应商总销售店天
+      ( select sum(SELL_QUANTITY) from (select k.SELL_QUANTITY * nvl(k1.NET_WEIGHT, 1) SELL_QUANTITY,
+               SELL_TOTAL_PRICE,
+               SELL_PROFIT,
+               k.supplier_code supplierCode
+          from MERCHANDISE_SELL_D_J_MONTH k
+          inner  join MERCHANDISE k1
+            on (k.merchandise_code = k1.merchandise_code and k.supplier_code=k1.supplier_code)
+         where k.sell_month <![CDATA[>=]]> #{minDate2}
+           and k.sell_month <![CDATA[<=]]> #{maxDate2}
+           and ( (k.MERCHANDISE_CODE<![CDATA[>=]]>10000 and k.MERCHANDISE_CODE<![CDATA[<=]]>59999)
+           or (k.MERCHANDISE_CODE<![CDATA[>=]]>70000 and k.MERCHANDISE_CODE<![CDATA[<=]]>79999)
+           or (k.MERCHANDISE_CODE<![CDATA[>=]]>814000000 and k.MERCHANDISE_CODE<![CDATA[<=]]>814999999)
+           or (k.MERCHANDISE_CODE<![CDATA[>=]]>900000000 and k.MERCHANDISE_CODE<![CDATA[<=]]>999999999) )
+           )) zxsl,
+      ( select sum(SELL_TOTAL_PRICE) from MERCHANDISE_SELL_D_J_MONTH k inner join MERCHANDISE k1
+            on (k.merchandise_code = k1.merchandise_code and k.supplier_code=k1.supplier_code) where k.sell_month <![CDATA[>=]]>#{minDate2} and  k.sell_month <![CDATA[<=]]>#{maxDate2} and ( (k.MERCHANDISE_CODE<![CDATA[>=]]>10000 and k.MERCHANDISE_CODE<![CDATA[<=]]>59999)
+           or (k.MERCHANDISE_CODE<![CDATA[>=]]>70000 and k.MERCHANDISE_CODE<![CDATA[<=]]>79999)
+           or (k.MERCHANDISE_CODE<![CDATA[>=]]>814000000 and k.MERCHANDISE_CODE<![CDATA[<=]]>814999999)
+           or (k.MERCHANDISE_CODE<![CDATA[>=]]>900000000 and k.MERCHANDISE_CODE<![CDATA[<=]]>999999999) )) zxsje, --总销售金额
+       ( select sum(SELL_PROFIT) from MERCHANDISE_SELL_D_J_MONTH k inner join MERCHANDISE k1
+            on (k.merchandise_code = k1.merchandise_code and k.supplier_code=k1.supplier_code) where k.sell_month <![CDATA[>=]]>#{minDate2} and  k.sell_month <![CDATA[<=]]>#{maxDate2} and ( (k.MERCHANDISE_CODE<![CDATA[>=]]>10000 and k.MERCHANDISE_CODE<![CDATA[<=]]>59999)
+           or (k.MERCHANDISE_CODE<![CDATA[>=]]>70000 and k.MERCHANDISE_CODE<![CDATA[<=]]>79999)
+           or (k.MERCHANDISE_CODE<![CDATA[>=]]>814000000 and k.MERCHANDISE_CODE<![CDATA[<=]]>814999999)
+           or (k.MERCHANDISE_CODE<![CDATA[>=]]>900000000 and k.MERCHANDISE_CODE<![CDATA[<=]]>999999999) )) zmle, --总毛利额
+       (select sum(SELL_QUANTITY) xflzxl from (select k.SELL_QUANTITY * nvl(k1.net_weight, 1) SELL_QUANTITY
+                        from MERCHANDISE_SELL_D_J_MONTH k
+                        inner  join MERCHANDISE k1
+                          on (k.merchandise_code = k1.merchandise_code and k.supplier_code=k1.supplier_code) where k1.small_type_code=#{smallTypeCode} and  k.sell_month <![CDATA[>=]]> #{minDate2}
+           and k.sell_month <![CDATA[<=]]> #{maxDate2}) ) xflzxl,--小分类总销量
+         (select sum(SELL_QUANTITY) mxlzxl from (select k.SELL_QUANTITY * nvl(k1.net_weight, 1) SELL_QUANTITY
+                        from MERCHANDISE_SELL_D_J_MONTH k
+                        inner  join MERCHANDISE k1
+                          on (k.merchandise_code = k1.merchandise_code and k.supplier_code=k1.supplier_code) where k1.small_type_code=#{smallTypeCode} and k1.detail_type_code=#{detailTypeCode}  and  k.sell_month <![CDATA[>=]]> #{minDate2}
+           and k.sell_month <![CDATA[<=]]> #{maxDate2}) ) mxlzxl,--明细类总销量
+         (select sum(SELL_TOTAL_PRICE) from MERCHANDISE_SELL_D_J_MONTH k inner  join MERCHANDISE k1
+                          on (k.merchandise_code = k1.merchandise_code and k.supplier_code=k1.supplier_code) where k1.small_type_code=#{smallTypeCode} and  k.sell_month <![CDATA[>=]]> #{minDate2}
+           and k.sell_month <![CDATA[<=]]> #{maxDate2}) xflzxsje ,--小分类总销售金额
+            (select sum(SELL_TOTAL_PRICE) from MERCHANDISE_SELL_D_J_MONTH k inner  join MERCHANDISE k1
+                          on (k.merchandise_code = k1.merchandise_code and k.supplier_code=k1.supplier_code) where k1.small_type_code=#{smallTypeCode} and k1.detail_type_code=#{detailTypeCode} and  k.sell_month <![CDATA[>=]]> #{minDate2}
+           and k.sell_month <![CDATA[<=]]> #{maxDate2}) mxlzxsje, --明细类总销售金额
+           (select sum(SELL_PROFIT) from MERCHANDISE_SELL_D_J_MONTH k inner  join MERCHANDISE k1
+                          on (k.merchandise_code = k1.merchandise_code and k.supplier_code=k1.supplier_code) where k1.small_type_code=#{smallTypeCode} and k1.detail_type_code=#{detailTypeCode} and  k.sell_month <![CDATA[>=]]> #{minDate2}
+           and k.sell_month <![CDATA[<=]]> #{maxDate2}) mxlzmle, --明细类总毛利
+           (select sum(SELL_PROFIT) from MERCHANDISE_SELL_D_J_MONTH k inner  join MERCHANDISE k1
+                          on (k.merchandise_code = k1.merchandise_code and k.supplier_code=k1.supplier_code) where k1.small_type_code=#{smallTypeCode} and  k.sell_month <![CDATA[>=]]> #{minDate2}
+           and k.sell_month <![CDATA[<=]]> #{maxDate2}) xflzmle --小分类总毛利
+  from (select k.SELL_QUANTITY * nvl(k1.NET_WEIGHT, 1) SELL_QUANTITY,
+               SELL_TOTAL_PRICE,
+               SELL_PROFIT,
+               SELL_STORE_QUANTITY,
+               k.supplier_code supplierCode
+          from MERCHANDISE_SELL_D_J_MONTH k
+          inner  join MERCHANDISE k1
+            on (k.merchandise_code = k1.merchandise_code and k.supplier_code=k1.supplier_code)
+         where k.sell_month <![CDATA[>=]]> #{minDate2}
+           and k.sell_month <![CDATA[<=]]> #{maxDate2}) where supplierCode in (${supplierCode})
+ group by supplierCode) t1 on t.SUPPLIER_CODE=t1.supplierCode
+left join 
+
+
+(select mer.supplier_code supplierCode,(sum(A_STORE_QUANTITY)+sum(B_STORE_QUANTITY)+sum(C_STORE_QUANTITY)+sum(D_STORE_QUANTITY)) mdszh ,sum(PERMISSION_STORE_QUANTITY) qxdt,sum(A_STORE_QUANTITY) amds,sum(B_STORE_QUANTITY) bmds,sum(C_STORE_QUANTITY) cmds,sum(D_STORE_QUANTITY) dmds from MERCHANDISE_JH_PERMISSION mjp
+inner join MERCHANDISE mer on mjp.merchandise_code=mer.merchandise_code
+where  to_char(mjp.permission_date,'YYYY-MM')<![CDATA[>=]]>#{minDate2} and  to_char(mjp.permission_date,'YYYY-MM')<![CDATA[<=]]>#{maxDate2} AND mer.supplier_code in (${supplierCode})
+group by mer.supplier_code ) t2 on t.SUPPLIER_CODE=t2.supplierCode--门店数总和，权限店天，ABCD门店数（分别)
+left join 
+(select mr.supplier_code supplierCode,sum(mr.receipt_rationed) jhl,sum(mr.receipt_total_price) jhe from  ( select (mer.receipt_rationed * nvl(k1.net_weight, 1)) receipt_rationed,mer.receipt_total_price,mer.reality_receipt_date,mer.supplier_code from  MERCHANDISE_RECEIPT mer
+ inner  join MERCHANDISE k1
+ on (mer.merchandise_code = k1.merchandise_code and mer.supplier_code=k1.supplier_code)) mr where  to_char(mr.reality_receipt_date,'YYYY-MM')<![CDATA[>=]]>#{minDate2} and  to_char(mr.reality_receipt_date,'YYYY-MM')<![CDATA[<=]]>#{maxDate2}  AND mr.supplier_code in (${supplierCode})
+group by mr.supplier_code) t3 on t.SUPPLIER_CODE=t3.supplierCode--进货量，进货额
+left join 
+(select ism.INTENTION_SUPPLIER_CODE supplierCode,count(1) gysyxps1 from(select INTENTION_SUPPLIER_CODE,INTENTION_CODE from  ACCESSORY_QUOTED_ELECTRONIC where  to_char(created,'YYYY-MM')<![CDATA[>=]]>#{minDate2} and  to_char(created,'YYYY-MM')<![CDATA[<=]]>#{maxDate2}  AND intention_supplier_code in (${supplierCode}) group by INTENTION_SUPPLIER_CODE,INTENTION_CODE) ism 
+group by ism.INTENTION_SUPPLIER_CODE) t4 on t.SUPPLIER_CODE=t4.supplierCode--供应商意向品数辅料
+left join 
+(select ism1.INTENTION_SUPPLIER_CODE supplierCode,count(1) gysyxps2 from(select INTENTION_SUPPLIER_CODE,INTENTION_CODE from  MERCHANDISE_QUOTED where  to_char(created,'YYYY-MM')<![CDATA[>=]]>#{minDate2} and  to_char(created,'YYYY-MM')<![CDATA[<=]]>#{maxDate2}  AND intention_supplier_code in (${supplierCode}) group by INTENTION_SUPPLIER_CODE,INTENTION_CODE) ism1 
+group by ism1.INTENTION_SUPPLIER_CODE) t41 on t.SUPPLIER_CODE=t41.supplierCode--供应商意向品数商品
+left join 
+(select sl.supplier_code supplierCode ,sl.quality_level zlxj from SUPPLIER_QUALITY_LEVEL sl where sl.quality_level_year=#{lastYear2}  AND sl.supplier_code in (${supplierCode}))t5 on t.SUPPLIER_CODE=t5.supplierCode--供应商质量星级
+left join 
+(select mrec.supplier_code supplierCode,count(1) zhcs,sum(RECYCLE_COUNT)zhsl from MERCHANDISE_RECYCLE mrec where  to_char(mrec.recycle_date,'YYYY-MM')<![CDATA[>=]]>#{minDate2} and   to_char(mrec.recycle_date,'YYYY-MM')<![CDATA[<=]]>#{maxDate2} AND mrec.supplier_code in (${supplierCode})
+group by mrec.supplier_code)t6 on t.SUPPLIER_CODE=t6.supplierCode--供应商召回次数，召回数量
+left join 
+(select merc1.supplier_code  supplierCode,count(merc1.merchandise_code) zhskugs from( select mrec.supplier_code,mrec.merchandise_code from MERCHANDISE_RECYCLE mrec where  to_char(mrec.recycle_date,'YYYY-MM')<![CDATA[>=]]>#{minDate2} and   to_char(mrec.recycle_date,'YYYY-MM')<![CDATA[<=]]>#{maxDate2}  AND mrec.supplier_code in (${supplierCode})group by mrec.supplier_code,mrec.merchandise_code)merc1
+group by  merc1.supplier_code ) t7 on t.SUPPLIER_CODE=t7.supplierCode--供应商召回sku个数
+left join 
+(select scom.supplier_code supplierCode,sum(COMPLAINTS_COUNT) gysndqwyks from SUPPLIER_COMPLAINTS scom where scom.complaints_year=#{lastYear2} AND scom.supplier_code in (${supplierCode}) group by scom.supplier_code) t8 on t.SUPPLIER_CODE=t8.supplierCode--供应商千万元客诉
+left join 
+(select svf.supplier_code supplierCode,avg(svf.score) gysxcpf,avg(svf.FLOOR_AREA) zdmj,avg(svf.PLANT_AREA) cjmj,avg(svf.YEAR_TOTAL_OUTPUT) nzcz,avg(svf.ENTERPRISE_COUNT_PEOPLE) qyzrs from SUPPLIER_VISIT_FACTORY svf where  to_char(svf.visit_factory_date,'YYYY-MM')<![CDATA[>=]]>#{minDate2} and    to_char(svf.visit_factory_date,'YYYY-MM')<![CDATA[<=]]>#{maxDate2} AND svf.supplier_code in (${supplierCode}) group by svf.supplier_code)t9 on t.SUPPLIER_CODE=t9.supplierCode--供应商巡查评分
+left join 
+(select ses1.supplier_code supplierCode,ses1.evaluate_item_score gyskpdf,rank() over(order by ses1.evaluate_item_score desc) as gyskpdfph from SUPPLIER_EVALUATE_SCORE ses1
+where created =(select max(created) from SUPPLIER_EVALUATE_SCORE ses2 where ses2.supplier_code=ses1.supplier_code and  to_char(ses2.created,'YYYY-MM')<![CDATA[>=]]>#{minDate2} and    to_char(ses2.created,'YYYY-MM')<![CDATA[<=]]>#{maxDate2} AND ses1.supplier_code in (${supplierCode}))) t10 on t.SUPPLIER_CODE=t10.supplierCode--供应商考评得分及排名
+left join 
+(select conre.supplier_code supplierCode ,sum(CONCESSION_RECEIVE_COUNT) rbjssl,count(1) rbjscs from CONCESSION_RECEIVE conre where  to_char(conre.APPLICATION_DATE,'YYYY-MM')<![CDATA[>=]]>#{minDate2} and   to_char(conre.APPLICATION_DATE,'YYYY-MM')<![CDATA[<=]]>#{maxDate2} AND conre.supplier_code in (${supplierCode}) group by conre.supplier_code) t11 on t.SUPPLIER_CODE=t11.supplierCode--让步接收数量，次数
+left join 
+(select supplier_code supplierCode,sum(ORDER_QUANTITY) dhzl,count(1) ddzs from MERCHANDISE_ORDER where  to_char(EXPECT_ARRIVE_DATE,'YYYY-MM')<![CDATA[>=]]>#{minDate2} and    to_char(EXPECT_ARRIVE_DATE,'YYYY-MM')<![CDATA[<=]]>#{maxDate2} AND ORDER_QUANTITY <![CDATA[>=]]>0 AND supplier_code in (${supplierCode}) group by supplier_code ) t12 on t.SUPPLIER_CODE=t12.supplierCode--供应商订货总量,订单总数
+left join 
+(select MR.supplier_code supplierCode,sum(MR.RECEIPT_RATIONED) shzl from MERCHANDISE_RECEIPT  MR
+  inner join MERCHANDISE_ORDER MO  on MR.ORDER_CODE=MO.ORDER_CODE and MR.SUPPLIER_CODE = MO.SUPPLIER_CODE
+   and MR.MERCHANDISE_CODE = MO.MERCHANDISE_CODE where MR.RECEIPT_RATIONED<![CDATA[>=]]>0 AND  MO.ORDER_QUANTITY<![CDATA[>=]]>0 AND  to_char(MR.REALITY_RECEIPT_DATE,'YYYY-MM')<![CDATA[>=]]>#{minDate2} and    to_char(MR.REALITY_RECEIPT_DATE,'YYYY-MM')<![CDATA[<=]]>#{maxDate2} AND MR.supplier_code in (${supplierCode}) group by MR.supplier_code ) t13 on t.SUPPLIER_CODE=t13.supplierCode--供应商收货总量
+left join 
+(select mero.supplier_code supplierCode,count(1) jsdhsl from (select * from  MERCHANDISE_ORDER where  to_char(EXPECT_ARRIVE_DATE,'YYYY-MM')<![CDATA[>=]]>#{minDate2} and    to_char(EXPECT_ARRIVE_DATE,'YYYY-MM')<![CDATA[<=]]>#{maxDate2} AND supplier_code in (${supplierCode})) mero inner join MERCHANDISE_RECEIPT merr on mero.order_code=merr.order_code and mero.SUPPLIER_CODE=merr.SUPPLIER_CODE and mero.MERCHANDISE_CODE=merr.MERCHANDISE_CODE AND mero.ORDER_QUANTITY<![CDATA[>=]]>0 and to_char(merr.reality_receipt_date,'YYYY-MM-DD')<![CDATA[<=]]>to_char(mero.expect_arrive_date,'YYYY-MM-DD') group by mero.supplier_code ) t14 on t.SUPPLIER_CODE=t14.supplierCode--供应商及时到货订单数
+left join 
+(select merunq.supplier_code supplierCode,count(1) cjbhgcs from MERCHANDISE_UNQUALIFIED merunq where  to_char(merunq.SPOT_CHECK_DATE,'YYYY-MM')<![CDATA[>=]]>#{minDate2} and   to_char(merunq.SPOT_CHECK_DATE,'YYYY-MM')<![CDATA[<=]]>#{maxDate2} AND merunq.supplier_code in (${supplierCode})
+group by merunq.supplier_code)t15 on t.SUPPLIER_CODE=t15.supplierCode--供应商抽检不合格次数，抽检不合格数量
+      		
+    	<where>
+    		1=1
+			<if test= "supplierCode != null and supplierCode!=''">
+			AND t.supplier_code in (${supplierCode})
+			</if>
+			
+    	</where>
+    
+    	
+    </if>
+    
+   <if test= "lastYear3 != null and lastYear3!=''">	
+    	Union 
+    	SELECT  
+    	
+      		(#{minDate3}||'-'||#{maxDate3}) sjsjfw,t.SUPPLIER_CODE supplierCode,t.SUPPLIER_NAME supplierName,round(t1.xsl,2) xsl, round(t1.xsje,2) xsje,round(t1.mle,2) mle,
+      		to_char(round((t1.xsl*100.00/(case when t1.zxsl=0 then 1 else t1.zxsl end)),2),'fm9999999990.00')||'%' as  xslzball,to_char(round ((t1.xsje*100.00/t1.zxsje),2),'fm9999999990.00')||'%' as xsjezball,
+			to_char(round ((t1.mle*100.00/t1.zmle),2),'fm9999999990.00')||'%' as mlezball, 
+		<if test= "smallTypeCode != null and smallTypeCode!='' and detailTypeCode != null and detailTypeCode!=''">to_char(round ((t1.xsl*100.00/t1.xflzxl),2),'fm9999999990.00')||'%' as xslzbxfl,
+			to_char(round ((t1.xsje*100.00/t1.xflzxsje),2),'fm9999999990.00')||'%' as xsjezbxfl,
+			to_char(round ((t1.mle*100.00/t1.xflzmle),2),'fm9999999990.00')||'%' as mlezbxfl,
+			to_char(round ((t1.xsl*100.00/t1.mxlzxl),2),'fm9999999990.00')||'%' as xslzbmxl,to_char(round ((t1.xsje*100.00/t1.mxlzxsje),2),'fm9999999990.00')||'%' as xsjezbmxl,
+			to_char(round ((t1.mle*100.00/t1.mxlzmle),2),'fm9999999990.00')||'%' as mlezbmxl,
+		</if>
+		<if test= "smallTypeCode != null and smallTypeCode!=''  and (detailTypeCode == null ||detailTypeCode=='')">
+			to_char(round ((t1.xsl*100.00/t1.xflzxl),2),'fm9999999990.00')||'%' as xslzbxfl,to_char(round ((t1.xsje*100.00/t1.xflzxsje),2),'fm9999999990.00')||'%' as xsjezbxfl,
+			to_char(round ((t1.mle*100.00/t1.xflzmle),2),'fm9999999990.00')||'%' as mlezbxfl,'' as xslzbmxl,'' as xsjezbmxl,
+			'' as mlezbmxl,
+		</if>
+		<if test= "(smallTypeCode == null || smallTypeCode=='')and(detailTypeCode == null || detailTypeCode=='')">'' as xslzbxfl,'' as xsjezbxfl,
+			'' as mlezbxfl,'' as xslzbmxl,'' as xsjezbmxl,'' as mlezbmxl,
+		</if>
+			to_char(round ((t1.xsl*1.00/t1.xsdt),2),'fm9999999990.00') psdxl,
+			to_char(round ((t1.xsje*1.00/t1.xsdt),2),'fm9999999990.00') psdxsje,
+			to_char(round ((t1.mle*1.00/t1.xsdt),2),'fm9999999990.00') psdml,t2.mdszh qxs,t2.qxdt,t1.xsdt,
+			to_char(round ((CASE WHEN (t1.xsdt*100.00/t2.qxdt)>100 then 100 else (t1.xsdt*100.00/t2.qxdt)  END),2),'fm9999999990.00')||'%' as hyd,
+			t2.amds,t2.bmds,t2.cmds,t2.dmds,t3.jhl,t3.jhe,to_char(round ((t14.jsdhsl*100.00/t12.ddzs),2),'fm9999999990.00')||'%' as ddjsl,
+			to_char(round ((t13.shzl*100.00/t12.dhzl),2),'fm9999999990.00')||'%' as ddmzl,t11.rbjssl,t11.rbjscs,t5.zlxj,
+			t6.zhcs,t6.zhsl,t7.zhskugs,t8.gysndqwyks,t9.gysxcpf,round(t9.zdmj,2) zdmj,
+			round(t9.cjmj,2) cjmj,round(t9.nzcz,2) nzcz,round(t9.qyzrs,0) qyzrs,t10.gyskpdf,t10.gyskpdfph,
+			(nvl(t4.gysyxps1,0)+nvl(t41.gysyxps2,0)) gysyxps,t15.cjbhgcs,t15.cjbhgcs cjbhgskus
+    
+    	
+      		from SUPPLIER t
+    	 
+      		left join (select supplierCode,--供应商编号
+       sum(SELL_QUANTITY) xsl,--供应商销售量
+       sum(SELL_TOTAL_PRICE) xsje,--供应商销售金额
+       sum(SELL_PROFIT) mle,--供应商毛利额
+       sum(SELL_STORE_QUANTITY) xsdt, --供应商总销售店天
+      ( select sum(SELL_QUANTITY) from (select k.SELL_QUANTITY * nvl(k1.NET_WEIGHT, 1) SELL_QUANTITY,
+               SELL_TOTAL_PRICE,
+               SELL_PROFIT,
+               k.supplier_code supplierCode
+          from MERCHANDISE_SELL_D_J_MONTH k
+          inner  join MERCHANDISE k1
+            on (k.merchandise_code = k1.merchandise_code and k.supplier_code=k1.supplier_code)
+         where k.sell_month <![CDATA[>=]]> #{minDate3}
+           and k.sell_month <![CDATA[<=]]> #{maxDate3}
+           and ( (k.MERCHANDISE_CODE<![CDATA[>=]]>10000 and k.MERCHANDISE_CODE<![CDATA[<=]]>59999)
+           or (k.MERCHANDISE_CODE<![CDATA[>=]]>70000 and k.MERCHANDISE_CODE<![CDATA[<=]]>79999)
+           or (k.MERCHANDISE_CODE<![CDATA[>=]]>814000000 and k.MERCHANDISE_CODE<![CDATA[<=]]>814999999)
+           or (k.MERCHANDISE_CODE<![CDATA[>=]]>900000000 and k.MERCHANDISE_CODE<![CDATA[<=]]>999999999) )
+           )) zxsl,
+      ( select sum(SELL_TOTAL_PRICE) from MERCHANDISE_SELL_D_J_MONTH k inner join MERCHANDISE k1
+            on (k.merchandise_code = k1.merchandise_code and k.supplier_code=k1.supplier_code) where k.sell_month <![CDATA[>=]]>#{minDate3} and  k.sell_month <![CDATA[<=]]>#{maxDate3} and ( (k.MERCHANDISE_CODE<![CDATA[>=]]>10000 and k.MERCHANDISE_CODE<![CDATA[<=]]>59999)
+           or (k.MERCHANDISE_CODE<![CDATA[>=]]>70000 and k.MERCHANDISE_CODE<![CDATA[<=]]>79999)
+           or (k.MERCHANDISE_CODE<![CDATA[>=]]>814000000 and k.MERCHANDISE_CODE<![CDATA[<=]]>814999999)
+           or (k.MERCHANDISE_CODE<![CDATA[>=]]>900000000 and k.MERCHANDISE_CODE<![CDATA[<=]]>999999999) )) zxsje, --总销售金额
+       ( select sum(SELL_PROFIT) from MERCHANDISE_SELL_D_J_MONTH k inner join MERCHANDISE k1
+            on (k.merchandise_code = k1.merchandise_code and k.supplier_code=k1.supplier_code) where k.sell_month <![CDATA[>=]]>#{minDate3} and  k.sell_month <![CDATA[<=]]>#{maxDate3} and ( (k.MERCHANDISE_CODE<![CDATA[>=]]>10000 and k.MERCHANDISE_CODE<![CDATA[<=]]>59999)
+           or (k.MERCHANDISE_CODE<![CDATA[>=]]>70000 and k.MERCHANDISE_CODE<![CDATA[<=]]>79999)
+           or (k.MERCHANDISE_CODE<![CDATA[>=]]>814000000 and k.MERCHANDISE_CODE<![CDATA[<=]]>814999999)
+           or (k.MERCHANDISE_CODE<![CDATA[>=]]>900000000 and k.MERCHANDISE_CODE<![CDATA[<=]]>999999999) )) zmle, --总毛利额
+       (select sum(SELL_QUANTITY) xflzxl from (select k.SELL_QUANTITY * nvl(k1.net_weight, 1) SELL_QUANTITY
+                        from MERCHANDISE_SELL_D_J_MONTH k
+                        inner  join MERCHANDISE k1
+                          on (k.merchandise_code = k1.merchandise_code and k.supplier_code=k1.supplier_code) where k1.small_type_code=#{smallTypeCode} and  k.sell_month <![CDATA[>=]]> #{minDate3}
+           and k.sell_month <![CDATA[<=]]> #{maxDate3}) ) xflzxl,--小分类总销量
+         (select sum(SELL_QUANTITY) mxlzxl from (select k.SELL_QUANTITY * nvl(k1.net_weight, 1) SELL_QUANTITY
+                        from MERCHANDISE_SELL_D_J_MONTH k
+                        inner  join MERCHANDISE k1
+                          on (k.merchandise_code = k1.merchandise_code and k.supplier_code=k1.supplier_code) where k1.small_type_code=#{smallTypeCode} and k1.detail_type_code=#{detailTypeCode}  and  k.sell_month <![CDATA[>=]]> #{minDate3}
+           and k.sell_month <![CDATA[<=]]> #{maxDate3}) ) mxlzxl,--明细类总销量
+         (select sum(SELL_TOTAL_PRICE) from MERCHANDISE_SELL_D_J_MONTH k inner  join MERCHANDISE k1
+                          on (k.merchandise_code = k1.merchandise_code and k.supplier_code=k1.supplier_code) where k1.small_type_code=#{smallTypeCode} and  k.sell_month <![CDATA[>=]]> #{minDate3}
+           and k.sell_month <![CDATA[<=]]> #{maxDate3}) xflzxsje ,--小分类总销售金额
+            (select sum(SELL_TOTAL_PRICE) from MERCHANDISE_SELL_D_J_MONTH k inner  join MERCHANDISE k1
+                          on (k.merchandise_code = k1.merchandise_code and k.supplier_code=k1.supplier_code) where k1.small_type_code=#{smallTypeCode} and k1.detail_type_code=#{detailTypeCode} and  k.sell_month <![CDATA[>=]]> #{minDate3}
+           and k.sell_month <![CDATA[<=]]> #{maxDate3}) mxlzxsje, --明细类总销售金额
+           (select sum(SELL_PROFIT) from MERCHANDISE_SELL_D_J_MONTH k inner  join MERCHANDISE k1
+                          on (k.merchandise_code = k1.merchandise_code and k.supplier_code=k1.supplier_code) where k1.small_type_code=#{smallTypeCode} and k1.detail_type_code=#{detailTypeCode} and  k.sell_month <![CDATA[>=]]> #{minDate3}
+           and k.sell_month <![CDATA[<=]]> #{maxDate3}) mxlzmle, --明细类总毛利
+           (select sum(SELL_PROFIT) from MERCHANDISE_SELL_D_J_MONTH k inner  join MERCHANDISE k1
+                          on (k.merchandise_code = k1.merchandise_code and k.supplier_code=k1.supplier_code) where k1.small_type_code=#{smallTypeCode} and  k.sell_month <![CDATA[>=]]> #{minDate3}
+           and k.sell_month <![CDATA[<=]]> #{maxDate3}) xflzmle --小分类总毛利
+  from (select k.SELL_QUANTITY * nvl(k1.NET_WEIGHT, 1) SELL_QUANTITY,
+               SELL_TOTAL_PRICE,
+               SELL_PROFIT,
+               SELL_STORE_QUANTITY,
+               k.supplier_code supplierCode
+          from MERCHANDISE_SELL_D_J_MONTH k
+          inner  join MERCHANDISE k1
+            on (k.merchandise_code = k1.merchandise_code and k.supplier_code=k1.supplier_code)
+         where k.sell_month <![CDATA[>=]]> #{minDate3}
+           and k.sell_month <![CDATA[<=]]> #{maxDate3}) where supplierCode in (${supplierCode})
+ group by supplierCode) t1 on t.SUPPLIER_CODE=t1.supplierCode
+left join 
+
+(select mer.supplier_code supplierCode,(sum(A_STORE_QUANTITY)+sum(B_STORE_QUANTITY)+sum(C_STORE_QUANTITY)+sum(D_STORE_QUANTITY)) mdszh ,sum(PERMISSION_STORE_QUANTITY) qxdt,sum(A_STORE_QUANTITY) amds,sum(B_STORE_QUANTITY) bmds,sum(C_STORE_QUANTITY) cmds,sum(D_STORE_QUANTITY) dmds from MERCHANDISE_JH_PERMISSION mjp
+inner join MERCHANDISE mer on mjp.merchandise_code=mer.merchandise_code
+where  to_char(mjp.permission_date,'YYYY-MM')<![CDATA[>=]]>#{minDate3} and  to_char(mjp.permission_date,'YYYY-MM')<![CDATA[<=]]>#{maxDate3} AND mer.supplier_code in (${supplierCode})
+group by mer.supplier_code ) t2 on t.SUPPLIER_CODE=t2.supplierCode--门店数总和，权限店天，ABCD门店数（分别)
+left join 
+(select mr.supplier_code supplierCode,sum(mr.receipt_rationed) jhl,sum(mr.receipt_total_price) jhe from  ( select (mer.receipt_rationed * nvl(k1.net_weight, 1)) receipt_rationed,mer.receipt_total_price,mer.reality_receipt_date,mer.supplier_code from  MERCHANDISE_RECEIPT mer
+ inner  join MERCHANDISE k1
+ on (mer.merchandise_code = k1.merchandise_code and mer.supplier_code=k1.supplier_code)) mr where  to_char(mr.reality_receipt_date,'YYYY-MM')<![CDATA[>=]]>#{minDate3} and  to_char(mr.reality_receipt_date,'YYYY-MM')<![CDATA[<=]]>#{maxDate3}  AND mr.supplier_code in (${supplierCode})
+group by mr.supplier_code) t3 on t.SUPPLIER_CODE=t3.supplierCode--进货量，进货额
+left join 
+(select ism.INTENTION_SUPPLIER_CODE supplierCode,count(1) gysyxps1 from(select INTENTION_SUPPLIER_CODE,INTENTION_CODE from  ACCESSORY_QUOTED_ELECTRONIC where  to_char(created,'YYYY-MM')<![CDATA[>=]]>#{minDate3} and  to_char(created,'YYYY-MM')<![CDATA[<=]]>#{maxDate3}  AND intention_supplier_code in (${supplierCode}) group by INTENTION_SUPPLIER_CODE,INTENTION_CODE) ism 
+group by ism.INTENTION_SUPPLIER_CODE) t4 on t.SUPPLIER_CODE=t4.supplierCode--供应商意向品数辅料
+left join 
+(select ism1.INTENTION_SUPPLIER_CODE supplierCode,count(1) gysyxps2 from(select INTENTION_SUPPLIER_CODE,INTENTION_CODE from  MERCHANDISE_QUOTED where  to_char(created,'YYYY-MM')<![CDATA[>=]]>#{minDate3} and  to_char(created,'YYYY-MM')<![CDATA[<=]]>#{maxDate3}  AND intention_supplier_code in (${supplierCode}) group by INTENTION_SUPPLIER_CODE,INTENTION_CODE) ism1 
+group by ism1.INTENTION_SUPPLIER_CODE) t41 on t.SUPPLIER_CODE=t41.supplierCode--供应商意向品数商品
+left join 
+(select sl.supplier_code supplierCode ,sl.quality_level zlxj from SUPPLIER_QUALITY_LEVEL sl where sl.quality_level_year=#{lastYear3}  AND sl.supplier_code in (${supplierCode}))t5 on t.SUPPLIER_CODE=t5.supplierCode--供应商质量星级
+left join 
+(select mrec.supplier_code supplierCode,count(1) zhcs,sum(RECYCLE_COUNT)zhsl from MERCHANDISE_RECYCLE mrec where  to_char(mrec.recycle_date,'YYYY-MM')<![CDATA[>=]]>#{minDate3} and   to_char(mrec.recycle_date,'YYYY-MM')<![CDATA[<=]]>#{maxDate3} AND mrec.supplier_code in (${supplierCode})
+group by mrec.supplier_code)t6 on t.SUPPLIER_CODE=t6.supplierCode--供应商召回次数，召回数量
+left join 
+(select merc1.supplier_code  supplierCode,count(merc1.merchandise_code) zhskugs from( select mrec.supplier_code,mrec.merchandise_code from MERCHANDISE_RECYCLE mrec where  to_char(mrec.recycle_date,'YYYY-MM')<![CDATA[>=]]>#{minDate3} and   to_char(mrec.recycle_date,'YYYY-MM')<![CDATA[<=]]>#{maxDate3}  AND mrec.supplier_code in (${supplierCode})group by mrec.supplier_code,mrec.merchandise_code)merc1
+group by  merc1.supplier_code ) t7 on t.SUPPLIER_CODE=t7.supplierCode--供应商召回sku个数
+left join 
+(select scom.supplier_code supplierCode,sum(COMPLAINTS_COUNT) gysndqwyks from SUPPLIER_COMPLAINTS scom where scom.complaints_year=#{lastYear3} AND scom.supplier_code in (${supplierCode}) group by scom.supplier_code) t8 on t.SUPPLIER_CODE=t8.supplierCode--供应商千万元客诉
+left join 
+(select svf.supplier_code supplierCode,avg(svf.score) gysxcpf,avg(svf.FLOOR_AREA) zdmj,avg(svf.PLANT_AREA) cjmj,avg(svf.YEAR_TOTAL_OUTPUT) nzcz,avg(svf.ENTERPRISE_COUNT_PEOPLE) qyzrs from SUPPLIER_VISIT_FACTORY svf where  to_char(svf.visit_factory_date,'YYYY-MM')<![CDATA[>=]]>#{minDate3} and    to_char(svf.visit_factory_date,'YYYY-MM')<![CDATA[<=]]>#{maxDate3} AND svf.supplier_code in (${supplierCode}) group by svf.supplier_code)t9 on t.SUPPLIER_CODE=t9.supplierCode--供应商巡查评分
+left join 
+(select ses1.supplier_code supplierCode,ses1.evaluate_item_score gyskpdf,rank() over(order by ses1.evaluate_item_score desc) as gyskpdfph from SUPPLIER_EVALUATE_SCORE ses1
+where created =(select max(created) from SUPPLIER_EVALUATE_SCORE ses2 where ses2.supplier_code=ses1.supplier_code and  to_char(ses2.created,'YYYY-MM')<![CDATA[>=]]>#{minDate3} and    to_char(ses2.created,'YYYY-MM')<![CDATA[<=]]>#{maxDate3} AND ses1.supplier_code in (${supplierCode}))) t10 on t.SUPPLIER_CODE=t10.supplierCode--供应商考评得分及排名
+left join 
+(select conre.supplier_code supplierCode ,sum(CONCESSION_RECEIVE_COUNT) rbjssl,count(1) rbjscs from CONCESSION_RECEIVE conre where  to_char(conre.APPLICATION_DATE,'YYYY-MM')<![CDATA[>=]]>#{minDate3} and   to_char(conre.APPLICATION_DATE,'YYYY-MM')<![CDATA[<=]]>#{maxDate3} AND conre.supplier_code in (${supplierCode}) group by conre.supplier_code) t11 on t.SUPPLIER_CODE=t11.supplierCode--让步接收数量，次数
+left join 
+(select supplier_code supplierCode,sum(ORDER_QUANTITY) dhzl,count(1) ddzs from MERCHANDISE_ORDER where  to_char(EXPECT_ARRIVE_DATE,'YYYY-MM')<![CDATA[>=]]>#{minDate3} and    to_char(EXPECT_ARRIVE_DATE,'YYYY-MM')<![CDATA[<=]]>#{maxDate3} AND ORDER_QUANTITY <![CDATA[>=]]>0 AND supplier_code in (${supplierCode}) group by supplier_code ) t12 on t.SUPPLIER_CODE=t12.supplierCode--供应商订货总量,订单总数
+left join 
+(select MR.supplier_code supplierCode,sum(MR.RECEIPT_RATIONED) shzl from MERCHANDISE_RECEIPT  MR
+  inner join MERCHANDISE_ORDER MO  on MR.ORDER_CODE=MO.ORDER_CODE and MR.SUPPLIER_CODE = MO.SUPPLIER_CODE
+   and MR.MERCHANDISE_CODE = MO.MERCHANDISE_CODE where MR.RECEIPT_RATIONED<![CDATA[>=]]>0 AND  MO.ORDER_QUANTITY<![CDATA[>=]]>0 AND  to_char(MR.REALITY_RECEIPT_DATE,'YYYY-MM')<![CDATA[>=]]>#{minDate3} and    to_char(MR.REALITY_RECEIPT_DATE,'YYYY-MM')<![CDATA[<=]]>#{maxDate3} AND MR.supplier_code in (${supplierCode}) group by MR.supplier_code ) t13 on t.SUPPLIER_CODE=t13.supplierCode--供应商收货总量
+left join 
+(select mero.supplier_code supplierCode,count(1) jsdhsl from (select * from  MERCHANDISE_ORDER where  to_char(EXPECT_ARRIVE_DATE,'YYYY-MM')<![CDATA[>=]]>#{minDate3} and    to_char(EXPECT_ARRIVE_DATE,'YYYY-MM')<![CDATA[<=]]>#{maxDate3} AND supplier_code in (${supplierCode})) mero inner join MERCHANDISE_RECEIPT merr on mero.order_code=merr.order_code and mero.SUPPLIER_CODE=merr.SUPPLIER_CODE and mero.MERCHANDISE_CODE=merr.MERCHANDISE_CODE AND mero.ORDER_QUANTITY<![CDATA[>=]]>0 and to_char(merr.reality_receipt_date,'YYYY-MM-DD')<![CDATA[<=]]>to_char(mero.expect_arrive_date,'YYYY-MM-DD') group by mero.supplier_code ) t14 on t.SUPPLIER_CODE=t14.supplierCode--供应商及时到货订单数
+left join 
+(select merunq.supplier_code supplierCode,count(1) cjbhgcs from MERCHANDISE_UNQUALIFIED merunq where  to_char(merunq.SPOT_CHECK_DATE,'YYYY-MM')<![CDATA[>=]]>#{minDate3} and   to_char(merunq.SPOT_CHECK_DATE,'YYYY-MM')<![CDATA[<=]]>#{maxDate3} AND merunq.supplier_code in (${supplierCode})
+group by merunq.supplier_code)t15 on t.SUPPLIER_CODE=t15.supplierCode--供应商抽检不合格次数，抽检不合格数量
+      		
+    	<where>
+    		1=1
+			<if test= "supplierCode != null and supplierCode!=''">
+			AND t.supplier_code in (${supplierCode})
+			</if>
+			
+    	</where>
+    
+    	
+    </if>
+    ) g
+     <if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY g.sjsjfw desc
+    		</if>
+    	</if>   
+    </select>
+   
+</mapper>

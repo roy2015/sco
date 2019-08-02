@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.peripheral.bw.MerchandiseJhPermissionDao">
+	<resultMap type="com.powere2e.sco.model.peripheral.bw.MerchandiseJhPermission" id="merchandiseJhPermissionMap">
+		<result property="merchandiseCode" column="merchandiseCode"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="regionCode" column="regionCode"/>
+		<result property="storeType" column="storeType"/>
+		<result property="permissionStoreQuantity" column="permissionStoreQuantity"/>
+		<result property="aStoreQuantity" column="aStoreQuantity"/>
+		<result property="bStoreQuantity" column="bStoreQuantity"/>
+		<result property="cStoreQuantity" column="cStoreQuantity"/>
+		<result property="dStoreQuantity" column="dStoreQuantity"/>
+		<result property="permissionDate" column="permissionDate"/>
+		<result property="syncDate" column="syncDate"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    
+    <!-- 增加商品进货权限 --> 
+	<insert id="saveMerchandiseJhPermission" parameterType="hashmap">
+		INSERT INTO merchandise_jh_permission(merchandise_code,region_code,store_type,permission_store_quantity,a_store_quantity,b_store_quantity,c_store_quantity,d_store_quantity,permission_date,sync_date,supplier_code) 
+    		  <foreach collection="list" item="item" index="index" separator="union all" > 
+		         (
+		         SELECT 
+			         #{item.merchandiseCode}, 
+			         #{item.regionCode},
+			         #{item.storeType}, 
+			         #{item.permissionStoreQuantity},
+			         #{item.aStoreQuantity}, 
+			         #{item.bStoreQuantity},
+			         #{item.cStoreQuantity}, 
+			         #{item.dStoreQuantity},
+			         #{item.permissionDate},
+			         #{app_created},
+			         #{item.supplierCode}
+		         FROM　DUAL
+		         )
+		     </foreach>  
+    </insert>
+   
+    <!--删除商品进货权限-->
+    <delete id="deleteMerchandiseJhPermission">
+    	DELETE FROM merchandise_jh_permission
+    </delete>
+   
+</mapper>

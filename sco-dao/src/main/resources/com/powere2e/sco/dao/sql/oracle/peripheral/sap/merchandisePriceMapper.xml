@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.peripheral.sap.MerchandisePriceDao">
+	<resultMap type="com.powere2e.sco.model.peripheral.sap.MerchandisePrice" id="merchandisePriceMap">
+		<result property="merchandiseCode" column="merchandiseCode"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="sellRegion" column="sellRegion"/>
+		<result property="directJoin" column="directJoin"/>
+		<result property="sellPrice" column="sellPrice"/>
+		<result property="priceDate" column="priceDate"/>
+		<result property="syncDate" column="syncDate"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    
+    <!-- 增加商品销售价格信息 --> 
+	<insert id="saveMerchandisePrice" parameterType="hashmap">
+		INSERT INTO merchandise_price(merchandise_code,supplier_code,sell_region,direct_join,sell_price,price_date,sync_date) 
+    		  <foreach collection="list" item="item" index="index" separator="union all" > 
+		         (
+		         SELECT 
+			         #{item.merchandiseCode}, 
+			         #{item.supplierCode},
+			         #{item.sellRegion}, 
+			         #{item.directJoin},
+			         #{item.sellPrice}, 
+			         #{item.priceDate},
+			         #{app_created}
+		         FROM　DUAL
+		         )
+		     </foreach>      
+    </insert>
+  
+   	<!--删除商品销售价格信息-->
+    <delete id="deleteMerchandisePrice">
+    	DELETE FROM merchandise_price
+    </delete>
+    
+    
+    <!-- 增加商品销售价格的重复数据 --> 
+	<insert id="saveMerchandisePriceGroup" parameterType="hashmap">
+		INSERT INTO merchandise_price_group(merchandise_code,supplier_code,sell_region,direct_join,sell_price,price_date,sync_date) 
+    		  <foreach collection="list" item="item" index="index" separator="union all" > 
+		         (
+		         SELECT 
+			         #{item.merchandiseCode}, 
+			         #{item.supplierCode},
+			         #{item.sellRegion}, 
+			         #{item.directJoin},
+			         #{item.sellPrice}, 
+			         #{item.priceDate},
+			         #{app_created}
+		         FROM　DUAL
+		         )
+		     </foreach>      
+    </insert>
+
+	<select id="querySameMerchandisePrice" resultMap="merchandisePriceMap">
+		SELECT
+			t1.merchandise_code merchandiseCode,
+			t1.supplier_code supplierCode,
+			t1.sell_region sellRegion,
+			t1.direct_join directJoin,
+			t1.sell_price sellPrice,
+			t1.price_date priceDate
+		FROM
+			merchandise_price t1
+		WHERE 1=1
+			AND t1.merchandise_code = #{merchandiseCode}
+			AND t1.supplier_code = #{supplierCode}
+			AND t1.sell_region = #{sellRegion}
+			AND t1.direct_join = #{directJoin}
+			AND t1.sell_price = #{sellPrice}
+			AND t1.price_date = (
+				SELECT
+					max(t1.price_date)
+				FROM
+					merchandise_price t1
+				WHERE 1=1
+					AND t1.merchandise_code = #{merchandiseCode}
+					AND t1.supplier_code = #{supplierCode}
+					AND t1.sell_region = #{sellRegion}
+					AND t1.direct_join = #{directJoin}
+					AND t1.price_date &lt; #{priceDate}
+				)
+	</select>
+  
+</mapper>

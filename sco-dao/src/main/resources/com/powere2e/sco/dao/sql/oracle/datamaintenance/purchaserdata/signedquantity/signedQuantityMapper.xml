@@ -1,0 +1,481 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.datamaintenance.purchaserdata.signedquantity.SignedQuantityDao">
+   <resultMap type="com.powere2e.sco.model.datamaintenance.purchaserdata.signedquantity.SignedQuantity" id="signedQty">
+		<result property="merchandiseCode" column="merchandiseCode"/>
+		<result property="merchandiseName" column="merchandiseName"/>
+		<result property="qlCode" column="qlCode"/>
+		<result property="qlCreated" column="qlCreated"/>
+		<result property="qlStartDate" column="qlStartDate"/>
+		<result property="qlPrice" column="qlPrice"/>
+		<result property="qlCount" column="qlCount"/>
+		<result property="qlStatus" column="qlStatus"/>
+		<result property="isSatisfyBeforeQl" column="isSatisfyBeforeQl"/>
+		<result property="gqCode" column="gqCode"/>
+		<result property="qlCreateby" column="qlCreateby"/>
+		<result property="xPrice" column="xPrice"/>
+		<result property="remarks" column="remarks"/>
+		<result property="proCount" column="proCount" />
+		<result property="proPercent" column="proPercent" />
+		<result property="finshDate" column="finshDate" />
+		<result property="beyondCount" column="beyondCount" />
+		<result property="supplierCode" column="supplierCode" />
+		<result property="supplierName" column="supplierName" />
+		<result property="dxRoleName" column="dxRoleName" />
+		<result property="dlRoleName" column="dlRoleName" />
+		<result property="centreName" column="centreName" />
+		<result property="smallName" column="smallName" />
+		<result property="detailName" column="detailName" />
+		<result property="fineName" column="fineName" />
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+   
+    <!-- 查询签量数据 -->
+	<select id="listSignedQuantity" resultMap="signedQty">
+		SELECT
+			<if test="page_count == null">
+				m.merchandise_code merchandiseCode, m.merchandise_name merchandiseName,
+				mp.purchase_price xPrice,
+	
+				ql.ql_code qlCode,ql.created qlCreated,ql.ql_start_date qlStartDate,
+				qd.ql_price qlPrice,ROUND(ql.ql_count,2) qlCount,
+				DECODE(ql.status,'A','新增','S','改签单','D','已改签','T','已终止') qlStatus,
+				DECODE(ql.is_satisfy_before_ql,'Y','是','N','否') isSatisfyBeforeQl,
+				ql.gq_code gqCode,u.real_name qlCreateby,qd.remarks remarks,
+				
+				ROUND(ql.finish_count,2) proCount,ROUND(ql.finish_percent,4) proPercent,
+				ql.ql_finish_date finshDate,ROUND(ql.exceed_count,2) beyondCount,
+	
+				s.supplier_code supplierCode,s.supplier_name supplierName,
+				dx.role_name dxRoleName,dl.role_name dlRoleName, 
+				ct.centre_type_name centreName, sm.small_type_name smallName, 
+				dt.detail_type_name detailName, ft.fine_type_name fineName 
+			 </if>
+	    	 <if test="page_count != null">
+	       		count(1) AS record_count 
+	    	 </if>
+		FROM
+			merchandise m 
+			LEFT JOIN merchandise_ql_detail qd ON m.merchandise_code = qd.merchandise_code 
+				AND m.supplier_code = qd.supplier_code <!-- 签量明细表 -->
+			LEFT JOIN merchandise_ql ql ON qd.ql_code = ql.ql_code <!-- 签量数据表 -->
+			LEFT JOIN (<include refid="seaLastedPurPrc" />) mp ON m.merchandise_code = mp.merchandise_code 
+				AND m.supplier_code = mp.supplier_code 
+			LEFT JOIN supplier s ON m.supplier_code = s.supplier_code  <!-- 供应商表 -->
+			LEFT JOIN merchandise_role mr ON m.merchandise_code = mr.merchandise_code <!-- 商品角色关联表 -->
+			LEFT JOIN merchandise_dx_role dx ON mr.dx_role_code = dx.role_code  <!-- 定性角色表 -->
+			LEFT JOIN merchandise_dl_role dl ON mr.dl_role_code = dl.role_code  <!-- 定量角色表 -->
+			LEFT JOIN merchandise_centre_type ct ON m.centre_type_code = ct.centre_type_code <!-- 中分类 -->
+			LEFT JOIN merchandise_small_type sm ON m.small_type_code = sm.small_type_code <!-- 小分类 -->
+			LEFT JOIN merchandise_detail_type dt ON m.detail_type_code = dt.detail_type_code <!-- 明细类 -->
+			
+			<!-- 查询细分类需关联意向品 -->
+		    LEFT JOIN intention_supplier_merchandise ism ON ism.merchandise_code = m.merchandise_code 
+           		AND ism.supplier_code = m.supplier_code											
+			LEFT JOIN merchandise_intention mi ON ism.intention_code = mi.intention_code
+    
+			LEFT JOIN merchandise_fine_type ft ON dt.detail_type_code = ft.detail_type_code 
+				AND mi.fine_type_code = ft.fine_type_code <!-- 细分类 -->
+			
+			LEFT JOIN pub_user u ON u.user_id = ql.createby <!-- 用户表 -->
+		WHERE 1=1 
+			<if test="supplierCode != null and supplierCode != ''">
+				AND UPPER(s.supplier_code) like UPPER('%'||#{supplierCode}||'%') 
+			</if>
+			<if test="supplierName != null and supplierName != ''">
+				AND UPPER(s.supplier_name) like UPPER('%'||#{supplierName}||'%') 
+			</if>
+			<if test="merchandiseCode != null and merchandiseCode != ''">
+				AND UPPER(m.merchandise_code) like UPPER('%'||#{merchandiseCode}||'%') 
+			</if>
+			<!-- 多个商品编号 -->
+			<if test="merchandiseCodes != null and merchandiseCodes != ''">
+				AND UPPER(m.merchandise_code) in (${merchandiseCodes}) 
+			</if>
+			<!-- 多个供应商编号 -->
+			<if test="supplierCodes != null and supplierCodes != ''">
+				AND UPPER(s.supplier_code) in (${supplierCodes}) 
+			</if>
+			
+			<if test="merchandiseName != null and merchandiseName != ''">
+				AND UPPER(m.merchandise_name) like UPPER('%'||#{merchandiseName}||'%') 
+			</if>
+			<if test="dlRoleCode != null and dlRoleCode != ''">
+				AND UPPER(mr.dl_role_code) like UPPER(#{dlRoleCode}) 
+			</if>
+			<if test="dxRoleCode != null and dxRoleCode != ''">
+				AND UPPER(mr.dx_role_code) like UPPER(#{dxRoleCode}) 
+			</if>
+			<if test="centreType != null and centreType != ''">
+				AND UPPER(m.centre_type_code) like UPPER(#{centreType}) 
+			</if>
+			<if test="smallType != null and smallType != ''">
+				AND UPPER(m.small_type_code) like UPPER(#{smallType}) 
+			</if>
+			<if test="detailType != null and detailType != ''">
+				AND UPPER(m.detail_type_code) like UPPER(#{detailType}) 
+			</if>
+			<if test="fineType != null and fineType != ''">
+				AND UPPER(ft.fine_type_code) like UPPER(#{fineType}) 
+			</if>
+			<if test="qlCode != null and qlCode != ''">
+				AND UPPER(ql.ql_code) like UPPER('%'||#{qlCode}||'%') 
+			</if>
+			<if test="gqCode != null and gqCode != ''">
+				AND UPPER(ql.gq_code) like UPPER('%'||#{gqCode}||'%') 
+			</if>
+			<if test="qlCreateby != null and qlCreateby != ''">
+				AND UPPER(u.real_name) like UPPER('%'||#{qlCreateby}||'%') 
+			</if>
+			<if test="isSatisfyBeforeQl =='ALL'">
+				AND 
+				(	UPPER(ql.is_satisfy_before_ql) like 'N' 
+					OR UPPER(ql.is_satisfy_before_ql) like 'Y'
+				)
+			</if>
+			<if test="isSatisfyBeforeQl != null and isSatisfyBeforeQl != '' and isSatisfyBeforeQl != 'ALL'">
+				AND UPPER(ql.is_satisfy_before_ql) like UPPER(#{isSatisfyBeforeQl}) 
+			</if>
+			
+			<if test="qlStartDate != null">
+				AND ql.ql_start_date >=  #{qlStartDate}
+			</if>
+			<if test="qlEndDate != null">
+				AND ql.ql_start_date <![CDATA[<]]> (#{qlEndDate}+1)
+			</if>
+			<if test="qlStatus != null and qlStatus != '' and qlStatus != 'ALL'">
+				AND UPPER(ql.status) like UPPER(#{qlStatus}) 
+			</if>
+			<if test="valStatus != null and valStatus != ''">
+				AND UPPER(ql.status) in (${valStatus}) 
+			</if>
+			<!-- 自定义条件 --> 
+			<if test="otherCondition != null and otherCondition != ''">
+				AND ${otherCondition}    
+			</if>
+		<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY m.merchandise_code DESC, ql.ql_start_date DESC
+    		</if>
+    	</if>
+	</select>
+	
+	<!-- 查询商品X001地区最新的进价 -->
+	<sql id="seaLastedPurPrc">
+	 	SELECT 
+			b.merchandise_code,b.supplier_code,
+			b.price_date, b.purchase_price 
+	  	FROM
+		  (
+		    SELECT 
+				pp.merchandise_code,
+				pp.supplier_code,
+				MAX(price_date) price_date 
+		    FROM 	
+		      	merchandise_p_price_group pp
+		    WHERE 
+		      	pp.warehouse_code = 'X001'  <!-- 商品进货价格信息 -->
+		    GROUP BY merchandise_code, supplier_code 
+		  ) a 
+		  LEFT JOIN merchandise_p_price_group b ON a.merchandise_code = b.merchandise_code 
+		  	AND a.supplier_code = b.supplier_code 
+		  	AND a.price_date = b.price_date and b.warehouse_code = 'X001'
+	</sql>
+	
+	<!-- 计算签量时查询相关签量数据 -->
+	<select id="listCalculateSignedQuantity" resultMap="signedQty">
+		SELECT 
+			ql.ql_code qlCode,ql.ql_start_date qlStartDate,ql.ql_count qlCount,
+			ql.is_satisfy_before_ql isSatisfyBeforeQl,ql.finish_count proCount,
+			ql.finish_percent proPercent,ql.ql_finish_date finshDate,
+			ql.exceed_count beyondCount 
+		FROM 
+			merchandise_ql ql 
+		INNER JOIN merchandise_ql_detail qd ON qd.ql_code = ql.ql_code
+		WHERE 
+			ql.status NOT IN ('D', 'T')   <!-- 除已改签、已终止外的 -->
+			<if test="merchandiseCodes != null and merchandiseCodes != ''">
+				AND UPPER(qd.merchandise_code) IN (${merchandiseCodes})
+			</if>
+			<if test="supplierCodes != null and supplierCodes != ''">
+				AND UPPER(qd.supplier_code) IN (${supplierCodes})
+			</if>
+			<if test="qlStartDate != null">
+				AND ql.ql_start_date <![CDATA[<]]> (#{qlStartDate}+1)
+			</if>
+		ORDER BY ql.ql_start_date DESC 
+	</select>
+	
+	<!-- 新增签量主信息 -->
+	<insert id="insertSignedQuantityQl" parameterType="java.util.List">
+		INSERT INTO merchandise_ql(ql_code,ql_start_date,ql_count,is_satisfy_before_ql,status,finish_count,
+			finish_percent,exceed_count,created,createby)
+		VALUES 
+			(#{qlCode},#{qlStartDate},#{qlCount},#{isSatisfyBeforeQl},#{qlStatus},0,
+			0,0,#{app_created},#{qlCreateby})
+	</insert>
+	
+	<!-- 新增签量明细数据 -->
+	<insert id="insertSignedQuantityDetail" parameterType="java.util.List">
+			INSERT INTO merchandise_ql_detail(ql_code,merchandise_code,supplier_code,ql_price,remarks,created) 
+		<foreach collection="list" item="item" separator="union all" >  
+			(
+			  SELECT 
+				#{item.qlCode},${item.merchandiseCode},${item.supplierCode},
+			 	#{item.qlPrice},#{item.remarks},#{app_created} 
+			  FROM 
+			  	dual 
+		 	)
+	    </foreach> 
+	</insert>
+	
+	<!-- 查询签量单主信息 -->
+	<select id="searchSignedQtyMain" resultMap="signedQty">
+		SELECT 
+			ql.ql_code, ql.ql_start_date qlStartDate, ql.is_satisfy_before_ql isSatisfyBeforeQl,
+			ql.ql_count qlCount,ql.finish_count proCount,ql.createby qlCreateby,
+			d.merchandiseCode merchandiseCode, d.supplierCode supplierCode
+		FROM 
+			merchandise_ql ql 
+		LEFT JOIN 
+	      (
+		      <!-- 一个签量单据有多个商品时，耗性能 -->
+		      <!-- SELECT 
+		           qd.ql_code,TO_CHAR(WMSYS.WM_CONCAT(''''||qd.merchandise_code||'''')) merchandiseCode,
+		           TO_CHAR(WMSYS.WM_CONCAT(''''||qd.supplier_code||'''')) supplierCode  
+		       FROM 
+		       	(SELECT * FROM merchandise_ql_detail ORDER BY created,merchandise_code) qd
+		       WHERE qd.ql_code = #{qlCode}
+		       GROUP BY 
+		             qd.ql_code  -->
+		       SELECT 
+                  qd.ql_code,qd.merchandise_code merchandiseCode,
+                  qd.supplier_code supplierCode 
+	           FROM 
+	           	  merchandise_ql_detail qd
+		       WHERE qd.ql_code = #{qlCode}
+	       ) d  
+         ON ql.ql_code = d.ql_code  
+		 WHERE 
+		 	ql.ql_code = #{qlCode} 
+		 	AND ql.status in (${qlStatus})
+	</select>
+	
+	<!-- 查询需改签(或需修改)的明细数据 -->
+	<select id="listSignedQtyDetail" resultMap="signedQty">
+		SELECT
+			m.merchandise_code merchandiseCode, m.merchandise_name merchandiseName,
+			mp.purchase_price xPrice,
+			qd.ql_price qlPrice,qd.remarks remarks,
+			
+			s.supplier_code supplierCode,s.supplier_name supplierName,
+			dx.role_name dxRoleName,dl.role_name dlRoleName, 
+			ct.centre_type_name centreName, sm.small_type_name smallName, 
+			dt.detail_type_name detailName, ft.fine_type_name fineName 
+		FROM
+			merchandise_ql ql 
+			LEFT JOIN merchandise_ql_detail qd ON ql.ql_code = qd.ql_code <!-- 签量数据表 -->
+			LEFT JOIN merchandise m ON qd.merchandise_code = m.merchandise_code 
+				AND qd.supplier_code = m.supplier_code 	<!-- 签量明细表 -->
+			LEFT JOIN (<include refid="seaLastedPurPrc" />) mp ON m.merchandise_code = mp.merchandise_code 
+				AND m.supplier_code = mp.supplier_code 
+			LEFT JOIN supplier s ON m.supplier_code = s.supplier_code  <!-- 供应商表 -->
+			LEFT JOIN merchandise_role mr ON m.merchandise_code = mr.merchandise_code <!-- 商品角色关联表 -->
+			LEFT JOIN merchandise_dx_role dx ON mr.dx_role_code = dx.role_code  <!-- 定性角色表 -->
+			LEFT JOIN merchandise_dl_role dl ON mr.dl_role_code = dl.role_code  <!-- 定量角色表 -->
+			LEFT JOIN merchandise_centre_type ct ON m.centre_type_code = ct.centre_type_code <!-- 中分类 -->
+			LEFT JOIN merchandise_small_type sm ON m.small_type_code = sm.small_type_code <!-- 小分类 -->
+			LEFT JOIN merchandise_detail_type dt ON m.detail_type_code = dt.detail_type_code <!-- 明细类 -->
+			
+			<!-- 查询细分类需关联意向品 -->
+		    LEFT JOIN intention_supplier_merchandise ism ON ism.merchandise_code = m.merchandise_code 
+           		AND ism.supplier_code = m.supplier_code											
+			LEFT JOIN merchandise_intention mi ON ism.intention_code = mi.intention_code
+    
+			LEFT JOIN merchandise_fine_type ft ON dt.detail_type_code = ft.detail_type_code 
+				AND mi.fine_type_code = ft.fine_type_code <!-- 细分类 -->
+		WHERE 
+			UPPER(ql.ql_code) like UPPER(#{qlCode}) 
+			AND UPPER(ql.status) in (${qlStatus}) 
+		ORDER BY qd.created,qd.merchandise_code
+	</select>
+	
+	<!-- 修改签量主信息 -->
+	<update id="updateSignedQtyMain">
+		UPDATE 
+			merchandise_ql
+		SET 
+			<if test="qlStartDate != null">
+				ql_start_date = #{qlStartDate},
+			</if>
+			<if test="isSatisfyBeforeQl != null and isSatisfyBeforeQl != ''">
+				is_satisfy_before_ql = #{isSatisfyBeforeQl},
+			</if>
+			<!-- 终止签量时 -->
+			<if test="terStatus != null and terStatus != ''">
+				last_status = status,
+				status = #{terStatus},
+			</if>
+			<!-- 撤销终止签量时 -->
+			<if test="revokerStatus != null and revokerStatus != ''">
+				status = last_status,
+			</if>
+			<if test="qlStatus != null and qlStatus != ''">
+				status = #{qlStatus},
+			</if>
+			<if test="qlCount != null and qlCount != ''">
+				ql_count = #{qlCount},
+			</if>
+			
+			<if test="gqCode != null and gqCode != ''">
+				gq_code = #{gqCode},
+			</if>
+			<if test="proCount != null">
+				finish_count = #{proCount},
+			</if>
+			<if test="proPercent != null">
+				finish_percent = #{proPercent},
+			</if>
+			<if test="finshDate != null">
+				ql_finish_date = #{finshDate},
+			</if>
+			<if test="beyondCount != null">
+				exceed_count = #{beyondCount},
+			</if>
+			updated=#{app_updated},
+	   		updateby=#{app_user_id}
+	   	WHERE 
+	   		ql_code in (${qlCode})
+	</update>
+	
+	<!-- 重置签量统计数据 -->
+	<update id="resetSignedQtyCalculate">
+		UPDATE 
+			merchandise_ql
+		SET 
+			finish_count = 0,
+			finish_percent = 0,
+			ql_finish_date = null,
+			exceed_count = 0 
+		WHERE 
+			ql_code IN (${qlCodes}) 
+			AND status NOT IN ('D', 'T') 
+	</update>
+	
+	<!-- 查询需删除的签量单编号 -->
+	<select id="searchDelQlCode" resultType="String">
+		SELECT  
+			TO_CHAR(WMSYS.WM_CONCAT(''''||ql_code||'''')) qlCode 
+		FROM 
+			(
+			  (                          <!-- 查询其对应的子节点 -->
+			    SELECT 
+			    	ql_code 
+			    FROM 
+			    	merchandise_ql 
+			    CONNECT BY PRIOR ql_code = gq_code 
+			    START WITH ql_code in (${qlCode})
+			  )
+			  UNION 					  <!-- 连接后就是该数据所在链路的所有节点 -->
+			  (							  <!-- 查询其上层的所有父节点 -->
+			   SELECT 
+			   		ql_code ql_code 
+			   FROM 
+			   		merchandise_ql
+			   START WITH ql_code in (${qlCode}) 
+			   CONNECT BY PRIOR gq_code = ql_code 
+			   )    
+			 )
+	</select>
+	
+	<!-- 根据签量编号查询出关联的商品 -->
+	<select id="listMerchandiseCodeByQlCode" resultType="java.lang.String">
+		SELECT 
+      		qd.merchandise_code  || ',' || qd.supplier_code 
+		FROM 
+			merchandise_ql ql 
+		INNER JOIN merchandise_ql_detail qd ON qd.ql_code = ql.ql_code
+		WHERE 
+		      ql.ql_code IN (${qlCode}) 
+        GROUP BY qd.merchandise_code, qd.supplier_code 
+	</select>
+	
+	<!-- 删除签量数据主信息 -->
+	<delete id="deleteSignedQtyMain">
+		DELETE FROM 
+			merchandise_ql 
+		WHERE 
+			ql_code in (${qlCode}) 
+	</delete>
+
+	<!-- 删除签量数据明细数据 -->
+	<delete id="deleteSignedQtyDetail">
+		DELETE FROM 
+			merchandise_ql_detail  
+		WHERE 
+			ql_code in (${qlCode}) 
+			<if test="merchandiseCodes != null and merchandiseCodes != ''">
+				AND merchandise_code not in (${merchandiseCodes})
+			</if>
+	</delete>
+	
+	<!-- 新增/修改签量明细 -->
+	<update id="insOrUpdSignedQty">
+         MERGE INTO merchandise_ql_detail T1
+	      	USING (
+				<foreach collection="list" item="item" separator="union all" >  
+		        	( SELECT 
+                   	  	#{item.qlCode} qlCode, 
+                   	    ${item.merchandiseCode} merchandiseCode,
+                   	    ${item.supplierCode} supplierCode,
+		                #{item.qlPrice} qlPrice,
+		                #{item.remarks} remarks 
+			          FROM dual 
+			         )
+				</foreach>
+	           ) T2
+			ON (T1.ql_code = T2.qlCode AND T1.merchandise_code = T2.merchandiseCode )   <!-- 判断条件 -->
+			WHEN MATCHED THEN															 <!-- 更新 -->
+			     UPDATE SET 
+                   T1.ql_price = T2.qlPrice,
+                   T1.remarks = T2.remarks,
+                   T1.updated = #{app_updated},
+   		           T1.updateby = #{app_user_id} 
+			WHEN NOT MATCHED THEN 
+			      INSERT (ql_code,merchandise_code,supplier_code,ql_price,remarks,created,createby) 
+			        VALUES(T2.qlCode,T2.merchandiseCode,T2.supplierCode,T2.qlPrice,T2.remarks,#{app_created}, #{app_create_by})
+	</update>
+	
+	<!-- 定时任务计数签量数据 -->
+	<update id="updateSignedQtyCalculate">
+		MERGE INTO merchandise_ql T1
+      		USING (
+<!-- 				<foreach collection="list" item="item" separator="union all" >   -->
+		        	( SELECT 
+                   	  	#{qlCode} qlCode, 
+                   	  	#{proCount} proCount, 
+                   	    #{proPercent} proPercent,
+                   	    #{finshDate} finshDate,
+		                #{beyondCount} beyondCount 
+			          FROM dual 
+			         )
+<!-- 				</foreach> -->
+	           ) T2
+			ON (1 = 1)							<!-- 判断条件(永为真)-->
+			WHEN MATCHED THEN					<!-- 在此功能中只能能更新 -->
+				UPDATE SET 
+	                finish_count = T2.proCount,
+					finish_percent = T2.proPercent, 
+					ql_finish_date = T2.finshDate, 
+					exceed_count = T2.beyondCount  
+				WHERE 
+					T1.ql_code = T2.qlCode  
+				AND T1.status NOT IN ('D', 'T')   <!-- 除已改签、已终止外的 -->
+			WHEN NOT MATCHED THEN 
+			      INSERT (ql_code) VALUES('||||')
+	</update>
+	
+</mapper>

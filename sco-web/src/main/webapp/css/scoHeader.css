@@ -1,0 +1,72 @@
+﻿@charset "utf-8";
+.ymx-head{
+	background-image: url(../images/headright.png);
+	background-position: right 0px;
+	background-repeat: repeat-x;
+	height: 78px;
+	font-family:"微软雅黑";
+}
+.ymx-logo02{
+	background-image: url(../images/logo-left.png);
+	background-position: 0px center;
+	height: 78px;
+	float: left;
+	width: 40%;
+	background-repeat: no-repeat;
+}
+.ymx-headright{
+	width: 60%;
+	*width: 57%;
+	height: 78px;
+	float: right;
+
+	position:relative;
+}
+.ymx-headtop{ position:absolute; right:0px; bottom:10px;}
+.ymx-headtop small{
+	font-size: 12px;
+	color: #FFA6A6;
+}
+.ymx-headright .ymx-span{
+	/* [disabled]color: #D7FEA7; */
+	position: absolute;
+	top: 0px;
+	right: 0px;
+	line-height: 31px;
+	height: 37px;
+/*	width: 307px;
+*/	background-image: url(../images/sco/xinx.png);
+	color: #FFF;
+	background-repeat: no-repeat;
+	background-position: left top;
+	padding:0 10px;
+
+}
+.ymx-headtop span{ margin-left:0px;}
+.ymx-headtop span,.ymx-headtop a{
+	color: #fff;
+	/*	padding-left: 10px;
+*/	text-decoration: none;
+	
+	text-align:center;
+}
+/*.ymx-headtop a:hover{
+	color: #BDE7FD;
+}*/
+.ymx-headright .ymx-span i{
+	display: inline-block;
+	width: 16px;
+	height: 16px;
+	background-image: url(../images/head-icon.png);
+	background-repeat: no-repeat;
+	line-height: 16px;
+	vertical-align: text-top;
+	margin-right:3px;
+}
+.bt-bj{
+	background-image: url(../images/btn.png);
+	background-repeat: no-repeat;
+	display: inline-block;
+	height: 30px;
+	width: 84px;
+}

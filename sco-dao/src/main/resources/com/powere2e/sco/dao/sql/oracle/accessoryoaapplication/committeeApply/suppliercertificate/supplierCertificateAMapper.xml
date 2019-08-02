@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.powere2e.sco.interfaces.dao.accessoryoaapplication.committeeApply.suppliercertificate.SupplierCertificateADao">
+	<resultMap type="com.powere2e.sco.model.accessoryoaapplication.suppliercertificate.SupplierCertificateA" id="supplierCertificateAMap">
+		<result property="applicationCode" column="applicationCode" />
+		<result property="supplierCode" column="supplierCode" />
+		<result property="supplierName" column="supplierName" />
+		<result property="certificateCode" column="certificateCode" />
+		<result property="intentionSupplierName" column="intentionSupplierName" />
+		<result property="certificateTypeName" column="certificateTypeName" />
+		<result property="path" column="path" />
+		<result property="createdate" column="createdate" />
+		<result property="createby" column="createby" />
+		<result property="startDate" column="startDate" />
+		<result property="endDate" column="endDate" />
+		<result property="recordCount" column="record_count" />
+	</resultMap>
+	<!-- 查询供应商证件(可分页) -->
+	<select id="searchSupplierCertificateA" resultMap="supplierCertificateAMap">
+		SELECT
+		<if test="page_count == null">
+			sca.application_code applicationCode,
+			sca.supplier_code supplierCode,
+			sca.certificate_code certificateCode,
+			s.supplier_name supplierName,
+			mis.intention_supplier_name intentionSupplierName,
+			sct.certificate_type_name certificateTypeName,
+			sc.path,
+			to_char(sc.created,'yyyy-mm-dd') createdate,
+			(SELECT b4.real_name from pub_user b4 where b4.user_id=sc.createby) as createby,
+			to_char(sc.start_date,'yyyy-mm-dd') startDate,
+			to_char(sc.end_date,'yyyy-mm-dd') endDate
+		</if>
+		<if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		from SUPPLIER_CERTIFICATE_A sca
+		left join ACCESSORY_INTENTION_SUPPLIER mis on mis.INTENTION_SUPPLIER_CODE=sca.supplier_code
+		left join SUPPLIER_CERTIFICATE sc on sc.certificate_code=sca.certificate_code
+		left join SUPPLIER_CERTIFICATE_TYPE sct on sc.certificate_type_code=sct.certificate_type_code
+		left join supplier s on s.supplier_code=sca.supplier_code
+		<where>
+			1=1
+			<if test="applicationCode != null and applicationCode!=''">
+				AND sca.application_code = #{applicationCode}
+			</if>
+			<if test="supplierCode != null and supplierCode !=''">
+				and sca.supplier_code = #{supplierCode}
+			</if>
+			<if test="certificateCode != null and certificateCode!=''">
+				and sca.certificate_code = #{certificateCode}
+			</if>
+			<if test="supplierCodes != null and supplierCodes !=''">
+				and sca.supplier_code) in (${supplierCodes})
+			</if>
+		</where>
+		<if test="page_count == null">
+			<if test="app_orderby !=null">
+				ORDER BY ${app_orderby}
+			</if>
+		</if>
+	</select>
+
+	<!-- 根据主键查询某个供应商证件(辅料OA)(可分页) -->
+	<select id="loadSupplierCertificateA" resultMap="supplierCertificateAMap">
+		SELECT
+		<if test="page_count == null">
+			t.application_code applicationCode,t.supplier_code supplierCode,t.certificate_code certificateCode
+		</if>
+		<if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		FROM supplier_certificate_a t
+		<where>
+			1=1
+			<if test="applicationCode != null and applicationCode!=''">
+				AND t.APPLICATION_CODE = #{applicationCode}
+			</if>
+		</where>
+		<if test="page_count == null">
+			<if test="app_orderby !=null">
+				ORDER BY ${app_orderby}
+			</if>
+		</if>
+	</select>
+	<select id="searchCount" resultType="String" >
+	  select  sca.supplier_code from (
+	    (select d.typeName,sCode.supplier_code from (  select  '企业法人营业执照' typeName  from dual) d
+	      left join (
+	      select ap.supplier_code from APPLICATION_QUOTED ap  where ap.application_code=#{applicationCode}  
+	      ) sCode on 1=1
+	      ) dt
+	      left join 
+	         ( select ap.supplier_code,sct.certificate_type_name typeName from APPLICATION_QUOTED ap 
+	          left join SUPPLIER_CERTIFICATE_A sca on sca.application_code=ap.application_code and sca.supplier_code=ap.supplier_code
+	           left join SUPPLIER_CERTIFICATE sc on  sca.certificate_code=sc.certificate_code  
+	           left join  SUPPLIER_CERTIFICATE_TYPE sct on sc.certificate_type_code=sct.certificate_type_code
+	           where ap.application_code=#{applicationCode} 
+	         ) sca on sca.typeName=dt.typeName and sca.supplier_code=dt.supplier_code
+	     ) order by  dt.supplier_code
+	</select>
+	<!-- 增加供应商证件(辅料OA) -->
+	<insert id="saveSupplierCertificateA" parameterType="hashmap">
+		INSERT INTO supplier_certificate_a(application_code,supplier_code,certificate_code)
+		<foreach collection="list" item="item" separator="union all" >  
+			(
+			  SELECT 
+				#{item.applicationCode},#{item.supplierCode}, #{item.certificateCode}
+			  FROM 
+			  	DUAL 
+		 	)
+	    </foreach>
+	</insert>
+	<!-- 删除供应商证件(辅料OA) -->
+	<delete id="deleteSupplierCertificateA" parameterType="hashmap">
+		DELETE FROM
+		supplier_certificate_a
+		<where>
+	        <foreach collection="list" item="item" separator="OR" index="index">
+				(
+				application_code=#{item.applicationCode} 
+				and supplier_code=#{item.supplierCode} 
+				and certificate_code=#{item.certificateCode}
+				)
+			</foreach>
+		</where>
+	</delete>
+	<!-- 删除供应商证件(辅料OA) -->
+	<delete id="deleteSupplierCertificateAByCode" parameterType="hashmap">
+		DELETE FROM supplier_certificate_a
+		<where> 
+		    application_code=#{applicationCode} 
+		</where>
+	</delete>
+</mapper>

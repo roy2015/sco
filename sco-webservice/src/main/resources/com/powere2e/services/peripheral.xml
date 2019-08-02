@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+ <!--BW接口 --> 
+  <!--商品区域销售情况(日直营)-->
+  <bean id="merchandiseSellDirectDayService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.peripheral.bw.MerchandiseSellDirectDayServiceImpl">
+        <property name="merchandiseSellDirectDayDao" ref="merchandiseSellDirectDayDao"/>
+      </bean>
+    </property>
+  </bean>
+  
+  <!--商品区域销售情况(日加盟)-->
+  <bean id="merchandiseSellJoinDayService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.peripheral.bw.MerchandiseSellJoinDayServiceImpl">
+        <property name="merchandiseSellJoinDayDao" ref="merchandiseSellJoinDayDao"/>
+      </bean>
+    </property>
+  </bean>
+  
+  <!--商品区域销售情况(日直营+日加盟)-->
+  <bean id="merchandiseSellDjDayService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.peripheral.bw.MerchandiseSellDjDayServiceImpl">
+        <property name="merchandiseSellDjDayDao" ref="merchandiseSellDjDayDao"/>
+      </bean>
+    </property>
+  </bean>
+  
+  <!--商品区域销售情况(月直营)-->
+  <bean id="merchandiseSellDirectMonthService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.peripheral.bw.MerchandiseSellDirectMonthServiceImpl">
+        <property name="merchandiseSellDirectMonthDao" ref="merchandiseSellDirectMonthDao"/>
+      </bean>
+    </property>
+  </bean>
+  
+  <!--商品区域销售情况(月加盟)-->
+  <bean id="merchandiseSellJoinMonthService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.peripheral.bw.MerchandiseSellJoinMonthServiceImpl">
+        <property name="merchandiseSellJoinMonthDao" ref="merchandiseSellJoinMonthDao"/>
+      </bean>
+    </property>
+  </bean>
+  
+  <!--商品区域销售情况(月直营+月加盟)-->
+  <bean id="merchandiseSellDjMonthService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.peripheral.bw.MerchandiseSellDjMonthServiceImpl">
+        <property name="merchandiseSellDjMonthDao" ref="merchandiseSellDjMonthDao"/>
+      </bean>
+    </property>
+  </bean>
+  
+   <!--商品订货单信息-->
+  <bean id="merchandiseOrderService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.peripheral.bw.MerchandiseOrderServiceImpl">
+        <property name="merchandiseOrderDao" ref="merchandiseOrderDao"/>
+      </bean>
+    </property>
+  </bean>
+  
+  <!--商品收货单信息-->
+  <bean id="merchandiseBwReceiptService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.peripheral.bw.MerchandiseReceiptServiceImpl">
+        <property name="merchandiseBwReceiptDao" ref="merchandiseBwReceiptDao"/>
+      </bean>
+    </property>
+  </bean>
+  
+  <!--商品进货权限-->
+  <bean id="merchandiseJhPermissionService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.peripheral.bw.MerchandiseJhPermissionServiceImpl">
+        <property name="merchandiseJhPermissionDao" ref="merchandiseJhPermissionDao"/>
+      </bean>
+    </property>
+  </bean>
+  
+   <!--SAP接口 --> 
+  <!--商品历史物料号-->
+  <bean id="merchandiseHistoryService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.peripheral.sap.MerchandiseHistoryServiceImpl">
+        <property name="merchandiseHistoryDao" ref="merchandiseHistoryDao"/>
+      </bean>
+    </property>
+  </bean>
+  
+  <!--商品供应商信息-->
+  <bean id="merchandiseSupplierService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.peripheral.sap.MerchandiseSupplierServiceImpl">
+        <property name="merchandiseSupplierDao" ref="merchandiseSupplierDao"/>
+      </bean>
+    </property>
+  </bean>
+  
+   <!--商品中分类-->
+  <bean id="merchandiseCentreTypeService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.peripheral.sap.MerchandiseCentreTypeServiceImpl">
+        <property name="merchandiseCentreTypeDao" ref="merchandiseCentreTypeDao"/>
+      </bean>
+    </property>
+  </bean>
+  
+   <!--商品小分类-->
+  <bean id="merchandiseSmallTypeService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.peripheral.sap.MerchandiseSmallTypeServiceImpl">
+        <property name="merchandiseSmallTypeDao" ref="merchandiseSmallTypeDao"/>
+      </bean>
+    </property>
+  </bean>
+  
+   <!--商品明细类-->
+  <bean id="merchandiseDetailTypeService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.peripheral.sap.MerchandiseDetailTypeServiceImpl">
+        <property name="merchandiseDetailTypeDao" ref="merchandiseDetailTypeDao"/>
+      </bean>
+    </property>
+  </bean>
+  
+  <!--供应商历史物料号-->
+  <bean id="merchandiseSupplierHistoryService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.peripheral.sap.MerchandiseSupplierHistoryServiceImpl">
+        <property name="merchandiseSupplierHistoryDao" ref="merchandiseSupplierHistoryDao"/>
+      </bean>
+    </property>
+  </bean>
+  
+   <!--区域信息-->
+  <bean id="regionService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.peripheral.sap.RegionServiceImpl">
+        <property name="regionDao" ref="regionDao"/>
+      </bean>
+    </property>
+  </bean>
+  
+   <!--仓库-->
+  <bean id="warehouseService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.peripheral.sap.WarehouseServiceImpl">
+        <property name="warehouseDao" ref="warehouseDao"/>
+      </bean>
+    </property>
+  </bean>
+  
+   <!--仓位-->
+  <bean id="warehouseSiteService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.peripheral.sap.WarehouseSiteServiceImpl">
+        <property name="warehouseSiteDao" ref="warehouseSiteDao"/>
+      </bean>
+    </property>
+  </bean>
+  
+  <!--商品-->
+  <bean id="merchandiseSapService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.peripheral.sap.MerchandiseSapServiceImpl">
+        <property name="merchandiseSapDao" ref="merchandiseSapDao"/>
+      </bean>
+    </property>
+  </bean>
+  <!--商品进货价格信息-->
+  <bean id="merchandisePurchasePriceService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.peripheral.sap.MerchandisePurchasePriceServiceImpl">
+        <property name="merchandisePurchasePriceDao" ref="merchandisePurchasePriceDao"/>
+      </bean>
+    </property>
+  </bean>
+ <!--商品销售价格信息-->
+  <bean id="merchandisePriceService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.peripheral.sap.MerchandisePriceServiceImpl">
+        <property name="merchandisePriceDao" ref="merchandisePriceDao"/>
+      </bean>
+    </property>
+  </bean>
+   <!--商品促销进货价-->
+  <bean id="merchandisePromotionPurchaseService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.peripheral.sap.MerchandisePromotionPurchaseServiceImpl">
+        <property name="merchandisePromotionPurchaseDao" ref="merchandisePromotionPurchaseDao"/>
+      </bean>
+    </property>
+  </bean>
+   <!--商品促销销售价-->
+  <bean id="merchandisePromotionSellService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.peripheral.sap.MerchandisePromotionSellServiceImpl">
+        <property name="merchandisePromotionSellDao" ref="merchandisePromotionSellDao"/>
+      </bean>
+    </property>
+  </bean>
+  <!--工作日-->
+  <bean id="workingDayService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.peripheral.sap.WorkingDayServiceImpl">
+        <property name="workingDayDao" ref="workingDayDao"/>
+      </bean>
+    </property>
+  </bean>
+  <!-- 抓取数据 -->
+  <bean id="materialDataFetchWorkerService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.peripheral.website.MaterialDataFetchWorkerServiceImpl">
+        <property name="materialDao" ref="materialDao"/>
+      </bean>
+    </property>
+  </bean>
+  
+  <!-- 来伊份用户数据抓取 -->
+	<bean id="fetchUserService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.peripheral.webservice.lyf.user.FetchUserInfoClientServiceImpl">
+		        <property name="singleLoginDao" ref="singleLoginDao"/>
+			</bean>
+		</property>
+	</bean>
+	
+</beans>
+

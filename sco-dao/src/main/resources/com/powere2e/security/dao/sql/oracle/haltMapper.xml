@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.powere2e.security.dao.HaltDao">             <!-- 完成 -->
+		
+	<resultMap type="com.powere2e.security.model.User" id="userMap">
+		<id property="userId" column="userId"/>
+		<result property="loginName" column="loginName"/>
+		<result property="realName" column="realName"/>
+		<collection property="roles" ofType="com.powere2e.security.model.Role">
+			<id property="roleId" column="roleId" />
+			<result property="name" column="name" />
+		</collection>
+    </resultMap>
+    
+    <resultMap type="com.powere2e.security.model.User" id="userMap2">
+		<id property="userId" column="userId"/>
+		<result property="loginName" column="loginName"/>
+		<result property="realName" column="realName"/>
+		<result property="recordCount" column="record_count" />
+		<collection property="roles" javaType="ArrayList" 
+				ofType="com.powere2e.security.model.Role" column="userId"
+				select="com.powere2e.security.dao.RoleDao.listRoleByUserId">
+			<id property="roleId" column="roleId" />
+			<result property="name" column="name" />
+		</collection>
+    </resultMap>	
+	
+	<resultMap type="com.powere2e.security.model.Halt" id="haltMap">
+		<result property="haltId" column="haltId" />
+		<result property="haltMsg" column="haltMsg" />
+		<result property="haltTime" column="haltTime" />
+		<result property="state" column="state" />
+		<result property="restored" column="restored" />
+		<result property="clientId" column="clientId" />
+		<result property="recordCount" column="record_count" />
+	</resultMap>
+	
+	<resultMap type="com.powere2e.security.model.Halt" id="haltMap2">
+		<result property="haltId" column="haltId" />
+		<result property="haltMsg" column="haltMsg" />
+		<result property="haltTime" column="haltTime" />
+		<result property="state" column="state" />
+		<result property="restored" column="restored" />
+		<result property="clientId" column="clientId" />
+		<collection property="haltUsers" ofType="com.powere2e.security.model.User">
+			<id property="userId" column="userId" />
+			<result property="loginName" column="loginName" />
+		</collection>
+	</resultMap>
+		
+	<!-- 查询停机通知管理(可分页) -->
+	<select id="listHalt" resultMap="haltMap">
+		SELECT
+		<if test="page_count == null">
+			t.halt_id haltId,t.halt_msg haltMsg,t.halt_time haltTime,t.state
+			state,t.restored restored,t.client_id clientId 
+		</if>
+		<if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		FROM pub_halt t 
+		<where>
+			t.client_id = #{app_user_clientID}
+			<if test="haltId != null and haltId!=''">
+				AND t.halt_id = #{haltId}
+			</if>
+			<if test="haltMsg != null and haltMsg!=''">
+				AND UPPER(t.halt_msg) LIKE UPPER('%'||#{haltMsg}||'%')
+			</if>
+			<if test="haltTime != null and haltTime!=''">
+				AND to_char(t.halt_time,'YYYY-MM-DD HH24:MI:SS') LIKE (#{haltTime})
+			</if>
+			<if test="state != null and state!=''">
+				AND UPPER(t.state) LIKE UPPER('%'||#{state}||'%')
+			</if>
+			<if test="restored != null and restored!=''">
+				AND to_char(t.restored,'YYYY-MM-DD HH24:MI:SS') LIKE (#{restored})
+			</if>
+		</where>
+		<if test="page_count == null">
+			<if test="app_orderby !=null">
+				ORDER BY ${app_orderby}
+			</if>
+			<if test="app_orderby ==null">
+				ORDER BY halt_Time DESC
+			</if>
+		</if>
+	</select>
+	
+	<!-- 加载停机通知，带所有运维用户 -->
+	<select id="loadHalt" resultMap="haltMap2">
+		SELECT
+				 h.halt_id haltId,h.halt_msg haltMsg,h.halt_time haltTime,
+				 h.state state,h.restored restored,h.client_id clientId<!-- ,
+				 u.user_id userId, u.login_name loginName --> 
+		FROM
+				 pub_halt h<!--  LEFT JOIN pub_halt_user hu ON h.halt_id=hu.halt_id 
+				 				  LEFT JOIN pub_user u ON u.user_id=hu.user_id -->
+		WHERE
+				 h.halt_id=#{haltId} 
+				 AND h.client_id = #{app_user_clientID} 
+				<!--  AND hu.client_id = h.client_id  
+				 AND u.client_id = h.client_id -->  
+	</select>
+	
+	<!-- 加载当前停机通知，带运维用户 -->
+	<select id="loadCurrentHalt" resultMap="haltMap2">
+		SELECT
+				 h.halt_id haltId,h.halt_msg haltMsg,h.halt_time haltTime,
+				 h.state state,h.restored restored,h.client_id clientId,
+				 u.user_id userId, u.login_name loginName 
+		FROM
+				 pub_halt h LEFT JOIN pub_halt_user hu ON h.halt_id=hu.halt_id 
+				 				  LEFT JOIN pub_user u ON u.user_id=hu.user_id
+		WHERE
+				 h.state='N'
+	</select>
+	
+	<!-- 增加停机通知管理 -->
+	<insert id="insertHalt" parameterType="hashmap">
+		INSERT INTO pub_halt(halt_id,halt_msg,state,client_id)
+				VALUES(#{haltId},#{haltMsg},'Y',#{app_user_clientID})
+	</insert>
+	
+	<!-- 修改停机通知管理 -->
+	<update id="updateHalt" parameterType="hashmap">
+		UPDATE
+				pub_halt 
+		SET
+				halt_msg=#{haltMsg}
+		WHERE
+				HALT_ID=#{haltId} 
+				AND client_id=#{app_user_clientID} 
+	</update>
+	
+	<!-- 删除停机通知管理 -->
+	<delete id="deleteHalt" parameterType="hashmap">
+		DELETE 
+		FROM
+				pub_halt 
+		WHERE
+				HALT_ID=#{haltId} 
+				AND client_id = #{app_user_clientID} 
+	</delete>
+	
+	<!-- 切换服务器状态 -->
+	<update id="toggleState">
+		UPDATE
+				pub_halt
+		<set>
+				RESTORED = #{restored},
+				<if test="haltTime != null">
+					HALT_TIME = #{haltTime},
+				</if>
+				HALT_ID=#{haltId},
+				STATE=#{state}
+		</set>
+		WHERE
+				HALT_ID=#{haltId} 
+				AND client_id = #{app_user_clientID} 
+	</update>
+	
+	<!-- 查询运维用户列表，不带分页过滤 -->
+	<select id="listHaltUser" resultMap="userMap">
+		SELECT 
+			u.user_id userId,u.login_name loginName,
+			u.real_name realName,r.role_id roleId,r.name name
+		FROM
+			pub_user u 
+			LEFT JOIN pub_user_role ur ON u.user_id=ur.user_id AND ur.client_id = #{app_user_clientID} 
+		  	LEFT JOIN pub_role r ON ur.role_id=r.role_id AND r.client_id = #{app_user_clientID} 
+		WHERE 
+			u.client_id = #{app_user_clientID} 
+			AND u.user_id IN(
+				SELECT 
+					user_id 
+				FROM 
+					pub_halt_user 
+				WHERE 
+					halt_id=#{haltId} 
+					AND client_id=#{app_user_clientID} 
+			)
+	</select>
+	
+	<!-- 查询非运维用户列表，带分页过滤 -->
+	<select id="listNonHaltUser" resultMap="userMap2">
+		SELECT 
+			<if test="page_count == null">
+				u.user_id userId,u.login_name loginName,u.real_name realName 
+			</if>
+			<if test="page_count != null">
+       			count(1) AS record_count
+    		</if>
+		FROM
+				pub_user u 
+		WHERE 
+				u.client_id = #{app_user_clientID} 
+				AND u.user_id NOT IN(
+					SELECT 
+							user_id 
+					FROM 
+							pub_halt_user 
+					WHERE 
+							halt_id=#{haltId} 
+							AND client_id = #{app_user_clientID} 
+				)
+				<if test= "loginName != null and loginName!=''">
+				AND UPPER(u.login_name) LIKE UPPER('%'||#{loginName}||'%')
+				</if>
+		    	<if test= "realName != null and realName!=''">
+				AND UPPER(u.real_name) LIKE UPPER('%'||#{realName}||'%')
+				</if>
+		<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY u.created DESC
+    		</if>
+    	</if>
+	</select>
+	
+	<!-- 添加运维用户 -->
+	<insert id="insertHaltUser">
+		INSERT INTO pub_halt_user(halt_id, user_id, client_id)
+				VALUES(#{haltId}, #{userId}, #{app_user_clientID})
+	</insert>
+	
+	<!-- 删除运维用户 -->
+	<delete id="deleteHaltUser">
+		DELETE
+		FROM
+				pub_halt_user
+		WHERE 
+				client_id=#{app_user_clientID} 
+				AND halt_id=#{haltId}
+				<if test="userId != null and userId != ''">
+				AND user_id=#{userId} 
+				</if>
+	</delete>
+	
+	<!-- 统计状态为N的停机通知消息数 -->
+	<select id="countByTurnOff" resultType="int">
+		SELECT 
+				count(1) 
+		FROM 
+				pub_halt t 
+		WHERE 
+				t.state='N' 
+				AND client_id=#{app_user_clientID} 
+	</select>
+	
+</mapper>

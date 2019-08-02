@@ -1,0 +1,453 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.sharefunctionanalysis.sellanalysis.selllinkrelative.MerchandiseLinkRelativeDao">
+    <resultMap type="com.powere2e.sco.model.sharefunctionanalysis.sellanalysis.selllinkrelative.LinkRelative" id="linkRelativeMap">
+		<result property="merchandiseCode" column="merchandiseCode" />
+		<result property="merchandiseName" column="merchandiseName" />
+		<result property="supplierCode" column="supplierCode" />
+		<result property="supplierName" column="supplierName" />
+		<result property="centreTypeCode" column="centreTypeCode"/>
+		<result property="smallTypeCode" column="smallTypeCode"/>
+		<result property="detailTypeCode" column="detailTypeCode"/>
+		<result property="fineTypeCode" column="fineTypeCode"/>
+		<result property="centreTypeName" column="centreTypeName"/>
+		<result property="smallTypeName" column="smallTypeName"/>
+		<result property="detailTypeName" column="detailTypeName"/>
+		<result property="fineTypeName" column="fineTypeName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>      	
+    
+    <resultMap type="com.powere2e.sco.model.sharefunctionanalysis.sellanalysis.selllinkrelative.SellLinkRelativeAnalysis" id="linkRelativeAnalysisMap">
+		<result property="merchandiseCode" column="merchandiseCode"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="directJoin" column="directJoin"/>
+		<result property="sellRegion" column="sellRegion"/>
+		<result property="sellMonth" column="sellMonth"/>
+		<result property="sellQuantity" column="sellQuantity"/>
+		<result property="sellTotalPrice" column="sellTotalPrice"/>
+		<result property="sellProfit" column="sellProfit"/>
+		<result property="psdSellQuantity" column="psdSellQuantity"/>
+		<result property="psdSellTotalPrice" column="psdSellTotalPrice"/>
+		<result property="psdSellProfit" column="psdSellProfit"/>
+		<result property="sellQuantityChange" column="sellQuantityChange"/>
+		<result property="sellTotalPriceChange" column="sellTotalPriceChange"/>
+		<result property="sellProfitChange" column="sellProfitChange"/>
+		<result property="psdSellQuantityChange" column="psdSellQuantityChange"/>
+		<result property="psdSellTotalPriceChange" column="psdSellTotalPriceChange"/>
+		<result property="psdSellProfitChange" column="psdSellProfitChange"/>
+		<!--去年同比信息  -->
+		<result property="lastSellMonth" column="lastSellMonth"/>
+		<result property="lastSellQuantity" column="lastSellQuantity"/>
+		<result property="lastSellQuantityChange" column="lastSellQuantityChange"/>
+		<result property="lastSellTotalPrice" column="lastSellTotalPrice"/>
+		<result property="lastSellTotalPriceChange" column="lastSellTotalPriceChange"/>
+		<result property="lastSellProfit" column="lastSellProfit"/>
+		<result property="lastSellProfitChange" column="lastSellProfitChange"/>
+		<result property="lastPsdSellQuantity" column="lastPsdSellQuantity"/>
+		<result property="lastPsdSellQuantityChange" column="lastPsdSellQuantityChange"/>
+		<result property="lastPsdSellTotalPrice" column="lastPsdSellTotalPrice"/>
+		<result property="lastPsdSellTotalPriceChange" column="lastPsdSellTotalPriceChange"/>
+		<result property="lastPsdSellProfit" column="lastPsdSellProfit"/>
+		<result property="lastPsdSellProfitChange" column="lastPsdSellProfitChange"/>
+		<!--前年-->
+		<result property="beforeSellMonth" column="beforeSellMonth"/>
+		<result property="beforeSellQuantity" column="beforeSellQuantity"/>
+		<result property="beforeSellQuantityChange" column="beforeSellQuantityChange"/>
+		<result property="beforeSellTotalPrice" column="beforeSellTotalPrice"/>
+		<result property="beforeSellTotalPriceChange" column="beforeSellTotalPriceChange"/>
+		<result property="beforeSellProfit" column="beforeSellProfit"/>
+		<result property="beforeSellProfitChange" column="beforeSellProfitChange"/>
+		<result property="beforePsdSellQuantity" column="beforePsdSellQuantity"/>
+		<result property="beforePsdSellQuantityChange" column="beforePsdSellQuantityChange"/>
+		<result property="beforePsdSellTotalPrice" column="beforePsdSellTotalPrice"/>
+		<result property="beforePsdSellTotalPriceChange" column="beforePsdSellTotalPriceChange"/>
+		<result property="beforePsdSellProfit" column="beforePsdSellProfit"/>
+		<result property="beforePsdSellProfitChange" column="beforePsdSellProfitChange"/>
+		
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+    </resultMap>
+    
+     <!-- 查询销售环比分析列表-->
+     <select id="listLinkRelative" resultMap="linkRelativeMap">
+     	SELECT  
+    	<if test="page_count == null">
+       	   t1.merchandise_code merchandiseCode,
+	       t1.merchandise_name merchandiseName,
+	       t2.supplier_code    supplierCode,
+	       t2.supplier_name    supplierName,
+	       t1.centre_type_code centreTypeCode,
+	       t3.centre_type_name centreTypeName,
+	       t1.small_type_code  smallTypeCode,
+	       t4.small_type_name  smallTypeName,
+	       t1.detail_type_code detailTypeCode,
+	       t5.detail_type_name detailTypeName,
+	       k2.fine_type_code   fineTypeCode,
+	       k3.fine_type_name   fineTypeName,
+	       t6.dx_role_code     dxRoleCode,
+	       t7.role_name        dxRoleName,
+	       t6.dl_role_code     dlRoleCode,
+	       t8.role_name        dlRoleName
+	   	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+	      	FROM 
+		     	  	merchandise t1
+		 INNER JOIN 
+		 			supplier t2
+		    ON 		t1.supplier_code = t2.supplier_code
+		  LEFT JOIN 
+		  			merchandise_centre_type t3
+		    ON 		t1.centre_type_code = t3.centre_type_code
+		  LEFT JOIN 
+		  			merchandise_small_type t4
+		    ON 		t1.small_type_code = t4.small_type_code
+		  LEFT JOIN 
+		  			merchandise_detail_type t5
+		    ON 		t1.detail_type_code = t5.detail_type_code
+		  LEFT JOIN 
+		  			merchandise_role t6
+		    ON 		t1.merchandise_code = t6.merchandise_code
+		  LEFT JOIN 
+		  			merchandise_dx_role t7
+		    ON 		t6.dx_role_code = t7.role_code
+		  LEFT JOIN 
+		  			merchandise_dl_role t8
+		    ON 		t6.dl_role_code = t8.role_code 
+		 LEFT　JOIN
+		 			intention_supplier_merchandise k1 
+		 	ON      t1.merchandise_code = k1.merchandise_code
+		    AND 	t1.supplier_code = k1.supplier_code
+		 LEFT JOIN 
+		 			merchandise_intention k2
+		   ON 		k1.intention_code = k2.intention_code
+		LEFT　JOIN 
+					merchandise_fine_type k3 
+		   ON		k2.fine_type_code = k3.fine_type_code
+		 <where>
+			1=1
+			<if test= "merchandiseCode != null and merchandiseCode !=''">
+			AND UPPER(t1.merchandise_code) LIKE UPPER('%'||#{merchandiseCode}||'%')
+			</if>
+			<if test= "merchandiseCodes != null and merchandiseCodes !=''">
+			AND t1.merchandise_code IN (${merchandiseCodes})
+			</if>
+	    	<if test= "merchandiseName != null and merchandiseName !=''">
+			AND UPPER(t1.merchandise_name) LIKE UPPER('%'||#{merchandiseName}||'%')
+			</if>
+			<if test= "supplierCode != null and supplierCode !=''">
+			AND UPPER(t1.supplier_code) LIKE UPPER('%'||#{supplierCode}||'%')
+			</if>
+	    	<if test= "supplierName != null and supplierName !=''">
+			AND UPPER(t2.supplier_name) LIKE UPPER('%'||#{supplierName}||'%')
+			</if>
+	    	<if test= "centreTypeCode != null and centreTypeCode !=''">
+			AND t1.centre_type_code = #{centreTypeCode}
+			</if>
+	    	<if test= "smallTypeCode != null and smallTypeCode !=''">
+			AND t1.small_type_code = #{smallTypeCode}
+			</if>
+	    	<if test= "detailTypeCode != null and detailTypeCode!=''">
+			AND t1.detail_type_code =#{detailTypeCode}
+			</if>
+	    	<if test= "fineTypeCode != null and fineTypeCode !=''">
+			AND k3.fine_type_code =#{fineTypeCode}
+			</if>
+	    	<if test= "dxRoleCode != null and dxRoleCode !=''">
+			AND t6.dx_role_code = #{dxRoleCode}
+			</if>
+	    	<if test= "dlRoleCode != null and dlRoleCode !=''">
+			AND t6.dl_role_code =#{dlRoleCode}
+			</if>
+			<if test= "rationed != null and rationed !='' and rationed=='gjz' ">
+			AND t1.net_weight =1
+			</if>
+			<if test= "rationed != null and rationed !='' and rationed=='dlz' ">
+			AND t1.net_weight !=1
+			</if>
+			<if test= "rationed != null and rationed !='' and rationed=='gjzAndDlz' ">
+			</if>
+			<if test= "purchaseDepartments != null and purchaseDepartments !='' ">
+			AND t1.purchase_departments =#{purchaseDepartments}
+			</if>
+		 </where>
+		  <if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t1.merchandise_code DESC, 
+    			         t1.supplier_code DESC
+    		</if>
+    	 </if>
+     </select>
+     
+     <!-- 查询单品销售环比单品信息-->
+     <select id="queryMerchandiseLinkRelative" resultMap="linkRelativeMap">
+     	SELECT  
+    	<if test="page_count == null">
+       	   t1.merchandise_code merchandiseCode,
+	       t1.merchandise_name merchandiseName,
+	       t2.supplier_code    supplierCode,
+	       t2.supplier_name    supplierName,
+	       t1.centre_type_code centreTypeCode,
+	       t3.centre_type_name centreTypeName,
+	       t1.small_type_code  smallTypeCode,
+	       t4.small_type_name  smallTypeName,
+	       t1.detail_type_code detailTypeCode,
+	       t5.detail_type_name detailTypeName,
+	       k2.fine_type_code   fineTypeCode,
+	       k3.fine_type_name   fineTypeName,
+	       t6.dx_role_code     dxRoleCode,
+	       t7.role_name        dxRoleName,
+	       t6.dl_role_code     dlRoleCode,
+	       t8.role_name        dlRoleName
+	   	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+	      	FROM 
+		     	  	merchandise t1
+		 INNER JOIN 
+		 			supplier t2
+		    ON 		t1.supplier_code = t2.supplier_code
+		  LEFT JOIN 
+		  			merchandise_centre_type t3
+		    ON 		t1.centre_type_code = t3.centre_type_code
+		  LEFT JOIN 
+		  			merchandise_small_type t4
+		    ON 		t1.small_type_code = t4.small_type_code
+		  LEFT JOIN 
+		  			merchandise_detail_type t5
+		    ON 		t1.detail_type_code = t5.detail_type_code
+		  LEFT JOIN 
+		  			merchandise_role t6
+		    ON 		t1.merchandise_code = t6.merchandise_code
+		  LEFT JOIN 
+		  			merchandise_dx_role t7
+		    ON 		t6.dx_role_code = t7.role_code
+		  LEFT JOIN 
+		  			merchandise_dl_role t8
+		    ON 		t6.dl_role_code = t8.role_code 
+		 LEFT　JOIN
+		 			intention_supplier_merchandise k1 
+		 	ON      t1.merchandise_code = k1.merchandise_code
+		    AND 	t1.supplier_code = k1.supplier_code
+		 LEFT JOIN 
+		 			merchandise_intention k2
+		   ON 		k1.intention_code = k2.intention_code
+		LEFT　JOIN 
+					merchandise_fine_type k3 
+		   ON		k2.fine_type_code = k3.fine_type_code
+		 <where>
+			1=1
+			 AND 
+			  (<foreach collection="codeList"  item="item" index="index" separator="OR">
+			   		(t1.merchandise_code = #{item.merchandiseCode}	 
+			 	AND
+			   		t1.supplier_code = #{item.supplierCode})
+			  </foreach> 	
+			  ) 
+			<if test= "rationed != null and rationed !='' and rationed=='gjz' ">
+			AND t1.net_weight =1
+			</if>
+			<if test= "rationed != null and rationed !='' and rationed=='dlz' ">
+			AND t1.net_weight !=1
+			</if>
+			<if test= "rationed != null and rationed !='' and rationed=='gjzAndDlz' ">
+			</if>
+		 </where>
+		  <if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t1.merchandise_code DESC, 
+    			         t1.supplier_code DESC
+    		</if>
+    	 </if>
+     </select>
+     
+     <select id="queryProductSellLinkRelative" resultMap="linkRelativeAnalysisMap">
+     	<foreach collection="list" item="item" index="index" separator="UNION ALL">
+     	SELECT
+     		sellDate,
+
+			ROUND(sellQuantity,2) sellQuantity,
+			ROUND(beforeSellQuantity,2) beforeSellQuantity,
+			ROUND(sellQuantityChange,2) sellQuantityChange,
+			
+			ROUND(sellTotalPrice,2) sellTotalPrice,
+			ROUND(beforeSellTotalPrice,2) beforeSellTotalPrice,
+			ROUND(sellTotalPriceChange,2) sellTotalPriceChange,
+			
+			ROUND(sellProfit,2) sellProfit,
+			ROUND(beforeSellProfit,2) beforeSellProfit,
+			ROUND(sellProfitChange,2) sellProfitChange,
+			
+			ROUND(psdSellQuantity,2) psdSellQuantity,
+			ROUND(beforePsdSellQuantity,2) beforePsdSellQuantity,
+			ROUND(DECODE(beforePsdSellQuantity,NULL,NULL,0,0,DECODE(psdSellQuantity,NULL,NULL,0,-1,psdSellQuantity/beforePsdSellQuantity-1))*100,2) psdSellQuantityChange,
+			
+			ROUND(psdSellTotalPrice,2) psdSellTotalPrice,
+			ROUND(beforePsdSellTotalPrice,2) beforePsdSellTotalPrice,
+			ROUND(DECODE(beforePsdSellTotalPrice,NULL,NULL,0,0,DECODE(psdSellTotalPrice,NULL,NULL,0,-1,psdSellTotalPrice/beforePsdSellTotalPrice-1))*100,2) psdSellTotalPriceChange,
+			
+			ROUND(psdSellProfit,2) psdSellProfit,
+			ROUND(beforePsdSellProfit,2) beforePsdSellProfit,
+			ROUND(DECODE(beforePsdSellProfit,NULL,NULL,0,0,DECODE(psdSellProfit,NULL,NULL,0,-1,psdSellProfit/beforePsdSellProfit-1))*100,2) psdSellProfitChange
+     	FROM
+     	(
+     		 SELECT 
+	  			 d1.sellDate,
+             
+	             d1.sellQuantity,
+	             d2.beforeSellQuantity,
+	             DECODE(d2.beforeSellQuantity,NULL,NULL,0,0,DECODE(d1.sellQuantity,NULL,NULL,0,-1,d1.sellQuantity/d2.beforeSellQuantity-1))*100 sellQuantityChange,
+	              
+	             d1.sellTotalPrice,
+	             d2.beforeSellTotalPrice,
+	             DECODE(d2.beforeSellTotalPrice,NULL,NULL,0,0,DECODE(d1.sellTotalPrice,NULL,NULL,0,-1,d1.sellTotalPrice/d2.beforeSellTotalPrice-1))*100 sellTotalPriceChange,
+	              
+	             d1.sellProfit,
+	             d2.beforeSellProfit,
+	             DECODE(d2.beforeSellProfit,NULL,NULL,0,0,DECODE(d1.sellProfit,NULL,NULL,0,-1,d1.sellProfit/d2.beforeSellProfit-1))*100 sellProfitChange,
+	              
+	             DECODE(d1.sellStoreQuantity,NULL,NULL,0,0,d1.sellQuantity/d1.sellStoreQuantity) psdSellQuantity,
+	             DECODE(d2.beforeSellStoreQuantity,NULL,NULL,0,0,d2.beforeSellQuantity/beforeSellStoreQuantity) beforePsdSellQuantity,
+	             
+	             DECODE(d1.sellStoreQuantity,NULL,NULL,0,0,d1.sellTotalPrice/d1.sellStoreQuantity) psdSellTotalPrice,
+	             DECODE(d2.beforeSellStoreQuantity,NULL,NULL,NULL,NULL,d2.beforeSellTotalPrice/beforeSellStoreQuantity) beforePsdSellTotalPrice,
+	             
+	             DECODE(d1.sellStoreQuantity,0,NULL,0,0,d1.sellProfit/d1.sellStoreQuantity) psdSellProfit,
+	             DECODE(d2.beforeSellStoreQuantity,NULL,NULL,0,0,d2.beforeSellProfit/beforeSellStoreQuantity) beforePsdSellProfit
+			 FROM 
+			 
+			(SELECT 
+			       <!--MIN(t1.sell_date) minDate, -->
+			       <!--MAX(t1.sell_date) maxDate,-->
+			       #{item.minDate} minDate,
+			       #{item.maxDate} maxDate,
+			       #{item.minDate}||'~'||#{item.maxDate} sellDate,
+			       <!--只有同时查看公斤装和定量装时，才进行单位转换-->
+			       <if test= "rationed != null and rationed !='' and rationed=='gjz' ">
+					SUM(t1.sell_quantity) sellQuantity,
+				   </if>
+				   <if test= "rationed != null and rationed !='' and rationed=='dlz' ">
+					SUM(t1.sell_quantity) sellQuantity,
+			       </if>
+			       <if test= "rationed != null and rationed !='' and rationed=='gjzAndDlz' ">
+			        SUM(t1.sell_quantity*NVL(t2.net_weight,1)) sellQuantity,
+				   </if>		
+			       SUM(t1.sell_total_price) sellTotalPrice,
+			       SUM(t1.sell_profit) sellProfit,
+			       <!-- SUM(t1.psd_sell_quantity) psdSellQuantity,
+			       SUM(t1.psd_sell_total_price) psdSellTotalPrice,
+			       SUM(t1.psd_sell_profit) psdSellProfit -->
+			       SUM(t1.sell_store_quantity) sellStoreQuantity <!--销售店天数-->
+			       
+			 FROM  
+			      <if test= "directJoin != null and directJoin !='' and directJoin =='direct' ">
+			 	   merchandise_sell_direct_day t1
+			 	  </if>
+			 	  <if test= "directJoin != null and directJoin !='' and directJoin =='join' ">
+			 	   merchandise_sell_join_day t1
+			 	  </if>
+			 	  <if test= "directJoin != null and directJoin !='' and directJoin =='all' ">
+			 	   merchandise_sell_d_j_day t1
+			 	  </if>
+	   INNER JOIN  merchandise t2
+		  	   ON  t1.merchandise_code=t2.merchandise_code
+		  	  AND  t1.supplier_code=t2.supplier_code 	 	  
+			WHERE  1=1  
+			  AND 
+				  (<foreach collection="codeList"  item="it" index="dex" separator="OR">
+					    (t2.merchandise_code = #{it.merchandiseCode}	 
+					 AND
+					    t2.supplier_code = #{it.supplierCode})
+				  </foreach> 
+				  )
+				  <if test= "rationed != null and rationed !='' and rationed=='gjz' ">
+						AND t2.net_weight =1
+				  </if>
+				  <if test= "rationed != null and rationed !='' and rationed=='dlz' ">
+						AND t2.net_weight !=1
+			      </if>
+			      <if test= "rationed != null and rationed !='' and rationed=='gjzAndDlz' ">
+				  </if>		
+			      <!--AND   t1.sell_region=#{sellRegion}  -->
+			      <if test= "sellRegion != null and sellRegion !='' and sellRegion !='all' ">
+			 	   AND  t1.sell_region =#{sellRegion}
+			 	  </if>
+			      AND   t1.sell_date &gt;=to_date((#{item.minDate}||'00:00:00'),'yyyy-mm-dd HH24:mi:ss')
+			      AND   t1.sell_date &lt;=to_date((#{item.maxDate}||'23:59:59'),'yyyy-mm-dd HH24:mi:ss')
+			) d1
+			
+			 LEFT JOIN      
+			(SELECT 
+			       TO_DATE(#{item.beforeMinDate},'yyyy-mm-dd') beforeMinDate,
+             	   TO_DATE(#{item.beforeMaxDate},'yyyy-mm-dd') beforeMaxDate,
+			       <!-- SUM(t1.sell_quantity*nvl(t2.net_weight,1)) beforeSellQuantity, -->
+			       <!--只有同时查看公斤装和定量装时，才进行单位转换-->
+			       <if test= "rationed != null and rationed !='' and rationed=='gjz' ">
+					SUM(t1.sell_quantity) beforeSellQuantity,
+				   </if>
+				   <if test= "rationed != null and rationed !='' and rationed=='dlz' ">
+					SUM(t1.sell_quantity) beforeSellQuantity,
+			       </if>
+			       <if test= "rationed != null and rationed !='' and rationed=='gjzAndDlz' ">
+			        SUM(t1.sell_quantity*nvl(t2.net_weight,1)) beforeSellQuantity,
+				   </if>	
+			       SUM(t1.sell_total_price) beforeSellTotalPrice,
+			       SUM(t1.sell_profit) beforeSellProfit,
+			       <!--  SUM(t1.psd_sell_quantity) beforePsdSellQuantity,
+			       SUM(t1.psd_sell_total_price) beforePsdSellTotalPrice,
+			       SUM(t1.psd_sell_profit) beforePsdSellProfit -->
+			       SUM(t1.sell_store_quantity) beforeSellStoreQuantity <!--销售店天数-->
+			       
+			 FROM  
+			      <if test= "directJoin != null and directJoin !='' and directJoin =='direct' ">
+			 	   merchandise_sell_direct_day t1
+			 	  </if>
+			 	  <if test= "directJoin != null and directJoin !='' and directJoin =='join' ">
+			 	   merchandise_sell_join_day t1
+			 	  </if>
+			 	  <if test= "directJoin != null and directJoin !='' and directJoin =='all' ">
+			 	   merchandise_sell_d_j_day t1
+			 	  </if>
+	   INNER JOIN  merchandise t2
+		  	   ON  t1.merchandise_code=t2.merchandise_code
+		  	  AND  t1.supplier_code=t2.supplier_code 	 	  
+			WHERE  1=1   
+			  AND 
+				  (<foreach collection="codeList"  item="it" index="dex" separator="OR">
+					    (t2.merchandise_code = #{it.merchandiseCode}	 
+					 AND
+					    t2.supplier_code = #{it.supplierCode})
+				  </foreach> 
+				  )
+				  <if test= "rationed != null and rationed !='' and rationed=='gjz' ">
+						AND t2.net_weight =1
+				  </if>
+				  <if test= "rationed != null and rationed !='' and rationed=='dlz' ">
+						AND t2.net_weight !=1
+			      </if>
+			      <if test= "rationed != null and rationed !='' and rationed=='gjzAndDlz' ">
+				  </if>		
+			       <!--AND   t1.sell_region=#{sellRegion}  -->
+			      <if test= "sellRegion != null and sellRegion !='' and sellRegion !='all' ">
+			 	   AND  t1.sell_region =#{sellRegion}
+			 	  </if>
+			      AND   t1.sell_date &gt;=to_date((#{item.beforeMinDate}||'00:00:00'),'yyyy-mm-dd HH24:mi:ss')
+			      AND   t1.sell_date &lt;=to_date((#{item.beforeMaxDate}||'23:59:59'),'yyyy-mm-dd HH24:mi:ss')
+			) d2      
+			 <!-- ON  d1.minDate=(d2.beforeMinDate+4)  -->
+			  <!-- AND d1.maxDate=(d2.beforeMaxDate+4)  -->   
+			 ON  d1.minDate=SUBSTR(to_char((d2.beforeMinDate+${linkRelativeCycle}),'yyyy-mm-dd hh24:mi:ss'),0,10)
+			 AND d1.maxDate=SUBSTR(to_char((d2.beforeMaxDate+${linkRelativeCycle}),'yyyy-mm-dd hh24:mi:ss'),0,10)
+		)
+     	</foreach>
+     </select>
+    
+</mapper>

@@ -1,0 +1,486 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.remind.ElseRemindDao">
+	<resultMap type="com.powere2e.sco.model.remind.ElseRemind" id="elseRemindMap">
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+        <resultMap type="com.powere2e.sco.model.remind.RemindMerchandsieQL" id="remindMerchandsieQLMap">
+    </resultMap>
+    
+    <!-- 查询所有其他提醒 -->
+    <select id="listElseRemind" resultMap="elseRemindMap">
+	    SELECT
+	    <if test="page_count == null">
+	        f.remind_code remindCode,
+	        (select value_string from common_mapping_config where key_type = 'REMIND_TYPE' and code_string = f.remind_type) 
+			 remindTypeString,
+			f.remind_type remindType,
+			f.ql_code qlCode,
+			f.config_code configCode,
+			TO_CHAR(f.remind_date,'yyyy-mm-dd hh24:mi:ss') remindDate,
+			f.remind_info remindInfo
+		</if>
+		<if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		FROM
+		(
+		  (
+			  <!-- 所有商品/辅料采购用户及所有商品/辅料采购部门经理 -->
+			  SELECT
+			  a.*
+			  FROM
+			  else_remind a
+			  WHERE (a.remind_type = 'ZJLQTX' OR a.remind_type = 'ZJGQTX')
+			  AND (SELECT
+			        COUNT(1) 
+			       FROM pub_role t,pub_user_role a
+			       WHERE t.role_id = a.role_id
+			       AND a.user_id = #{app_create_by}
+			       AND (t.name = '商品采购员' OR t.name = '辅料采购员' OR t.name = '商品采购部门经理' OR t.name = '辅料采购部门经理')
+			      )>0
+		  )
+		  UNION
+		  (
+			  <!-- 所有商品采购用户及商品采购部门经理 -->
+			  SELECT
+			  b.*
+			  FROM
+			  else_remind b
+			  WHERE (b.remind_type = 'YLJGYJ' OR b.remind_type = 'SPJGYJ')
+			  AND (SELECT
+			        COUNT(1) 
+			       FROM pub_role t,pub_user_role a
+			       WHERE t.role_id = a.role_id
+			       AND a.user_id = #{app_create_by}
+			       AND (t.name = '商品采购员' OR t.name = '商品采购部门经理')
+			      )>0
+			  )
+		  UNION
+		  (
+			  <!--  所有 辅料 采购用户 -->
+			  SELECT
+			  c.*
+			  FROM 
+			  else_remind c
+			  WHERE c.remind_type = 'FLYXPJGYJ'
+			  AND (SELECT
+			        COUNT(1) 
+			       FROM pub_role t,pub_user_role a
+			       WHERE t.role_id = a.role_id
+			       AND a.user_id = #{app_create_by}
+			       AND (t.name = '辅料采购员' OR t.name = '辅料采购部门经理')
+			      )>0
+			  )
+		  UNION
+		  (
+			  <!--  该签量单的创建用户 -->
+			  SELECT
+			  d.*
+			  FROM
+			  else_remind d
+			  INNER JOIN merchandise_ql m ON m.ql_code = d.ql_code AND d.remind_type = 'QLWCTX'
+			  WHERE m.createby = #{app_create_by}
+		  )
+		  UNION
+		  (
+			  <!--  该SCO申请单的创建用户 -->
+			  SELECT
+		        e.*
+		      FROM
+		      (
+		          SELECT
+		          *
+		          FROM
+		          else_remind
+		          WHERE remind_type = 'TJQLWHTX'
+		       ) e
+		       WHERE EXISTS(
+		        SELECT oa.application_code FROM oa_application oa WHERE oa.createby = #{app_create_by} AND e.remind_info LIKE '%'||oa.application_code||'%'
+		       )
+		  )
+		) f
+		<where>
+		NOT EXISTS
+	    (
+		    SELECT 
+		    erf.remind_code
+		    FROM else_remind_flag erf 
+		    WHERE erf.remind_code = f.remind_code
+		    AND erf.flag_person = #{app_create_by}
+	    )
+		<if test="remindType != null and remindType != ''">
+		AND f.remind_type = #{remindType}
+		</if>
+		</where>
+		<if test="page_count == null">
+			<if test="app_orderby !=null">
+				ORDER BY #{app_orderby}
+			</if>
+			<if test="app_orderby ==null">
+				ORDER BY f.remind_code DESC
+			</if>
+		</if>
+    </select>
+    
+    <!-- 清空其他提醒-->
+    <delete id="deleteElseRemind">
+    	 DELETE FROM else_remind
+    	 <where>
+    	 remind_code IN
+		(
+		SELECT
+        remind_code
+        FROM else_remind_flag
+        )
+    	 </where>
+    </delete>
+    
+    <!-- 添加原料价格同环比预警提醒 -->
+    <insert id="insertTHBRemind">
+	     INSERT INTO else_remind(remind_code,remind_type,remind_date,remind_info)
+	     (SELECT
+		 S_ELSE_REMIND.NEXTVAL,
+		 'YLJGYJ',
+		 SYSDATE,
+		'公示网站：'||f1.website_name||' 原料：'||f1.material_name||
+		'价格同比变化幅度:'||
+		(CASE WHEN ABS(f1.tb)>=(SELECT mm.threshold_value FROM material_warn_config mm WHERE mm.material_code = f1.material_code AND mm.website_code = f1.website_code AND mm.warn_type = 'YLJGTBYJ') THEN '&lt;span style=&quot;color:red&quot; &gt;'||to_char(f1.tb,'fm9999999990.00')||'%&lt;/span&gt;'
+		      WHEN ABS(f1.tb)&lt;(SELECT mm.threshold_value FROM material_warn_config mm WHERE mm.material_code = f1.material_code AND mm.website_code = f1.website_code AND mm.warn_type = 'YLJGTBYJ') THEN to_char(f1.tb,'fm9999999990.00')||'%'
+		      ELSE '0%' END )
+		||',环比变化幅度:'||
+		(CASE WHEN ABS(f1.hb)>=(SELECT mm.threshold_value FROM material_warn_config mm WHERE mm.material_code = f1.material_code AND mm.website_code = f1.website_code AND mm.warn_type = 'YLJGHBYJ') THEN '&lt;span style=&quot;color:red&quot; &gt;'||to_char(f1.hb,'fm9999999990.00')||'%&lt;/span&gt;'
+		      WHEN ABS(f1.hb)&lt;(SELECT mm.threshold_value FROM material_warn_config mm WHERE mm.material_code = f1.material_code AND mm.website_code = f1.website_code AND mm.warn_type = 'YLJGHBYJ') THEN to_char(f1.hb,'fm9999999990.00')||'%'
+		      ELSE '0%' END )
+		FROM
+		(
+          SELECT
+            w.website_code,
+            w.website_name,
+            m.material_code,
+            m.material_name,
+            (
+	             SELECT 
+	              fmw.qoq_change
+	              FROM
+	              (
+	                  SELECT
+	                  tmw.material_code,
+	                  tmw.qoq_change,
+	                  tmw.material_region_code,
+	                  tmw.warn_date
+	                  FROM material_warn tmw 
+	                  WHERE tmw.warn_type = 'YLJGTBYJ' 
+	              ) fmw
+	              WHERE fmw.material_code = t.material_code AND fmw.material_region_code = t.material_region_code AND fmw.warn_date = t.warn_date
+            ) tb,
+            (
+	             SELECT 
+	              fmw.qoq_change
+	              FROM
+	              (
+	                  SELECT
+	                  tmw.material_code,
+	                  tmw.qoq_change,
+	                  tmw.material_region_code,
+	                  tmw.warn_date
+	                  FROM material_warn tmw 
+	                  WHERE tmw.warn_type = 'YLJGHBYJ' 
+	              ) fmw
+	              WHERE fmw.material_code = t.material_code AND fmw.material_region_code = t.material_region_code AND fmw.warn_date = t.warn_date
+            ) hb
+      		
+          FROM
+          (
+            SELECT
+            DISTINCT
+            material_code,
+            material_region_code,
+            warn_date
+            FROM material_warn WHERE TO_CHAR(warn_date,'YYYYMM') = to_char(SYSDATE, 'YYYYMM')
+          ) t
+          LEFT JOIN material m ON t.material_code = m.material_code
+          LEFT JOIN website w ON m.website_code = w.website_code
+		) f1
+		WHERE f1.tb IS NOT NULL AND f1.hb IS NOT NULL
+		)
+    </insert>
+    
+    <!-- 添加符合触发条件的商品价格警提醒(定时任务) -->
+    <insert id="insertMerchandiseWarnRemind">
+    INSERT INTO else_remind(remind_code,remind_type,remind_date,remind_info)
+	    SELECT
+	     S_ELSE_REMIND.NEXTVAL,
+	     m_info.warn_type,
+	     SYSDATE,
+	    '商品：'||m_info.merchandise_code||'-'||m_info.merchandise_name||' 受原料变化价格变化影响,对比目前价格('||m_info.merchandise_price_compute||'元/'||decode(m_info.net_weight,0,1,m_info.net_weight)||'KG，'||to_char(oa.oa_approve_date,'yyyy')||'年'||to_char(oa.oa_approve_date,'mm')||'月'||to_char(oa.oa_approve_date,'dd')||'日起执行),进价变化为±'||m_info.merchandise_price_growth||'元/'||decode(m_info.net_weight,0,1,m_info.net_weight)||'KG,变化百分比为±'||m_info.merchandise_price_proportion||'%。'
+	    FROM
+	    (
+	          SELECT
+			  m.merchandise_code,
+			  m.merchandise_name,
+			  m.supplier_code,
+			  m.net_weight,
+			  mrm.merchandise_material_code,
+			  mw.warn_type,
+			  mw.merchandise_price_compute,
+			  mw.merchandise_price_growth,
+			  mw.merchandise_price_proportion
+			FROM merchandise_warn mw
+			LEFT JOIN merchandise_relevance_material mrm ON mrm.id = mw.relevance_id
+			INNER JOIN merchandise m ON m.merchandise_code = mrm.merchandise_code AND m.supplier_code = mrm.supplier_code
+			LEFT JOIN
+			(
+			  SELECT
+			  material_code,
+			  warn_type,
+			  MIN(threshold_value) min_value
+			  FROM material_warn_config
+			  GROUP BY material_code,warn_type
+			) mwc ON mwc.material_code = mrm.material_code AND mwc.warn_type = mw.warn_type
+			WHERE mw.merchandise_price_proportion>=mwc.min_value AND TO_CHAR(mw.warn_date,'YYYYMM') = to_char(SYSDATE, 'YYYYMM')
+	    ) m_info
+	    INNER JOIN v_merchandise_last_oa oa ON oa.merchandise_code = m_info.merchandise_code AND oa.supplier_code = m_info.supplier_code
+    </insert>
+    
+    <!-- 添加符合触发条件的辅料意向品价格警提醒(定时任务) -->
+    <insert id="insertAccessoryWarnRemind">
+    	INSERT INTO else_remind(remind_code,remind_type,remind_date,remind_info)
+	    SELECT
+		 S_ELSE_REMIND.NEXTVAL,
+		 'FLYXPJGYJ',
+		 SYSDATE,
+		 '意向品：'||ai_info.intention_code||'-'||ai_info.intention_name||' 受原料变化价格变化影响,对比目前价格('||ai_info.merchandise_purchase_price||'元,'||to_char(oa_info.oa_approve_date,'yyyy')||'年'||to_char(oa_info.oa_approve_date,'mm')||'月'||to_char(oa_info.oa_approve_date,'dd')||'日起执行),进价变化为'||ai_info.merchandise_price_compute||'元,变化百分比为'||ai_info.merchandise_price_proportion||'%。'
+		FROM
+		(
+		  SELECT
+		  ai.intention_code,
+		  ai.intention_name,
+		  arm.intention_supplier_code,
+		  ai.fine_type_code,
+		  aw.merchandise_purchase_price,
+		  aw.merchandise_price_compute,
+		  aw.merchandise_price_growth,
+		  aw.merchandise_price_proportion
+		  FROM accessory_warn aw
+		  LEFT JOIN accessory_relevance_materia arm ON arm.id = aw.relevance_id
+		  INNER JOIN accessory_intention ai ON ai.intention_code = arm.intention_code AND ai.fine_type_code in ('PS','PB','PL')
+		  LEFT JOIN
+		  (
+		    SELECT
+		    material_code,
+		    warn_type,
+		    MIN(threshold_value) min_value
+		    FROM material_warn_config
+		    GROUP BY material_code,warn_type
+		  ) mwc ON mwc.material_code = arm.material_code AND mwc.warn_type = aw.warn_type
+		  WHERE ABS(aw.merchandise_price_proportion)>=mwc.min_value  AND TO_CHAR(aw.warn_date,'YYYYMM') = to_char(SYSDATE, 'YYYYMM')
+		) ai_info
+		INNER JOIN
+		(
+		  SELECT
+		  application_code,
+		  oa_approve_date,
+		  intention_code,
+		  supplier_code,
+		  enquiry_code,
+		  quoted_code
+		  FROM 
+		  (
+		    SELECT
+		    	application_code,
+			    intention_code,
+			    supplier_code,
+			    enquiry_code,
+			    quoted_code,
+			    oa_approve_date
+		    FROM
+		    (
+		      <!-- 辅料意向品最后一次通过0A审批的最晚的报价单 -->
+		      SELECT
+		        wl.*,
+		        oa.application_status,
+		        oa.oa_approve_date,
+		        aqe.quoted_date,
+		        row_number() OVER(partition by ai.intention_code order by oa.oa_approve_date DESC) row_number1,
+		        rank() OVER(partition by ai.intention_code order by aqe.quoted_date DESC) row_number2
+		      FROM accessory_intention ai
+		      INNER JOIN accessory_enquiry ae ON ae.intention_code = ai.intention_code
+		      INNER JOIN accessory_quoted_electronic aqe ON aqe.intention_code = ae.intention_code AND aqe.enquiry_code = ae.enquiry_code
+		      INNER JOIN wl_info wl ON wl.intention_code = aqe.intention_code AND wl.supplier_code = aqe.intention_supplier_code
+		      AND wl.enquiry_code = aqe.enquiry_code AND wl.quoted_code = aqe.quoted_code
+		      INNER JOIN oa_application oa ON oa.application_code = wl.application_code AND oa.application_status = 'SPTG'
+		    ) 
+		    WHERE row_number1 = 1 AND row_number2 = 1
+		  )
+		) oa_info ON oa_info.intention_code = ai_info.intention_code AND oa_info.supplier_code = ai_info.intention_supplier_code
+    </insert>
+    
+    <!-- 添加符合触发条件的签量完成提醒 -->
+    <insert id="insertQLWCTXRemind">
+        INSERT INTO else_remind(remind_code,remind_type,remind_date,remind_info,ql_code,config_code)
+	    SELECT
+      	S_ELSE_REMIND.NEXTVAL,t.*
+      	FROM (
+      	<foreach collection="list" item="item" index="index" separator="UNION">
+					SELECT 
+					    'QLWCTX',
+						SYSDATE,
+						'签量单号：'||#{item.qlCode}||' 商品： '||#{item.merchandiseCode}||'-'||#{item.merchandiseName}||'，'||#{item.supplierCode}||'-'||#{item.supplierName}||' 签量已完成百分比为： '||#{item.finishPercent}||'%',
+      					#{item.qlCode},
+      					#{item.configCode}
+					FROM dual
+					WHERE NOT EXISTS 
+				    (
+				    SELECT 
+				    er.remind_code
+				    FROM else_remind er
+				    WHERE er.ql_code = #{item.qlCode} AND er.remind_info LIKE '%'||#{item.merchandiseCode}||'%' AND er.remind_info LIKE '%'||#{item.supplierCode}||'%'
+				    )
+				</foreach>
+			) t
+    </insert>
+    
+    <!-- 添加证件临期提醒 -->
+    <insert id="insertZJLQTXRemind">
+        INSERT INTO else_remind(remind_code,remind_type,remind_date,remind_info)
+	    SELECT S_ELSE_REMIND.NEXTVAL, t.* from (
+				<foreach collection="list" item="item" index="index" separator="UNION">
+					SELECT 
+						'ZJLQTX',
+						SYSDATE,
+						'供应商： '||#{item.supplierCode}||' - '||#{item.supplierName}||'  证件：'||#{item.certificateTypeName}||' 过期日期：'|| to_char(#{item.endDate},'yyyy-MM-dd')
+					FROM dual
+				</foreach>
+			) t
+    </insert>
+    
+    <!-- 添加证件过期期提醒 -->
+    <insert id="insertZJGQTXRemind">
+        INSERT INTO else_remind(remind_code,remind_type,remind_date,remind_info)
+	    SELECT S_ELSE_REMIND.NEXTVAL, t.* from (
+				<foreach collection="list" item="item" index="index" separator="UNION">
+					SELECT 
+						'ZJGQTX',
+						SYSDATE,
+						'供应商： '||#{item.supplierCode}||' - '||#{item.supplierName}||'  证件：'||#{item.certificateTypeName}||'已过期'
+					FROM dual
+				</foreach>
+			) t
+    </insert>
+    
+    <!-- 添加调价签量维护提醒 -->
+    <insert id="insertTJQLWHTXRemind">
+    	INSERT INTO else_remind(remind_code,remind_type,remind_date,remind_info,ql_code)
+		SELECT
+			S_ELSE_REMIND.NEXTVAL,
+			'TJQLWHTX',
+			SYSDATE,
+			(SELECT value_string from common_mapping_config where key_type = 'APPLICATION_TYPE' and code_string = t4.application_type)||'-SCO申请单号：'||t4.application_code||', 商品'||t4.merchandise_code||'-'||t5.merchandise_name||',存在未使用完成的签量，请及时确认是否需要更新签量维护信息。',
+			t5.ql_code
+		FROM
+		(
+		SELECT
+		 o.application_type,
+		 am.application_code,
+		 am.merchandise_code,
+		 am.supplier_code
+		FROM application_merchandise am
+		RIGHT JOIN (
+		SELECT
+		oa.application_code,
+		oa.application_type
+		FROM oa_application oa
+		WHERE (oa.application_type = 'MERCHANDISE_FASTADJUSTPRICE' OR oa.application_type = 'MERCHANDISE_ADJUSTPRICE')
+		AND oa.application_status = 'SPTG'
+		) o ON am.application_code = o.application_code
+		) t4
+		INNER JOIN 
+		(
+		SELECT
+		       t3.*,
+		       m.merchandise_name
+		       FROM 
+		      (
+		      SELECT 
+		      t2.* 
+		      FROM 
+		      (
+				      SELECT 
+				      mqd.merchandise_code,
+				      mqd.supplier_code,
+				      MAX(mq.ql_start_date) ql_start_date
+				      FROM merchandise_ql mq
+				      INNER JOIN merchandise_ql_detail mqd ON mq.ql_code = mqd.ql_code
+				      WHERE (mq.status = 'A' OR mq.status = 'S') <!-- 状态为A:新增或者S:改签的 -->
+				      GROUP BY mqd.merchandise_code,mqd.supplier_code
+		      ) t1 
+		      INNER JOIN 
+		      (
+		            SELECT 
+		            a.ql_code, 
+		            b.merchandise_code,
+		            b.supplier_code,
+		            a.ql_start_date,
+		            a.ql_count,
+		            a.finish_count
+		            FROM merchandise_ql a, merchandise_ql_detail b 
+		           WHERE a.ql_code = b.ql_code 
+		           AND (a.status = 'A' OR a.status = 'S') <!-- 状态为A:新增或者S:改签的 -->
+		      ) t2 ON t1.merchandise_code = t2.merchandise_code AND t1.ql_start_date = t2.ql_start_date
+		       WHERE t2.ql_count != t2.finish_count
+		       )  t3
+		       LEFT JOIN merchandise m ON t3.merchandise_code = m.merchandise_code AND m.supplier_code = t3.supplier_code
+		       LEFT JOIN supplier s ON t3.supplier_code = s.supplier_code
+		) t5 ON t4.merchandise_code = t5.merchandise_code AND t4.supplier_code = t5.supplier_code
+		WHERE NOT EXISTS 
+	    (
+	      SELECT 
+	      er.remind_code
+	      FROM else_remind er
+	      WHERE er.ql_code = t5.ql_code AND er.remind_info LIKE '%'||t4.application_code||'%'
+	    )
+    </insert>
+    
+    <!-- 查询有签量的商品 -->
+    <select id="listMerchandiseHashQL" resultMap="remindMerchandsieQLMap">
+    	SELECT
+	     t3.ql_code qlCode,
+	     t3.merchandise_code merchandiseCode,
+	     t3.supplier_code supplierCode,
+	     t3.ql_start_date qlStartDate,
+	     t3.finish_percent*100 finishPercent,
+	     m.merchandise_name merchandiseName,
+	     s.supplier_name supplierName
+	       FROM 
+	      (
+	         SELECT t2.* FROM 
+	         (	
+	                SELECT 
+	                mqd.merchandise_code,
+	                mqd.supplier_code,
+	                MAX(mq.ql_start_date) ql_start_date
+	                FROM merchandise_ql mq
+	                INNER JOIN merchandise_ql_detail mqd ON mq.ql_code = mqd.ql_code
+	                WHERE (mq.status = 'A' OR mq.status = 'S')
+	                GROUP BY mqd.merchandise_code,mqd.supplier_code
+	         ) t1 
+	          INNER JOIN 
+	        (		
+	        		SELECT 
+	                a.ql_code, 
+	                b.merchandise_code,
+	                b.supplier_code,
+	                a.ql_start_date,
+	                a.finish_percent
+	                FROM merchandise_ql a, merchandise_ql_detail b 
+	                WHERE a.ql_code = b.ql_code
+	                AND (a.status = 'A' OR a.status = 'S')
+	         ) t2 ON t1.merchandise_code = t2.merchandise_code AND t1.supplier_code = t2.supplier_code AND t1.ql_start_date = t2.ql_start_date
+	         
+	       ) t3
+       LEFT JOIN merchandise m ON t3.merchandise_code = m.merchandise_code AND m.supplier_code = t3.supplier_code
+       LEFT JOIN supplier s ON t3.supplier_code = s.supplier_code
+    </select>
+    
+</mapper>

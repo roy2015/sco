@@ -1,0 +1,412 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.datamaintenance.purchaserdata.websitematerial.WebsiteMaterialDao">
+	<resultMap type="com.powere2e.sco.model.datamaintenance.purchaserdata.websitematerial.WebsiteMaterial" id="wbmMap">
+		<result property="id" column="id"/>
+		<result property="materialCode" column="materialCode"/>
+		<result property="materialName" column="materialName"/>
+		<result property="websiteCode" column="websiteCode"/>
+		<result property="websiteName" column="websiteName"/>
+		<result property="websiteUrl" column="websiteUrl"/>
+		<result property="priceRegionCode" column="priceRegionCode"/>
+		<result property="priceRegion" column="priceRegion"/>
+		<result property="priceDate" column="priceDate"/>
+		<result property="month" column="month"/>
+		<result property="created" column="created"/>
+		<result property="price" column="price"/>
+		<result property="createby" column="createby"/>
+		
+		<result property="materialBigTypeCode" column="materialBigTypeCode"/>
+		<result property="materialBigTypeName" column="materialBigTypeName"/>
+		<result property="materialSmallTypeCode" column="materialSmallTypeCode"/>
+		<result property="materialSmallTypeName" column="materialSmallTypeName"/>
+		
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    
+    <!-- 查询已有网站价格数据 -->
+    <select id="listExistsWebsiteMaterial" resultMap="wbmMap">
+   		SELECT  
+    		<if test="page_count == null">
+	       		t.material_code materialCode,t.material_name websiteMaterialName,
+	       		mr.material_region_code priceRegionCode,
+	       		mr.material_region_name priceRegion,
+	       		mr.website_url websiteUrl,
+	       		w.website_name websiteName,
+	       		b.material_big_type_name materialBigTypeName,
+	       		s.material_small_type_name materialSmallTypeName,
+	       		p.id,p.price_date priceDate,p.price,u.real_name createby,p.created 
+	   		</if>
+	    	<if test="page_count != null">
+	       		count(1) AS record_count 
+	    	</if>
+   		FROM 
+   			material t
+   			INNER JOIN website w ON t.website_code = w.website_code <!-- 公示网站 -->
+   			INNER JOIN material_region mr ON t.material_code = mr.material_code <!-- 价格地区 -->
+   			INNER JOIN material_big_type b ON t.material_big_type_code = b.material_big_type_code <!-- 原料大类 -->
+   			INNER JOIN material_small_type s ON t.material_small_type_code = s.material_small_type_code 
+   				AND t.material_big_type_code = s.material_big_type_code <!-- 原料小类 -->
+    		<if test= "priceRegion != null and priceRegion !=''">
+    			INNER JOIN 
+    		</if>
+    		<if test= "priceRegion == null or priceRegion ==''">
+    			INNER JOIN 
+    		</if>
+    		material_price p on t.material_code = p.material_code 
+    			AND mr.material_region_code = p.material_region_code <!-- 原料价格 -->
+    		LEFT JOIN pub_user u ON p.createby = u.user_id
+    	<where>
+    		1=1
+	    	<if test= "websiteName != null and websiteName !=''">
+				AND UPPER(w.website_name) LIKE UPPER('%'||#{websiteName}||'%')
+			</if>
+	    	<if test= "websiteUrl != null and websiteUrl !=''">
+				AND UPPER(mr.website_url) LIKE UPPER('%'||#{websiteUrl}||'%')
+			</if>
+	    	<if test= "priceRegion != null and priceRegion !=''">
+				AND UPPER(mr.material_region_name) LIKE UPPER('%'||#{priceRegion}||'%')
+			</if>
+	    	<if test= "priceDate != null ">
+				AND p.price_date >=  #{priceDate}
+			</if>
+	    	<if test= "priceEndDate != null ">
+				AND p.price_date <![CDATA[<]]> (#{priceEndDate}+1)
+			</if>
+	    	<if test= "createby != null and createby !=''">
+				AND UPPER(u.real_name) LIKE UPPER('%'||#{createby}||'%')
+			</if>
+	    	<if test= "materialCode != null and materialCode !=''">
+				AND UPPER(t.material_code) LIKE UPPER(#{materialCode})
+			</if>
+	    	<if test= "materialName != null and materialName !=''">
+				AND UPPER(t.material_name) LIKE UPPER('%'||#{materialName}||'%')
+			</if>
+	    	<if test= "websiteMaterialName != null and websiteMaterialName != ''">
+				<if test="exact != null">
+					AND UPPER(t.material_name) LIKE UPPER(#{websiteMaterialName})
+				</if>
+				<if test="exact == null">
+					AND UPPER(t.material_name) LIKE UPPER('%'||#{websiteMaterialName}||'%')
+				</if>
+			</if>
+	    	<if test= "materialBigTypeCode != null and materialBigTypeCode !=''">
+				AND UPPER(t.material_big_type_code) LIKE UPPER(#{materialBigTypeCode})
+			</if>
+	    	<if test= "materialSmallTypeCode != null and materialSmallTypeCode !=''">
+				AND UPPER(t.material_small_type_code) LIKE UPPER(#{materialSmallTypeCode})
+			</if>
+	    	<if test= "websiteCode != null and websiteCode !=''">
+				AND UPPER(t.website_code) LIKE UPPER(#{websiteCode})
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY w.website_name,t.material_name,p.price_date DESC
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 查询原料最小的创建时间 -->
+	<select id="searchMinCreated" resultType="java.util.Date">
+		SELECT
+			MIN(created) 
+		FROM material
+	</select>
+    
+    <!-- 分组查询数据(查询出条件过滤后所需区间的数据) -->
+    <select id="existsDataGroupByMonth" resultMap="wbmMap">
+    	SELECT 
+    		*
+    	FROM 
+    		(
+		    	SELECT 
+		              m.material_code materialCode,
+		              <!-- DECODE(m.material_region_code, null, '-', m.material_region_code) priceRegionCode, -->
+					  m.material_region_code priceRegionCode,
+		              TO_CHAR(DECODE(SIGN(m.created-t.price_date),-1,t.price_date,1,m.created,t.price_date), 'yyyy-mm') month
+			    FROM 
+					(
+		   				SELECT 
+		   					t.material_code,
+		   					mr.material_region_code,
+		   					t.created 
+		   				FROM 
+		   					material t 
+			   			INNER JOIN website w ON t.website_code = w.website_code <!-- 公示网站 --> 
+			   			INNER JOIN material_big_type b ON t.material_big_type_code = b.material_big_type_code <!-- 原料大类 -->
+			   			INNER JOIN material_small_type s ON t.material_small_type_code = s.material_small_type_code 
+			   				AND t.material_big_type_code = s.material_big_type_code <!-- 原料小类 --> 
+			   			<if test= "priceRegion != null and priceRegion !=''">
+			   				INNER JOIN 
+			   			</if>
+			   			<if test= "priceRegion == null or priceRegion ==''">
+			   				LEFT JOIN 
+			   			</if>
+			   				material_region mr ON t.material_code = mr.material_code <!-- 原料价格地区 -->
+			   			WHERE 
+							t.created <![CDATA[<]]> (ADD_MONTHS(#{endDate}, 1))
+			   			<if test= "websiteMaterialName != null and websiteMaterialName != ''">
+							AND UPPER(t.material_name) LIKE UPPER('%'||#{websiteMaterialName}||'%')
+						</if>
+				    	<if test= "materialBigTypeCode != null and materialBigTypeCode !=''">
+							AND UPPER(t.material_big_type_code) LIKE UPPER(#{materialBigTypeCode})
+						</if>
+				    	<if test= "materialSmallTypeCode != null and materialSmallTypeCode !=''">
+							AND UPPER(t.material_small_type_code) LIKE UPPER(#{materialSmallTypeCode})
+						</if>
+						<if test= "priceRegion != null and priceRegion !=''">
+						 	AND	UPPER(mr.material_region_name) LIKE UPPER('%'||#{priceRegion}||'%')
+						</if>
+						<if test= "websiteName != null and websiteName !=''">
+							AND UPPER(w.website_name) LIKE UPPER('%'||#{websiteName}||'%')
+						</if>
+						<if test= "materialName != null and materialName !=''">
+							AND UPPER(t.material_name) LIKE UPPER('%'||#{materialName}||'%')
+						</if>
+		   			) m 
+			 	INNER JOIN 
+			    	(
+			            <foreach collection="list" item="item" separator="union all" >  
+				        	( SELECT 
+				           	  	TO_DATE(#{item}, 'yyyy-mm-dd') price_date 
+					          FROM dual 
+					        )
+						</foreach>   
+			      	) t
+			     ON 1 = 1 
+			) h 
+		GROUP　by h.materialCode,h.priceRegionCode,h.month 
+	    <!-- ORDER BY h.materialCode,h.priceRegionCode,h.month   -->
+    </select>
+    
+    <!-- 查询某月份区间不存在网站公示价的数据 -->
+    <select id="listNotExistsWebsiteMaterial" resultMap="wbmMap">
+		SELECT  
+    		<if test="page_count == null">
+    			rs.materialCode,
+	       		rs.month,
+	       		rs.priceRegion,
+	       		rs.priceRegionCode,
+	       		rs.websiteUrl,
+    			
+	       		b.material_big_type_name materialBigTypeName,
+	       		s.material_small_type_name materialSmallTypeName,
+	       		t.material_name websiteMaterialName,
+	       		w.website_name websiteName 
+	   		</if>
+	    	<if test="page_count != null">
+	       		count(1) AS record_count 
+	    	</if>
+   		FROM 
+   			(
+   				SELECT 
+	   				d.material_code materialCode,
+		       		d.month,d.material_region_code priceRegionCode,
+		       		p.price_date priceDate,
+		       		r.website_url websiteUrl,
+		       		r.material_region_name priceRegion
+				FROM 
+					(
+		    			<foreach collection="list" item="item" separator="union all" >  
+				        	( SELECT 
+				           	  	#{item.materialCode} material_code, 
+				           	  	#{item.priceRegionCode} material_region_code,
+				           	  	#{item.month} month
+					          FROM dual 
+					        )
+						</foreach>
+			  		) d
+				LEFT JOIN 
+					(
+						SELECT 
+							t.material_code, t.material_region_code,
+							to_char(t.price_date, 'yyyy-mm') price_date 
+						FROM 
+							material_price t 
+						WHERE 
+							t.price_date >=  #{startDate}
+							AND t.price_date <![CDATA[<]]> ADD_MONTHS(#{endDate}, 1)
+						GROUP BY 
+							t.material_code, t.material_region_code, TO_CHAR(t.price_date, 'yyyy-mm')
+					) p ON p.material_code = d.material_code 
+						AND d.material_region_code = p.material_region_code 
+						AND d.month = p.price_date 
+				LEFT JOIN material_region r ON d.material_code = r.material_code
+					AND d.material_region_code = r.material_region_code 
+   			) rs 
+   			INNER JOIN material t on rs.materialCode = t.material_code <!-- 原料信息 -->
+   			INNER JOIN website w ON t.website_code = w.website_code <!-- 公示网站 --> 
+			INNER JOIN material_big_type b ON t.material_big_type_code = b.material_big_type_code <!-- 原料大类 -->
+			INNER JOIN material_small_type s ON t.material_small_type_code = s.material_small_type_code 
+				AND t.material_big_type_code = s.material_big_type_code <!-- 原料小类 -->
+   			WHERE 
+   				rs.priceDate IS NULL 
+    		<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY w.website_name,t.material_name,rs.month 
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 查询某个原料信息 -->
+    <select id="loadWebsiteMaterialByMateCode" resultMap="wbmMap">
+  		SELECT  
+       		t.material_code materialCode,t.material_name websiteMaterialName,
+       		mr.material_region_name priceRegion,
+       		mr.material_region_code priceRegionCode,
+       		mr.website_url websiteUrl,
+       		w.website_name websiteName,
+       		b.material_big_type_name materialBigTypeName,
+       		s.material_small_type_name materialSmallTypeName 
+  		FROM 
+  			material t
+  			INNER JOIN website w ON t.website_code = w.website_code <!-- 公示网站 --> 
+  			INNER JOIN material_region mr ON t.material_code = mr.material_code <!-- 价格地区 -->
+ 			LEFT JOIN material_price p on t.material_code = p.material_code 
+    			AND mr.material_region_code = p.material_region_code <!-- 原料价格 -->
+  			INNER JOIN material_big_type b ON t.material_big_type_code = b.material_big_type_code <!-- 原料大类 -->
+  			INNER JOIN material_small_type s ON t.material_small_type_code = s.material_small_type_code 
+  				AND t.material_big_type_code = s.material_big_type_code <!-- 原料小类 -->
+   		WHERE 
+			UPPER(t.material_code) LIKE UPPER(#{materialCode})
+			AND UPPER(mr.material_region_code) LIKE UPPER(#{priceRegionCode}) 
+			AND ROWNUM = 1
+   	</select>
+   
+   	<!-- 查询是否存在相同日期的原料价格 -->
+   	<select id="loadWebMaterialPrice" resultType="String">
+   		SELECT  
+       		t.id id
+       	FROM 
+       		material_price t 
+       	WHERE 
+       		t.material_code = #{materialCode}
+       		AND t.price_date = #{priceDate}
+       		AND t.material_region_code = #{priceRegionCode}
+       		AND ROWNUM = 1 
+   	</select>
+   	
+   	<!-- 新增原料价格数据 -->
+   	<insert id="insertWebMaterialPrice">
+   		INSERT INTO material_price(id,material_code,material_region_code,price_date,price,created,createby) 
+			 VALUES(#{id},#{materialCode},#{priceRegionCode},#{priceDate},#{price},#{app_created},#{createby})
+   	</insert>
+   	
+   	<!-- 删除原料价格数据 -->
+   	<delete id="deleteWebsiteMaterialPrice">
+   		DELETE FROM 
+   			material_price
+   		WHERE
+   			id IN (${ids})
+   	</delete>
+   	
+   	<!-- 查询公示网站原料名称下拉框 -->
+   	<select id="listMaterialNameOption" resultType="com.powere2e.security.model.Option">
+   		SELECT 
+   			m.material_code id, m.material_name text 
+  		FROM 
+  			material m 
+		  LEFT JOIN material_big_type b ON m.material_big_type_code = b.material_big_type_code 
+		  LEFT JOIN material_small_type s ON m.material_small_type_code = s.material_small_type_code
+		        AND b.material_big_type_code = s.material_big_type_code 
+   		WHERE 
+   			1 = 1 
+   			<if test="materialCode != null and materialCode != ''">
+	   			AND m.material_code = #{materialCode}
+   			</if>
+   			<if test="materialBigTypeCode != null and materialBigTypeCode != ''">
+   				AND b.material_big_type_code = #{materialBigTypeCode}
+   			</if>
+   			<if test="materialSmallTypeCode != null and materialSmallTypeCode != ''">
+	   			AND s.material_small_type_code = #{materialSmallTypeCode}
+   			</if>
+   		ORDER BY m.material_name 
+   	</select>
+   	
+   	<!-- 查询价格地区 -->
+   	<select id="listMaterialRegionOption" resultType="com.powere2e.security.model.Option">
+   		SELECT 
+   			mr.material_region_code id, mr.material_region_name text 
+  		FROM 
+  			material m 
+		  LEFT JOIN material_big_type b ON m.material_big_type_code = b.material_big_type_code 
+		  LEFT JOIN material_small_type s ON m.material_small_type_code = s.material_small_type_code
+		        AND b.material_big_type_code = s.material_big_type_code 
+		  INNER JOIN material_region mr ON m.material_code = mr.material_code  
+   		WHERE 
+   			1 = 1 
+   			<if test="materialCode != null and materialCode != ''">
+	   			AND m.material_code = #{materialCode}
+   			</if>
+   			<if test="materialBigTypeCode != null and materialBigTypeCode != ''">
+   				AND b.material_big_type_code = #{materialBigTypeCode}
+   			</if>
+   			<if test="materialSmallTypeCode != null and materialSmallTypeCode != ''">
+	   			AND s.material_small_type_code = #{materialSmallTypeCode}
+   			</if>
+   		ORDER BY mr.material_region_name
+   	</select>
+   	
+	<!-- 公示网站名称 -->
+   	<select id="listMaterialWebNameOption" resultType="com.powere2e.security.model.Option">
+   		SELECT 
+   			w.website_code id, w.website_name text 
+  		FROM 
+  			material m 
+		  LEFT JOIN material_big_type b ON m.material_big_type_code = b.material_big_type_code 
+		  LEFT JOIN material_small_type s ON m.material_small_type_code = s.material_small_type_code
+		        AND b.material_big_type_code = s.material_big_type_code 
+		  LEFT JOIN website w ON m.website_code = w.website_code 
+   		WHERE 
+   			1 = 1 
+   			<if test="materialCode != null and materialCode != ''">
+	   			AND m.material_code = #{materialCode}
+   			</if>
+   			<if test="materialBigTypeCode != null and materialBigTypeCode != ''">
+   				AND b.material_big_type_code = #{materialBigTypeCode}
+   			</if>
+   			<if test="materialSmallTypeCode != null and materialSmallTypeCode != ''">
+	   			AND s.material_small_type_code = #{materialSmallTypeCode}
+   			</if>
+   		ORDER BY w.website_name 
+   	</select>
+   	
+   	<!-- 公示网站地址 -->
+	<select id="listMaterialWebUrlOption" resultType="com.powere2e.security.model.Option">
+   		SELECT 
+   			w.website_code id, mr.website_url text 
+  		FROM 
+  			material m 
+		  INNER JOIN material_big_type b ON m.material_big_type_code = b.material_big_type_code 
+		  INNER JOIN material_small_type s ON m.material_small_type_code = s.material_small_type_code
+		        AND b.material_big_type_code = s.material_big_type_code 
+          INNER JOIN material_region mr ON m.material_code = mr.material_code 
+		  INNER JOIN website w ON m.website_code = w.website_code 
+   		WHERE 
+   			1 = 1 
+   			<if test="materialCode != null and materialCode != ''">
+	   			AND m.material_code = #{materialCode}
+   			</if>
+   			<if test="materialBigTypeCode != null and materialBigTypeCode != ''">
+   				AND b.material_big_type_code = #{materialBigTypeCode}
+   			</if>
+   			<if test="materialSmallTypeCode != null and materialSmallTypeCode != ''">
+	   			AND s.material_small_type_code = #{materialSmallTypeCode}
+   			</if>
+   			<if test="materialRegionCode != null and materialRegionCode != ''">
+   				AND mr.material_region_code = #{materialRegionCode} 
+   			</if>
+   			<if test="websiteCode != null and websiteCode != ''">
+   				AND WEBSITE_CODE = #{websiteCode} 
+   			</if>
+   		ORDER BY mr.website_url 
+   	</select>
+   	
+</mapper>

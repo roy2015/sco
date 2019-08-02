@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.common.MasterDataTypeDao">
+   
+   <!-- 查询中分类 -->
+	<select id="listCenterType" resultType="com.powere2e.security.model.Option">
+		SELECT
+			centre_type_code id, centre_type_name text
+		FROM
+			merchandise_centre_type 
+		<where>
+			<if test="centreTypeCode != '' and centreTypeCode != null ">
+				centre_type_code = #{centreTypeCode}		
+			</if>
+		</where>
+		ORDER BY '食品' 
+	</select>
+	
+   <!-- 查询小分类 -->
+	<select id="listSmallType" resultType="com.powere2e.security.model.Option">
+		SELECT
+			small_type_code id, small_type_name text
+		FROM 
+			merchandise_small_type 
+		WHERE 
+			1 = 1
+			<if test="smallTypeCode != '' and smallTypeCode != null ">
+				AND small_type_code = #{smallTypeCode}
+			</if>
+			<if test="centreTypeCode != '' and centreTypeCode != null ">
+				AND centre_type_code = #{centreTypeCode}
+			</if>
+		ORDER BY small_type_name 
+	</select>
+	
+   <!-- 查询明细类 -->
+	<select id="listDetailType" resultType="com.powere2e.security.model.Option">
+		SELECT
+			detail_type_code id, detail_type_name text
+		FROM
+			merchandise_detail_type 
+		WHERE
+			1 = 1
+			<if test="detailTypeCode != '' and detailTypeCode != null ">
+				AND detail_type_code = #{detailTypeCode}
+			</if>
+			<if test="smallTypeCode != '' and smallTypeCode != null ">
+				AND small_type_code = #{smallTypeCode}
+			</if>
+		ORDER BY detail_type_name 
+	</select>
+	
+   <!-- 查询细分类 -->
+	<select id="listFineType" resultType="com.powere2e.security.model.Option">
+		SELECT
+			fine_type_code id, fine_type_name text 
+		FROM
+			merchandise_fine_type 
+		WHERE
+			1 = 1 
+			<if test="fineTypeCode != '' and fineTypeCode != null ">
+				AND fine_type_code = #{fineTypeCode}
+			</if>
+			<if test="detailTypeCode != '' and detailTypeCode != null ">
+				AND detail_type_code = #{detailTypeCode}
+			</if>
+		ORDER BY fine_type_name 
+	</select>
+	
+	<!-- 商品销售方式查询 -->
+	<select id="listSaleType" resultType="com.powere2e.security.model.Option">
+		SELECT
+			distinct m.storage_form id, m.storage_form text
+		FROM
+			merchandise m where m.storage_form is not null 
+		ORDER BY m.storage_form 
+	</select>
+	
+	<!-- 区域信息查询 -->
+	<select id="listRegion" resultType="com.powere2e.security.model.Option">
+		SELECT
+			region_code id, region_name text
+		FROM
+			region r 
+		ORDER BY region_name 
+	</select>
+	
+	<!-- 获取sequence值 -->
+	<select id="nextID" resultType="String">
+		SELECT ${sequenceName}.NEXTVAL from dual
+	</select>
+	
+	<!-- 仓库查询 -->
+	<select id="listWarehouseOption" resultType="com.powere2e.security.model.Option">
+		SELECT
+			warehouse_code id, warehouse_code text
+		FROM
+			warehouse w order by warehouse_code
+	</select>
+	
+</mapper>

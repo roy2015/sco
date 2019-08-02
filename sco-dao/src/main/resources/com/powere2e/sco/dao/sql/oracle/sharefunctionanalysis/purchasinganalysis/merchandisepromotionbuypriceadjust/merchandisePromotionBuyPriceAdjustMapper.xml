@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.powere2e.sco.interfaces.dao.sharefunctionanalysis.purchasinganalysis.merchandisepromotionbuypriceadjust.MerchandisePromotionBuyPriceAdjustDao">
+	<resultMap type="com.powere2e.sco.model.sharefunctionanalysis.purchasinganalysis.merchandisepromotionbuypriceadjust.MerchandisePromotionBuyPriceAdjust" id="MerchandisePromotionBuyPriceAdjustMap">
+		<result property="merchandiseCode" column="merchandiseCode" />
+		<result property="merchandiseName" column="merchandiseName" />
+		<result property="supplierCode" column="supplierCode" />
+		<result property="supplierName" column="supplierName" />
+		<result property="centreName" column="centreName" />
+		<result property="smallName" column="smallName" />
+		<result property="detailName" column="detailName" />
+		<result property="fineName" column="fineName" />
+		<result property="dxRoleName" column="dxRoleName" />
+		<result property="dlRoleName" column="dlRoleName" />
+		<result property="startDate" column="startDate" />
+		<result property="endDate" column="endDate" />
+		<result property="promotionName" column="promotionName" />
+		<result property="promotionCode" column="promotionCode" />
+		<result property="promotionSchedule" column="promotionSchedule" />
+		<result property="regionCode" column="regionCode" />
+		<result property="warehouseCode" column="warehouseCode" />
+		<result property="receiptRationed" column="receiptRationed" />
+		<result property="receiptTotalPrice" column="receiptTotalPrice" />
+		<result property="purchasePrice" column="purchasePrice" />
+		<result property="priceDate" column="priceDate" />
+		<result property="createUserName" column="createUserName" />
+		<result property="updateUserName" column="updateUserName" />
+		<result property="recordCount" column="record_count" />
+	</resultMap>
+	<!-- 区域信息查询 -->
+	<select id="searchRegion" resultType="com.powere2e.security.model.Option">
+		SELECT
+		WAREHOUSE_SITE_CODE id, WAREHOUSE_SITE_NAME text
+		FROM
+		WAREHOUSE_SITE
+		where WAREHOUSE_SITE_CODE=#{regionCode}
+		ORDER BY WAREHOUSE_SITE_NAME
+	</select>
+	<!-- 查询商品信息 -->
+	<select id="searchMerchandise" resultMap="MerchandisePromotionBuyPriceAdjustMap">
+		SELECT
+		<if test="page_count == null">
+			m.merchandise_code merchandiseCode,
+			m.merchandise_name merchandiseName,
+			s.supplier_code supplierCode,
+			s.supplier_name supplierName,
+			dx.role_name dxRoleName,
+			dl.role_name dlRoleName,
+			ct.centre_type_name centreName,
+			st.small_type_name smallName,
+			dt.detail_type_name detailName,
+			ft.fine_type_name fineName
+		</if>
+		<if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		FROM
+		merchandise m
+		LEFT JOIN supplier s ON m.supplier_code = s.supplier_code
+		left join MERCHANDISE_ROLE mr on mr.MERCHANDISE_CODE=m.merchandise_code
+		LEFT JOIN merchandise_dx_role dx ON mr.dx_role_code =
+		dx.role_code
+		LEFT JOIN merchandise_dl_role dl ON mr.dl_role_code = dl.role_code
+		LEFT JOIN merchandise_centre_type ct ON m.centre_type_code =ct.centre_type_code
+		LEFT JOIN merchandise_small_type st ON
+		m.small_type_code = st.small_type_code
+		LEFT JOIN merchandise_detail_type dt ON m.detail_type_code = dt.detail_type_code
+		left join INTENTION_SUPPLIER_MERCHANDISE ism on
+		ism.merchandise_code=m.merchandise_code and ism.SUPPLIER_CODE=m.SUPPLIER_CODE
+		left join MERCHANDISE_INTENTION mi on ism.intention_code=mi.intention_code
+		LEFT JOIN merchandise_fine_type ft ON
+		dt.detail_type_code = ft.detail_type_code
+		AND mi.fine_type_code = ft.fine_type_code	<!-- 细分类 -->
+		<where>
+			1=1
+			<if test="merchandiseCode != null and merchandiseCode !=''">
+				AND UPPER(m.merchandise_code) LIKE UPPER('%'||#{merchandiseCode}||'%')
+			</if>
+			<if test="merchandiseName != null and merchandiseName !=''">
+				AND UPPER(m.merchandise_name) LIKE UPPER('%'||#{merchandiseName}||'%')
+			</if>
+			<if test="supplierCode != null and supplierCode !=''">
+				AND UPPER(m.supplier_code) LIKE UPPER('%'||#{supplierCode}||'%')
+			</if>
+			<if test="supplierName != null and supplierName !=''">
+				AND UPPER(s.supplier_name) LIKE UPPER('%'||#{supplierName}||'%')
+			</if>
+			<if test="show ==1">
+				AND m.NET_WEIGHT != 1
+			</if>
+			and (
+		           (m.merchandise_code >= 10000 and 59999 >= m.merchandise_code) 
+		           or 
+		           (m.merchandise_code >= 70000 and 79999 >= m.merchandise_code) 
+		           or 
+		           (m.merchandise_code >= 814000000 and 814999999 >= m.merchandise_code) 
+		           or 
+		           (m.merchandise_code >= 900000000 and 999999999 >= m.merchandise_code)
+		        )
+			<if test="show ==2">
+				AND m.NET_WEIGHT =1
+			</if>
+			<if test="centreTypeCode != null and centreTypeCode != ''">
+				AND UPPER(m.centre_type_code) like UPPER(#{centreTypeCode})
+			</if>
+			<if test="smallTypeCode != null and smallTypeCode != ''">
+				AND UPPER(m.small_type_code) like UPPER(#{smallTypeCode})
+			</if>
+			<if test="detailTypeCode != null and detailTypeCode != ''">
+				AND UPPER(m.detail_type_code) like UPPER(#{detailTypeCode})
+			</if>
+			<if test="fineTypeCode != null and fineTypeCode != ''">
+				AND UPPER(ft.fine_type_code) like UPPER(#{fineTypeCode})
+			</if>
+			<if test="dxRoleCode != null and dxRoleCode != ''">
+				AND dx.role_code = #{dxRoleCode}
+			</if>
+			<if test="dlRoleCode != null and dlRoleCode != ''">
+				AND dl.role_code = #{dlRoleCode}
+			</if>
+		</where>
+		<if test="page_count == null">
+			<if test="app_orderby !=null">
+				ORDER BY ${app_orderby}
+			</if>
+			<if test="app_orderby ==null">
+				ORDER BY m.merchandise_code DESC
+			</if>
+		</if>
+	</select>
+	<!-- 查看价格变动日期和变动价格 -->
+	<select id="searchPromotionPriceOrDate" resultMap="MerchandisePromotionBuyPriceAdjustMap">
+		select
+
+		<if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		<if test="page_count == null">
+			m.merchandiseCode,
+			m.merchandiseName,
+			m.supplierCode,
+			m.supplierName,
+			m.dxRoleName,
+			m.dlRoleName,
+			m.centreName,
+			m.smallName,
+			m.detailName,
+			m.fineName,
+			m.minDate,
+			m.maxDate,
+			m.promotionName,
+			m.promotionSchedule,
+			mp.warehouseCode,
+			m.purchasePrice,
+			mp.receiptRationed,
+			mp.receiptTotalPrice
+		</if>
+		from(
+		(
+		select
+		mpp.merchandise_code merchandiseCode,
+		m.merchandise_name merchandiseName,
+		mpp.supplier_code supplierCode,
+		s.supplier_name supplierName,
+		dx.role_name dxRoleName,
+		dl.role_name dlRoleName,
+		ct.centre_type_name centreName,
+		st.small_type_name smallName,
+		dt.detail_type_name detailName,
+		ft.fine_type_name fineName,
+		to_char(mpp.start_DATE,'yyyy-mm-dd') minDate,
+		to_char(mpp.end_DATE,'yyyy-mm-dd') maxDate,
+		mpp.promotion_name promotionName,
+		mpp.promotion_schedule promotionSchedule,
+		mpp.PRICE purchasePrice
+
+		from MERCHANDISE_PROMOTION_PURCHASE mpp
+		inner join merchandise m on m.merchandise_code=mpp.merchandise_code and m.supplier_code=mpp.supplier_code
+		LEFT JOIN supplier s ON m.supplier_code = s.supplier_code
+		left join MERCHANDISE_ROLE mr on mr.MERCHANDISE_CODE=m.merchandise_code
+		LEFT JOIN merchandise_dx_role dx ON mr.dx_role_code = dx.role_code
+		LEFT JOIN merchandise_dl_role dl ON mr.dl_role_code = dl.role_code
+		LEFT JOIN merchandise_centre_type ct ON m.centre_type_code =ct.centre_type_code
+		LEFT JOIN merchandise_small_type st ON m.small_type_code = st.small_type_code
+		LEFT JOIN merchandise_detail_type dt ON m.detail_type_code = dt.detail_type_code
+		left join INTENTION_SUPPLIER_MERCHANDISE ism on ism.merchandise_code=m.merchandise_code and ism.SUPPLIER_CODE=m.SUPPLIER_CODE
+		left join MERCHANDISE_INTENTION mi on ism.intention_code=mi.intention_code
+		LEFT JOIN merchandise_fine_type ft ON dt.detail_type_code = ft.detail_type_code AND mi.fine_type_code = ft.fine_type_code	<!-- 细分类 -->
+		where
+		(
+		<foreach collection="list" item="item" index="index" separator="OR">
+			(
+			mpp.merchandise_code = #{item.merchandiseCode}
+			AND
+			mpp.supplier_code =#{item.supplierCode}
+			)
+		</foreach>)
+		and mpp.start_date >=to_date(#{minDate},'yyyy-mm-dd') and mpp.end_date &lt;=to_date(#{maxDate},'yyyy-mm-dd')
+		order by mpp.merchandise_code,to_char(mpp.start_DATE,'yyyy-mm-dd') asc
+		) m
+		left join (
+		select
+			mp.merchandise_code,
+			mp.supplier_code,
+			mp.warehouse_code warehouseCode,  
+			mpp.price,
+			to_char(mpp.start_DATE,'yyyy-mm-dd') startDate,
+			to_char(mpp.end_DATE,'yyyy-mm-dd') endDate,
+			nvl(sum(mp.RECEIPT_RATIONED),0) receiptRationed,
+			nvl(sum(mp.RECEIPT_TOTAL_PRICE),0) receiptTotalPrice
+		from MERCHANDISE_RECEIPT mp
+		inner join ( select distinct merchandise_code,supplier_code,start_DATE,end_DATE,price from  MERCHANDISE_PROMOTION_PURCHASE 
+              where 1=1 
+               and
+              (
+                  
+                  <foreach collection="list" item="item" index="index" separator="OR">
+					(
+						merchandise_code = #{item.merchandiseCode}
+							AND
+						supplier_code =#{item.supplierCode}
+					)
+				</foreach>
+                 
+              )
+              and start_date >=to_date(#{minDate},'yyyy-mm-dd') and end_date &lt;=to_date(#{maxDate},'yyyy-mm-dd')
+               ) mpp on mp.merchandise_code=mpp.merchandise_code and mp.supplier_code=mpp.supplier_code and mp.order_date between mpp.start_date and mpp.end_date
+		where 1=1
+			and mp.WAREHOUSE_CODE in (${warehouseCode})
+			and
+			(
+				<foreach collection="list" item="item" index="index" separator="OR">
+					(
+						mp.merchandise_code = #{item.merchandiseCode}
+							AND
+						mp.supplier_code =#{item.supplierCode}
+					)
+				</foreach>
+			)
+			and ((mp.order_date between to_date(#{minDate},'yyyy-mm-dd') and to_date(#{maxDate},'yyyy-mm-dd') )and (mp.reality_receipt_date between to_date(#{minDate},'yyyy-mm-dd') and to_date(#{maxDate},'yyyy-mm-dd') ))
+			group by mp.merchandise_code,mp.supplier_code,mpp.price,mp.warehouse_code,to_char(mpp.start_DATE,'yyyy-mm-dd'),to_char(mpp.end_DATE,'yyyy-mm-dd')
+		) mp on m.merchandiseCode=mp.merchandise_code and m.supplierCode=mp.supplier_code and mp.price=m.purchasePrice and mp.startDate=m.minDate and mp.endDate=m.maxDate
+		) order by m.minDate asc
+	</select>
+</mapper>

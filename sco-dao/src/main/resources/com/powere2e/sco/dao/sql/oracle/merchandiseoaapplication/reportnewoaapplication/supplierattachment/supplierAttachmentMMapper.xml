@@ -1,0 +1,480 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.powere2e.sco.interfaces.dao.merchandiseoaapplication.reportnewoaapplication.supplierattachment.SupplierAttachmentMDao">
+	<resultMap type="com.powere2e.sco.model.merchandiseoaapplication.reportnewoaapplication.supplierattachment.SupplierAttachmentM" id="supplierAttachmentMMap">
+		<result property="applicationCode" column="applicationCode" />
+		<result property="intentionSupplierCode" column="intentionSupplierCode" />
+		<result property="intentionSupplierName" column="intentionSupplierName" />
+		<result property="intentionCode" column="intentionCode" />
+		<result property="intentionName" column="intentionName" />
+		<result property="merchandiseCode" column="merchandiseCode" />
+		<result property="merchandiseName" column="merchandiseName" />
+		<result property="supplierCode" column="supplierCode" />
+		<result property="supplierName" column="supplierName" />
+		<result property="accountingCode" column="accountingCode" />
+		<result property="attachmentType" column="attachmentType" />
+		<result property="elseAttachmentType" column="elseAttachmentType" />
+		<result property="attachmentName" column="attachmentName" />
+		<result property="elseAttachmentName" column="elseAttachmentName" />
+		<result property="path" column="path" />
+		<result property="inFrom" column="inFrom" />
+		<result property="typeCode" column="typeCode" />
+		<result property="created" column="created" />
+		<result property="createDate" column="createDate" />
+		<result property="createby" column="createby" />
+		<result property="updateDate" column="updateDate" />
+		<result property="updated" column="updated" />
+		<result property="updateby" column="updateby" />
+		<result property="createUserName" column="createUserName" />
+		<result property="updateUserName" column="updateUserName" />
+		<result property="recordCount" column="record_count" />
+	</resultMap>
+	<resultMap type="com.powere2e.sco.model.merchandiseoaapplication.ApplicationLackFileM" id="ApplicationLackFileM">
+		<result property="applicationCode" column="applicationCode" />
+		<result property="merchandiseCode" column="merchandiseCode" />
+		<result property="merchandiseName" column="merchandiseName" />
+		<result property="supplierCode" column="supplierCode" />
+		<result property="supplierName" column="supplierName" />
+		<result property="lackFileName" column="lackFileName" />
+		<result property="lackFileVersions" column="lackFileVersions" />
+
+	</resultMap>
+	<select id="searchAttachmentLackInfo" resultMap="ApplicationLackFileM">
+		select
+		distinct
+		am.application_code applicationCode,
+		am.merchandise_code merchandiseCode,
+		am.supplier_code supplierCode,
+		nvl(am.merchandise_name,am.intention_name) merchandiseName,
+		nvl(am.supplier_name,am.intention_supplier_name) supplierName,
+		#{lackFileName} lackFileName,'扫描版' lackFileVersions
+		from
+		((select am.supplier_code,
+		am.merchandise_code,
+		am.application_code,
+		mis.intention_supplier_name,
+		s.supplier_name,
+		m.merchandise_name,
+		mi.intention_name
+		 from application_merchandise am
+		left join supplier_attachment_m a on a.merchandise_code=am.merchandise_code and a.supplier_code=am.supplier_code
+		left join MERCHANDISE_INTENTION_SUPPLIER mis on mis.intention_supplier_code=am.supplier_code
+		left join supplier s on s.supplier_code=am.supplier_code
+		left join merchandise m on m.merchandise_code=am.merchandise_code  and m.supplier_code=am.supplier_code
+		left join MERCHANDISE_INTENTION mi on mi.intention_code=am.merchandise_code
+		where am.application_code=#{applicationCode}
+		<if test="lackFileName !='新品信息登记表' and lackFileName !='感官标准' and lackFileName !=null and lackFileName !=''">
+			and am.supplier_code not in (select supplier_code from supplier)
+		</if>
+		) am
+		left join
+		(select * from SUPPLIER_ATTACHMENT_M where application_code=#{applicationCode} and attachment_type=#{lackFileName}) sam
+		on sam.application_code=am.application_code and
+		am.merchandise_code=sam.merchandise_code and am.supplier_code=sam.supplier_code)
+		where sam.attachment_type is null or sam.attachment_type=''
+	</select>
+	<!-- 查询供应商附件(可分页) -->
+	<select id="searchSupplierAttachmentM" resultMap="supplierAttachmentMMap">
+		SELECT
+		<if test="page_count == null">
+			t.application_code applicationCode,
+			mi.intention_code intentionCode,
+			mi.intention_name intentionName,
+			m.merchandise_name merchandiseName,
+			t.merchandise_code merchandiseCode,
+			t.supplier_code supplierCode,
+			mis.intention_supplier_code intentionSupplierCode,
+			mis.intention_supplier_name intentionSupplierName,
+			s.supplier_name supplierName,
+			t.attachment_type attachmentType,
+			t.attachment_name attachmentName,
+			t.else_attachment_type elseAttachmentType,
+			t.path
+			path,
+			t.created,
+			t.updated,
+			(select u.real_name from pub_user u where u.user_id=t.createby) as createby,
+			(select u.real_name from pub_user u where u.user_id=t.updateby) as updateby
+		</if>
+		<if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		FROM supplier_attachment_m t
+		left join MERCHANDISE_INTENTION mi on t.merchandise_code=mi.intention_code
+		left join MERCHANDISE m on t.merchandise_code=m.merchandise_code  and m.supplier_code=t.supplier_code
+		left join MERCHANDISE_INTENTION_SUPPLIER mis on t.supplier_code=mis.intention_supplier_code
+		left join supplier s on t.supplier_code = s.supplier_code
+		<where>
+			1=1
+			<if test="applicationCode != null and applicationCode!=''">
+				AND t.application_code = #{applicationCode}
+			</if>
+			<if test="merchandiseCode != null and merchandiseCode !=''">
+				and (t.merchandise_code LIKE UPPER('%'||#{merchandiseCode}||'%') or mi.intention_code LIKE UPPER('%'|| #{merchandiseCode}||'%'))
+			</if>
+			<if test="merchandiseName != null and merchandiseName !=''">
+				and (m.merchandise_name LIKE UPPER('%'||#{merchandiseName}||'%') or mi.intention_name LIKE UPPER('%'||#{merchandiseName}||'%'))
+			</if>
+			<if test="supplierCode != null and supplierCode !=''">
+				and (s.supplier_code LIKE UPPER('%'||#{supplierCode}||'%') or mis.intention_supplier_code LIKE UPPER('%'||#{supplierCode}||'%'))
+			</if>
+			<if test="intentionCodes != null and intentionCodes !=''">
+				and ( t.merchandise_code in (${intentionCodes}))
+			</if>
+			<if test="intentionSupplierCodes != null and intentionSupplierCodes !=''">
+				and ( t.supplier_code in (${intentionSupplierCodes}))
+			</if>
+			<if test="supplierName != null and supplierName !=''">
+				and (s.supplier_name LIKE UPPER('%'||#{supplierName}||'%') or mis.intention_supplier_name LIKE UPPER('%'|| #{supplierName}||'%'))
+			</if>
+			<if test="attachmentType != null and attachmentType !='' ">
+				and ( t.attachment_type = #{attachmentType})
+			</if>
+			<if test="attachmentName != null and attachmentName!=''">
+				and (t.attachment_name = #{attachmentName})
+			</if>
+			<if test="path != null and path!=''">
+				and t.path = #{path}
+			</if>
+			<if test="created != null and created!=''">
+				and convert(varchar,t.created,120) LIKE (#{created})
+			</if>
+			<if test="createby != null and createby!=''">
+				and (t.createby = #{createby})
+			</if>
+			<if test="updated != null and updated!=''">
+				and convert(varchar,t.updated,120) LIKE (#{updated})
+			</if>
+			<if test="updateby != null and updateby!=''">
+				and (t.updateby = #{updateby})
+			</if>
+		</where>
+		<if test="page_count == null">
+			<if test="app_orderby !=null">
+				ORDER BY ${app_orderby}
+			</if>
+			<if test="app_orderby ==null">
+				ORDER BY t.created DESC
+			</if>
+		</if>
+	</select>
+
+	<select id="searchSupplierAttachmentMInFrom" resultMap="supplierAttachmentMMap">
+		select
+		<if test="page_count == null">
+			*  
+		</if>
+		<if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		from ((
+		select
+		ais.accounting_code accountingCode,
+		mi.intention_code intentionCode,
+		m.merchandise_code merchandiseCode,
+		mi.intention_name intentionName,
+		m.merchandise_name merchandiseName,
+		mis.intention_supplier_code intentionSupplierCode,
+		s.supplier_code supplierCode,
+		mis.intention_supplier_name intentionSupplierName,
+		s.supplier_name supplierName,
+		ais.accounting_scan_path path,
+		to_char(ais.created,'yyyy-mm-dd') createDate,
+		1 typeCode
+		from ANALYSIS_REPORTS_M arm
+		left join REPORTS r on arm.reports_code=r.reports_code
+		left join COST_ANALYSIS_MERCHANDISE cam on cam.reports_code=r.reports_code
+		left join ACCOUNTING_INGREDIENT_SCAN ais on ais.accounting_code=cam.accounting_code
+		left join MERCHANDISE_INTENTION mi on mi.intention_code=ais.intention_code
+		left join merchandise m on m.merchandise_code=ais.merchandise_code  and m.supplier_code=ais.supplier_code
+		left join MERCHANDISE_INTENTION_SUPPLIER mis on ais.intention_supplier_code=mis.intention_supplier_code
+		left join supplier s on ais.supplier_code=s.supplier_code or s.supplier_code=ais.intention_supplier_code
+		where
+		r.reports_type_code='MCA' and ais.accounting_scan_path is not null
+		<if test="applicationCode != null and applicationCode !=''">
+			and arm.application_code=#{applicationCode}
+		</if>
+		<if test="accountingCode != null and accountingCode !=''">
+			and ais.accounting_code=#{accountingCode}
+		</if>
+		<if test="list != null">
+			and (<foreach collection="list" item="item" index="index" separator="OR">
+					(
+						(
+							ais.supplier_code =#{item.supplierCode} 
+							and 
+							(mi.intention_code=#{item.merchandiseCode} or m.merchandise_code=#{item.merchandiseCode})
+						) 
+						or 
+						(
+							ais.intention_supplier_code=#{item.supplierCode}
+							and 
+							(mi.intention_code=#{item.merchandiseCode} or m.merchandise_code=#{item.merchandiseCode})
+						)
+					)
+				</foreach>)
+		</if>
+		<if test="merchandiseCode != null and merchandiseCode !=''">
+			and ( UPPER(ais.intention_code) LIKE UPPER('%'||#{merchandiseCode}||'%') or UPPER(ais.merchandise_code) LIKE UPPER('%'||#{merchandiseCode}||'%'))
+		</if>
+		<if test="merchandiseName != null and merchandiseName !=''">
+			and ( UPPER(mi.intention_name) LIKE UPPER('%'||#{merchandiseName}||'%') or UPPER(m.merchandise_name) LIKE UPPER('%'||#{merchandiseName}||'%'))
+		</if>
+		<if test="supplierCode != null and supplierCode !=''">
+			and ( UPPER(ais.supplier_code) LIKE UPPER('%'||#{supplierCode}||'%') or UPPER(ais.intention_supplier_code) LIKE UPPER('%'||#{supplierCode}||'%'))
+		</if>
+		<if test="supplierName != null and supplierName !=''">
+			and ( UPPER(s.supplier_name) LIKE UPPER('%'||#{supplierName}||'%') or UPPER(mis.intention_supplier_name) LIKE UPPER('%'||#{supplierName}||'%'))
+		</if>
+		<if test="typeCode != 2 and typeCode != null and typeCode !=''">
+			and ais.accounting_scan_path !=''
+		</if>
+		)
+		UNION All
+		(
+		select
+		ais.accounting_code accountingCode,
+		mi.intention_code intentionCode,
+		m.merchandise_code merchandiseCode,
+		mi.intention_name intentionName,
+		m.merchandise_name merchandiseName,
+		mis.intention_supplier_code intentionSupplierCode,
+		s.supplier_code supplierCode,
+		mis.intention_supplier_name intentionSupplierName,
+		s.supplier_name supplierName,
+		ais.ingredient_scan_path ,
+		to_char(ais.created,'yyyy-mm-dd') createDate,
+		2
+		from ANALYSIS_REPORTS_M arm
+		left join REPORTS r on arm.reports_code=r.reports_code
+		left join COST_ANALYSIS_MERCHANDISE cam on cam.reports_code=r.reports_code
+		left join ACCOUNTING_INGREDIENT_SCAN ais on ais.accounting_code=cam.accounting_code
+		left join MERCHANDISE_INTENTION mi on mi.intention_code=ais.intention_code
+		left join merchandise m on m.merchandise_code=ais.merchandise_code  and m.supplier_code=ais.supplier_code
+		left join MERCHANDISE_INTENTION_SUPPLIER mis on ais.intention_supplier_code=mis.intention_supplier_code
+		left join supplier s on ais.supplier_code=s.supplier_code  or s.supplier_code=ais.intention_supplier_code
+		where
+		r.reports_type_code='MCA' and ais.INGREDIENT_SCAN_PATH is not null
+		<if test="applicationCode != null and applicationCode !=''">
+			and arm.application_code=#{applicationCode}
+		</if>
+		<if test="accountingCode != null and accountingCode !=''">
+			and ais.accounting_code=#{accountingCode}
+		</if>
+		<if test="list != null">
+			and (<foreach collection="list" item="item" index="index" separator="OR">
+					(
+						(
+							ais.supplier_code =#{item.supplierCode} 
+							and 
+							(mi.intention_code=#{item.merchandiseCode} or m.merchandise_code=#{item.merchandiseCode})
+						) 
+						or 
+						(
+							ais.intention_supplier_code=#{item.supplierCode}
+							and 
+							(mi.intention_code=#{item.merchandiseCode} or m.merchandise_code=#{item.merchandiseCode})
+						)
+					)
+				</foreach>)
+		</if>
+		<if test="merchandiseCode != null and merchandiseCode !=''">
+			and ( UPPER(ais.intention_code) LIKE UPPER('%'||#{merchandiseCode}||'%') or UPPER(ais.merchandise_code) LIKE UPPER('%'||#{merchandiseCode}||'%'))
+		</if>
+		<if test="merchandiseName != null and merchandiseName !=''">
+			and ( UPPER(mi.intention_name) LIKE UPPER('%'||#{merchandiseName}||'%') or UPPER(m.merchandise_name) LIKE UPPER('%'||#{merchandiseName}||'%'))
+		</if>
+		<if test="supplierCode != null and supplierCode !=''">
+			and ( UPPER(ais.supplier_code) LIKE UPPER('%'||#{supplierCode}||'%') or UPPER(ais.intention_supplier_code) LIKE UPPER('%'||#{supplierCode}||'%'))
+		</if>
+		<if test="supplierName != null and supplierName !=''">
+			and ( UPPER(s.supplier_name) LIKE UPPER('%'||#{supplierName}||'%') or UPPER(mis.intention_supplier_name) LIKE UPPER('%'||#{supplierName}||'%'))
+		</if>
+		<if test="typeCode != 1 and typeCode !='' and typeCode != null">
+			AND ais.ingredient_scan_path !=''
+		</if>
+		)
+		)
+	</select>
+	<!-- 查看数据库是否有指定文件 -->
+	<select id="searchCount" resultType="Integer">
+		select count(*) from SUPPLIER_ATTACHMENT_M sam
+		where sam.attachment_type='感官标准'and sam.application_code=#{applicationCode}
+		group by sam.merchandise_code
+	</select>
+	<!-- 查询意向品和意向品供应商 -->
+	<select id="searchMerchandiseSupplier" resultMap="supplierAttachmentMMap">
+		select
+		<if test="page_count == null">
+			m.merchandise_code merchandiseCode,
+			m.merchandise_name merchandiseName,
+			s.supplier_code supplierCode,
+			s.supplier_name supplierName
+		</if>
+		<if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		from merchandise m
+		left join supplier s on m.supplier_code = s.supplier_code
+		<where>
+			(
+			<foreach collection="list" item="item" index="index" separator="OR">
+				(
+				m.merchandise_code = #{item.merchandiseCode}
+				AND
+				m.supplier_code =#{item.supplierCode}
+				)
+			</foreach>
+			)
+		</where>
+		ORDER BY m.merchandise_code,m.supplier_code DESC 
+	</select>
+
+
+	<!-- 查询意向品和意向品供应商 -->
+	<select id="searchIntentionSupplier" resultMap="supplierAttachmentMMap">
+		select
+		<if test="page_count == null">
+			intentionCode,
+			intentionName,
+			supplierCode,
+			intentionSupplierCode,
+			supplierName,
+			intentionSupplierName
+		</if>
+		<if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		from (
+		(
+		select distinct ism.intention_code,
+		ism.intention_supplier_code,
+		ism.supplier_code
+		from INTENTION_SUPPLIER_MERCHANDISE ism
+		where
+		<foreach collection="list" item="item" index="index" separator="OR">
+			(
+			ism.intention_code = #{item.merchandiseCode}
+			AND
+			(ism.intention_supplier_code =#{item.supplierCode} or ism.supplier_code =
+			#{item.supplierCode})
+			)
+		</foreach>
+		) a
+		left join
+		(select s.supplier_code supplierCode,
+		s.supplier_name supplierName
+		from supplier s
+		where
+		<foreach collection="list" item="item" index="index" separator="or">
+			s.supplier_code=#{item.supplierCode}
+		</foreach>
+		) b on a.supplier_code=b.suppliercode or b.supplierCode=a.intention_supplier_code
+		left join
+		(select mis.intention_supplier_code intentionSupplierCode,
+		mis.intention_supplier_name intentionSupplierName
+		from MERCHANDISE_INTENTION_SUPPLIER mis
+		where
+		<foreach collection="list" item="item" index="index" separator="or">
+			mis.intention_supplier_code =#{item.supplierCode}
+		</foreach>
+		) c on a.intention_supplier_code=c.intentionsuppliercode
+		left join
+		( select mi.intention_code intentionCode,
+		mi.intention_name intentionName
+		from MERCHANDISE_INTENTION mi
+		where
+		<foreach collection="list" item="item" index="index" separator="or">
+			mi.intention_code = #{item.merchandiseCode}
+		</foreach>
+		) d on a.intention_code=d.intentioncode )
+		ORDER BY intentionCode,intentionSupplierCode DESC 
+	</select>
+	<!-- 根据主键查询某个供应商附件(可分页) -->
+	<select id="loadSupplierAttachmentM" resultMap="supplierAttachmentMMap">
+		SELECT
+		<if test="page_count == null">
+			t.application_code applicationCode,t.merchandise_code merchandiseCode,
+			t.supplier_code supplierCode,t.attachment_type
+			attachmentType,t.attachment_name attachmentName,
+			t.else_attachment_type elseAttachmentType,t.path path
+			,t.created,t.updated
+			,(select
+			u.real_name from pub_user u where
+			u.user_id=t.createby) as createUserName,
+			(select u.real_name from pub_user u where u.user_id=t.updateby) as updateUserName
+		</if>
+		<if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		FROM supplier_attachment_m t
+		<where>
+			1=1
+			<if test="applicationCode != null and applicationCode!=''">
+				AND t.APPLICATION_CODE = #{applicationCode}
+			</if>
+			<if test="merchandiseCode != null and merchandiseCode !=''">
+				and t.merchandise_code = #{merchandiseCode}
+			</if>
+			<if test="supplierCode != null and supplierCode !=''">
+				and t.supplier_code = #{supplierCode}
+			</if>
+			<if test="attachmentType != null and attachmentType !=''">
+				and t.attachment_type = #{attachmentType}
+			</if>
+			<if test="elseAttachmentType != null and elseAttachmentType !=''">
+				and t.else_attachment_type = #{elseAttachmentType}
+			</if>
+		</where>
+		<if test="page_count == null">
+			<if test="app_orderby !=null">
+				ORDER BY ${app_orderby}
+			</if>
+			<if test="app_orderby ==null">
+				ORDER BY t.created DESC
+			</if>
+		</if>
+	</select>
+	<!-- 增加供应商附件(新品引进) -->
+	<insert id="saveSupplierAttachmentM" parameterType="hashmap">
+		INSERT INTO
+		supplier_attachment_m(application_code,MERCHANDISE_CODE,SUPPLIER_CODE,ATTACHMENT_TYPE,ATTACHMENT_NAME,PATH,created,createby,ELSE_ATTACHMENT_TYPE)
+		VALUES(#{applicationCode},#{merchandiseCode},#{supplierCode},#{attachmentType},#{attachmentName},#{path},#{app_created},#{app_create_by},#{elseAttachmentType})
+	</insert>
+	
+	<delete id="deleteSupplierAttachmentMs" parameterType="hashmap">
+		delete SUPPLIER_ATTACHMENT_M where application_code=#{applicationCode} 
+		and (<foreach collection="merchandise"  item="item" index="index" separator="or">
+				 (
+				 merchandise_code = #{item.merchandiseCode} 
+				 and 
+				 supplier_code = #{item.supplierCode}
+				 and 
+				 attachment_type = #{item.merchandiseName}
+				 and 
+				 else_attachment_type = #{item.supplierName}
+				 ) 
+			</foreach>)
+	</delete>
+	<delete id="deleteSupplierAttachmentM" parameterType="hashmap">
+		delete SUPPLIER_ATTACHMENT_M 
+		where application_code=#{applicationCode}
+		<if test="merchandiseCode != null and merchandiseCode !=''">
+			and MERCHANDISE_CODE =#{merchandiseCode}
+		</if>
+		and supplier_code=#{supplierCode}
+		and (
+			ATTACHMENT_TYPE =#{attachmentType} 
+			<if test="elseAttachmentType != null and elseAttachmentType !=''">
+				and else_ATTACHMENT_TYPE =#{elseAttachmentType}
+			</if>
+			)
+	</delete>
+
+	<!-- 根据申请单号删除供应商附件 -->
+	<delete id="deleteSupplierAttachmentByCode" parameterType="hashmap">
+		DELETE SUPPLIER_ATTACHMENT_M
+		WHERE
+		application_code IN (${applicationCodes})
+	</delete>
+</mapper>

@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.merchandiseoaapplication.reportnewoaapplication.reportnew.MerchandisePriceNewDao">
+	<resultMap type="com.powere2e.sco.model.merchandiseoaapplication.reportnewoaapplication.reportnew.MerchandisePriceNew" id="merchandisePriceNewMap">
+		<result property="reportCode" column="reportCode"/>
+		<result property="stockSite" column="stockSite"/>
+		<result property="purchasePrice" column="purchasePrice"/>
+		<result property="purchaseUnits" column="purchaseUnits"/>
+		<result property="sellRegion" column="sellRegion"/>
+		<result property="sellPrice" column="sellPrice"/>
+		<result property="sellUnits" column="sellUnits"/>
+		<result property="profitRate" column="profitRate"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    
+    <!-- 商品原料情况 -->
+    <resultMap type="com.powere2e.sco.model.merchandiseoaapplication.reportadjustpriceoaapplication.reportadjustprice.MerchandiseMaterial" id="merchandiseMaterialMap">
+		<result property="reportCode" column="reportCode"/>
+		<result property="reportType" column="reportType"/>
+		<result property="materialName" column="materialName"/>
+		<result property="materialSite" column="materialSite"/>
+		<result property="materialDate" column="materialDate"/>
+		<result property="materialCount" column="materialCount"/>
+		<result property="sellDate" column="sellDate"/>
+		<result property="remarks" column="remarks"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    
+    <!-- 查询商品价格(新品引进)(可分页)-->
+    <select id="searchMerchandisePriceNew" resultMap="merchandisePriceNewMap">
+    	SELECT  
+    	<if test="page_count == null">
+		       t1.report_code reportCode,
+		       t1.stock_site stockSite,
+		       t1.purchase_price purchasePrice,
+		       t1.purchase_units purchaseUnits,
+       		   t1.sell_region sellRegion,
+		       t1.sell_price sellPrice,
+		       t1.sell_units sellUnits,
+		       t1.profit_rate profitRate,
+		       to_char(t1.profit_rate*100,'fm9999999990.00')||'%' profitRatePercent,
+		       t2.application_code applicationCode,
+		       t2.intention_code intentionCode,
+		       t2.supplier_code supplierCode
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      FROM    merchandise_price_new t1,application_report_new t2
+  	   WHERE  t1.report_code=t2.report_code
+  	   AND    t2.application_code=#{applicationCode}
+	    
+	    <if test= "intentionCode != null and intentionCode !=''">
+		AND t2.intention_code= #{intentionCode}
+		</if>
+	    <if test= "supplierCode != null and supplierCode !=''">
+		AND t2.supplier_code= #{supplierCode}
+		</if>
+		
+    </select>
+    
+    <!-- 根据主键查询某个商品价格(新品引进)(可分页)-->
+    <select id="loadMerchandisePriceNew" resultMap="merchandisePriceNewMap">
+    	SELECT  
+    	<if test="page_count == null">
+	 		 t.report_code reportCode,
+			 t.stock_site stockSite,
+			 t.purchase_price purchasePrice,
+			 t.purchase_units purchaseUnits,
+	         t.sell_region sellRegion,
+			 t.sell_price sellPrice,
+			 t.sell_units sellUnits,
+			 t.profit_rate profitRate
+       		
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM merchandise_price_new t
+    	<where>
+    		1=1
+	    	<if test= "reportCode != null and reportCode!=''">
+			AND  t.REPORT_CODE = #{reportCode}
+			</if>
+    	</where>
+    </select>
+    
+    <!-- 增加商品价格(新品引进) --> 
+	<insert id="saveMerchandisePriceNew" parameterType="hashmap">
+		INSERT INTO merchandise_price_new(report_code,stock_site,purchase_price,purchase_units,sell_region,sell_price,sell_units,profit_rate) 
+			 VALUES(#{reportCode},#{stockSite},#{purchasePrice},#{purchaseUnits},#{sellRegion},#{sellPrice},#{sellUnits},#{profitRate})
+    </insert>
+    <!-- 删除商品价格(新品引进) -->
+    <delete id="deleteMerchandisePriceNew" parameterType="hashmap">
+        DELETE FROM 
+        			merchandise_price_new 
+        WHERE 
+        			REPORT_CODE=#{reportCode} <!--AND client_id=#{app_user_clientID}-->
+    </delete>
+    <!-- 根据申请单号删除商品价格(新品引进) -->
+    <delete id="deletePriceNewByApplicationCode" parameterType="hashmap">
+        DELETE FROM 
+        			merchandise_price_new 
+        WHERE 
+        			REPORT_CODE IN (SELECT report_code FROM　application_report_new　WHERE APPLICATION_CODE IN (${applicationCodes}))
+    </delete>
+    
+    <!-- 相同商品模块 -->
+    <resultMap type="com.powere2e.sco.model.merchandiseoaapplication.reportnewoaapplication.reportnew.SameMerchandiseNew" id="sameMerchandiseNewMap">
+		<result property="reportCode" column="reportCode"/>
+		<result property="reportType" column="reportType"/>
+		<result property="trademark" column="trademark"/>
+		<result property="merchandiseName" column="merchandiseName"/>
+		<result property="sellChannel" column="sellChannel"/>
+		<result property="sellUnits" column="sellUnits"/>
+		<result property="sellPrice" column="sellPrice"/>
+		<result property="kgPrice" column="kgPrice"/>
+		<result property="remarks" column="remarks"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <!-- 查询同类商品市场零售价(新品引进)(可分页)-->
+    <select id="searchSameMerchandiseNew" resultMap="sameMerchandiseNewMap">
+    	SELECT  
+    	<if test="page_count == null">
+			   t1.report_code      reportCode,
+		       t1.report_type      reportType,
+		       t1.trademark        trademark,
+		       t1.merchandise_name merchandiseName,
+		       t1.sell_channel     sellChannel,
+		       t1.sell_units       sellUnits,
+		       t1.sell_price       sellPrice,
+		       t1.kg_price         kgPrice,
+		       t1.remarks,
+		       t2.application_code applicationCode,
+		       t2.intention_code   intentionCode,
+		       t2.supplier_code    supplierCode  
+		            		
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+	    FROM  same_merchandise_new t1,application_report_new t2
+	 	WHERE 
+	 		   t1.report_code = t2.report_code
+	 	AND    t2.application_code=#{applicationCode}	   
+	    	
+		<if test= "intentionCode != null and intentionCode !=''">
+		AND t2.intention_code= #{intentionCode}
+		</if>
+		<if test= "supplierCode != null and supplierCode !=''">
+		AND t2.supplier_code= #{supplierCode}
+		</if>
+		
+    </select>
+    
+    <!-- 根据主键查询某个同类商品市场零售价(新品引进)(可分页)-->
+    <select id="loadSameMerchandiseNew" resultMap="sameMerchandiseNewMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		   t.report_code      reportCode,
+		       t.report_type      reportType,
+		       t.trademark        trademark,
+		       t.merchandise_name merchandiseName,
+		       t.sell_channel     sellChannel,
+		       t.sell_units       sellUnits,
+		       t.sell_price       sellPrice,
+		       t.kg_price         kgPrice,
+		       t.remarks
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM same_merchandise_new t
+    	<where>
+    		1=1
+	    	<if test= "reportCode != null and reportCode!=''">
+			AND  t.REPORT_CODE = #{reportCode}
+			</if>
+    	</where>
+    </select>
+    
+    <!-- 增加同类商品市场零售价(新品引进) --> 
+	<insert id="saveSameMerchandiseNew" parameterType="hashmap">
+		INSERT INTO same_merchandise_new(report_code,report_type,trademark,merchandise_name,sell_channel,sell_units,sell_price,kg_price,remarks) 
+			 VALUES(#{reportCode},#{reportType},#{trademark},#{merchandiseName},#{sellChannel},#{sellUnits},#{sellPrice},#{kgPrice},#{remarks})
+    </insert>
+    <!-- 修改同类商品市场零售价(新品引进)  -->
+    <update id="updateSameMerchandiseNew" parameterType="hashmap">
+		UPDATE	
+				same_merchandise_new	
+		   SET	
+		   		report_type=#{reportType},
+		   		trademark=#{trademark},
+		   		merchandise_name=#{merchandiseName},
+		   		sell_channel=#{sellChannel},
+		   		sell_units=#{sellUnits},
+		   		sell_price=#{sellPrice},
+		   		kg_price=#{kgPrice}		   		
+		 WHERE	
+		 		REPORT_CODE=#{reportCode}
+    </update>
+    <!-- 删除同类商品市场零售价(新品引进) -->
+    <delete id="deleteSameMerchandiseNew" parameterType="hashmap">
+        DELETE FROM 
+        			same_merchandise_new 
+        WHERE 
+        			REPORT_CODE=#{reportCode} <!--AND client_id=#{app_user_clientID}-->
+    </delete>
+    <!-- 根据申请单号删除同类商品市场零售价(新品引进) -->
+    <delete id="deleteSameNewByApplicationCode" parameterType="hashmap">
+        DELETE FROM 
+        			same_merchandise_new 
+        WHERE 
+        			REPORT_CODE IN (SELECT report_code FROM　application_report_new　WHERE APPLICATION_CODE IN (${applicationCodes}))
+    </delete>
+    
+    <!-- 销售预计模块 -->
+    <resultMap type="com.powere2e.sco.model.merchandiseoaapplication.reportnewoaapplication.reportnew.SellAnticipatedNew" id="sellAnticipatedNewMap">
+		<result property="reportCode" column="reportCode"/>
+		<result property="sellRegion" column="sellRegion"/>
+		<result property="sellStoreCount" column="sellStoreCount"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <!-- 查询商品销售预计(新品引进)(可分页)-->
+    <select id="searchSellAnticipatedNew" resultMap="sellAnticipatedNewMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t1.report_code reportCode,
+       		t1.sell_region sellRegion,
+       		t1.sell_store_count sellStoreCount,
+       		t2.application_code applicationCode,
+		    t2.intention_code   intentionCode,
+		    t2.supplier_code    supplierCode 
+       		
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      	FROM sell_anticipated_new t1,application_report_new t2
+	 	WHERE 
+	 		  t1.report_code = t2.report_code
+	 	AND    t2.application_code=#{applicationCode}	  
+    	<if test= "intentionCode != null and intentionCode !=''">
+		AND t2.intention_code= #{intentionCode}
+		</if>
+		<if test= "supplierCode != null and supplierCode !=''">
+		AND t2.supplier_code= #{supplierCode}
+		</if>
+		
+    </select>
+    
+    <!-- 根据主键查询某个商品销售预计(新品引进)(可分页)-->
+    <select id="loadSellAnticipatedNew" resultMap="sellAnticipatedNewMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.report_code reportCode,
+       		t.sell_region sellRegion,
+       		t.sell_store_count sellStoreCount
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM sell_anticipated_new t
+    	<where>
+    		1=1
+	    	<if test= "reportCode != null and reportCode!=''">
+			AND  t.REPORT_CODE = #{reportCode}
+			</if>
+    	</where>
+    </select>
+    
+    <!-- 增加商品销售预计(新品引进) --> 
+	<insert id="saveSellAnticipatedNew" parameterType="hashmap">
+		INSERT INTO sell_anticipated_new(report_code,sell_region,sell_store_count) 
+			 VALUES(#{reportCode},#{sellRegion},#{sellStoreCount})
+    </insert>
+    <!-- 修改商品销售预计(新品引进)  -->
+    <update id="updateSellAnticipatedNew" parameterType="hashmap">
+		UPDATE	
+				sell_anticipated_new	
+		   SET	
+		   		sell_region=#{sellRegion},
+		   		sell_store_count=#{sellStoreCount}		   		
+		 WHERE	
+		 		REPORT_CODE=#{reportCode}
+    </update>
+    <!-- 删除商品销售预计(新品引进) -->
+    <delete id="deleteSellAnticipatedNew" parameterType="hashmap">
+        DELETE FROM 
+        			sell_anticipated_new 
+        WHERE 
+        			REPORT_CODE=#{reportCode} <!--AND client_id=#{app_user_clientID}-->
+    </delete>
+    <!-- 根据申请单号删除商品销售预计(新品引进) -->
+    <delete id="deleteSellNewByApplicationCode" parameterType="hashmap">
+        DELETE FROM 
+        			sell_anticipated_new 
+        WHERE 
+        			REPORT_CODE IN (SELECT report_code FROM　application_report_new　WHERE APPLICATION_CODE IN (${applicationCodes}))
+    </delete>
+    
+     <!-- 根据申请单号删除关联分析报表(商品OA) -->
+    <delete id="deleteAnalysisReportsMByApplicationCode" parameterType="hashmap">
+        DELETE FROM 
+        			analysis_reports_m 
+        WHERE 
+        			APPLICATION_CODE IN  (${applicationCodes})
+    </delete>
+    
+    <!-- 删除报告检验标准(新品引进) -->
+    <delete id="deleteCheckStandardNew">
+    	 DELETE FROM 
+   			check_standard_new 
+        WHERE 
+  			report_code=#{reportCode}
+    </delete>
+    
+    <!-- 添加报告检验标准(新品引进) -->
+    <insert id="insertCheckStandardNew">
+    	INSERT INTO check_standard_new(report_code,colour,smell,form,moisture_content) 
+		 VALUES(#{reportCode},#{colour},#{smell},#{form},#{moistureContent})
+    </insert>
+    
+    <!-- 商品原料(新品引进)查询 -->
+    <select id="listMerchandiseMaterial" resultMap="merchandiseMaterialMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		   t1.report_code    reportCode,
+		       t1.report_type    reportType,
+		       t1.material_name  materialName,
+		       t1.material_site  materialSite,
+		       t1.material_date  materialDate,
+		       t1.material_count materialCount,
+		       t1.sell_date      sellDate,
+		       t1.remarks        remarks,
+		        t2.application_code    applicationCode,
+		       t2.intention_code    merchandiseCode,
+		       t2.supplier_code       supplierCode
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM merchandise_material_new t1,application_report_new t2
+  	   WHERE  		
+  	   			t1.report_code=t2.report_code
+    		AND t2.application_code=#{applicationCode}	
+    		<if test= "intentionCode != null and intentionCode !=''">
+			AND t2.intention_code= #{intentionCode}
+			</if>
+		    <if test= "supplierCode != null and supplierCode !=''">
+			AND t2.supplier_code= #{supplierCode}
+			</if>
+    </select>
+    
+    <!-- 添加商品原料情况(新品引进) -->
+    <insert id="insertMerchandiseMaterial">
+   		INSERT INTO merchandise_material_new(report_code,report_type,material_name,material_site,material_date,material_count,sell_date,remarks) 
+		 VALUES(#{reportCode},#{reportType},#{materialName},#{materialSite},#{materialDate},#{materialCount},#{sellDate},#{remarks})
+    </insert>
+    
+    <!-- 删除商品原料情况(新品引进) -->
+    <delete id="deleteMerchandiseMaterial">
+    	 DELETE FROM 
+  			merchandise_material_new 
+        WHERE 
+  			report_code = #{reportCode} 
+    </delete>
+    
+    <!-- 删除商品原料情况(新品引进) -->
+    <delete id="deleteMerchandiseMaterialByCode" parameterType="hashmap">
+        DELETE FROM 
+ 			merchandise_material_new 
+      	WHERE 
+  			report_code IN (SELECT report_code FROM　application_report_new　WHERE application_code IN (${applicationCodes}))
+    </delete>
+    
+</mapper>

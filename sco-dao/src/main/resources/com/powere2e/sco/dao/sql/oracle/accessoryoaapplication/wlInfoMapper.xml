@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.accessoryoaapplication.WlInfoDao">
+	<resultMap type="com.powere2e.sco.model.accessoryoaapplication.WlInfo" id="wlInfoMap">
+		<result property="applicationCode" column="applicationCode"/>
+		<result property="intentionCode" column="intentionCode"/>
+		<result property="intentionName" column="intentionName"/>
+		<result property="intentionSupplierCode" column="intentionSupplierCode"/>
+		<result property="intentionSupplierName" column="intentionSupplierName"/>
+		<result property="accessoryCode" column="accessoryCode"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="supplierName" column="supplierName"/>
+		<result property="enquiryCode" column="enquiryCode"/>
+		<result property="quotedCode" column="quotedCode"/>
+		<result property="enquiryCount" column="enquiryCount"/>
+		<result property="purchaseCount" column="purchaseCount"/>
+		<result property="contractPrice" column="contractPrice"/>
+		<result property="purchaseMoney" column="purchaseMoney"/>
+		<result property="invoiceType" column="invoiceType"/>
+		<result property="taxRate" column="taxRate"/>
+		<result property="accessorySapCode" column="accessorySapCode"/>
+		<result property="supplierSapCode" column="supplierSapCode"/>
+		<result property="sjyjSpecification" column="sjyjSpecification"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <!-- 查询物料信息(可分页)-->
+    <select id="searchWlInfo" resultMap="wlInfoMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.application_code applicationCode,t.intention_code intentionCode,t.intention_supplier_code intentionSupplierCode,t.accessory_code accessoryCode,t.supplier_code supplierCode,t.enquiry_code enquiryCode,t.quoted_code quotedCode,t.enquiry_count enquiryCount,t.purchase_count purchaseCount,t.contract_price contractPrice,t.purchase_money purchaseMoney,t.invoice_type invoiceType,t.tax_rate taxRate,t.accessory_sap_code accessorySapCode,t.supplier_sap_code supplierSapCode,t.sjyj_specification sjyjSpecification
+       		 ,m.intention_supplier_name intentionSupplierName,n.supplier_name supplierName,a.intention_name intentionName
+			
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM wl_info t
+      		left join accessory_intention a on t.intention_code=a.intention_code
+      		left join accessory_intention_supplier m on t.intention_supplier_code=m.intention_supplier_code
+      		left join supplier n on t.intention_supplier_code=n.supplier_code
+    	<where>
+    		1=1
+	    	<if test= "applicationCode != null and applicationCode!=''">
+			AND t.application_code = #{applicationCode}
+			</if>
+	    	<if test= "intentionCode != null and intentionCode!=''">
+			AND t.intention_code=#{intentionCode}
+			</if>
+	    	<if test= "intentionSupplierCode != null and intentionSupplierCode!=''">
+			AND UPPER(t.intention_supplier_code) LIKE UPPER('%'||#{intentionSupplierCode}||'%')
+			</if>
+	    	<if test= "accessoryCode != null and accessoryCode!=''">
+			AND UPPER(t.accessory_code) LIKE UPPER('%'||#{accessoryCode}||'%')
+			</if>
+	    	<if test= "supplierCode != null and supplierCode!=''">
+			AND UPPER(t.supplier_code) LIKE UPPER('%'||#{supplierCode}||'%')
+			</if>
+	    	<if test= "enquiryCode != null and enquiryCode!=''">
+			AND UPPER(t.enquiry_code) LIKE UPPER('%'||#{enquiryCode}||'%')
+			</if>
+	    	<if test= "quotedCode != null and quotedCode!=''">
+			AND UPPER(t.quoted_code) LIKE UPPER('%'||#{quotedCode}||'%')
+			</if>
+	    	<if test= "enquiryCount != null and enquiryCount!=''">
+			AND UPPER(t.enquiry_count) LIKE UPPER('%'||#{enquiryCount}||'%')
+			</if>
+	    	<if test= "purchaseCount != null and purchaseCount!=''">
+			AND UPPER(t.purchase_count) LIKE UPPER('%'||#{purchaseCount}||'%')
+			</if>
+	    	<if test= "contractPrice != null and contractPrice!=''">
+			AND t.contract_price = #{contractPrice}
+			</if>
+	    	<if test= "purchaseMoney != null and purchaseMoney!=''">
+			AND t.purchase_money = #{purchaseMoney}
+			</if>
+	    	<if test= "invoiceType != null and invoiceType!=''">
+			AND UPPER(t.invoice_type) LIKE UPPER('%'||#{invoiceType}||'%')
+			</if>
+	    	<if test= "taxRate != null and taxRate!=''">
+			AND t.tax_rate = #{taxRate}
+			</if>
+	    	<if test= "accessorySapCode != null and accessorySapCode!=''">
+			AND UPPER(t.accessory_sap_code) LIKE UPPER('%'||#{accessorySapCode}||'%')
+			</if>
+	    	<if test= "supplierSapCode != null and supplierSapCode!=''">
+			AND UPPER(t.supplier_sap_code) LIKE UPPER('%'||#{supplierSapCode}||'%')
+			</if>
+	    	<if test= "sjyjSpecification != null and sjyjSpecification!=''">
+			AND UPPER(t.sjyj_specification) LIKE UPPER('%'||#{sjyjSpecification}||'%')
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		
+    	</if>
+    </select>
+    
+    <!-- 根据主键查询某个物料信息(可分页)-->
+    <select id="loadWlInfo" resultMap="wlInfoMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.application_code applicationCode,t.intention_code intentionCode,t.intention_supplier_code intentionSupplierCode,t.accessory_code accessoryCode,t.supplier_code supplierCode,t.enquiry_code enquiryCode,t.quoted_code quotedCode,t.enquiry_count enquiryCount,t.purchase_count purchaseCount,t.contract_price contractPrice,t.purchase_money purchaseMoney,t.invoice_type invoiceType,t.tax_rate taxRate,t.accessory_sap_code accessorySapCode,t.supplier_sap_code supplierSapCode,t.sjyj_specification sjyjSpecification
+       		,t.created,	t.updated 
+		   ,(select u.real_name from pub_user u where u.user_id=t.createby) as createUserName,
+           	(select u.real_name from pub_user u where u.user_id=t.updateby) as updateUserName
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM wl_info t
+    	<where>
+    		1=1
+	    	<if test= "applicationCode != null and applicationCode!=''">
+			AND  t.APPLICATION_CODE = #{applicationCode}
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.created DESC
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 增加物料信息 --> 
+	<!-- <insert id="saveWlInfo" parameterType="hashmap">
+		INSERT INTO wl_info(application_code,intention_code,intention_supplier_code,accessory_code,supplier_code,enquiry_code,quoted_code,enquiry_count,purchase_count,contract_price,purchase_money,invoice_type,tax_rate,accessory_sap_code,supplier_sap_code,sjyj_specification) 
+			 VALUES(#{applicationCode},#{intentionCode},#{intentionSupplierCode},#{accessoryCode},#{supplierCode},#{enquiryCode},#{quotedCode},#{enquiryCount},#{purchaseCount},#{contractPrice},#{purchaseMoney},#{invoiceType},#{taxRate},#{accessorySapCode},#{supplierSapCode},#{sjyjSpecification})
+    </insert> -->
+    <!-- 修改物料信息  -->
+    <update id="updateWlInfo" parameterType="hashmap">
+		UPDATE	
+				wl_info	
+		   SET	
+		   		intention_code=#{intentionCode},
+		   		intention_supplier_code=#{intentionSupplierCode},
+		   		accessory_code=#{accessoryCode},
+		   		supplier_code=#{supplierCode},
+		   		enquiry_code=#{enquiryCode},
+		   		quoted_code=#{quotedCode},
+		   		enquiry_count=#{enquiryCount},
+		   		purchase_count=#{purchaseCount},
+		   		contract_price=#{contractPrice},
+		   		purchase_money=#{purchaseMoney},
+		   		invoice_type=#{invoiceType},
+		   		tax_rate=#{taxRate},
+		   		accessory_sap_code=#{accessorySapCode},
+		   		supplier_sap_code=#{supplierSapCode},
+		   		sjyj_specification=#{sjyjSpecification}		   		
+		 WHERE	
+		 		APPLICATION_CODE=#{applicationCode}
+    </update>
+    
+      <update id="saveWlInfo" parameterType="hashmap">
+		MERGE INTO wl_info T1
+         USING (
+     
+         SELECT 
+     
+     #{applicationCode} applicationCode,
+     #{quotedCode} quotedCode ,
+     #{intentionCode} intentionCode,
+     #{invoiceType} invoiceType,
+     #{intentionSupplierCode} intentionSupplierCode,
+     #{accessoryCode} accessoryCode,
+     #{supplierCode} supplierCode,
+     #{enquiryCode} enquiryCode,
+     #{enquiryCount} enquiryCount,
+     #{purchaseCount} purchaseCount,
+     #{contractPrice} contractPrice,
+     #{purchaseMoney} purchaseMoney,
+     #{taxRate} taxRate,
+     #{accessorySapCode} accessorySapCode,
+     #{supplierSapCode} supplierSapCode,
+     #{sjyjSpecification} sjyjSpecification
+                FROM dual 
+               
+             ) T2 
+     ON (T1.application_code = T2.applicationCode and  T1.quoted_code = T2.quotedCode )  <!-- 判断条件 -->
+    WHEN MATCHED THEN                <!-- 更新 -->
+         UPDATE SET 
+                T1.intention_code=T2.intentionCode,
+		   		T1.intention_supplier_code=T2.supplierCode,
+		   		T1.accessory_code=T2.accessoryCode,
+		   		T1.supplier_code=T2.supplierCode,
+		   		T1.enquiry_code=T2.enquiryCode,
+		   		T1.enquiry_count=T2.enquiryCount,
+		   		T1.purchase_count=T2.purchaseCount,
+		   		T1.contract_price=T2.contractPrice,
+		   		T1.purchase_money=T2.purchaseMoney,
+		   		T1.invoice_type=T2.invoiceType,
+		   		T1.tax_rate=T2.taxRate,
+		   		T1.accessory_sap_code=T2.accessorySapCode,
+		   		T1.supplier_sap_code=T2.supplierSapCode,
+		   		T1.sjyj_specification=T2.sjyjSpecification	
+               WHERE 
+               T1.application_code = #{applicationCode} 
+                AND T1.quoted_code = #{quotedCode}
+    WHEN NOT MATCHED THEN 
+         INSERT (application_code,intention_code,intention_supplier_code,accessory_code,supplier_code,enquiry_code,quoted_code,enquiry_count,purchase_count,contract_price,purchase_money,invoice_type,tax_rate,accessory_sap_code,supplier_sap_code,sjyj_specification,created,createby) 
+			 VALUES(T2.applicationCode,T2.intentionCode,T2.supplierCode,T2.accessoryCode,T2.supplierCode,T2.enquiryCode,T2.quotedCode,T2.enquiryCount,T2.purchaseCount,T2.contractPrice,T2.purchaseMoney,T2.invoiceType,T2.taxRate,T2.accessorySapCode,T2.supplierSapCode,T2.sjyjSpecification,#{app_created},#{app_create_by})
+    </update>  
+    <!-- 删除物料信息 -->
+    <delete id="deleteWlInfo" parameterType="hashmap">
+        DELETE FROM 
+        			wl_info 
+        WHERE 
+        			APPLICATION_CODE=#{applicationCode} <!--AND client_id=#{app_user_clientID}-->
+    </delete>
+</mapper>

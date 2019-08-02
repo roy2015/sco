@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.peripheral.sap.MerchandiseSapDao">
+	<resultMap type="com.powere2e.sco.model.peripheral.sap.MerchandiseSap" id="merchandiseMap">
+		<result property="merchandiseCode" column="merchandiseCode"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="merchandiseName" column="merchandiseName"/>
+		<result property="industryStandards" column="industryStandards"/>
+		<result property="wlType" column="wlType"/>
+		<result property="purchaseDepartments" column="purchaseDepartments"/>
+		<result property="purchaseGroup" column="purchaseGroup"/>
+		<result property="centreTypeCode" column="centreTypeCode"/>
+		<result property="smallTypeCode" column="smallTypeCode"/>
+		<result property="detailTypeCode" column="detailTypeCode"/>
+		<result property="storageForm" column="storageForm"/>
+		<result property="merchandiseStatus" column="merchandiseStatus"/>
+		<result property="netWeight" column="netWeight"/>
+		<result property="syncDate" column="syncDate"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    
+    <!-- 增加商品 --> 
+	<insert id="saveMerchandise" parameterType="hashmap">
+		INSERT INTO merchandise(merchandise_code,supplier_code,merchandise_name,industry_standards,wl_type,purchase_departments,purchase_group,centre_type_code,small_type_code,detail_type_code,storage_form,merchandise_status,net_weight,company_site,sync_date) 
+   			  <foreach collection="list" item="item" index="index" separator="union all" > 
+		         (
+		         SELECT 
+			         #{item.merchandiseCode}, 
+			         #{item.supplierCode},
+			         #{item.merchandiseName},
+			         #{item.industryStandards}, 
+			         #{item.wlType},
+			         #{item.purchaseDepartments},
+			         #{item.purchaseGroup}, 
+			         #{item.centreTypeCode},
+			         #{item.smallTypeCode},
+			         #{item.detailTypeCode},
+			         #{item.storageForm},
+			         #{item.merchandiseStatus},
+			         #{item.netWeight},
+			         #{item.companySite},
+			         #{app_created}
+		         FROM　DUAL
+		         )
+		     </foreach>     
+    </insert>
+    
+     <!--删除商品-->
+    <delete id="deleteMerchandise">
+    	DELETE FROM merchandise
+    </delete>
+   
+</mapper>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.remind.ElseRemindFlagDao">
+	<resultMap type="com.powere2e.sco.model.remind.ElseRemindFlag" id="elseRemindFlagMap">
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <select id="listElseRemindFlag" resultMap="elseRemindFlagMap">
+	    SELECT
+			 er.remind_code remindCode,
+			 er.flag_person flagPerson,
+			 er.remind_type remindType,
+			 er.config_code configCode,
+			 er.ql_code qlCode
+		FROM else_remind_flag er 
+    </select>
+    
+    <insert id="insertElseRemindFlag">
+    	INSERT INTO else_remind_flag(remind_code,remind_type,ql_code,config_code,flag_person,created,createby)
+				<foreach collection="list" item="item" index="index" separator="UNION">
+					SELECT #{item.remindCode},#{item.remindType},#{item.qlCode},#{item.configCode},#{app_create_by},#{app_created},#{app_create_by} FROM dual
+				</foreach>
+    </insert>
+</mapper>

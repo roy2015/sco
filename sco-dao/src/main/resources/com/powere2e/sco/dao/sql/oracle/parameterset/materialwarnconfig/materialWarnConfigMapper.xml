@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.powere2e.sco.interfaces.dao.parameterset.materialwarnconfig.MaterialWarnConfigDao">
+	<resultMap type="com.powere2e.sco.model.parameterset.materialwarnconfig.MaterialWarnConfig" id="materialWarnConfigMap">
+		<result property="configCode" column="configCode" />
+		<result property="materialBigTypeCode" column="materialBigTypeCode" />
+		<result property="materialSmallTypeCode" column="materialSmallTypeCode" />
+		<result property="materialCode" column="materialCode" />
+		<result property="websiteCode" column="websiteCode" />
+		<result property="warnType" column="warnType" />
+		<result property="thresholdValue" column="thresholdValue" />
+		<result property="created" column="created" />
+		<result property="createby" column="createby" />
+		<result property="updated" column="updated" />
+		<result property="updateby" column="updateby" />
+		<result property="createUserName" column="createUserName" />
+		<result property="updateUserName" column="updateUserName" />
+		<result property="recordCount" column="record_count" />
+	</resultMap>
+	<resultMap type="com.powere2e.sco.model.parameterset.materialwarnconfig.MaterialWarnConfigJoint" id="materialWarnConfigJiontMap">
+		<result property="configCode" column="configCode" />
+		<result property="materialBigTypeCode" column="materialBigTypeCode" />
+		<result property="materialBigName" column="materialBigName" />
+		<result property="materialSmallTypeCode" column="materialSmallTypeCode" />
+		<result property="materialSmallName" column="materialSmallName" />
+		<result property="materialCode" column="materialCode" />
+		<result property="materialName" column="materialName" />
+		<result property="websiteCode" column="websiteCode" />
+		<result property="websiteName" column="websiteName" />
+		<result property="warnType" column="warnType" />
+		<result property="thresholdValue" column="thresholdValue" />
+		<result property="created" column="created" />
+		<result property="createby" column="createby" />
+		<result property="recordCount" column="record_count" />
+	</resultMap>
+	<!-- 查询原料行情预警方式 -->
+	<select id="listWarnType" resultType="com.powere2e.security.model.Option">
+	    select  
+	    code_string id,
+	    value_string text
+	    from common_mapping_config
+	    where key_type='WARN_TYPE'
+	</select>
+	
+	
+	
+	<!-- 查询原料行情预警设置(可分页) -->
+	<select id="searchMaterialWarnConfig" resultMap="materialWarnConfigMap">
+		SELECT
+		<if test="page_count == null">
+			t.config_code configCode,
+			t.material_big_type_code materialBigTypeCode,
+			t.material_small_type_code materialSmallTypeCode,
+			t.material_code materialCode,
+			t.website_code websiteCode,
+			cmc.value_string warnType,
+			t.threshold_value thresholdValue
+			,t.created, t.updated
+			,(select u.real_name from pub_user u where u.user_id=t.createby) as createby,
+			(select u.real_name from pub_user u where u.user_id=t.updateby) as updateby
+		</if>
+		<if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		from material_warn_config t
+		left join common_mapping_config cmc on cmc.code_string=t.warn_type   and cmc.key_type='WARN_TYPE'
+		<where>
+			1=1 
+			<if test="configCode != null and configCode!=''">
+				AND t.config_code = #{configCode}
+			</if>
+			<if test="materialBigTypeCode != null and materialBigTypeCode!=''">
+				AND UPPER(t.material_big_type_code) LIKE UPPER('%'||#{materialBigTypeCode}||'%')
+			</if>
+			<if test="materialSmallTypeCode != null and materialSmallTypeCode!=''">
+				AND UPPER(t.material_small_type_code) LIKE UPPER('%'||#{materialSmallTypeCode}||'%')
+			</if>
+			<if test="materialCode != null and materialCode!=''">
+				AND UPPER(t.material_code) LIKE UPPER('%'||#{materialCode}||'%')
+			</if>
+			<if test="websiteCode != null and websiteCode!=''">
+				AND UPPER(t.website_code) LIKE UPPER('%'||#{websiteCode}||'%')
+			</if>
+			<if test="warnType != null and warnType!='' and warnType !='W'.toString()" >
+				and t.warn_type = #{warnType}
+			</if>
+			<if test="warnType =='W'.toString()" >
+				and t.warn_type is null
+			</if>
+			<if test="thresholdValue != null and thresholdValue!=''">
+				AND t.threshold_value = #{thresholdValue}
+			</if>
+			<if test="created != null and created!=''">
+				AND convert(varchar,t.created,120) LIKE (#{created})
+			</if>
+			<if test="createby != null and createby!=''">
+				AND UPPER(t.createby) LIKE UPPER('%'||#{createby}||'%')
+			</if>
+			<if test="updated != null and updated!=''">
+				AND convert(varchar,t.updated,120) LIKE (#{updated})
+			</if>
+			<if test="updateby != null and updateby!=''">
+				AND UPPER(t.updateby) LIKE UPPER('%'||#{updateby}||'%')
+			</if>
+		</where>
+		<if test="page_count == null">
+			<if test="app_orderby !=null">
+				ORDER BY ${app_orderby}
+			</if>
+			<if test="app_orderby ==null">
+				ORDER BY t.created DESC
+			</if>
+		</if>
+	</select>
+	<!-- 多表联查 -->
+	<select id="JiontMAterialWarnCodfig" resultMap="materialWarnConfigJiontMap">
+		select
+		<if test="page_count == null">
+			mwc.config_code configCode,
+			mbt.material_big_type_code materialBigTypeCode,
+			mbt.material_big_type_name materialBigName,
+			mst.material_small_type_code materialSmallTypeCode,
+			mst.material_small_type_name materialSmallName,
+			m.material_code materialCode ,
+			m.material_name materialName ,
+			w.website_code websiteCode,
+			w.website_name websiteName,
+			cmc.value_string warnType,
+			mwc.threshold_value thresholdValue,
+			u.real_name createby,
+			mwc.created
+		</if>
+		<if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		from MATERIAL m
+		left join MATERIAL_BIG_TYPE mbt
+		on m.material_big_type_code=mbt.material_big_type_code
+		left join MATERIAL_SMALL_TYPE mst
+		on m.material_small_type_code=mst.material_small_type_code
+		left join WEBSITE w
+		on m.website_code=w.website_code
+		left join MATERIAL_WARN_CONFIG mwc
+		on mwc.material_code=m.material_code
+		left join COMMON_MAPPING_CONFIG cmc on cmc.code_string=mwc.warn_type   and cmc.key_type='WARN_TYPE'
+		left join pub_user u on u.user_id=mwc.createby
+		<where>
+			1=1
+			<if test="materialBigCode != null and materialBigCode!=''">
+				and mbt.material_big_type_code = #{materialBigCode}
+			</if>
+			<if test="materialSmallCode != null and materialSmallCode!=''">
+				and mst.material_small_type_code = #{materialSmallCode}
+			</if>
+			<if test="materialCode != null and materialCode!=''">
+				and m.material_code = #{materialCode}
+			</if>
+			<if test="websiteCode != null and websiteCode!=''">
+				and w.website_code = #{websiteCode}
+			</if>
+			<if test="warnType != null and warnType !='' and warnType !='W'.toString()">
+				and mwc.warn_type = #{warnType}
+			</if>
+			<if test="warnType =='W'.toString()">
+				and mwc.warn_type is null
+			</if>
+			<if test="created != null and created!=''">
+				and mwc.created &gt;= to_date( #{created},'yyyy-MM-DD')
+			</if>
+			<if test="createds != null and createds!=''">
+				and mwc.created &lt;= to_date( #{createds},'yyyy-MM-DD')
+			</if>
+			<if test="createby != '%null%' and createby!='%%'">
+				and u.real_name LIKE (#{createby})
+			</if>
+		</where>
+		<if test="sort != null and sort!=''">
+			order by ${sort} ${order}
+		</if>
+	</select>
+	<!-- 根据指定的列，查询是否存在该数据 -->
+	<select id="searchMaterialWarnConfigByInfo" resultMap="materialWarnConfigMap">
+		SELECT
+		t.config_code configCode,t.material_big_type_code materialBigTypeCode,t.material_small_type_code materialSmallTypeCode,t.material_code materialCode,t.website_code websiteCode,t.warn_type
+		warnType,t.threshold_value thresholdValue
+		,t.created, t.updated
+		FROM material_warn_config t
+		<where>
+			UPPER(t.material_code) LIKE UPPER('%'||#{materialCode}||'%')
+			AND UPPER(t.warn_type) LIKE UPPER('%'||#{warnType}||'%')
+			AND t.threshold_value = #{thresholdValue}
+		</where>
+
+	</select>
+	<!-- 根据主键查询某个原料行情预警设置(可分页) -->
+	<select id="loadMaterialWarnConfig" resultMap="materialWarnConfigMap">
+		SELECT
+		<if test="page_count == null">
+			t.config_code configCode,t.material_big_type_code materialBigTypeCode,t.material_small_type_code materialSmallTypeCode,t.material_code materialCode,t.website_code websiteCode,t.warn_type
+			warnType,t.threshold_value thresholdValue
+			,t.created, t.updated
+			,(select u.login_name from pub_user u where u.user_id=t.createby) as createUserName,
+			(select u.login_name from pub_user u where u.user_id=t.updateby) as updateUserName
+		</if>
+		<if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		FROM material_warn_config t
+		<where>
+			1=1
+			<if test="configCode != null and configCode!=''">
+				AND t.CONFIG_CODE = #{configCode}
+			</if>
+		</where>
+		<if test="page_count == null">
+			<if test="app_orderby !=null">
+				ORDER BY ${app_orderby}
+			</if>
+			<if test="app_orderby ==null">
+				ORDER BY t.created DESC
+			</if>
+		</if>
+	</select>
+
+	<!-- 增加原料行情预警设置 -->
+	<insert id="saveMaterialWarnConfig" parameterType="hashmap">
+		INSERT INTO
+		material_warn_config(config_code,material_big_type_code,material_small_type_code,material_code,website_code,warn_type,threshold_value,created,createby)
+		VALUES(S_MATERIAL_WARN_CONFIG.NEXTVAL,#{materialBigTypeCode},#{materialSmallTypeCode},#{materialCode},#{websiteCode},#{warnType},#{thresholdValue},sysdate,#{app_create_by})
+	</insert>
+	<!-- 修改原料行情预警设置 -->
+	<update id="updateMaterialWarnConfig" parameterType="hashmap">
+		UPDATE
+		material_warn_config
+		SET
+		material_big_type_code=#{materialBigTypeCode},
+		material_small_type_code=#{materialSmallTypeCode},
+		material_code=#{materialCode},
+		website_code=#{websiteCode},
+		warn_type=#{warnType},
+		threshold_value=#{thresholdValue}
+		WHERE
+		CONFIG_CODE=#{configCode}
+	</update>
+	<!-- 删除原料行情预警设置 -->
+	<delete id="deleteMaterialWarnConfig" parameterType="hashmap">
+		DELETE FROM
+		material_warn_config
+		WHERE
+		CONFIG_CODE in
+		<foreach collection="configCode" item="configCode" separator="," open="(" close=")">
+			#{configCode}
+		</foreach>
+		<!--AND client_id=#{app_user_clientID} -->
+	</delete>
+</mapper>

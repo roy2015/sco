@@ -1,0 +1,648 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.powere2e.sco.interfaces.dao.merchandisecostanalysis.merchandiseitemcost.MerchandiseItemCostDao">
+	
+	<resultMap type="com.powere2e.sco.model.merchandisecostanalysis.merchandiseitemcost.Merchandiseitemcost" id="merchandiseItemCostMap">
+		<result property="x001Region" column="X001Region" />
+		<result property="recordCount" column="record_count" />
+	</resultMap>
+	            
+	<select id="searchMechandiseItemCost" resultMap="merchandiseItemCostMap">
+		SELECT
+		<if test="page_count == null">
+			a.intentionCode,
+			a.intentionName,
+			a.intentionSupplierCode,
+			a.intentionSupplierName,
+			b.merchandiseCode,
+			b.merchandiseName,
+			b.supplierCode,
+			b.supplierName,
+			(select value_string from common_mapping_config where key_type = 'PURCHASE_DEPARTMENTS_TYPE' and code_string = a.intentionPurchaseDepartments) intentionPurchaseDepartments,
+			a.smallTypeCode intentionSmallTypeCode,
+			a.elseTypeName,
+			b.purchaseDepartments,
+			b.storageForm,
+			b.netWeight,
+			c.role_code merchandiseDxRoleCode,
+			c.role_name merchandiseDxRoleName,
+			d.role_code merchandiseDlRoleCode,
+			d.role_name merchandiseDlRoleName,
+			(select value_string from common_mapping_config where key_type = 'RATIONED_TYPE' and code_string = a.rationed) rationed,
+			(select value_string from common_mapping_config where key_type = 'PURCHASE_TYPE' and code_string = a.purchaseType) purchaseType,
+			a.saleType,
+			e1.centre_type_code centreTypeCode,
+			e1.centre_type_name centreTypeName,
+			e2.small_type_code smallTypeCode,
+			e2.small_type_name smallTypeName,
+			e3.detail_type_code detailTypeCode,
+			e3.detail_type_name detailTypeName,
+			e4.fine_type_code fineTypeCode,
+			e4.fine_type_name fineTypeName,
+			
+			
+			
+			f.accountingCode,
+			g.applicationCode,
+			g.applicationStatus,
+			(select value_string from common_mapping_config where key_type = 'APPLICATION_STATUS' and code_string = DECODE(g.applicationStatus,null,'W',g.applicationStatus)) applicationStatusValue,
+			g.approveDate oaApproveDate,
+			(select u.real_name from pub_user u where u.user_id=g.createby) as createby,
+			mcp.price X001Region,
+			f.quotedDate,
+
+			<if test='itemValue=="material"'>
+            (SELECT value_string FROM common_mapping_config WHERE key_type = 'MATERIAL_TYPE' AND code_string = ii.material_type) materialType,
+            ii.material_name materialName,
+            ii.material_origin materialOrigin,
+            ii.material_brand materialBrand,
+            ii.material_level_specification materialLevelSpecification,
+            ii.purchase_price purchasePrice,
+            ii.input_count inputCount,
+            ii.input_cost inputCost,
+            ii.avg_cost avgCost,
+            ii.input_count_proportion inputCountProportion,
+            i.moisture moisture,
+            i.yield yield,
+            </if>
+            
+            <if test='itemValue=="npackag"'>
+            <!-- 内包装 -->
+				(SELECT value_string FROM common_mapping_config WHERE key_type = 'NPACKAG_TYPE' AND code_string = an.npackag_type) packagType,
+				DECODE(UPPER(an.npackag_type),'ELSE',an.else_name,(SELECT value_string FROM common_mapping_config WHERE key_type = 'NPACKAG_TYPE' AND code_string = an.npackag_type)) packagName,
+				an.price price,
+				an.material_size materialSize,
+				an.remarks,
+            <choose>
+	            <when test='selectComboxValue=="FHD_JM" or selectComboxValue=="FHD_LSM"'>
+	            <!-- 复合袋-卷膜 -->
+	            <!-- 复合袋-拉伸膜 -->
+	            an.texture texture,
+	            an.kg_price kgPrice,
+	            an.weight_proportion weightProportion,
+	            </when>
+	            <when test='selectComboxValue=="FHD_ZD"'>
+	            <!-- 复合袋-制袋 -->
+	            an.texture texture,
+	            an.weight weight,
+	            an.units_price unitsPrice,
+	            an.kg_price kgPrice,
+	            an.quantity quantity,
+	            </when>
+	            <when test='npackagName=="ST"'>
+	            <!-- 塑托 -->
+	            an.texture texture,
+	            an.weight weight,
+	            an.kg_price kgPrice,
+	            an.weight_proportion weightProportion,
+	            </when>
+	            <when test='selectComboxValue=="TYJ"'>
+	            <!-- 脱氧剂 -->
+	            an.weight weight,
+	            an.units_price unitsPrice,
+	            an.quantity quantity,
+	            </when>
+	            <when test='selectComboxValue=="NDD"'>
+	            <!-- 内胆袋 -->
+	            an.texture texture,
+	            an.units_price unitsPrice,
+	            an.quantity quantity,
+	            </when>
+	            <when test='selectComboxValue=="BQ" or selectComboxValue=="ZZL"'>
+	            <!-- 标签 -->
+	            <!-- 纸张 -->
+	            an.texture texture,
+	            an.quantity quantity,
+	            an.technology_requirements technologyRequirements,
+	            </when>
+	            <!-- 其它 -->
+	            <otherwise>
+	            </otherwise>
+            </choose>
+            </if>
+            
+            <if test='itemValue=="wpackag"'>
+            <!-- 外包装 -->
+				(SELECT value_string FROM common_mapping_config WHERE key_type = 'WPACKAG_TYPE' AND code_string = aw.wpackag_type) packagType,
+				DECODE(UPPER(aw.wpackag_type),'ELSE',aw.else_name,(SELECT value_string FROM common_mapping_config WHERE key_type = 'WPACKAG_TYPE' AND code_string = aw.wpackag_type)) packagName,
+				aw.price price,
+				aw.remarks remarks,
+            <choose>
+	            <when test='selectComboxValue=="FXD"'>
+	            <!-- 封箱带 -->
+	            aw.units_price unitsPrice,
+	            aw.use_quantity useQuantity,
+	            </when>
+	            <when test='selectComboxValue=="ZX"'>
+	            <!-- 纸箱 -->
+	            aw.texture texture,
+	            aw.length||'*'||aw.width||'*'||aw.height lwh,
+	            aw.area area,
+	            aw.units_price unitsPrice,
+	            aw.yl_units_price ylUnitsPrice,
+	            aw.specification specification,
+	            </when>
+	            <!-- 其他 -->
+	            <otherwise>
+	            </otherwise>
+            </choose>
+            </if>
+            
+             <if test='itemValue=="elsecost"'>
+	            <choose>
+		            <!-- 其他成本 -->
+			        <when test='selectComboxValue=="SH"'>
+		            <!-- 损耗 -->
+		            wast.wastage_type wastageType,
+		            wast.price price,
+		            wast.remarks remarks,
+		            </when>
+		            <when test='selectComboxValue=="SDM"'>
+		            <!-- 水电煤 -->
+		            wec.price price,
+		            wec.water water,
+		            wec.electricity electricity,
+		            wec.gas gas,
+		            wec.coal coal,
+		            wec.oil oil,
+		            wec.total total,
+		            wec.remarks remarks,
+		            </when>
+		            <when test='selectComboxValue=="SBZJWH"'>
+		            <!-- 设备折旧及维护 -->
+		            sb.price price,
+		            sb.total_price totalPrice,
+		            sb.age_limit ageLimit,
+		            sb.depreciation depreciation,
+		            sb.capacity capacity,
+		            sb.total total,
+		            sb.remarks remarks,
+		            </when>
+		            <when test='selectComboxValue=="RG"'>
+		            <!-- 人工 -->
+		            amp.price price,
+		            amp.manpower_count manpowerCount,
+		            amp.avg_wage avgWage,
+		            amp.month_capacity monthCapacity,
+		            amp.units_wage unitsWage,
+		            amp.remarks remarks,
+		            </when>
+		            <when test='selectComboxValue=="GL"'>
+		            <!-- 管理 -->
+		            ama.price price,
+		            ama.remarks remarks,
+		            amr.region region,
+		            amr.proportion proportion,
+		            </when>
+		            <when test='selectComboxValue=="YS"'>
+		            <!-- 运输 -->
+		            afr.price price,
+		            afr.region region,
+		            afr.sum_km sumKm,
+		            af.units_cost unitsCost,
+		            af.remarks remarks,
+		            NVL(b.company_site,a.company_site) companySite,
+		            </when>
+		            <when test='selectComboxValue=="SS"'>
+		            <!-- 税收 -->
+		            atr.price price,
+		            atr.region region,
+		            atr.proportion proportion,
+		            atax.tax_rate taxRate,
+		            atax.remarks remarks,
+		            </when>
+		            <when test='selectComboxValue=="LR"'>
+		            <!-- 利润 -->
+		            apr.price price,
+		            apr.region region,
+		            apr.proportion proportion,
+		            ap.remarks remarks,
+		            </when>
+		            <otherwise>
+		            </otherwise>
+	            </choose>
+            </if>
+            
+             <if test='itemValue=="importcost"'>
+            	<choose>
+            	<when test="selectComboxValue=='CC'">
+            	<!-- 商品报价 -->
+            	afp.price price,
+            	afp.currency currency,
+            	afp.payment_type paymentType,
+            	afp.remarks remarks,
+            	ae.exchangerate exchangerate,
+            	ae.reference_date referenceDate,
+            	ae.reference_bank referenceBank,
+            	ae.remarks aeRemarks,
+            	aci.rmb_settlement_price rmbSettlementPrice,
+            	aci.rmb_settlement_price_remarks rmbSettlementPriceRemarks,
+            	</when>
+            	<when test='selectComboxValue=="HY" or selectComboxValue=="KY"'>
+            	<!-- 海运费 ,空运费 -->
+            	ao.price price,
+            	ao.starting starting,
+            	ao.destination destination,
+            	DECODE(UPPER(ao.container_type),'ELSE',ao.else_type,(SELECT value_string FROM common_mapping_config WHERE key_type = 'CONTAINER_TYPE' AND code_string = ao.container_type)) containerType,
+            	ao.container_size containerSize,
+            	ao.unit_price unitPrice,
+            	ao.container_capacity containerCapacity,
+            	ao.compute_type computeType,
+            	ao.remarks remarks,
+            	</when>
+            	<when test="selectComboxValue=='HD'">
+            	<!-- 换单费 -->
+            	aci.update_order_fee updateOrderFee,
+            	aci.update_order_fee_remarks updateOrderFeeRemarks,
+            	</when>
+            	<when test="selectComboxValue=='BX'">
+            	<!-- 保险费 -->
+            	aci.premium premium,
+            	aci.premium_remarks premiumRemarks,
+            	</when>
+            	<when test="selectComboxValue=='BG'">
+            	<!-- 报关服务费 -->
+            	bg.price price,
+            	bg.customscharges customscharges,
+            	bg.port_surcharge portSurcharge,
+            	bg.demurrage_charge demurrageCharge,
+            	bg.container_dirtyness_change containerDirtynessChange,
+            	bg.else_fee elseFee,
+            	bg.remarks remarks,
+            	</when>
+            	<when test="selectComboxValue=='GS'">
+            	<!-- 关税 -->
+            	gs.price price,
+            	gs.hs_code hsCode,
+            	gs.tax_rate taxRate,
+            	gs.customsduties_compute_type customsdutiesComputeType,
+            	gs.remarks remarks,
+            	</when>
+            	<when test="selectComboxValue=='ZZ'">
+            	<!-- 增值税 -->
+            	zz.price price,
+            	zz.tax_rate taxRate,
+            	zz.addedvaluetax_compute_type addedvaluetaxComputeType,
+            	zz.remarks remarks,
+            	</when>
+            	</choose>
+             </if>
+			f.units
+			
+		</if>
+		<if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		FROM
+			(
+			select
+				a1.merchandise_code merchandiseCode,
+				a1.supplier_code supplierCode,
+				a5.company_site,
+				a2.intention_code intentionCode,
+				a2.intention_name intentionName,
+				a2.centre_type_code centreTypeCode,
+				a2.small_type_code smallTypeCode,
+				a2.detail_type_code detailTypeCode,
+				a2.fine_type_code fineTypeCode,
+				a2.else_type_name elseTypeName,
+				a2.purchase_departments intentionPurchaseDepartments,
+				a2.rationed rationed,
+				a2.purchase_type purchaseType,
+				a2.sale_type saleType,
+				a1.intention_supplier_code intentionSupplierCode,
+				DECODE(a4.supplier_code,null,a3.intention_supplier_name,a4.supplier_name) intentionSupplierName
+			FROM
+				(select * from intention_supplier_merchandise where intention_supplier_code is not null or supplier_code is not null) a1
+				left join merchandise_intention a2 on a2.intention_code = a1.intention_code
+				left join merchandise_intention_supplier a3 on a3.intention_supplier_code = a1.intention_supplier_code
+				left join supplier a4 on a4.supplier_code = a1.intention_supplier_code
+				left join merchandise a5 on a5.merchandise_code = a1.merchandise_code and a5.supplier_code = a1.supplier_code
+			<where>
+				1=1
+				<if test="merchandiseCode != null and merchandiseCode != ''">
+					AND (a1.intention_code LIKE UPPER('%'||#{merchandiseCode}||'%') or a1.merchandise_code LIKE UPPER('%'||#{merchandiseCode}||'%'))
+				</if>
+				<if test="merchandiseName != null and merchandiseName != ''">
+					AND (a2.intention_name LIKE UPPER('%'||#{merchandiseName}||'%') or a5.merchandise_name LIKE UPPER('%'||#{merchandiseName}||'%'))
+				</if>
+				<if test="centreTypeCode != null and centreTypeCode != ''">
+					AND a2.centre_type_code = #{centreTypeCode}
+				</if>
+				<if test="smallTypeCode != null and smallTypeCode != ''">
+					AND a2.small_type_code = #{smallTypeCode}
+				</if>
+				<if test="detailTypeCode != null and detailTypeCode != ''">
+					AND a2.detail_type_code = #{detailTypeCode}
+				</if>
+				<if test="fineTypeCode != null and fineTypeCode != ''">
+					AND a2.fine_type_code = #{fineTypeCode}
+				</if>
+				<if test="purchaseDepartments != null and purchaseDepartments != ''">
+					AND a2.purchase_departments = #{purchaseDepartments}
+				</if>
+				<if test="rationed != null and rationed != ''">
+					AND a2.rationed = #{rationed}
+				</if>
+				<if test="purchaseType != null and purchaseType != ''">
+					AND a2.purchase_type = #{purchaseType}
+				</if>
+				<if test="saleType != null and saleType != ''">
+					AND a2.sale_type = #{saleType}
+				</if>
+				<if test="supplierCode != null and supplierCode != ''">
+					AND (a1.intention_supplier_code LIKE UPPER('%'||#{supplierCode}||'%') or a1.supplier_code LIKE UPPER('%'||#{supplierCode}||'%'))
+				</if>
+				<if test="supplierName != null and supplierName != ''">
+					AND (a3.intention_supplier_name LIKE UPPER('%'||#{supplierName}||'%') or a4.supplier_name LIKE UPPER('%'||#{supplierName}||'%'))
+				</if>
+				<if test="companySite != null and companySite != ''">
+					AND a5.company_site LIKE UPPER('%'||#{companySite}||'%')
+				</if>
+			</where>
+			) a
+			<choose>
+				<when test="purchaseType != null and purchaseType != ''">
+					left join
+				</when>
+				<otherwise>
+					<choose>
+						<when test="(merchandiseDxRoleCode != null and merchandiseDxRoleCode != '') or (merchandiseDlRoleCode != null and merchandiseDlRoleCode != '')">
+							right join
+						</when>
+						<otherwise>
+							full join
+						</otherwise>
+					</choose>
+				</otherwise>	
+					
+			</choose>
+			(
+			select
+				b1.merchandise_code merchandiseCode,
+				b1.merchandise_name merchandiseName,
+				b1.centre_type_code centreTypeCode,
+				b1.small_type_code smallTypeCode,
+				b1.detail_type_code detailTypeCode,
+				b1.purchase_departments purchaseDepartments,
+				b1.storage_form storageForm,
+				DECODE(b1.net_weight,1,'公斤装','定量装') netWeight,
+				b2.supplier_code supplierCode,
+				b2.supplier_name supplierName,
+				b1.company_site,
+				b3.dx_role_code merchandiseDxRoleCode,
+				b3.dl_role_code merchandiseDlRoleCode
+			FROM
+				merchandise b1
+				<choose>
+					<when test="supplierCode != null and supplierCode != ''">
+						inner join
+					</when>
+					<otherwise>
+						left join
+					</otherwise>
+				</choose>
+				supplier b2 on b2.supplier_code = b1.supplier_code
+				<choose>
+					<when test="(merchandiseDxRoleCode != null and merchandiseDxRoleCode != '') or (merchandiseDlRoleCode != null and merchandiseDlRoleCode != '')">
+						inner join
+					</when>
+					<otherwise>
+						left join
+					</otherwise>
+				</choose>
+				merchandise_role b3 on b3.merchandise_code = b1.merchandise_code
+				left join intention_supplier_merchandise b4 on b4.merchandise_code = b1.merchandise_code and b4.supplier_code = b1.supplier_code
+				left join merchandise_intention b5 on b5.intention_code = b4.intention_code
+				left join merchandise_intention_supplier b6 on b6.intention_supplier_code = b4.intention_supplier_code
+			<where>
+				1=1
+				<if test="merchandiseCode != null and merchandiseCode != ''">
+					AND (b1.merchandise_code LIKE UPPER('%'||#{merchandiseCode}||'%') or b4.intention_code LIKE UPPER('%'||#{merchandiseCode}||'%'))
+				</if>
+				<if test="merchandiseName != null and merchandiseName != ''">
+					AND (b1.merchandise_name LIKE UPPER('%'||#{merchandiseName}||'%') or b5.intention_name LIKE UPPER('%'||#{merchandiseName}||'%'))
+				</if>
+				<if test="centreTypeCode != null and centreTypeCode != ''">
+					AND b1.centre_type_code = #{centreTypeCode}
+				</if>
+				<if test="smallTypeCode != null and smallTypeCode != ''">
+					AND b1.small_type_code = #{smallTypeCode}
+				</if>
+				<if test="detailTypeCode != null and detailTypeCode != ''">
+					AND b1.detail_type_code = #{detailTypeCode}
+				</if>
+				<if test="purchaseDepartments != null and purchaseDepartments != ''">
+					<if test="purchaseDepartments == 'INLAND'">
+						AND b1.purchase_departments = '国内'
+					</if>
+					<if test="purchaseDepartments == 'IMPORT'">
+						AND b1.purchase_departments = '国际'
+					</if>
+				</if>
+				<if test="saleType != null and saleType != ''">
+					AND b1.storage_form = #{saleType}
+				</if>
+				<if test="rationed != null and rationed != ''">
+					<if test="rationed == 'GJZ'">
+						AND b1.net_weight = 1
+					</if>
+					<if test="rationed == 'DLZ'">
+						AND b1.net_weight != 1
+					</if>
+				</if>
+				<if test="supplierCode != null and supplierCode != ''">
+					AND (b2.supplier_code LIKE UPPER('%'||#{supplierCode}||'%') or b4.intention_supplier_code LIKE UPPER('%'||#{supplierCode}||'%'))
+				</if>
+				<if test="supplierName != null and supplierName != ''">
+					AND (b2.supplier_name LIKE UPPER('%'||#{supplierName}||'%') or b6.intention_supplier_name LIKE UPPER('%'||#{supplierName}||'%'))
+				</if>
+				<if test="companySite != null and companySite != ''">
+					AND b1.company_site LIKE UPPER('%'||#{companySite}||'%')
+				</if>
+				<if test="merchandiseDxRoleCode != null and merchandiseDxRoleCode != ''">
+					AND b3.dx_role_code = #{merchandiseDxRoleCode}
+				</if>
+				<if test="merchandiseDlRoleCode != null and merchandiseDlRoleCode != ''">
+					AND b3.dl_role_code = #{merchandiseDlRoleCode}
+				</if>
+			</where>
+			) b on a.merchandiseCode = b.merchandiseCode and a.supplierCode = b.supplierCode
+			left join merchandise_dx_role c on b.merchandiseDxRoleCode = c.role_code
+			left join merchandise_dl_role d on b.merchandiseDlRoleCode = d.role_code
+			left join merchandise_centre_type e1 on a.centreTypeCode = e1.centre_type_code or b.centreTypeCode = e1.centre_type_code
+			left join merchandise_small_type e2 on a.smallTypeCode = e2.small_type_code or b.smallTypeCode = e2.small_type_code
+			left join merchandise_detail_type e3 on a.detailTypeCode = e3.detail_type_code or b.detailTypeCode = e3.detail_type_code
+			left join merchandise_fine_type e4 on a.fineTypeCode = e4.fine_type_code
+			inner join
+			(
+				select 
+					intention_code intentionCode,
+					intention_supplier_code intentionSupplierCode,
+					merchandise_code merchandiseCode,
+					supplier_code supplierCode,
+					accounting_code accountingCode,
+					quoted_date quotedDate,
+					units units 
+				from accounting
+				<where>
+				1=1
+				<if test='itemValue=="importcost"'>
+				    AND inland_import = 'IMPORT'
+				</if>
+				<if test="minQuotedDate != null">
+					AND quoted_date >= #{minQuotedDate}
+				</if>
+				<if test="maxQuotedDate != null">
+					AND quoted_date <![CDATA[<]]>(#{maxQuotedDate}+1)
+				</if>
+				</where>
+			) f on (a.intentionCode = f.intentionCode and a.intentionSupplierCode = f.intentionSupplierCode) or (b.merchandiseCode = f.merchandiseCode and b.supplierCode = f.supplierCode)
+		    <choose>
+				<when test="(applicationCode != null and applicationCode != '') or (applicationStatus != null and applicationStatus != '' and applicationStatus != 'W'.toString()) or costValue=='lastcost' ">
+					inner join
+				</when>
+				<otherwise>
+					left join
+				</otherwise>
+			</choose>
+			(
+			  SELECT
+			  fi.*,
+			  cam.accounting_code accountingCode
+			  FROM
+			  (
+			  <!-- 查询最后一次的申请 -->
+			  <if test='costValue=="lastcost"'>
+	            SELECT 
+			    last_oa.application_code applicationCode,
+			    last_oa.oa_merchandise_code merchandiseCode,
+			    last_oa.oa_supplier_code supplierCode,
+			    oa.application_status applicationStatus,
+			    oa.oa_approve_date approveDate,
+			    oa.createby
+			    FROM v_merchandise_last_oa last_oa
+			    LEFT JOIN oa_application oa ON oa.application_code = last_oa.application_code AND oa.oa_approve_date = last_oa.oa_approve_date
+			  	<where>
+		          1=1
+		          <if test="applicationStatus != null and applicationStatus != ''">
+				  AND oa.application_status = #{applicationStatus}
+			  	  </if>
+          		</where>
+			  </if> 
+			  <if test='costValue!="lastcost"'>
+			      <!-- 查询所有的申请 -->
+				  SELECT
+					am.application_code applicationCode,
+					am.merchandise_code merchandiseCode,
+					am.supplier_code supplierCode,
+					oa.createby,
+					oa.application_status applicationStatus,
+					oa.application_type applicationType,
+					oa.oa_approve_date approveDate
+				  FROM oa_application oa, application_merchandise am
+				  WHERE oa.application_code = am.application_code
+				  <if test="applicationStatus != null and applicationStatus != ''">
+				    AND oa.application_status = #{applicationStatus}
+			  	  </if>
+			  </if>
+          ) fi
+          LEFT JOIN analysis_reports_m arm ON arm.application_code = fi.applicationCode
+          LEFT JOIN cost_analysis_merchandise cam ON cam.reports_code = arm.reports_code AND fi.merchandiseCode = cam.merchandise_code AND fi.supplierCode = cam.supplier_code
+			) g on f.accountingCode = g.accountingCode
+		 <if test='itemValue=="material"'>
+		 LEFT JOIN ingredient i ON f.accountingCode = i.ingredient_code <!-- 投料表-总 -->
+		 LEFT JOIN ingredient_item ii ON i.ingredient_code = ii.ingredient_code <!-- 投料表-细 -->
+		 </if>
+		 <if test='itemValue=="npackag"'>
+    	  LEFT JOIN accounting_npackag an ON an.accounting_code = f.accountingCode <!-- 核算表内包装 -->
+    	  </if>
+    	  <if test='itemValue=="wpackag"'>
+    	  LEFT JOIN accounting_wpackag aw ON aw.accounting_code = f.accountingCode <!-- 核算表外包装 -->
+    	  </if>
+    	  <!-- 其他成本 -->
+    	  <choose>
+		    <when test='selectComboxValue=="SH"'>
+		  LEFT JOIN accounting_wastage wast ON wast.accounting_code = f.accountingCode <!-- 核算表损耗类型 -->
+			</when>
+			<when test='selectComboxValue=="SDM"'>
+		  LEFT JOIN accounting_wec wec ON wec.accounting_code = f.accountingCode <!-- 核算表水电煤 -->
+			</when>
+			<when test='selectComboxValue=="SBZJWH"'>
+		  LEFT JOIN accounting_sbzjwh sb ON sb.accounting_code = f.accountingCode <!-- 核算表设备折旧及维护 -->
+			</when>
+			<when test='selectComboxValue=="RG"'>
+		  LEFT JOIN accounting_manpower amp ON amp.accounting_code = f.accountingCode <!-- 核算表人工 -->
+			</when>
+			<when test='selectComboxValue=="GL"'>
+		  LEFT JOIN accounting_manage ama ON ama.accounting_code = f.accountingCode <!-- 核算表管理 -->
+		  LEFT JOIN accounting_manage_region amr ON amr.accounting_code = f.accountingCode <!-- 核算表管理各地区 -->
+			</when>
+			<when test='selectComboxValue=="YS"'>
+		  LEFT JOIN accounting_freight af ON af.accounting_code = f.accountingCode <!-- 核算表运输备注 -->
+          LEFT JOIN accounting_freight_region afr ON afr.accounting_code = f.accountingCode <!-- 核算表运输各地区 -->
+			</when>
+			<when test='selectComboxValue=="SS"'>
+		  LEFT JOIN accounting_tax atax ON atax.accounting_code = f.accountingCode <!-- 核算表税收 -->
+          LEFT JOIN accounting_tax_region atr ON atr.accounting_code = f.accountingCode <!-- 核算表税收各地区 -->
+			</when>
+			<when test='selectComboxValue=="LR"'>
+		  LEFT JOIN accounting_profit ap ON ap.accounting_code = f.accountingCode <!-- 核算表利润 -->
+          LEFT JOIN accounting_profit_region apr ON apr.accounting_code = f.accountingCode <!-- 核算表利润各地区 -->
+			</when>
+			</choose> 
+			LEFT JOIN accounting_cost_item aci ON aci.accounting_code = f.accountingCode <!-- 成本细项 -->
+			<!-- 进口相关成本 -->
+			<choose>
+		    <when test='selectComboxValue=="CC"'>
+		  LEFT JOIN accounting_factory_price afp ON afp.accounting_code = f.accountingCode <!-- 核算表商品出厂价 -->
+		  LEFT JOIN accounting_exchangerate ae ON ae.accounting_code = f.accountingCode <!-- 核算表汇率 -->
+			</when>
+			<when test='selectComboxValue=="HY" or selectComboxValue=="KY"'>
+		  LEFT JOIN accounting_oceanfreight ao ON ao.accounting_code = f.accountingCode <!-- 核算表海运费 -->
+			</when>
+			<when test='selectComboxValue=="BG"'>
+		  LEFT JOIN accounting_customscharges bg ON bg.accounting_code = f.accountingCode <!-- 核算表报关服务费 -->
+			</when>
+			<when test='selectComboxValue=="GS"'>
+		  LEFT JOIN accounting_customsduties gs ON gs.accounting_code = f.accountingCode <!-- 核算表关税 -->
+			</when>
+			<when test='selectComboxValue=="ZZ"'>
+		  LEFT JOIN accounting_addedvaluetax zz ON zz.accounting_code = f.accountingCode <!-- 核算表增值税 -->
+			</when>
+			</choose> 
+          LEFT JOIN merchandise_contract_price mcp ON (g.applicationCode = mcp.application_code AND mcp.region = 'X001' AND mcp.merchandise_code = g.merchandiseCode AND mcp.supplier_code = g.supplierCode)
+		<where>
+		1=1
+		<if test="selectComboxValue=='HY'">
+		AND ao.freight_type = 'HYF'
+		</if>
+		<if test="selectComboxValue=='KY'">
+		AND ao.freight_type = 'KYF'
+		</if>
+		<if test= "materialName !=null and materialName != ''">
+		AND UPPER(ii.material_name) LIKE UPPER('%'||#{materialName}||'%')
+		</if>
+		<if test= "materialOrigin !=null and materialOrigin != ''">
+		AND UPPER(ii.material_origin) LIKE UPPER('%'||#{materialOrigin}||'%')
+		</if>
+		<if test= "materialBrand !=null and materialBrand != ''">
+		AND UPPER(ii.material_brand) LIKE UPPER('%'||#{materialBrand}||'%')
+		</if>
+		<if test= 'itemValue=="npackag"'>
+		AND an.npackag_type = #{npackagName}
+		</if>
+		<if test= 'itemValue=="wpackag"'>
+		AND aw.wpackag_type = #{wpackagName}
+		</if>
+		</where>
+		<if test="page_count == null">
+			<if test="app_orderby != null">
+				ORDER BY ${app_orderby}
+			</if>
+			<if test="app_orderby == null">
+				ORDER BY NVL(b.merchandiseCode,a.intentionCode),f.accountingCode DESC
+			</if>
+		</if>
+	</select>
+</mapper>

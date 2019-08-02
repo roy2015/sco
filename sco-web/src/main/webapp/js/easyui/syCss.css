@@ -1,0 +1,59 @@
+
+.tableForm {
+	border-collapse: collapse;
+	width: 97%;
+}
+
+.tableForm th {
+	text-align: right;
+	border: 0px solid #ccc;
+	font-weight:normal;
+	white-space:nowrap;
+	padding-left:5px;
+	padding-right:5px;
+	padding-bottom:5px;
+}
+
+.tableForm td {
+	padding-left:5px;
+	padding-right:5px;
+	padding-bottom:5px;
+	text-align: left;
+	border: 0px solid #ccc;
+}
+
+.tableForm input {
+	width: 98%;
+}
+
+.tableForm textarea {
+	width: 98%;
+}
+
+.logo {
+	
+}
+
+.info {
+	background: #FFFEE6;
+	color: #8F5700;
+	padding: 12px;
+}
+
+.tip {
+	width: 24px;
+	height: 16px;
+	float: left;
+}
+
+.filterInput{ 
+        height:11px;
+        font-size:12px;
+        font-family:normal small "Microsoft YaHei","Microsoft JhengHei","΢���ź�",Arial,Verdana,Helvetica,sans-serif;
+}
+
+.filterSelect{ 
+/*         border:1px; */
+        font-size:12px;
+        font-family:normal small "Microsoft YaHei","Microsoft JhengHei","΢���ź�",Arial,Verdana,Helvetica,sans-serif;
+}

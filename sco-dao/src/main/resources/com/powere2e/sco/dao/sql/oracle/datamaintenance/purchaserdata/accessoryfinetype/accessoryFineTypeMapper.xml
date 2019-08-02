@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.datamaintenance.purchaserdata.accessoryfinetype.AccessoryFineTypeDao">
+	<resultMap type="com.powere2e.sco.model.datamaintenance.purchaserdata.accessoryfinetype.AccessoryFineType" id="accessoryFineTypeMap">
+		<result property="fineTypeCode" column="fineTypeCode"/>
+		<result property="fineTypeName" column="fineTypeName"/>
+		<result property="created" column="created"/>
+		<result property="createby" column="createby"/>
+		<result property="updated" column="updated"/>
+		<result property="updateby" column="updateby"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <!-- 查询辅助细分类维护(可分页)-->
+    <select id="searchAccessoryFineType" resultMap="accessoryFineTypeMap">
+    	SELECT 
+    	<if test="page_count == null">
+       		t.fine_type_code fineTypeCode,t.fine_type_name fineTypeName
+       		,t.created,	t.updated 
+			,(select u.login_name from pub_user u where u.user_id=t.createby) as createby,
+           	(select u.login_name from pub_user u where u.user_id=t.updateby) as updateby
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM accessory_fine_type t
+    	<where>
+    		1=1
+	    	<if test= "fineTypeCode != null and fineTypeCode!=''">
+			AND t.fine_type_code = #{fineTypeCode}
+			</if>
+	    	<if test= "fineTypeName != null and fineTypeName!=''">
+			AND t.fine_type_name = #{fineTypeName}
+			</if>
+	    	<if test= "created != null and created!=''">
+			AND	convert(varchar,t.created,120) LIKE (#{created})
+			</if>
+	    	<if test= "createby != null and createby!=''">
+			AND UPPER(t.createby) LIKE UPPER('%'||#{createby}||'%')
+			</if>
+	    	<if test= "updated != null and updated!=''">
+			AND	convert(varchar,t.updated,120) LIKE (#{updated})
+			</if>
+	    	<if test= "updateby != null and updateby!=''">
+			AND UPPER(t.updateby) LIKE UPPER('%'||#{updateby}||'%')
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.created DESC
+    		</if>
+    	</if>
+    </select>
+    <!-- 查询细分类是否存在于辅料中 -->
+    <select id="searchAccessoryIntention" resultType="Integer">
+            select count(*) from ACCESSORY_INTENTION where FINE_TYPE_CODE=#{fineTypeCode}
+    </select>
+    <!-- 增加辅助细分类维护 --> 
+	<insert id="saveAccessoryFineType" parameterType="hashmap">
+		INSERT INTO accessory_fine_type(fine_type_code,fine_type_name,created,createby) 
+			 VALUES(S_ACCESSORY_FINE_TYPE.NEXTVAL,#{fineTypeName},sysdate,#{app_create_by})
+    </insert>
+    <!-- 删除辅助细分类维护 -->
+    <delete id="deleteAccessoryFineType" parameterType="hashmap">
+        DELETE FROM 
+        			accessory_fine_type 
+        WHERE 
+        			FINE_TYPE_CODE in 
+        			<foreach collection="fineTypeCode"  item="fineTypeCode" separator="," open="(" close=")">
+        			    #{fineTypeCode}
+        			</foreach>
+    </delete>
+</mapper>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.singlelogin.SingleLoginDao">
+
+	<!-- 同步来伊份用户数据 -->
+	<update id="completeSynUser">
+	
+		MERGE INTO pub_user T1 
+		USING (
+			<foreach collection="list" item="item" separator="UNION ALL">
+				(SELECT 
+					s1.c,s2.* 
+				FROM 
+				(
+				SELECT 
+					rownum c,user_id userId 
+				FROM pub_user
+				WHERE 
+					user_id = #{item.uid}
+				) s1 
+				RIGHT JOIN 
+				(
+				SELECT 
+					#{item.uid} userId,
+					#{item.cn} realName,
+					#{item.telephonenumber} phone,
+					#{item.mobile} mobile,
+					#{item.lyfmail} email,
+					#{item.telexnumber} fax,
+					sysdate opDate
+				FROM DUAL 
+				) s2 
+				ON s1.userId = s2.userId
+				)
+			</foreach>
+			) T2 
+			ON (T2.c > 0) 
+			WHEN MATCHED THEN
+				UPDATE SET 
+					T1.real_name = T2.realName,
+					T1.phone = T2.phone,
+					T1.mobile = T2.mobile,
+					T1.email = T2.email,
+					T1.description = T2.fax,
+					T1.updated = T2.opDate
+				WHERE T1.user_id = T2.userId
+			WHEN NOT MATCHED THEN 
+				INSERT (user_id,login_name,real_name,phone,mobile,email,description, 
+					object_id,object_typ,passwd,salt,active,client_id,created,createby) 
+				VALUES(T2.userId,T2.userId,T2.realName,T2.phone,T2.mobile,T2.email,T2.fax,
+					'10001','O','tWgkrL3cmAvUpZIiJywEtYo/iCrVV3YpsAZGgqK4L7o=','O0J3xHUm3142/LzPN5jbwA==','Y','1',T2.opDate,'15122816231')
+	</update>
+	
+	<!-- 删除用户 -->
+	<delete id="deleteSynUser">
+		DELETE FROM 
+			pub_user
+		WHERE 
+			user_id IN (${uids})
+	</delete>
+	
+	<!-- 删除用户分配的角色记录 -->
+	<delete id="deleteSynRoleRec">
+		DELETE FROM 
+			pub_user_role
+		WHERE
+			user_id IN (${uids})
+	</delete>
+	
+</mapper>

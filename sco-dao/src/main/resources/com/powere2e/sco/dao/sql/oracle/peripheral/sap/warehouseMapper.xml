@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.peripheral.sap.WarehouseDao">
+	<resultMap type="com.powere2e.sco.model.peripheral.sap.Warehouse" id="warehouseMap">
+		<result property="warehouseCode" column="warehouseCode"/>
+		<result property="warehouseName" column="warehouseName"/>
+		<result property="regionCode" column="regionCode"/>
+		<result property="syncDate" column="syncDate"/>
+    </resultMap>
+    
+    
+    <!-- 增加仓库 --> 
+	<insert id="saveWarehouse" parameterType="hashmap">
+		INSERT INTO warehouse(warehouse_code,warehouse_name,region_code,sync_date) 
+			 <foreach collection="list" item="item" index="index" separator="union all" > 
+		         (
+		         SELECT 
+			         #{item.warehouseCode}, 
+			         #{item.warehouseName},
+			         #{item.regionCode},
+			         #{app_created}
+		         FROM　DUAL
+		         )
+		     </foreach>   
+    </insert>
+    
+     <!--删除仓库-->
+    <delete id="deleteWarehouse">
+    	DELETE FROM warehouse
+    </delete>
+   
+</mapper>

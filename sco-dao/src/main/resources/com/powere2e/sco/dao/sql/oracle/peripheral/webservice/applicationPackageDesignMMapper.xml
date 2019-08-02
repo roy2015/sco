@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.peripheral.webservice.ApplicationPackageDesignMDao">
+	<resultMap type="com.powere2e.sco.model.peripheral.webservice.ApplicationPackageDesignM" id="applicationPackageDesignMMap">
+		<result property="applicationPdCode" column="applicationPdCode"/>
+		<result property="applicationCode" column="applicationCode"/>
+		<result property="merchandiseCode" column="merchandiseCode"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <!-- 查询商品包装设计申请单(商品)(可分页)-->
+    <select id="searchApplicationPackageDesignM" resultMap="applicationPackageDesignMMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.application_pd_code applicationPdCode,t.application_code applicationCode,t.merchandise_code merchandiseCode,t.supplier_code supplierCode
+       		
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM application_package_design_m t
+    	<where>
+    		1=1
+	    	<if test= "applicationPdCode != null and applicationPdCode!=''">
+			AND t.application_pd_code = #{applicationPdCode}
+			</if>
+	    	<if test= "applicationCode != null and applicationCode!=''">
+			AND UPPER(t.application_code) LIKE UPPER('%'||#{applicationCode}||'%')
+			</if>
+	    	<if test= "merchandiseCode != null and merchandiseCode!=''">
+			AND UPPER(t.merchandise_code) LIKE UPPER('%'||#{merchandiseCode}||'%')
+			</if>
+	    	<if test= "supplierCode != null and supplierCode!=''">
+			AND UPPER(t.supplier_code) LIKE UPPER('%'||#{supplierCode}||'%')
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		
+    	</if>
+    </select>
+    
+    <!-- 根据主键查询某个商品包装设计申请单(商品)(可分页)-->
+    <select id="loadApplicationPackageDesignM" resultMap="applicationPackageDesignMMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.application_pd_code applicationPdCode,t.application_code applicationCode,t.merchandise_code merchandiseCode,t.supplier_code supplierCode
+       		
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM application_package_design_m t
+    	<where>
+    		1=1
+	    	<if test= "applicationPdCode != null and applicationPdCode!=''">
+			AND  t.APPLICATION_PD_CODE = #{applicationPdCode}
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		
+    	</if>
+    </select>
+    
+    <!-- 增加商品包装设计申请单(商品) --> 
+	<insert id="saveApplicationPackageDesignM" parameterType="hashmap">
+		INSERT INTO application_package_design_m(application_pd_code,application_code,merchandise_code,supplier_code) 
+			 VALUES(#{applicationPdCode},#{applicationCode},#{merchandiseCode},#{supplierCode})
+    </insert>
+    <!-- 修改商品包装设计申请单(商品)  -->
+    <update id="updateApplicationPackageDesignM" parameterType="hashmap">
+		UPDATE	
+				application_package_design_m	
+		   SET	
+		   		application_code=#{applicationCode},
+		   		merchandise_code=#{merchandiseCode},
+		   		supplier_code=#{supplierCode}		   		
+		 WHERE	
+		 		APPLICATION_PD_CODE=#{applicationPdCode}
+    </update>
+    <!-- 删除商品包装设计申请单(商品) -->
+    <delete id="deleteApplicationPackageDesignM" parameterType="hashmap">
+        DELETE FROM 
+        			application_package_design_m 
+        WHERE 
+        			APPLICATION_PD_CODE=#{applicationPdCode} <!--AND client_id=#{app_user_clientID}-->
+    </delete>
+</mapper>

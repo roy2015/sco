@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.peripheral.sap.RegionDao">
+	<resultMap type="com.powere2e.sco.model.peripheral.sap.Region" id="regionMap">
+		<result property="regionCode" column="regionCode"/>
+		<result property="regionName" column="regionName"/>
+		<result property="directStoreQuantity" column="directStoreQuantity"/>
+		<result property="joinStoreQuantity" column="joinStoreQuantity"/>
+		<result property="syncDate" column="syncDate"/>
+    </resultMap>
+   
+    
+    <!-- 增加区域信息 --> 
+	<insert id="saveRegion" parameterType="hashmap">
+		INSERT INTO region(region_code,region_name,direct_store_quantity,join_store_quantity,sync_date) 
+			  <foreach collection="list" item="item" index="index" separator="union all" > 
+		         (
+		         SELECT 
+			         #{item.regionCode}, 
+			         #{item.regionName},
+			         #{item.directStoreQuantity},
+			         #{item.joinStoreQuantity},
+			         #{app_created}
+		         FROM　DUAL
+		         )
+		     </foreach>   
+    </insert>
+    
+     <!--删除区域信息-->
+    <delete id="deleteRegion">
+    	DELETE FROM region
+    </delete>
+    
+</mapper>

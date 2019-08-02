@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.sharefunctionanalysis.supplieranalysis.suppliersalescontribution.SupplierSalesContributionDao">
+    <resultMap type="com.powere2e.sco.model.sharefunctionanalysis.supplieranalysis.suppliersalescontribution.SupplierSalesContribution" id="supplierSalesMap">
+		<result property="supplierCode" column="supplierCode" />
+		<result property="supplierName" column="supplierName" />
+		<result property="sellMonth" column="sellMonth"/>
+		
+		<result property="sellQuantity" column="sellQuantity"/>
+		<result property="lastSellQuantity" column="lastSellQuantity"/>
+		<result property="sellQuantityChange" column="sellQuantityChange"/>
+		<result property="lastSellQuantityChange" column="lastSellQuantityChange"/>
+		<result property="sellQuantityRank" column="sellQuantityRank"/>
+		<result property="lastSellQuantityRank" column="lastSellQuantityRank"/>
+		
+		<result property="sellTotalPrice" column="sellTotalPrice"/>
+		<result property="lastSellTotalPrice" column="lastSellTotalPrice"/>
+		<result property="sellTotalPriceChange" column="sellTotalPriceChange"/>
+		<result property="lastSellTotalPriceChange" column="lastSellTotalPriceChange"/>
+		<result property="sellTotalPriceRank" column="sellTotalPriceRank"/>
+		<result property="lastSellTotalPriceRank" column="lastSellTotalPriceRank"/>
+		
+		<result property="sellProfit" column="sellProfit"/>
+		<result property="lastSellProfit" column="lastSellProfit"/>
+		<result property="sellProfitChange" column="sellProfitChange"/>
+		<result property="lastSellProfitChange" column="lastSellProfitChange"/>
+		<result property="sellProfitRank" column="sellProfitRank"/>
+		<result property="lastSellProfitRank" column="lastSellProfitRank"/>
+		
+		<result property="receiptPrice" column="receiptPrice"/>
+		<result property="lastReceiptPrice" column="lastReceiptPrice"/>
+		<result property="receiptPriceChange" column="receiptPriceChange"/>
+		<result property="lastReceiptPriceChange" column="lastReceiptPriceChange"/>
+		<result property="receiptPriceRank" column="receiptPriceRank"/>
+		<result property="lastReceiptPriceRank" column="lastReceiptPriceRank"/>
+		
+		<result property="receiptRationed" column="receiptRationed"/>
+		<result property="lastReceiptRationed" column="lastReceiptRationed"/>
+		<result property="receiptRationedChange" column="receiptRationedChange"/>
+		<result property="lastReceiptRationedChange" column="lastReceiptRationedChange"/>
+		<result property="receiptRationedRank" column="receiptRationedRank"/>
+		<result property="lastReceiptRationedRank" column="lastReceiptRationedRank"/>
+		
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+
+     <!--查询单品销售总计-->
+      <select id="querySupplierSalesContribution" resultMap="supplierSalesMap">
+     	SELECT
+     	<if test="page_count == null">
+     	  *
+     	</if>
+	    <if test="page_count != null">
+	      count(1) AS record_count
+	    </if> 
+     	FROM
+     	(
+     		SELECT
+       	        d1.supplierCode supplierCode,
+                d1.supplierName supplierName,
+                
+                ROUND(d1.sellQuantity,2) sellQuantity,
+                ROUND(d3.lastSellQuantity,2) lastSellQuantity,
+                TO_CHAR(ROUND(DECODE(d2.totalSellQuantity,NULL,0,0,0,NVL(d1.sellQuantity,0)/d2.totalSellQuantity)*100,2),'fm990.00')||'%' sellQuantityChange,
+                TO_CHAR(ROUND(DECODE(d4.lastTotalSellQuantity,NULL,0,0,0,NVL(d3.lastSellQuantity,0)/d4.lastTotalSellQuantity)*100,2),'fm990.00')||'%' lastSellQuantityChange,
+                ROW_NUMBER() OVER(ORDER BY DECODE(d2.totalSellQuantity,NULL,0,0,0,NVL(d1.sellQuantity,0)/d2.totalSellQuantity) DESC) sellQuantityRank,
+                ROW_NUMBER() OVER(ORDER BY DECODE(d4.lastTotalSellQuantity,NULL,0,0,0,NVL(d3.lastSellQuantity,0)/d4.lastTotalSellQuantity) DESC) lastSellQuantityRank,
+                
+                ROUND(d1.sellTotalPrice,2) sellTotalPrice,
+                ROUND(d3.lastSellTotalPrice,2) lastSellTotalPrice,
+                TO_CHAR(ROUND(DECODE(d2.totalSellTotalPrice,NULL,0,0,0,NVL(d1.sellTotalPrice,0)/d2.totalSellTotalPrice)*100,2),'fm990.00')||'%' sellTotalPriceChange,
+                TO_CHAR(ROUND(DECODE(d4.lastTotalSellTotalPrice,NULL,0,0,0,NVL(d3.lastSellTotalPrice,0)/d4.lastTotalSellTotalPrice)*100,2),'fm990.00')||'%' lastSellTotalPriceChange,
+                ROW_NUMBER() OVER(ORDER BY DECODE(d2.totalSellTotalPrice,NULL,0,0,0,NVL(d1.sellTotalPrice,0)/d2.totalSellTotalPrice) DESC) sellTotalPriceRank,
+                ROW_NUMBER() OVER(ORDER BY DECODE(d4.lastTotalSellTotalPrice,NULL,0,0,0,NVL(d3.lastSellTotalPrice,0)/d4.lastTotalSellTotalPrice) DESC) lastSellTotalPriceRank,
+                
+                ROUND(d1.sellProfit,2) sellProfit,
+                ROUND(d3.lastSellProfit,2) lastSellProfit,
+                TO_CHAR(ROUND(DECODE(d2.totalSellProfit,NULL,0,0,0,NVL(d1.sellProfit,0)/d2.totalSellProfit)*100,2),'fm990.00')||'%' sellProfitChange,
+                TO_CHAR(ROUND(DECODE(d4.lastTotalSellProfit,NULL,0,0,0,NVL(d3.lastSellProfit,0)/d4.lastTotalSellProfit)*100,2),'fm990.00')||'%' lastSellProfitChange,
+                ROW_NUMBER() OVER(ORDER BY DECODE(d2.totalSellProfit,NULL,0,0,0,NVL(d1.sellProfit,0)/d2.totalSellProfit) DESC) sellProfitRank,
+                ROW_NUMBER() OVER(ORDER BY DECODE(d4.lastTotalSellProfit,NULL,0,0,0,NVL(d3.lastSellProfit,0)/d4.lastTotalSellProfit) DESC) lastSellProfitRank,
+       	       
+       	        ROUND(b1.receiptPrice,2) receiptPrice,
+			    ROUND(b1.lastReceiptPrice,2) lastReceiptPrice,
+			    b1.receiptPriceChange receiptPriceChange,
+			    b1.lastReceiptPriceChange lastReceiptPriceChange,
+			    ROW_NUMBER() OVER(ORDER BY NVL(b1.receiptPriceChange,0) DESC) receiptPriceRank,
+                ROW_NUMBER() OVER(ORDER BY NVL(b1.lastReceiptPriceChange,0) DESC) lastReceiptPriceRank,
+			   
+			    ROUND(b1.receiptRationed,2) receiptRationed,
+			    ROUND(b1.lastReceiptRationed,2) lastReceiptRationed,
+			    b1.receiptRationedChange receiptRationedChange,
+			    b1.lastReceiptRationedChange lastReceiptRationedChange,
+			    ROW_NUMBER() OVER(ORDER BY NVL(b1.receiptRationedChange,0) DESC) receiptRationedRank,
+                ROW_NUMBER() OVER(ORDER BY NVL(b1.lastReceiptRationedChange,0) DESC) lastReceiptRationedRank
+               
+       	   FROM 
+       	   <!--查询销售信息-->
+       	   	(SELECT
+	       	   	   t1.supplier_code supplierCode,
+	               MIN(t3.supplier_name) supplierName,
+	               SUM(t1.sell_quantity*NVL(t2.net_weight,1)) sellQuantity,
+	               SUM(t1.sell_total_price) sellTotalPrice,
+	               SUM(t1.sell_profit) sellProfit,
+	               #{minDate} sellMonth
+               
+            FROM   merchandise_sell_d_j_month t1
+      INNER JOIN   merchandise t2
+       	      ON   t1.merchandise_code=t2.merchandise_code
+             AND   t1.supplier_code=t2.supplier_code
+      INNER JOIN   supplier t3
+              ON   t1.supplier_code=t3.supplier_code
+           WHERE   1=1
+             AND   TO_DATE(t1.sell_month,'YYYY-MM') &gt;= TO_DATE(#{minDate},'YYYY-MM')
+		     AND   TO_DATE(t1.sell_month,'YYYY-MM') &lt;= TO_DATE(#{maxDate},'YYYY-MM')
+		   
+           GROUP BY t1.supplier_code
+           ) d1
+           
+     LEFT JOIN
+		  (SELECT      
+		           SUM(t1.sell_quantity*NVL(t2.net_weight,1)) totalSellQuantity,
+		           SUM(t1.sell_total_price) totalSellTotalPrice,
+		           SUM(t1.sell_profit) totalSellProfit,
+		           #{minDate} sellMonth
+		        
+		    FROM   merchandise_sell_d_j_month t1,merchandise t2
+           WHERE   t1.merchandise_code=t2.merchandise_code
+             AND   t1.supplier_code=t2.supplier_code
+             AND   t1.supplier_code BETWEEN 10000 AND 49999
+             AND 
+				   (
+				     t1.merchandise_code BETWEEN 10000 AND 59999
+				     OR t1.merchandise_code BETWEEN 70000 AND 79999
+				     OR t1.merchandise_code BETWEEN 814000000 AND 814999999
+				     OR t1.merchandise_code BETWEEN 900000000 AND 99999999
+				   )
+             AND   TO_DATE(t1.sell_month,'YYYY-MM') &gt;=TO_DATE(#{minDate},'YYYY-MM')
+		     AND   TO_DATE(t1.sell_month,'YYYY-MM') &lt;=TO_DATE(#{maxDate},'YYYY-MM')
+		   ) d2
+		   
+		   	  ON   d1.sellMonth=d2.sellMonth
+	  LEFT  JOIN
+		 (SELECT 
+		 		   t1.supplier_code supplierCode,
+		           SUM(t1.sell_quantity*NVL(t2.net_weight,1)) lastSellQuantity,
+		           SUM(t1.sell_total_price) lastSellTotalPrice,
+		           SUM(t1.sell_profit) lastSellProfit,
+		           #{minDate} lastSellMonth
+	               
+	        FROM   merchandise_sell_d_j_month t1
+	  INNER JOIN   merchandise t2
+       	      ON   t1.merchandise_code=t2.merchandise_code
+             AND   t1.supplier_code=t2.supplier_code
+      INNER JOIN   supplier t3
+              ON   t1.supplier_code=t3.supplier_code
+           WHERE   1=1
+             AND   TO_DATE(t1.sell_month,'YYYY-MM') &gt;=TO_DATE(CONCAT((SUBSTR(#{minDate},0,4)-1),SUBSTR(#{minDate},5)),'YYYY-MM')
+		     AND   TO_DATE(t1.sell_month,'YYYY-MM') &lt;=TO_DATE(CONCAT((SUBSTR(#{maxDate},0,4)-1),SUBSTR(#{maxDate},5)),'YYYY-MM')
+			   
+	       GROUP BY t1.supplier_code
+	       ) d3
+	           
+	         ON   d1.supplierCode=d3.supplierCode
+	        AND	  d1.sellMonth=d3.lastSellMonth  
+	  LEFT JOIN
+	 		(SELECT      
+			        SUM(t1.sell_quantity*NVL(t2.net_weight,1)) lastTotalSellQuantity,
+			        SUM(t1.sell_total_price) lastTotalSellTotalPrice,
+			        SUM(t1.sell_profit) lastTotalSellProfit,
+			        #{minDate} lastSellMonth
+	       
+	  		 FROM   merchandise_sell_d_j_month t1,merchandise t2
+            WHERE   t1.merchandise_code=t2.merchandise_code
+              AND   t1.supplier_code BETWEEN 10000 AND 49999
+              AND
+				    (
+				     t1.merchandise_code BETWEEN 10000 AND 59999
+				     OR t1.merchandise_code BETWEEN 70000 AND 79999
+				     OR t1.merchandise_code BETWEEN 814000000 AND 814999999
+				     OR t1.merchandise_code BETWEEN 900000000 AND 99999999
+				    )
+              AND   t1.supplier_code=t2.supplier_code
+              AND   TO_DATE(t1.sell_month,'YYYY-MM') &gt;=TO_DATE(CONCAT((SUBSTR(#{minDate},0,4)-1),SUBSTR(#{minDate},5)),'YYYY-MM')
+	 		  AND   TO_DATE(t1.sell_month,'YYYY-MM') &lt;=TO_DATE(CONCAT((SUBSTR(#{maxDate},0,4)-1),SUBSTR(#{maxDate},5)),'YYYY-MM')
+	 		) d4
+			ON 	    d3.lastSellMonth=d4.lastSellMonth	
+	  <!--查询进货信息-->		
+	  LEFT JOIN
+	  		(SELECT 
+				   d5.supplierCode supplierCode,
+	               d5.receiptPrice receiptPrice,
+	               d7.lastReceiptPrice lastReceiptPrice,
+	               TO_CHAR(ROUND(DECODE(d6.totalReceiptPrice,NULL,0,0,0,NVL(d5.receiptPrice,0)/d6.totalReceiptPrice)*100,2),'fm990.00')||'%' receiptPriceChange,
+	               TO_CHAR(ROUND(DECODE(d8.lastTotalReceiptPrice,NULL,0,0,0,NVL(d7.lastReceiptPrice,0)/d8.lastTotalReceiptPrice)*100,2),'fm990.00')||'%' lastReceiptPriceChange,
+	              
+	               d5.receiptRationed receiptRationed,
+	               d7.lastReceiptRationed lastReceiptRationed,
+	               TO_CHAR(ROUND(DECODE(d6.totalReceiptRationed,NULL,0,0,0,NVL(d5.receiptRationed,0)/d6.totalReceiptRationed)*100,2),'fm990.00')||'%' receiptRationedChange,
+				   TO_CHAR(ROUND(DECODE(d8.lastTotalReceiptRationed,NULL,0,0,0,NVL(d7.lastReceiptRationed,0)/d8.lastTotalReceiptRationed)*100,2),'fm990.00')||'%' lastReceiptRationedChange
+        
+       		FROM
+	 	   (SELECT 
+	 	   		   t1.supplier_code supplierCode,
+                   SUM(t1.receipt_total_price) receiptPrice,
+                   SUM(t1.receipt_rationed*NVL(t2.net_weight,1)) receiptRationed,
+                   #{minDate} sellMonth
+               
+            FROM   merchandise_receipt t1
+      INNER JOIN   merchandise t2
+       	      ON   t1.merchandise_code=t2.merchandise_code
+             AND   t1.supplier_code=t2.supplier_code
+      INNER JOIN   supplier t3
+              ON   t1.supplier_code=t3.supplier_code
+           WHERE   1=1
+             AND   t1.supplier_code BETWEEN 10000 AND 49999
+             AND 
+				    (
+				     t1.merchandise_code BETWEEN 10000 AND 59999
+				     OR t1.merchandise_code BETWEEN 70000 AND 79999
+				     OR t1.merchandise_code BETWEEN 814000000 AND 814999999
+				     OR t1.merchandise_code BETWEEN 900000000 AND 99999999
+				    )
+             AND   TO_DATE(SUBSTR(TO_CHAR(t1.reality_receipt_date,'yyyy-mm-dd hh:mi:ss'),0,7),'YYYY-MM') &gt;=TO_DATE(#{minDate},'YYYY-MM')
+             AND   TO_DATE(SUBSTR(TO_CHAR(t1.reality_receipt_date,'yyyy-mm-dd hh:mi:ss'),0,7),'YYYY-MM') &lt;=TO_DATE(#{maxDate},'YYYY-MM')
+           GROUP BY t1.supplier_code
+           ) d5
+
+		   <!-- ON      d1.supplierCode=d5.supplierCode -->
+  	  LEFT JOIN
+		    (SELECT      
+		            SUM(t1.receipt_total_price) totalReceiptPrice,
+		            SUM(t1.receipt_rationed*NVL(t2.net_weight,1)) totalReceiptRationed,
+		            #{minDate} sellMonth
+		        
+		     FROM   merchandise_receipt t1,merchandise t2
+            WHERE   t1.merchandise_code=t2.merchandise_code
+              AND   t1.supplier_code=t2.supplier_code
+              AND   t1.supplier_code BETWEEN 10000 AND 49999
+              AND 
+				    (
+				     t1.merchandise_code BETWEEN 10000 AND 59999
+				     OR t1.merchandise_code BETWEEN 70000 AND 79999
+				     OR t1.merchandise_code BETWEEN 814000000 AND 814999999
+				     OR t1.merchandise_code BETWEEN 900000000 AND 99999999
+				    )
+              AND   TO_DATE(SUBSTR(TO_CHAR(t1.reality_receipt_date,'yyyy-mm-dd hh:mi:ss'),0,7),'YYYY-MM') &gt;=TO_DATE(#{minDate},'YYYY-MM')
+		      AND   TO_DATE(SUBSTR(TO_CHAR(t1.reality_receipt_date,'yyyy-mm-dd hh:mi:ss'),0,7),'YYYY-MM') &lt;=TO_DATE(#{maxDate},'YYYY-MM')
+		   ) d6
+		   
+		    ON 		d5.sellMonth=d6.sellMonth	
+		   
+	  LEFT JOIN
+	 	   (SELECT 
+	 	   		   t1.supplier_code supplierCode,
+                   SUM(t1.receipt_total_price) lastReceiptPrice,
+                   SUM(t1.receipt_rationed*NVL(t2.net_weight,1)) lastReceiptRationed,
+                   #{minDate} lastSellMonth
+               
+            FROM   merchandise_receipt t1 
+      INNER JOIN   merchandise t2
+       	      ON   t1.merchandise_code=t2.merchandise_code
+             AND   t1.supplier_code=t2.supplier_code
+      INNER JOIN   supplier t3
+              ON   t1.supplier_code=t3.supplier_code
+           WHERE   1=1
+             AND   TO_DATE(SUBSTR(TO_CHAR(t1.reality_receipt_date,'yyyy-mm-dd hh:mi:ss'),0,7),'YYYY-MM') &gt;=TO_DATE(CONCAT((SUBSTR(#{minDate},0,4)-1),SUBSTR(#{minDate},5)),'YYYY-MM')
+             AND   TO_DATE(SUBSTR(TO_CHAR(t1.reality_receipt_date,'yyyy-mm-dd hh:mi:ss'),0,7),'YYYY-MM') &lt;=TO_DATE(CONCAT((SUBSTR(#{maxDate},0,4)-1),SUBSTR(#{maxDate},5)),'YYYY-MM')
+           
+           GROUP BY t1.supplier_code
+           ) d7
+
+		     ON   d5.supplierCode=d7.supplierCode
+		    AND	  d5.sellMonth=d7.lastSellMonth
+  	  LEFT JOIN
+		    (SELECT      
+		            SUM(t1.receipt_total_price) lastTotalReceiptPrice,
+		            SUM(t1.receipt_rationed*nvl(t2.net_weight,1)) lastTotalReceiptRationed,
+		            #{minDate} lastSellMonth
+		        
+		     FROM   merchandise_receipt t1,merchandise t2
+            WHERE   t1.merchandise_code=t2.merchandise_code
+              AND   t1.supplier_code=t2.supplier_code
+              AND   t1.supplier_code BETWEEN 10000 AND 49999
+              AND 
+				    (
+				     t1.merchandise_code BETWEEN 10000 AND 59999
+				     OR t1.merchandise_code BETWEEN 70000 AND 79999
+				     OR t1.merchandise_code BETWEEN 814000000 AND 814999999
+				     OR t1.merchandise_code BETWEEN 900000000 AND 99999999
+				    )
+              AND   TO_DATE(SUBSTR(TO_CHAR(t1.reality_receipt_date,'yyyy-mm-dd hh:mi:ss'),0,7),'YYYY-MM') &gt;=TO_DATE(CONCAT((SUBSTR(#{minDate},0,4)-1),SUBSTR(#{minDate},5)),'YYYY-MM')
+		      AND   TO_DATE(SUBSTR(TO_CHAR(t1.reality_receipt_date,'yyyy-mm-dd hh:mi:ss'),0,7),'YYYY-MM') &lt;=TO_DATE(CONCAT((SUBSTR(#{maxDate},0,4)-1),SUBSTR(#{maxDate},5)),'YYYY-MM')
+		   ) d8
+		   
+		   ON      d7.lastSellMonth=d8.lastSellMonth
+		   ) b1
+		   
+		   ON      d1.supplierCode=b1.supplierCode 
+		   WHERE d1.supplierCode BETWEEN 10000 AND 49999
+		   ) f WHERE 1=1
+		   <if test="supplierCode !=null and supplierCode !='' ">
+	        	AND UPPER(f.supplierCode) LIKE UPPER('%'||#{supplierCode}||'%')
+		   </if>
+		   <if test= "supplierName != null and supplierName !=''">
+				AND UPPER(f.supplierName) LIKE UPPER('%'||#{supplierName}||'%')
+		   </if>
+		   <if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    			NULLS LAST
+    		</if>
+    	 </if>			   			
+     </select>
+    
+</mapper>

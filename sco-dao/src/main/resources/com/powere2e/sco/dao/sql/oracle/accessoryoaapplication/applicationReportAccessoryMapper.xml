@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.accessoryoaapplication.ApplicationReportAccessoryDao">
+	<resultMap type="com.powere2e.sco.model.accessoryoaapplication.ApplicationReportAccessory" id="applicationReportAccessoryMap">
+		<result property="applicationCode" column="applicationCode"/>
+		<result property="cause" column="cause"/>
+		<result property="gzMoney" column="gzMoney"/>
+		<result property="accumulativeYear" column="accumulativeYear"/>
+		<result property="ljMoney" column="ljMoney"/>
+		<result property="content" column="content"/>
+		<result property="departments" column="departments"/>
+		<result property="responsiblePerson" column="responsiblePerson"/>
+		<result property="subscribeBillDate" column="subscribeBillDate"/>
+		<result property="auditDate" column="auditDate"/>
+		<result property="requirementsDwDate" column="requirementsDwDate"/>
+		<result property="activityDqDate" column="activityDqDate"/>
+		<result property="emergency" column="emergency"/>
+		<result property="haveornotSubscribeBill" column="haveornotSubscribeBill"/>
+		<result property="isslItem" column="isslItem"/>
+		<result property="dxhtgz" column="dxhtgz"/>
+		<result property="cglj" column="cglj"/>
+		<result property="syfw" column="syfw"/>
+		<result property="path" column="path"/>
+		<result property="opinion" column="opinion"/>
+		<result property="purchaseName" column="purchaseName"/>
+		<result property="purchaseCount" column="purchaseCount"/>
+		<result property="purchasePrice" column="purchasePrice"/>
+		<result property="purchaseDepartment" column="purchaseDepartment"/>
+		<result property="created" column="created"/>
+		<result property="createby" column="createby"/>
+		<result property="updated" column="updated"/>
+		<result property="updateby" column="updateby"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="projectManager" column="projectManager"/>
+		<result property="projectBudget" column="projectBudget"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <!-- 查询申请报告(可分页)-->
+    <select id="searchApplicationReportAccessory" resultMap="applicationReportAccessoryMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.application_code applicationCode,t.cause cause,t.path path,t.gz_money gzMoney,t.accumulative_year accumulativeYear,t.lj_money ljMoney,t.content content,t.departments departments,t.responsible_person responsiblePerson,t.subscribe_bill_date subscribeBillDate,t.audit_date auditDate,t.requirements_dw_date requirementsDwDate,t.activity_dq_date activityDqDate,t.emergency emergency,t.haveornot_subscribe_bill haveornotSubscribeBill,t.issl_item isslItem,t.dxhtgz dxhtgz,t.cglj cglj,t.syfw syfw,t.opinion opinion,t.purchase_name purchaseName,t.purchase_count purchaseCount,t.purchase_price purchasePrice,t.purchase_department purchaseDepartment
+       		,t.project_manager projectManager,t.project_budget projectBudget,t.created,	t.updated 
+			,(select u.real_name from pub_user u where u.user_id=t.createby) as createUserName,
+           	(select u.real_name from pub_user u where u.user_id=t.updateby) as updateUserName
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM application_report_accessory t
+    	<where>
+    		1=1
+	    	<if test= "applicationCode != null and applicationCode!=''">
+			AND t.application_code = #{applicationCode}
+			</if>
+	    	<if test= "cause != null and cause!=''">
+			AND UPPER(t.cause) LIKE UPPER('%'||#{cause}||'%')
+			</if>
+	    	<if test= "gzMoney != null and gzMoney!=''">
+			AND t.gz_money = #{gzMoney}
+			</if>
+	    	<if test= "accumulativeYear != null and accumulativeYear!=''">
+			AND UPPER(t.accumulative_year) LIKE UPPER('%'||#{accumulativeYear}||'%')
+			</if>
+	    	<if test= "ljMoney != null and ljMoney!=''">
+			AND t.lj_money = #{ljMoney}
+			</if>
+	    	<if test= "content != null and content!=''">
+			AND UPPER(t.content) LIKE UPPER('%'||#{content}||'%')
+			</if>
+	    	<if test= "departments != null and departments!=''">
+			AND UPPER(t.departments) LIKE UPPER('%'||#{departments}||'%')
+			</if>
+	    	<if test= "responsiblePerson != null and responsiblePerson!=''">
+			AND UPPER(t.responsible_person) LIKE UPPER('%'||#{responsiblePerson}||'%')
+			</if>
+	    	<if test= "subscribeBillDate != null and subscribeBillDate!=''">
+			AND	convert(varchar,t.subscribe_bill_date,120) LIKE (#{subscribeBillDate})
+			</if>
+	    	<if test= "auditDate != null and auditDate!=''">
+			AND	convert(varchar,t.audit_date,120) LIKE (#{auditDate})
+			</if>
+	    	<if test= "requirementsDwDate != null and requirementsDwDate!=''">
+			AND	convert(varchar,t.requirements_dw_date,120) LIKE (#{requirementsDwDate})
+			</if>
+	    	<if test= "activityDqDate != null and activityDqDate!=''">
+			AND UPPER(t.activity_dq_date) LIKE UPPER('%'||#{activityDqDate}||'%')
+			</if>
+	    	<if test= "emergency != null and emergency!=''">
+			AND UPPER(t.emergency) LIKE UPPER('%'||#{emergency}||'%')
+			</if>
+	    	<if test= "haveornotSubscribeBill != null and haveornotSubscribeBill!=''">
+			AND UPPER(t.haveornot_subscribe_bill) LIKE UPPER('%'||#{haveornotSubscribeBill}||'%')
+			</if>
+	    	<if test= "isslItem != null and isslItem!=''">
+			AND UPPER(t.issl_item) LIKE UPPER('%'||#{isslItem}||'%')
+			</if>
+	    	<if test= "dxhtgz != null and dxhtgz!=''">
+			AND t.dxhtgz = #{dxhtgz}
+			</if>
+	    	<if test= "cglj != null and cglj!=''">
+			AND t.cglj = #{cglj}
+			</if>
+	    	<if test= "syfw != null and syfw!=''">
+			AND UPPER(t.syfw) LIKE UPPER('%'||#{syfw}||'%')
+			</if>
+	    	<if test= "opinion != null and opinion!=''">
+			AND UPPER(t.opinion) LIKE UPPER('%'||#{opinion}||'%')
+			</if>
+	    	<if test= "purchaseName != null and purchaseName!=''">
+			AND UPPER(t.purchase_name) LIKE UPPER('%'||#{purchaseName}||'%')
+			</if>
+	    	<if test= "purchaseCount != null and purchaseCount!=''">
+			AND t.purchase_count = #{purchaseCount}
+			</if>
+	    	<if test= "purchasePrice != null and purchasePrice!=''">
+			AND t.purchase_price = #{purchasePrice}
+			</if>
+	    	<if test= "purchaseDepartment != null and purchaseDepartment!=''">
+			AND UPPER(t.purchase_department) LIKE UPPER('%'||#{purchaseDepartment}||'%')
+			</if>
+	    	<if test= "created != null and created!=''">
+			AND	convert(varchar,t.created,120) LIKE (#{created})
+			</if>
+	    	<if test= "createby != null and createby!=''">
+			AND UPPER(t.createby) LIKE UPPER('%'||#{createby}||'%')
+			</if>
+	    	<if test= "updated != null and updated!=''">
+			AND	convert(varchar,t.updated,120) LIKE (#{updated})
+			</if>
+	    	<if test= "updateby != null and updateby!=''">
+			AND UPPER(t.updateby) LIKE UPPER('%'||#{updateby}||'%')
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.created DESC
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 根据主键查询某个申请报告(可分页)-->
+    <select id="loadApplicationReportAccessory" resultMap="applicationReportAccessoryMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.application_code applicationCode,t.cause cause,t.path path,t.gz_money gzMoney,t.accumulative_year accumulativeYear,t.lj_money ljMoney,t.content content,t.departments departments,t.responsible_person responsiblePerson,t.subscribe_bill_date subscribeBillDate,t.audit_date auditDate,t.requirements_dw_date requirementsDwDate,t.activity_dq_date activityDqDate,t.emergency emergency,t.haveornot_subscribe_bill haveornotSubscribeBill,t.issl_item isslItem,t.dxhtgz dxhtgz,t.cglj cglj,t.syfw syfw,t.opinion opinion,t.purchase_name purchaseName,t.purchase_count purchaseCount,t.purchase_price purchasePrice,t.purchase_department purchaseDepartment
+       		,t.project_manager projectManager,t.project_budget projectBudget,t.created,	t.updated 
+		   ,(select u.real_name from pub_user u where u.user_id=t.createby) as createUserName,
+           	(select u.real_name from pub_user u where u.user_id=t.updateby) as updateUserName
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM application_report_accessory t
+    	<where>
+    		1=1
+	    	<if test= "applicationCode != null and applicationCode!=''">
+			AND  t.APPLICATION_CODE = #{applicationCode}
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.created DESC
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 增加申请报告 --> 
+	<insert id="saveApplicationReportAccessory" parameterType="hashmap">
+		INSERT INTO application_report_accessory(application_code,cause,gz_money,accumulative_year,lj_money,content,departments,responsible_person,subscribe_bill_date,audit_date,requirements_dw_date,activity_dq_date,emergency,haveornot_subscribe_bill,issl_item,dxhtgz,cglj,syfw,opinion,purchase_name,purchase_count,purchase_price,purchase_department,project_manager,project_budget,created,createby) 
+			 VALUES(#{applicationCode},#{cause},#{gzMoney},#{accumulativeYear},#{ljMoney},#{content},#{departments},#{responsiblePerson},#{subscribeBillDate},#{auditDate},#{requirementsDwDate},#{activityDqDate},#{emergency},#{haveornotSubscribeBill},#{isslItem},#{dxhtgz},#{cglj},#{syfw},#{opinion},#{purchaseName},#{purchaseCount},#{purchasePrice},#{purchaseDepartment},#{projectManager},#{projectBudget},#{app_created},#{app_create_by})
+    </insert>
+    <!-- 修改申请报告  -->
+    <update id="updateApplicationReportAccessory" parameterType="hashmap">
+		UPDATE	
+				application_report_accessory	
+		   SET	
+		   		cause=#{cause},
+		   		gz_money=#{gzMoney},
+		   		accumulative_year=#{accumulativeYear},
+		   		lj_money=#{ljMoney},
+		   		content=#{content},
+		   		departments=#{departments},
+		   		responsible_person=#{responsiblePerson},
+		   		subscribe_bill_date=#{subscribeBillDate},
+		   		audit_date=#{auditDate},
+		   		requirements_dw_date=#{requirementsDwDate},
+		   		activity_dq_date=#{activityDqDate},
+		   		emergency=#{emergency},
+		   		haveornot_subscribe_bill=#{haveornotSubscribeBill},
+		   		issl_item=#{isslItem},
+		   		dxhtgz=#{dxhtgz},
+		   		cglj=#{cglj},
+		   		syfw=#{syfw},
+		   		opinion=#{opinion},
+		   		purchase_name=#{purchaseName},
+		   		purchase_count=#{purchaseCount},
+		   		purchase_price=#{purchasePrice},
+		   		purchase_department=#{purchaseDepartment},	
+		   		project_manager=#{projectManager},
+		   		project_budget=#{projectBudget}	, 
+		   		path=#{path}	   		
+		 WHERE	
+		 		APPLICATION_CODE=#{applicationCode}
+    </update>
+    <!-- 删除申请报告 -->
+    <delete id="deleteApplicationReportAccessory" parameterType="hashmap">
+        DELETE FROM 
+        			application_report_accessory 
+        WHERE 
+        			APPLICATION_CODE=#{applicationCode} <!--AND client_id=#{app_user_clientID}-->
+    </delete>
+</mapper>

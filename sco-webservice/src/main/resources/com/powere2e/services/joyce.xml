@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+  <!-- 意向品管理模块 -->
+  <bean id="merchandiseIntentionService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.service.impl.merchandiseintention.MerchandiseIntentionServiceImpl">
+        <property name="merchandiseIntentionDao" ref="merchandiseIntentionDao"/>
+        <property name="merchandiseQuotedDao" ref="merchandiseQuotedDao"/>
+        <property name="foretasteFeedbackDao" ref="foretasteFeedbackDao"/>
+      </bean>
+    </property>
+  </bean>
+  
+  <!-- 意向品管理模块 -->
+  <bean id="merchandiseQuotedService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.service.impl.merchandiseintention.MerchandiseQuotedServiceImpl">
+        <property name="merchandiseQuotedDao" ref="merchandiseQuotedDao"/>
+      </bean>
+    </property>
+  </bean>
+  
+  
+  <!-- 意向品管理模块 -->
+  <bean id="quotedCompareService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.service.impl.merchandiseintention.QuotedCompareServiceImpl">
+        <property name="quotedCompareDao" ref="quotedCompareDao"/>
+      </bean>
+    </property>
+  </bean>
+  
+  <!-- 意向品管理模块 -->
+  <bean id="foretasteFeedbackService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.service.impl.merchandiseintention.ForetasteFeedbackServiceImpl">
+        <property name="foretasteFeedbackDao" ref="foretasteFeedbackDao"/>
+      </bean>
+    </property>
+  </bean>
+  
+  <!-- 供应商列表 -->
+  <bean id="supplierDataService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.service.impl.SupplierDataServiceImpl">
+        <property name="supplierDataDao" ref="supplierDataDao"/>
+      </bean>
+    </property>
+  </bean>
+  
+  <!-- 新品引进OA申请 -->
+  <bean id="reportNewService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.service.impl.merchandiseoaapplication.reportnewoaapplication.ApplicationReportNewServiceImpl">
+         <property name="reportNewDao" ref="reportNewDao"/>
+         <property name="merchandiseOaApplicationDao" ref="merchandiseOaApplicationDao"/>
+         <property name="priceNewDao" ref="priceNewDao"/>
+         <property name="supplierAttachmentMDao" ref="supplierAttachmentMDao"/>
+      </bean>
+    </property>
+  </bean>
+  
+  <!-- 老品新上OA申请 -->
+  <bean id="reportOldupService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.service.impl.merchandiseoaapplication.reportoldupoaapplication.ApplicationReportOldupServiceImpl">
+         <property name="reportOldupDao" ref="reportOldupDao"/>
+         <property name="merchandiseOaApplicationDao" ref="merchandiseOaApplicationDao"/>
+         <property name="priceOldupDao" ref="priceOldupDao"/>
+         <property name="supplierAttachmentMDao" ref="supplierAttachmentMDao"/>
+      </bean>
+    </property>
+  </bean>
+  
+  <!-- 正常调价OA申请 -->
+  <bean id="reportAdjustpriceService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.service.impl.merchandiseoaapplication.reportadjustpriceoaapplication.ApplicationReportAdjustpriceServiceImpl">
+         <property name="reportAdjustpriceDao" ref="reportAdjustpriceDao"/>
+         <property name="merchandiseOaApplicationDao" ref="merchandiseOaApplicationDao"/>
+         <property name="priceAdjustpriceDao" ref="priceAdjustpriceDao"/>
+         <property name="supplierAttachmentMDao" ref="supplierAttachmentMDao"/>
+      </bean>
+    </property>
+  </bean>
+  
+  <!-- 快速调价OA申请 -->
+  <bean id="fastAdjustpriceService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.service.impl.merchandiseoaapplication.fastadjustpriceoaapplication.ApplicationFastadjustpriceServiceImpl">
+        <property name="fastAdjustpriceDao" ref="fastAdjustpriceDao"/>
+        <property name="merchandiseOaApplicationDao" ref="merchandiseOaApplicationDao"/>
+      </bean>
+    </property>
+  </bean>
+  
+  <!-- 商品OA申请-->
+  <bean id="merchandiseOaApplicationService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.service.impl.merchandiseoaapplication.MerchandiseOaApplicationServiceImpl">
+        <property name="merchandiseOaApplicationDao" ref="merchandiseOaApplicationDao"/>
+      </bean>
+    </property>
+  </bean>
+  
+  <!-- 商品价格(新品引进) -->
+  <bean id="priceNewService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.service.impl.merchandiseoaapplication.reportnewoaapplication.reportnew.MerchandisePriceNewServiceImpl">
+        <property name="priceNewDao" ref="priceNewDao"/>
+      </bean>
+    </property>
+  </bean>
+  
+  <!-- 历史与本次价格(老品新上) -->
+  <bean id="priceOldupService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.service.impl.merchandiseoaapplication.reportoldupoaapplication.reportoldup.HistoryPriceOldupServiceImpl">
+        <property name="priceOldupDao" ref="priceOldupDao"/>
+        <property name="reportOldupDao" ref="reportOldupDao"/>
+      </bean>
+    </property>
+  </bean>
+  
+  <!-- 历史与本次价格(老品新上) -->
+  <bean id="priceAdjustpriceService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.service.impl.merchandiseoaapplication.reportadjustpriceoaapplication.reportadjustprice.HistoryPriceAdjustpriceServiceImpl">
+        <property name="priceAdjustpriceDao" ref="priceAdjustpriceDao"/>
+        <property name="reportAdjustpriceDao" ref="reportAdjustpriceDao"/>
+      </bean>
+    </property>
+  </bean>
+  
+  
+  <!-- 销售同比分析 -->
+  <bean id="sellYearOnYearService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.service.impl.sharefunctionanalysis.sellanalysis.sellyearonyearanalysis.SellYearOnYearServiceImpl">
+        <property name="sellYearOnYearDao" ref="sellYearOnYearDao"/>
+      </bean>
+    </property>
+  </bean>
+  
+   <!-- 明细类销售同比分析 -->
+  <bean id="detailSellYearOnYearService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.service.impl.sharefunctionanalysis.sellanalysis.sellyearonyearanalysis.DetailSellYearOnYearServiceImpl">
+        <property name="detailSellYearOnYearDao" ref="detailSellYearOnYearDao"/>
+      </bean>
+    </property>
+  </bean>
+  
+   <!-- 小分类销售同比分析 -->
+  <bean id="smallSellYearOnYearService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.service.impl.sharefunctionanalysis.sellanalysis.sellyearonyearanalysis.SmallSellYearOnYearServiceImpl">
+        <property name="smallSellYearOnYearDao" ref="smallSellYearOnYearDao"/>
+      </bean>
+    </property>
+  </bean>
+  
+   <!-- 整体销售同比分析 -->
+  <bean id="marketSellYearOnYearService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.service.impl.sharefunctionanalysis.sellanalysis.sellyearonyearanalysis.MarketSellYearOnYearServiceImpl">
+        <property name="marketSellYearOnYearDao" ref="marketSellYearOnYearDao"/>
+      </bean>
+    </property>
+  </bean>
+  
+   <!-- 单品销售环比分析 -->
+  <bean id="merchandiseLinkRelativeService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.service.impl.sharefunctionanalysis.sellanalysis.selllinkrelative.MerchandiseLinkRelativeServiceImpl">
+        <property name="merchandiseLinkRelativeDao" ref="merchandiseLinkRelativeDao"/>
+      </bean>
+    </property>
+  </bean>
+  
+   <!-- 明细类销售环比分析 -->
+  <bean id="detailLinkRelativeService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.service.impl.sharefunctionanalysis.sellanalysis.selllinkrelative.DetailLinkRelativeServiceImpl">
+        <property name="detailLinkRelativeDao" ref="detailLinkRelativeDao"/>
+      </bean>
+    </property>
+  </bean>
+  
+   <!-- 小分类销售环比分析 -->
+  <bean id="smallLinkRelativeService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.service.impl.sharefunctionanalysis.sellanalysis.selllinkrelative.SmallLinkRelativeServiceImpl">
+        <property name="smallLinkRelativeDao" ref="smallLinkRelativeDao"/>
+      </bean>
+    </property>
+  </bean>
+  
+   <!-- 整体销售环比分析 -->
+  <bean id="marketLinkRelativeService" parent="baseTxProxy">
+    <property name="target">																		 
+      <bean class="com.powere2e.sco.service.impl.sharefunctionanalysis.sellanalysis.selllinkrelative.MarketLinkRelativeServiceImpl">
+        <property name="marketLinkRelativeDao" ref="marketLinkRelativeDao"/>
+      </bean>
+    </property>
+  </bean>
+  
+   <!-- 供应商销售贡献度排行 -->
+  <bean id="supplierSalesContributionService" parent="baseTxProxy">
+    <property name="target">																		 
+      <bean class="com.powere2e.sco.service.impl.sharefunctionanalysis.supplieranalysis.suppliersalescontribution.SupplierSalesContributionServiceImpl">
+        <property name="supplierSalesContributionDao" ref="supplierSalesContributionDao"/>
+      </bean>
+    </property>
+  </bean>
+  
+</beans>

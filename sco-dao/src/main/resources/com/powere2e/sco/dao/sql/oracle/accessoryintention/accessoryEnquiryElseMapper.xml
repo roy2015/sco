@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.accessoryintention.AccessoryEnquiryElseDao">
+	<resultMap type="com.powere2e.sco.model.accessoryintention.AccessoryEnquiryElse" id="accessoryEnquiryElseMap">
+		<result property="elseCode" column="elseCode"/>
+		<result property="enquiryCode" column="enquiryCode"/>
+		<result property="name" column="name"/>
+		<result property="info" column="info"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <!-- 查询询价单其他要求(可分页)-->
+    <select id="searchAccessoryEnquiryElse" resultMap="accessoryEnquiryElseMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.else_code elseCode,t.enquiry_code enquiryCode,t.name name,t.info info
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM accessory_enquiry_else t
+    	<where>
+    		1=1
+	    	<if test= "elseCode != null and elseCode!=''">
+			AND t.else_code = #{elseCode}
+			</if>
+	    	<if test= "enquiryCode != null and enquiryCode!=''">
+			AND t.enquiry_code = #{enquiryCode}
+			</if>
+	    	<if test= "name != null and name!=''">
+			AND UPPER(t.name) LIKE UPPER('%'||#{name}||'%')
+			</if>
+	    	<if test= "info != null and info!=''">
+			AND UPPER(t.info) LIKE UPPER('%'||#{info}||'%')
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 根据主键查询某个询价单其他要求(可分页)-->
+    <select id="loadAccessoryEnquiryElse" resultMap="accessoryEnquiryElseMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.else_code elseCode,t.enquiry_code enquiryCode,t.name name,t.info info
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM accessory_enquiry_else t
+    	<where>
+    		1=1
+	    	<if test= "elseCode != null and elseCode!=''">
+			AND  t.ELSE_CODE = #{elseCode}
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 增加询价单其他要求 --> 
+	<insert id="saveAccessoryEnquiryElse" parameterType="hashmap">
+		INSERT INTO accessory_enquiry_else(else_code,enquiry_code,name,info) 
+			 VALUES(#{elseCode},#{enquiryCode},#{name},#{info})
+    </insert>
+    <!-- 修改询价单其他要求  -->
+    <update id="updateAccessoryEnquiryElse" parameterType="hashmap">
+		UPDATE	
+				accessory_enquiry_else	
+		   SET	
+		   		enquiry_code=#{enquiryCode},
+		   		name=#{name},
+		   		info=#{info}		   		
+		 WHERE	
+		 		ELSE_CODE=#{elseCode}
+    </update>
+    <!-- 删除询价单其他要求 -->
+    <delete id="deleteAccessoryEnquiryElse" parameterType="hashmap">
+        DELETE FROM 
+        			accessory_enquiry_else 
+        WHERE 
+        			ENQUIRY_CODE=#{enquiryCode} <!--AND client_id=#{app_user_clientID}-->
+    </delete>
+</mapper>

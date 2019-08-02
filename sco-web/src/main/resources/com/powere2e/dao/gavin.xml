@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+  <bean id="accessoryIntentionDao" class="com.powere2e.sco.dao.impl.accessoryintention.AccessoryIntentionDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+    <bean id="accessoryEnquiryDao" class="com.powere2e.sco.dao.impl.accessoryintention.AccessoryEnquiryDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  <bean id="accessoryEnquiryMaterialDao" class="com.powere2e.sco.dao.impl.accessoryintention.AccessoryEnquiryMaterialDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  <bean id="accessoryEnquiryAccessoryDao" class="com.powere2e.sco.dao.impl.accessoryintention.AccessoryEnquiryAccessoryDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  <bean id="accessoryEnquiryPackingDao" class="com.powere2e.sco.dao.impl.accessoryintention.AccessoryEnquiryPackingDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  <bean id="accessoryEnquiryTechnologyDao" class="com.powere2e.sco.dao.impl.accessoryintention.AccessoryEnquiryTechnologyDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  <bean id="accessoryEnquiryQuotedCountDao" class="com.powere2e.sco.dao.impl.accessoryintention.AccessoryEnquiryQuotedCountDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  <bean id="accessoryEnquiryElseDao" class="com.powere2e.sco.dao.impl.accessoryintention.AccessoryEnquiryElseDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  <!-- 导入报价单 -->
+   <bean id="accessoryQuotedMaterialDao" class="com.powere2e.sco.dao.impl.accessoryintention.AccessoryQuotedMaterialDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  <bean id="accessoryQuotedElectronicDao" class="com.powere2e.sco.dao.impl.accessoryintention.AccessoryQuotedElectronicDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  <bean id="accessoryQuotedAccessoryDao" class="com.powere2e.sco.dao.impl.accessoryintention.AccessoryQuotedAccessoryDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  <bean id="accessoryQuotedPackingDao" class="com.powere2e.sco.dao.impl.accessoryintention.AccessoryQuotedPackingDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  <bean id="accessoryQuotedTechnologyDao" class="com.powere2e.sco.dao.impl.accessoryintention.AccessoryQuotedTechnologyDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  <bean id="accessoryQuotedElseDao" class="com.powere2e.sco.dao.impl.accessoryintention.AccessoryQuotedElseDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  <bean id="accessoryQuotedTotalDao" class="com.powere2e.sco.dao.impl.accessoryintention.AccessoryQuotedTotalDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  <bean id="accessoryProofingDao" class="com.powere2e.sco.dao.impl.accessoryintention.AccessoryProofingDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  <bean id="accessoryQuotedScanDao" class="com.powere2e.sco.dao.impl.accessoryintention.AccessoryQuotedScanDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  <bean id="reportsDao" class="com.powere2e.sco.dao.impl.reports.ReportsDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  <bean id="committeeApplyDao" class="com.powere2e.sco.dao.impl.accessoryoaapplication.CommitteeApplyDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  <bean id="nonFoodApplyDao" class="com.powere2e.sco.dao.impl.accessoryoaapplication.NonFoodApplyDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  <bean id="compareApplyDao" class="com.powere2e.sco.dao.impl.accessoryoaapplication.CompareApplyDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+   <bean id="oaApplicationDao" class="com.powere2e.sco.dao.impl.accessoryoaapplication.OaApplicationDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  <bean id="applicationReportAccessoryDao" class="com.powere2e.sco.dao.impl.accessoryoaapplication.ApplicationReportAccessoryDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  <bean id="subscribeAccessoryDao" class="com.powere2e.sco.dao.impl.accessoryoaapplication.SubscribeAccessoryDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  <bean id="dhInfoDao" class="com.powere2e.sco.dao.impl.accessoryoaapplication.DhInfoDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  <bean id="applicationQuotedDao" class="com.powere2e.sco.dao.impl.accessoryoaapplication.ApplicationQuotedDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  <bean id="wlInfoDao" class="com.powere2e.sco.dao.impl.accessoryoaapplication.WlInfoDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  <bean id="totalcostanalysisDao" class="com.powere2e.sco.dao.impl.accessoryintentioncostanalysis.totalcostanalysis.TotalcostanalysisDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+   <bean id="costAnalogyDao" class="com.powere2e.sco.dao.impl.accessoryintentioncostanalysis.costanalogy.CostAnalogyDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  <bean id="historicalQuoteSupplierDao" class="com.powere2e.sco.dao.impl.accessoryintentioncostanalysis.historicalquotesupplier.HistoricalQuoteSupplierDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  <bean id="supplierComprehensiveAnalysisDao" class="com.powere2e.sco.dao.impl.suppliercomprehensiveanalysis.SupplierComprehensiveAnalysisDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+   <bean id="applicationVisitFactoryDao" class="com.powere2e.sco.dao.impl.peripheral.webservice.ApplicationVisitFactoryDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  <bean id="applicationPackageDesignDao" class="com.powere2e.sco.dao.impl.peripheral.webservice.ApplicationPackageDesignDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  <bean id="applicationVisitFactoryMDao" class="com.powere2e.sco.dao.impl.peripheral.webservice.ApplicationVisitFactoryMDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+  <bean id="applicationPackageDesignMDao" class="com.powere2e.sco.dao.impl.peripheral.webservice.ApplicationPackageDesignMDaoImpl">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+  </bean>
+</beans>

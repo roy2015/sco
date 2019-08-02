@@ -1,0 +1,558 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.powere2e.sco.interfaces.dao.sharefunctionanalysis.purchasinganalysis.merchandisestockdetail.MerchandiseStockDetailDao">
+	<resultMap type="com.powere2e.sco.model.sharefunctionanalysis.purchasinganalysis.merchandisestockdetail.MerchandiseStockDetail" id="MerchandiseStockDetailMap">
+		<result property="merchandiseCode" column="merchandiseCode" />
+		<result property="merchandiseName" column="merchandiseName" />
+		<result property="supplierCode" column="supplierCode" />
+		<result property="supplierName" column="supplierName" />
+		<result property="centreName" column="centreName" />
+		<result property="smallName" column="smallName" />
+		<result property="detailName" column="detailName" />
+		<result property="fineName" column="fineName" />
+		<result property="dxRoleName" column="dxRoleName" />
+		<result property="dlRoleName" column="dlRoleName" />
+		<result property="maxDate" column="maxDate" />
+		<result property="minDate" column="minDate" />
+		<result property="regionCode" column="regionCode" />
+		<result property="warehouseCode" column="warehouseCode" />
+		<result property="receiptRationed" column="receiptRationed" />
+		<result property="receiptTotalPrice" column="receiptTotalPrice" />
+		<result property="receiptRationedM" column="receiptRationedM" />
+		<result property="receiptTotalPriceM" column="receiptTotalPriceM" />
+		<result property="receiptRationedMS" column="receiptRationedMS" />
+		<result property="receiptTotalPriceMS" column="receiptTotalPriceMS" />
+		<result property="receiptRationedMA" column="receiptRationedMA" />
+		<result property="receiptTotalPriceMA" column="receiptTotalPriceMA" />
+		<result property="receiptRationedS" column="receiptRationedS" />
+		<result property="receiptTotalPriceS" column="receiptTotalPriceS" />
+		<result property="realityReceiptDate" column="realityReceiptDate" />
+		<result property="createUserName" column="createUserName" />
+		<result property="updateUserName" column="updateUserName" />
+		<result property="recordCount" column="record_count" />
+	</resultMap>
+	<!-- 区域信息查询 -->
+	<select id="searchRegion" resultType="com.powere2e.security.model.Option">
+		select
+		warehouse_site_code id, warehouse_site_name text
+		from
+		warehouse_site
+		where warehouse_site_code=#{regionCode}
+		order by warehouse_site_name
+	</select>
+	<!-- 仓库信息查询 -->
+	<select id="searchWarehouse" resultType="com.powere2e.security.model.Option">
+		select
+		distinct
+		warehouse_code id
+		from
+		warehouse 
+		order by warehouse_code asc
+	</select>
+	<!-- 仓位信息查询 -->
+	<select id="searchWarehouseSite" resultType="com.powere2e.security.model.Option">
+		select
+		distinct warehouse_site_code id
+		from
+		warehouse_site
+		order by warehouse_site_code asc
+	</select>
+	<!-- 查询商品信息 -->
+	<select id="searchMerchandise" resultMap="MerchandiseStockDetailMap">
+		SELECT
+		<if test="page_count == null">
+			m.merchandise_code merchandiseCode,
+			m.merchandise_name merchandiseName,
+			s.supplier_code supplierCode,
+			s.supplier_name supplierName,
+			dx.role_name dxRoleName,
+			dl.role_name dlRoleName,
+			ct.centre_type_name centreName,
+			st.small_type_name smallName,
+			dt.detail_type_name detailName,
+			ft.fine_type_name fineName
+		</if>
+		<if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		FROM
+		merchandise m
+		LEFT JOIN supplier s ON m.supplier_code = s.supplier_code
+		left join MERCHANDISE_ROLE mr on mr.MERCHANDISE_CODE=m.merchandise_code
+		LEFT JOIN merchandise_dx_role dx ON mr.dx_role_code =
+		dx.role_code
+		LEFT JOIN merchandise_dl_role dl ON mr.dl_role_code = dl.role_code
+		LEFT JOIN merchandise_centre_type ct ON m.centre_type_code =ct.centre_type_code
+		LEFT JOIN merchandise_small_type st ON
+		m.small_type_code = st.small_type_code
+		LEFT JOIN merchandise_detail_type dt ON m.detail_type_code = dt.detail_type_code
+		left join INTENTION_SUPPLIER_MERCHANDISE ism on
+		ism.merchandise_code=m.merchandise_code and ism.SUPPLIER_CODE=m.SUPPLIER_CODE
+		left join MERCHANDISE_INTENTION mi on ism.intention_code=mi.intention_code
+		LEFT JOIN merchandise_fine_type ft ON
+		dt.detail_type_code = ft.detail_type_code
+		AND mi.fine_type_code = ft.fine_type_code	<!-- 细分类 -->
+		<where>
+			1=1
+			<if test="merchandiseCode != null and merchandiseCode !=''">
+				AND UPPER(m.merchandise_code) LIKE UPPER('%'||#{merchandiseCode}||'%')
+			</if>
+			<if test="merchandiseName != null and merchandiseName !=''">
+				AND UPPER(m.merchandise_name) LIKE UPPER('%'||#{merchandiseName}||'%')
+			</if>
+			<if test="supplierCode != null and supplierCode !=''">
+				AND UPPER(m.supplier_code) LIKE UPPER('%'||#{supplierCode}||'%')
+			</if>
+			<if test="supplierName != null and supplierName !=''">
+				AND UPPER(s.supplier_name) LIKE UPPER('%'||#{supplierName}||'%')
+			</if>
+			<if test="show ==1">
+				AND m.NET_WEIGHT != 1
+			</if>
+			<if test="show ==2">
+				AND m.NET_WEIGHT =1
+			</if>
+			<if test="show ==null">
+				and (
+					  (m.merchandise_code is null)
+                      or
+					  (m.merchandise_code >= 60000 and 69999 >= m.merchandise_code) 
+				      or 
+				      (m.merchandise_code >= 810000000 and 810999999 >= m.merchandise_code) 
+				      or 
+				      (m.merchandise_code >= 811000000 and 811999999 >= m.merchandise_code)
+				      or 
+				      (m.merchandise_code >= 812000000 and 812999999 >= m.merchandise_code)
+				      or 
+				      (m.merchandise_code >= 813000000 and 813999999 >= m.merchandise_code)
+		        	)
+			</if>
+			<if test="show !=null">
+				and (
+		           (m.merchandise_code >= 10000 and 59999 >= m.merchandise_code) 
+		           or 
+		           (m.merchandise_code >= 70000 and 79999 >= m.merchandise_code) 
+		           or 
+		           (m.merchandise_code >= 814000000 and 814999999 >= m.merchandise_code) 
+		           or 
+		           (m.merchandise_code >= 900000000 and 999999999 >= m.merchandise_code)
+		        )
+			</if>
+			<if test="centreTypeCode != null and centreTypeCode != ''">
+				AND UPPER(m.centre_type_code) like UPPER(#{centreTypeCode})
+			</if>
+			<if test="smallTypeCode != null and smallTypeCode != ''">
+				AND UPPER(m.small_type_code) like UPPER(#{smallTypeCode})
+			</if>
+			<if test="detailTypeCode != null and detailTypeCode != ''">
+				AND UPPER(m.detail_type_code) like UPPER(#{detailTypeCode})
+			</if>
+			<if test="fineTypeCode != null and fineTypeCode != ''">
+				AND UPPER(ft.fine_type_code) like UPPER(#{fineTypeCode})
+			</if>
+			<if test="dxRoleCode != null and dxRoleCode != ''">
+				AND dx.role_code = #{dxRoleCode}
+			</if>
+			<if test="dlRoleCode != null and dlRoleCode != ''">
+				AND dl.role_code = #{dlRoleCode}
+			</if>
+		</where>
+		<if test="page_count == null">
+			<if test="app_orderby !=null">
+				ORDER BY ${app_orderby}
+			</if>
+			<if test="app_orderby ==null">
+				ORDER BY m.merchandise_code desc
+			</if>
+		</if>
+	</select>
+
+
+	<!-- 查询促销明细 -->
+	<select id="searchMerchandiseStockDetailInfo" resultMap="MerchandiseStockDetailMap">
+		select
+		<if test="page_count == null">
+		    *
+		</if>
+		<if test="page_count != null">
+	 		count(1) record_count
+		</if>
+		from(
+		  (select 
+		    m.merchandiseCode,
+			m.merchandiseName,
+			m.supplierCode,
+			m.supplierName,
+			m.warehouseCode,
+			m.regionCode,
+			m.dxRoleName,
+			m.dlRoleName,
+			m.centreName,
+			m.smallName,
+			m.detailName,
+			m.fineName,
+			m.realityReceiptDate,
+			m.receiptTotalPriceM,
+			m.receiptRationedM,
+			mpS.receiptTotalPriceS,
+			mpS.receiptRationedS,
+			round(decode(mpS.receiptTotalPriceS,0,0,m.receiptTotalPriceM*100/mpS.receiptTotalPriceS),2) receiptTotalPriceMS,
+			round(decode(mpS.receiptRationedS,0,0,m.receiptRationedM*100/mpS.receiptRationedS),2) receiptRationedMS,
+			mp.receiptTotalPrice,
+			mp.receiptRationed,
+			round(decode(mp.receiptTotalPrice,0,0,m.receiptTotalPriceM*100/mp.receiptTotalPrice),2) receiptTotalPriceMA,
+			round(decode(mp.receiptRationed,0,0,m.receiptRationedM*100/mp.receiptRationed),2) receiptRationedMA
+		
+		from (
+		(
+			SELECT
+			m.merchandise_code merchandiseCode,
+			m.merchandise_name merchandiseName,
+			s.supplier_code supplierCode,
+			s.supplier_name supplierName,
+			dx.role_name dxRoleName,
+			dl.role_name dlRoleName,
+			ct.centre_type_name centreName,
+			st.small_type_code smallCode,
+			st.small_type_name smallName,
+			dt.detail_type_name detailName,
+			dt.detail_type_code detailCode,
+			ft.fine_type_name fineName,
+			mp.warehouse_code warehouseCode,
+			mp.warehouse_site_code regionCode,
+			<if test="type=='month' ">
+				to_char(mp.reality_receipt_date,'yyyy-mm')
+			</if>
+			<if test="type=='day' ">
+				to_char(mp.reality_receipt_date,'yyyy-mm-dd')
+			</if>
+			realityReceiptDate,
+			round(sum(mp.receipt_total_price),2) receiptTotalPriceM,
+			round(sum(mp.receipt_rationed
+			<if test="show ==3">
+				*m.net_weight
+			</if>),2) receiptRationedM
+		FROM
+		merchandise m
+		LEFT JOIN supplier s ON m.supplier_code = s.supplier_code
+		left join MERCHANDISE_ROLE mr on m.merchandise_code=mr.merchandise_code
+		LEFT JOIN merchandise_dx_role dx ON mr.dx_role_code = dx.role_code
+		LEFT JOIN merchandise_dl_role dl ON mr.dl_role_code = dl.role_code
+		LEFT JOIN merchandise_centre_type ct ON m.centre_type_code =ct.centre_type_code
+		LEFT JOIN merchandise_small_type st ON m.small_type_code = st.small_type_code
+		LEFT JOIN merchandise_detail_type dt ON m.detail_type_code = dt.detail_type_code
+		left join INTENTION_SUPPLIER_MERCHANDISE ism on ism.merchandise_code=m.merchandise_code and ism.SUPPLIER_CODE=m.SUPPLIER_CODE
+		left join MERCHANDISE_INTENTION mi on ism.intention_code=mi.intention_code
+		LEFT JOIN merchandise_fine_type ft ON dt.detail_type_code = ft.detail_type_code AND mi.fine_type_code = ft.fine_type_code	<!-- 细分类 -->
+		left join MERCHANDISE_RECEIPT mp on  m.merchandise_code=mp.merchandise_code and m.supplier_code=mp.supplier_code
+		<where>
+			1=1
+			and 
+				(<foreach collection="list" item="item" index="index" separator="OR">
+					( m.merchandise_code = #{item.merchandiseCode} AND m.supplier_code =#{item.supplierCode})
+				</foreach>)
+			and (mp.reality_receipt_date between 
+			<if test="type=='day' ">
+				to_date(#{minDate},'yyyy-mm-dd') and to_date(#{maxDate},'yyyy-mm-dd')
+			</if>
+			<if test="type=='month' ">
+				to_date(#{minDate},'yyyy-mm-dd') and to_date(#{maxDate},'yyyy-mm-dd')
+			</if>)
+			and mp.WAREHOUSE_CODE in (${warehouseCode})
+			and mp.WAREHOUSE_SITE_CODE in (${regionCode})
+		</where>
+		group by m.merchandise_code,
+			m.merchandise_name,
+			s.supplier_code,
+			s.supplier_name,
+			dx.role_name,
+			dl.role_name,
+			ct.centre_type_name,
+			st.small_type_code,
+			st.small_type_name,
+			dt.detail_type_name,
+			dt.detail_type_code,
+			ft.fine_type_name,
+			mp.warehouse_code,
+			mp.warehouse_site_code,
+      		<if test="type=='month' ">
+				to_char(mp.reality_receipt_date,'yyyy-mm')
+			</if>
+			<if test="type=='day' ">
+				to_char(mp.reality_receipt_date,'yyyy-mm-dd')
+			</if>
+		) m
+		left join
+			(SELECT
+			<if test="type=='month' ">
+				to_char(mp.reality_receipt_date,'yyyy-mm')
+			</if>
+			<if test="type=='day' ">
+				to_char(mp.reality_receipt_date,'yyyy-mm-dd')
+			</if>
+			realityReceiptDateS,
+			m.small_type_code,
+			round(sum(mp.receipt_total_price),2) receiptTotalPriceS,
+			round(sum(mp.receipt_rationed
+			<if test="show ==3">
+				*m.net_weight
+			</if>),2) receiptRationedS
+			FROM MERCHANDISE_RECEIPT mp
+			left join merchandise m on m.merchandise_code=mp.merchandise_code and m.supplier_code=mp.supplier_code
+			<where>
+				1=1
+				and (
+				mp.reality_receipt_date between
+				<if test="type=='day' ">
+					to_date(#{minDate},'yyyy-mm-dd') and to_date(#{maxDate},'yyyy-mm-dd')
+				</if>
+				<if test="type=='month' ">
+					to_date(#{minDate},'yyyy-mm-dd') and to_date(#{maxDate},'yyyy-mm-dd')
+				</if>
+				)
+				<if test="show ==1">
+					AND m.net_weight!= 1
+				</if>
+				<if test="show ==2">
+					AND m.net_weight =1
+				</if>
+				and mp.WAREHOUSE_CODE in (${warehouseCode})
+				and mp.WAREHOUSE_SITE_CODE in (${regionCode})
+			</where>
+			group by
+			<if test="type=='month' ">
+				to_char(mp.reality_receipt_date,'yyyy-mm')
+			</if>
+			<if test="type=='day' ">
+				to_char(mp.reality_receipt_date,'yyyy-mm-dd')
+			</if>
+			, m.small_type_code
+		) mpS on mpS.realityReceiptDateS=m.realityReceiptDate and mpS.small_type_code=m.smallCode
+		left join 
+			(SELECT
+			<if test="type=='month' ">
+				to_char(mp.reality_receipt_date,'yyyy-mm')
+			</if>
+			<if test="type=='day' ">
+				to_char(mp.reality_receipt_date,'yyyy-mm-dd')
+			</if>
+			realityReceiptDate,
+			round(sum(mp.receipt_total_price),2) receiptTotalPrice,
+			round(sum(mp.receipt_rationed
+			<if test="show ==3">
+				*m.net_weight
+			</if>),2) receiptRationed
+			FROM
+			MERCHANDISE_RECEIPT mp
+			left join merchandise m on m.merchandise_code=mp.merchandise_code and m.supplier_code=mp.supplier_code
+			<where>
+				1=1
+				and (
+				mp.reality_receipt_date between
+				<if test="type=='day' ">
+					to_date(#{minDate},'yyyy-mm-dd') and to_date(#{maxDate},'yyyy-mm-dd')
+				</if>
+				<if test="type=='month' ">
+					to_date(#{minDate},'yyyy-mm-dd') and to_date(#{maxDate},'yyyy-mm-dd')
+				</if>
+				)
+				<if test="show ==1">
+					AND m.NET_WEIGHT != 1
+				</if>
+				<if test="show ==2">
+					AND m.NET_WEIGHT =1
+				</if>
+				and mp.WAREHOUSE_CODE in (${warehouseCode})
+				and mp.WAREHOUSE_SITE_CODE in (${regionCode})
+				<if test="show !=4">
+				and (
+		              (m.merchandise_code >= 10000 and 59999 >= m.merchandise_code) 
+		              or 
+		              (m.merchandise_code >= 70000 and 79999 >= m.merchandise_code) 
+		              or 
+		              (m.merchandise_code >= 814000000 and 814999999 >= m.merchandise_code) 
+		              or 
+		              (m.merchandise_code >= 900000000 and 999999999 >= m.merchandise_code)
+		             )
+		        </if>
+		        <if test="show ==4">
+						and (
+							  (m.merchandise_code is null and mp.merchandise_code is null)
+                       		  or
+				              (m.merchandise_code >= 60000 and 69999 >= m.merchandise_code) 
+				              or 
+				              (m.merchandise_code >= 810000000 and 810999999 >= m.merchandise_code) 
+				              or 
+				              (m.merchandise_code >= 811000000 and 811999999 >= m.merchandise_code)
+				              or 
+				              (m.merchandise_code >= 812000000 and 812999999 >= m.merchandise_code)
+				              or 
+				              (m.merchandise_code >= 813000000 and 813999999 >= m.merchandise_code)
+				             )
+				</if>
+			</where>
+			group by
+			<if test="type=='month' ">
+				to_char(mp.reality_receipt_date,'yyyy-mm')
+			</if>
+			<if test="type=='day' ">
+				to_char(mp.reality_receipt_date,'yyyy-mm-dd')
+			</if>
+		) mp on mp.realityReceiptDate=m.realityReceiptDate)
+		)
+		union all
+		(select 
+			'',
+			'',
+			'',
+			'',
+			'',
+			'',
+			'',
+			'',
+			'',
+			'',
+			'',
+			'',
+			'合计' realityReceiptDate,
+			receiptTotalPriceM,
+			receiptRationedM,
+			null,
+			null,
+			null,
+			null,
+			receiptTotalPrice,
+			receiptRationed,
+			receiptTotalPriceMA,
+			receiptRationedMA 
+			from 
+			(
+				select 
+					sum(m.receiptTotalPriceM) receiptTotalPriceM,
+					sum(m.receiptRationedM) receiptRationedM,
+					sum(mp.receiptTotalPrice) receiptTotalPrice,
+					sum(mp.receiptRationed) receiptRationed,
+					round(sum(m.receiptTotalPriceM)*100/sum(mp.receiptTotalPrice),2) receiptTotalPriceMA,
+					round(sum(m.receiptRationedM)*100/sum(mp.receiptRationed),2) receiptRationedMA
+				from (
+				(
+					SELECT
+					m.merchandise_code merchandiseCode,
+					s.supplier_code supplierCode,
+					<if test="type=='month' ">
+						to_char(mp.reality_receipt_date,'yyyy-mm')
+					</if>
+					<if test="type=='day' ">
+						to_char(mp.reality_receipt_date,'yyyy-mm-dd')
+					</if>
+					realityReceiptDate,
+					round(sum(mp.receipt_total_price),2) receiptTotalPriceM,
+					round(sum(mp.receipt_rationed
+					<if test="show ==3">
+						*m.net_weight
+					</if>),2) receiptRationedM
+				FROM
+				merchandise m
+				LEFT JOIN supplier s ON m.supplier_code = s.supplier_code
+				left join MERCHANDISE_RECEIPT mp on  m.merchandise_code=mp.merchandise_code and m.supplier_code=mp.supplier_code
+				<where>
+					1=1
+					and 
+						(<foreach collection="list" item="item" index="index" separator="OR">
+							( m.merchandise_code = #{item.merchandiseCode} AND m.supplier_code =#{item.supplierCode})
+						</foreach>)
+					and (mp.reality_receipt_date between 
+					<if test="type=='day' ">
+						to_date(#{minDate},'yyyy-mm-dd') and to_date(#{maxDate},'yyyy-mm-dd')
+					</if>
+					<if test="type=='month' ">
+						to_date(#{minDate},'yyyy-mm-dd') and to_date(#{maxDate},'yyyy-mm-dd')
+					</if>)
+					and mp.WAREHOUSE_CODE in (${warehouseCode})
+					and mp.WAREHOUSE_SITE_CODE in (${regionCode})
+				</where>
+				group by m.merchandise_code,
+					s.supplier_code,
+		      		<if test="type=='month' ">
+						to_char(mp.reality_receipt_date,'yyyy-mm')
+					</if>
+					<if test="type=='day' ">
+						to_char(mp.reality_receipt_date,'yyyy-mm-dd')
+					</if>
+				) m
+				left join 
+					(SELECT
+					<if test="type=='month' ">
+						to_char(mp.reality_receipt_date,'yyyy-mm')
+					</if>
+					<if test="type=='day' ">
+						to_char(mp.reality_receipt_date,'yyyy-mm-dd')
+					</if>
+					realityReceiptDate,
+					round(sum(mp.receipt_total_price),2) receiptTotalPrice,
+					round(sum(mp.receipt_rationed
+					<if test="show ==3">
+						*m.net_weight
+					</if>),2) receiptRationed
+					FROM
+					MERCHANDISE_RECEIPT mp
+					left join merchandise m on m.merchandise_code=mp.merchandise_code and m.supplier_code=mp.supplier_code
+					<where>
+						1=1
+						and (
+						mp.reality_receipt_date between
+						<if test="type=='day' ">
+							to_date(#{minDate},'yyyy-mm-dd') and to_date(#{maxDate},'yyyy-mm-dd')
+						</if>
+						<if test="type=='month' ">
+							to_date(#{minDate},'yyyy-mm-dd') and to_date(#{maxDate},'yyyy-mm-dd')
+						</if>
+						)
+						<if test="show ==1">
+							AND m.NET_WEIGHT != 1
+						</if>
+						<if test="show ==2">
+							AND m.NET_WEIGHT =1
+						</if>
+						and mp.WAREHOUSE_CODE in (${warehouseCode})
+						and mp.WAREHOUSE_SITE_CODE in (${regionCode})
+						<if test="show !=4">
+						and (
+				              (m.merchandise_code >= 10000 and 59999 >= m.merchandise_code) 
+				              or 
+				              (m.merchandise_code >= 70000 and 79999 >= m.merchandise_code) 
+				              or 
+				              (m.merchandise_code >= 814000000 and 814999999 >= m.merchandise_code) 
+				              or 
+				              (m.merchandise_code >= 900000000 and 999999999 >= m.merchandise_code)
+				             )
+				        </if>
+				        <if test="show ==4">
+						and (
+							  (m.merchandise_code is null and mp.merchandise_code is null)
+                       		  or
+				              (m.merchandise_code >= 60000 and 69999 >= m.merchandise_code) 
+				              or 
+				              (m.merchandise_code >= 810000000 and 810999999 >= m.merchandise_code) 
+				              or 
+				              (m.merchandise_code >= 811000000 and 811999999 >= m.merchandise_code)
+				              or 
+				              (m.merchandise_code >= 812000000 and 812999999 >= m.merchandise_code)
+				              or 
+				              (m.merchandise_code >= 813000000 and 813999999 >= m.merchandise_code)
+				             )
+				        </if>
+					</where>
+					group by
+					<if test="type=='month' ">
+						to_char(mp.reality_receipt_date,'yyyy-mm')
+					</if>
+					<if test="type=='day' ">
+						to_char(mp.reality_receipt_date,'yyyy-mm-dd')
+					</if>
+				) mp on mp.realityReceiptDate=m.realityReceiptDate)
+			) 
+			)
+		)  ORDER BY realityReceiptDate asc,merchandiseCode desc
+	</select>
+</mapper>

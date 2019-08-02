@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.merchandiseoaapplication.reportoldupoaapplication.ApplicationReportOldupDao">
+	<resultMap type="com.powere2e.sco.model.merchandiseoaapplication.reportoldupoaapplication.ApplicationReportOldup" id="applicationReportOldupMap">
+		<result property="reportCode" column="reportCode"/>
+		<result property="applicationCode" column="applicationCode"/>
+		<result property="merchandiseCode" column="merchandiseCode"/>
+		<result property="merchandiseName" column="merchandiseName"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="supplierName" column="supplierName"/>
+		<result property="supplierAttribute" column="supplierAttribute"/>
+		<result property="supplierSite" column="supplierSite"/>
+		<result property="smallTypeSku" column="smallTypeSku"/>
+		<result property="detailTypeSku" column="detailTypeSku"/>
+		<result property="dlRoleCode" column="dlRoleCode"/>
+		<result property="dxRoleCode" column="dxRoleCode"/>
+		<result property="centreTypeCode" column="centreTypeCode"/>
+		<result property="smallTypeCode" column="smallTypeCode"/>
+		<result property="detailTypeCode" column="detailTypeCode"/>
+		<result property="fineTypeCode" column="fineTypeCode"/>
+		<result property="development" column="development"/>
+		<result property="sameMerchandisePrice" column="sameMerchandisePrice"/>
+		<result property="anticipatedSellStoreQuantit" column="anticipatedSellStoreQuantit"/>
+		<result property="anticipatedSellQuantity" column="anticipatedSellQuantity"/>
+		<result property="purchaseOpinion" column="purchaseOpinion"/>
+		<result property="oldMoistureContent" column="oldMoistureContent"/>
+		<result property="newMoistureContent" column="newMoistureContent"/>
+		<result property="purchaseAnalysis" column="purchaseAnalysis"/>
+		
+		<result property="created" column="created"/>
+		<result property="createby" column="createby"/>
+		<result property="updated" column="updated"/>
+		<result property="updateby" column="updateby"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    
+     <!--缺失文件说明的resultMap-->
+    <resultMap type="com.powere2e.sco.model.merchandiseoaapplication.ApplicationLackFileM" id="applicationLackFileMMap">
+		<result property="applicationCode" column="applicationCode"/>
+		<result property="merchandiseCode" column="merchandiseCode"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="lackFileName" column="lackFileName"/>
+		<result property="lackFileVersions" column="lackFileVersions"/>
+		<result property="lackFileCause" column="lackFileCause"/>
+    </resultMap>
+    
+   	 <!-- 查询没有报告的商品-->
+     <select id="queryNotHaveReportMerchandiseOldup" resultMap="applicationLackFileMMap">
+     		SELECT 
+     			   t2.application_code   applicationCode,
+			       t2.merchandise_code   merchandiseCode,
+			       t2.supplier_code      supplierCode 
+			 FROM  oa_application t1, application_merchandise t2
+			 WHERE t1.application_code = t2.application_code 
+			 AND   t1.application_code=#{applicationCode}
+			
+			MINUS
+			
+			SELECT t3.application_code   applicationCode,
+			       t3.merchandise_code   merchandiseCode,
+			       t3.supplier_code      supplierCode
+			FROM   application_report_oldup t3
+			WHERE  t3.application_code=#{applicationCode}
+     </select>
+    
+    
+    <!-- 查询老品新上报告-->
+    <select id="listApplicationReportOldup" resultMap="applicationReportOldupMap">
+    	SELECT 
+		       t.report_code                    reportCode,
+		       t.application_code               applicationCode,
+		       t.merchandise_code               merchandiseCode,
+		       t.merchandise_name               merchandiseName,
+		       t.supplier_code                  supplierCode,
+		       t.supplier_name                  supplierName,
+		       t.supplier_attribute             supplierAttribute,
+		       t.supplier_site                  supplierSite,
+		       t.small_type_sku                 smallTypeSku,
+		       t.detail_type_sku                detailTypeSku,
+		       t.dl_role_code                   dlRoleCode,
+		       t.dx_role_code                   dxRoleCode,
+		       t.centre_type_code               centreTypeCode,
+		       t.small_type_code                smallTypeCode,
+		       t.detail_type_code               detailTypeCode,
+		       t.fine_type_code                 fineTypeCode,
+		       t.development                    development,
+		       t.same_merchandise_price         sameMerchandisePrice,
+		       t.anticipated_sell_store_quantit anticipatedSellStoreQuantit,
+		       t.anticipated_sell_quantity      anticipatedSellQuantity,
+		       t.purchase_opinion               purchaseOpinion,
+		       t.anticipated_sell_profit		anticipatedSellProfit,<!-- 预计毛利额(最小单位/单店单天) -->
+		       t1.old_standard_colour           oldStandardColour,
+		       t1.new_standard_colour           newStandardColour,
+		       t1.old_standard_smell            oldStandardSmell,
+		       t1.new_standard_smell            newStandardSmell,
+		       t1.old_standard_from             oldStandardFrom,
+		       t1.new_standard_form             newStandardForm,
+		       t.path							path,
+		       t1.old_moisture_content          oldMoistureContent,
+		       t1.new_moisture_content			newMoistureContent,
+		       t.purchase_analysis				purchaseAnalysis,
+		        <!-- 判断申请报告是否有同类商品零售价 -->
+		       (SELECT a1.report_code FROM same_merchandise_oldup a1 WHERE a1.report_code=t.report_code and rownum=1)  isHaveSameReport
+		            
+		                  
+	  FROM 	     application_report_oldup t
+      LEFT JOIN 
+      			 check_standard_oldup t1
+      ON	     t.report_code=t1.report_code
+      WHERE 1=1
+      		<if test= "applicationCode != null and applicationCode !=''">
+				AND t.application_code = #{applicationCode}
+		    </if>
+	  AND 
+			(<foreach collection="list"  item="item" index="index" separator="OR">
+				(t.merchandise_code = #{item.merchandiseCode}	 
+					AND
+				t.supplier_code = #{item.supplierCode})
+			</foreach> 	
+			)         
+    </select>
+    
+    <!-- 查询申请报告从商品中带入的信息-->
+    <select id="queryReportOfOldup" resultMap="applicationReportOldupMap">
+    	SELECT 
+		             t1.merchandise_code     merchandiseCode,
+		             t1.merchandise_name     merchandiseName,
+		             t1.centre_type_code     centreTypeCode,
+		             t1.small_type_code      smallTypeCode,
+		             t1.detail_type_code     detailTypeCode,
+		             ''                      fineTypeCode,
+		             t1.purchase_departments purchaseDepartments,
+		             DECODE(t1.net_weight,1,'GJZ','DLZ')  rationed,
+		             ''        purchaseType,
+		             t1.storage_form         saleType,
+		             t2.supplier_code  supplierCode,
+		             t2.supplier_name supplierName,
+		             '新供应商' supplierAttribute,
+		             t2.company_site supplierSite,
+		             (SELECT a1.report_code FROM application_report_oldup a1 WHERE a1.merchandise_code=t1.merchandise_code AND a1.supplier_code=t1.supplier_code and rownum=1) reportCode<!-- 判断某一个供应商对应的意向品是否新增了报告 -->
+		            
+		                  
+		    FROM     MERCHANDISE t1,supplier t2
+		     WHERE
+		             t1.supplier_code=t2.supplier_code
+		     AND 
+					(	<foreach collection="list"  item="item" index="index" separator="OR">
+					(t1.merchandise_code = #{item.merchandiseCode}	 
+					AND
+					t1.supplier_code = #{item.supplierCode})
+					</foreach> 	
+					)         
+    </select>
+    
+    <!-- 根据主键查询某个申请报告(老品新上)(可分页)-->
+    <select id="loadApplicationReportOldup" resultMap="applicationReportOldupMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		   t.report_code                    reportCode,
+		       t.application_code               applicationCode,
+		       t.merchandise_code               merchandiseCode,
+		       t.merchandise_name               merchandiseName,
+		       t.supplier_code                  supplierCode,
+		       t.supplier_name                  supplierName,
+		       t.supplier_attribute             supplierAttribute,
+		       t.supplier_site                  supplierSite,
+		       t.small_type_sku                 smallTypeSku,
+		       t.detail_type_sku                detailTypeSku,
+		       t.dl_role_code                   dlRoleCode,
+		       t.dx_role_code                   dxRoleCode,
+		       t.centre_type_code               centreTypeCode,
+		       t.small_type_code                smallTypeCode,
+		       t.detail_type_code               detailTypeCode,
+		       t.fine_type_code                 fineTypeCode,
+		       t.development                    development,
+		       t.same_merchandise_price         sameMerchandisePrice,
+		       t.anticipated_sell_store_quantit anticipatedSellStoreQuantit,
+		       t.anticipated_sell_quantity      anticipatedSellQuantity,
+		       t.purchase_opinion               purchaseOpinion,
+		       t.anticipated_sell_profit		anticipatedSellProfit,
+		       t1.old_standard_colour           oldStandardColour,
+		       t1.new_standard_colour           newStandardColour,
+		       t1.old_standard_smell            oldStandardSmell,
+		       t1.new_standard_smell            newStandardSmell,
+		       t1.old_standard_from             oldStandardFrom,
+		       t1.new_standard_form             newStandardForm,
+		       t.path							path,
+		        <!-- 判断申请报告是否有同类商品零售价 -->
+		       (SELECT a1.report_code FROM same_merchandise_oldup a1 WHERE a1.report_code=t.report_code and rownum=1)  isHaveSameReport
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM 	application_report_oldup t
+      		LEFT JOIN 
+      				check_standard_oldup t1
+      		ON	t.report_code=t1.report_code
+      		
+    	<where>
+    		1=1
+	    	<if test= "reportCode != null and reportCode != ''">
+			AND  t.report_code = #{reportCode}
+			</if>
+	    	<if test= "applicationCode != null and applicationCode != ''">
+			AND  t.application_code = #{applicationCode}
+			</if>
+	    	<if test= "intentionCode != null and intentionCode != ''">
+			AND  t.merchandise_code = #{intentionCode}
+			</if>
+	    	<if test= "supplierCode != null and supplierCode != ''">
+			AND  t.supplier_code = #{supplierCode}
+			</if>
+    	</where>
+    </select>
+    
+    <!-- 增加申请报告(老品新上) --> 
+	<insert id="saveApplicationReportOldup" parameterType="hashmap">
+		INSERT INTO application_report_oldup(report_code,application_code,merchandise_code,merchandise_name,supplier_code,supplier_name,supplier_attribute,supplier_site,small_type_sku,
+			detail_type_sku,dl_role_code,dx_role_code,centre_type_code,small_type_code,detail_type_code,fine_type_code,development,same_merchandise_price,anticipated_sell_store_quantit,
+			anticipated_sell_quantity,purchase_opinion,created,createby,anticipated_sell_profit,purchase_analysis) 
+	 VALUES(#{reportCode},#{applicationCode},#{merchandiseCode},#{merchandiseName},#{supplierCode},#{supplierName},#{supplierAttribute},#{supplierSite},#{smallTypeSku},
+	 		#{detailTypeSku},#{dlRoleCode},#{dxRoleCode},#{centreTypeCode},#{smallTypeCode},#{detailTypeCode},#{fineTypeCode},#{development},#{sameMerchandisePrice},#{anticipatedSellStoreQuantit},
+	 		#{anticipatedSellQuantity},#{purchaseOpinion},#{app_created},#{app_create_by},#{anticipatedSellProfit},#{purchaseAnalysis})
+    </insert>
+    <!-- 修改申请报告(老品新上)  -->
+    <update id="updateApplicationReportOldup" parameterType="hashmap">
+		UPDATE	
+				application_report_oldup	
+		   SET	
+		   		application_code=#{applicationCode},
+		   		merchandise_code=#{merchandiseCode},
+		   		merchandise_name=#{merchandiseName},
+		   		supplier_code=#{supplierCode},
+		   		supplier_name=#{supplierName},
+		   		supplier_attribute=#{supplierAttribute},
+		   		supplier_site=#{supplierSite},
+		   		small_type_sku=#{smallTypeSku},
+		   		detail_type_sku=#{detailTypeSku},
+		   		dl_role_code=#{dlRoleCode},
+		   		dx_role_code=#{dxRoleCode},
+		   		centre_type_code=#{centreTypeCode},
+		   		small_type_code=#{smallTypeCode},
+		   		detail_type_code=#{detailTypeCode},
+		   		fine_type_code=#{fineTypeCode},
+		   		development=#{development},
+		   		same_merchandise_price=#{sameMerchandisePrice},
+		   		anticipated_sell_store_quantit=#{anticipatedSellStoreQuantit},
+		   		anticipated_sell_quantity=#{anticipatedSellQuantity},
+		   		purchase_opinion=#{purchaseOpinion},
+		   		anticipated_sell_profit=#{anticipatedSellProfit},
+		   		path=#{path}		   		
+		 WHERE	
+		 		REPORT_CODE=#{reportCode}
+    </update>
+    <!-- 删除申请报告(老品新上) -->
+    <delete id="deleteApplicationReportOldup" parameterType="hashmap">
+        DELETE FROM 
+        			application_report_oldup 
+        WHERE 
+        			REPORT_CODE=#{reportCode} <!--AND client_id=#{app_user_clientID}-->
+    </delete>
+    
+    <!-- 根据申请单号删除申请报告(老品新上) -->
+    <delete id="deleteReportOldupByApplicationCode" parameterType="hashmap">
+        DELETE FROM 
+        			application_report_oldup 
+        WHERE 
+        			APPLICATION_CODE IN (${applicationCodes})
+    </delete>
+</mapper>

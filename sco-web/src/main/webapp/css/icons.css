@@ -1,0 +1,316 @@
+
+.active{
+	background:url('../images/icons/active.png') no-repeat;
+}
+
+.noactive{
+	background:url('../images/icons/close.png') no-repeat;
+}
+
+/**
+ * 刷新 */
+.refresh{
+	background:url(../images/icons/refresh.png) no-repeat  !important;
+}
+/**
+退出系统
+*/
+.logout{
+	background:url('../images/icon/out.png') no-repeat;
+}
+/**
+ * 新增 */
+.add{
+	background:url(../images/icons/add.png) no-repeat  !important;
+}
+/**
+ * 激活*/
+.active{
+	background:url(../images/icons/active.png) no-repeat  !important;
+}
+/**
+ * 删除*/
+.delete{
+	background:url(../images/icons/delete.png) no-repeat  !important;
+}
+/**
+ * 编辑 */
+.edit{
+	background:url(../images/icons/edit.png) no-repeat  !important;
+}
+/**
+ * 查找 */
+.find{
+	background:url(../images/icons/find.png) no-repeat  !important;
+}
+/**
+ * 向右 */
+.right{
+	background:url(../images/icons/right.png) no-repeat  !important;
+}
+
+/**
+ * 清空查询*/
+.clear{
+	background:url(../images/icons/clear.png) no-repeat  !important;
+}
+/**
+ * 保存 */
+.save{
+	background:url(../images/icons/save.png) no-repeat  !important;
+}
+/**
+ * 下载 */
+.download{
+	background:url(../images/icons/down.png) no-repeat  !important;
+}
+/**
+ * 返回 */
+.return{
+	background:url(../images/icons/return.png) no-repeat  !important;
+}
+/**
+ * 取消 */
+.cancel{
+	background:url(../images/icons/cancel.png) no-repeat  !important;
+}
+/**
+ * 关闭
+ */
+.close{
+	background:url(../images/icons/close.png) no-repeat  !important;
+}
+/**
+ * 接收 */
+.accept{
+	background:url(../images/icons/accept.png) no-repeat  !important;
+}
+/**
+ * 返回 */
+.back{
+	background:url(../images/icons/back.png) no-repeat  !important;
+}
+/**
+ * 拒绝*/
+.reject{
+	background:url(../images/icons/reject.png) no-repeat  !important;
+}
+
+.truck{
+	background:url(../images/icons/truck.png) no-repeat  !important;
+}
+/**
+ * 时间 */
+.timer{
+	background:url(../images/icons/timer.png) no-repeat  !important;
+}
+/**
+ * Excel
+ */
+.excel{
+	background:url(../images/icons/excel.png) no-repeat  !important;
+}
+/**
+ * Pdf
+ */
+.pdf{
+	background:url(../images/icons/pdf.png) no-repeat  !important;
+}
+/**
+ * 接收 */
+.receive{
+	background:url(../images/icons/receive.png) no-repeat  !important;
+}
+/**
+ *完成 */
+.finished{
+	background:url(../images/icons/finished.png) no-repeat  !important;
+}
+/**
+ * 复制 */
+.copy{
+	background:url(../images/icons/copy.png) no-repeat  !important;
+}
+
+/**
+ * 权限树
+ */
+.powertree{
+	background:url(../images/icons/powerTree.png) no-repeat  !important;
+}
+/**
+ * 向上
+ */
+.up{
+	background:url(../images/icons/up.png) no-repeat  !important;
+}
+/**
+ * 向下
+ */
+.down{
+	background:url(../images/icons/down.png) no-repeat  !important;
+}
+/*
+====================================================================================
+*/
+/**
+ * 设置*/
+.privilege{
+	background:url(../images/icons/settings.png) no-repeat  !important;
+}
+/**
+ * 用户
+ */
+.userManagent{
+	background:url(../images/icons/user.png) no-repeat  !important;
+}
+/**
+ * 角色 */
+.role{
+	background:url(../images/icons/role.png) no-repeat  !important;
+}
+/**
+ * 组织*/
+.org{
+	background:url(../images/icons/org.png) no-repeat  !important;
+}
+/**
+ * 仓库*/
+.warehouse{
+	background:url(../images/icons/warehouse.png) no-repeat  !important;
+}
+/**
+ * 工厂 */
+.plant{
+	background:url(../images/icons/plant.png) no-repeat  !important;
+}
+/**
+ * 区域
+ */
+.storageArea{
+	background:url(../images/icons/area.png) no-repeat  !important;
+}
+/**
+ * 包含
+ */
+.storageUnit{
+	background:url(../images/icons/container.png) no-repeat  !important;
+}
+.bin{
+	background:url(../images/icons/bin.png) no-repeat  !important;
+}
+.material{
+	background:url(../images/icons/material.png) no-repeat  !important;
+}
+.vendor{
+	background:url(../images/icons/vendor.png) no-repeat  !important;
+}
+.strategy{
+	background:url(../images/icons/strategy.png) no-repeat  !important;
+}
+.search{
+	background:url(../images/icons/search.png) no-repeat  !important;
+}
+.upload{
+	background:url(../images/icons/up.png) no-repeat  !important;
+}
+
+.systemManager{
+	background:url(../images/menu/11.png) no-repeat  !important;
+}
+.dataBase{
+	background:url(../images/menu/home.png) no-repeat  !important;
+}
+.report{
+	background:url(../images/menu/menu_confirm.png) no-repeat  !important;
+}
+.uploadData{
+	background:url(../images/menu/menu_upload.png) no-repeat  !important;
+}
+.verify{
+	background:url(../images/menu/menu_search.png) no-repeat  !important;
+}
+.orderData{
+	background:url(../images/menu/menu_refresh.png) no-repeat  !important;
+}
+.templete{
+	background:url(../images/menu/menu_download.png) no-repeat  !important;
+}
+.dataDownload{
+	background:url(../images/menu/menu_download.png) no-repeat  !important;
+}
+.systemSet{
+	background:url(../images/menu/11.png) no-repeat  !important;
+}
+.n01{
+	background:url(../images/menu/01.png) no-repeat  !important;
+}
+.n02{
+	background:url(../images/menu/02.png) no-repeat  !important;
+}
+.n03{
+	background:url(../images/menu/03.png) no-repeat  !important;
+}
+.n04{
+	background:url(../images/menu/04.png) no-repeat  !important;
+}
+.n05{
+	background:url(../images/menu/05.png) no-repeat  !important;
+}
+.n06{
+	background:url(../images/menu/06.png) no-repeat  !important;
+}
+.n07{
+	background:url(../images/menu/07.png) no-repeat  !important;
+}
+.n08{
+	background:url(../images/menu/08.png) no-repeat  !important;
+}
+/**
+ * 娴犮儰绗傞弰顖氬閼冲�褰嶉崡鏇犳畱閸ョ偓鐖�========================================
+ */
+ 
+.menu_confirm{
+	background:url(../images/menu/menu_confirm.png) no-repeat  !important;
+}
+.menu_download{
+	background:url(../images/menu/menu_download.png) no-repeat  !important;
+}
+.menu_power{
+	background:url(../images/menu/menu_power.png) no-repeat  !important;
+}
+.menu_refresh{
+	background:url(../images/menu/menu_refresh.png) no-repeat  !important;
+}
+.menu_search{
+	background:url(../images/menu/menu_search.png) no-repeat  !important;
+}
+.menu_upload{
+	background:url(../images/menu/menu_upload.png) no-repeat  !important;
+}
+/**
+ * 零售商
+ */
+.retailer{
+	background:url(../images/icons/retailer.png) no-repeat  !important;
+}
+
+/**
+ * 零售商供应商
+ */
+.retailer_vendor{
+	background:url(../images/icons/retailer_vendor.png) no-repeat  !important;
+}
+/**
+ * 代理
+ */
+.agent{
+	background:url(../images/icons/agent.png) no-repeat  !important;
+}
+
+/**
+ * 更改密码
+ */
+.resetpwd{
+	background:url(../images/icons/resetpwd.png) no-repeat  !important;
+}

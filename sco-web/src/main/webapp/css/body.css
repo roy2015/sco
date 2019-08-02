@@ -1,0 +1,44 @@
+.uploadBackground{background:url(../images/bg1.gif) no-repeat right bottom;}
+.number1{
+	background-image:url(../images/number/01.png) !important;
+}
+.number2{
+	background-image:url(../images/number/02.png) !important;
+}
+.number3{
+	background-image:url(../images/number/03.png) !important;
+}
+.number4{
+	background-image:url(../images/number/04.png) !important;
+}
+
+
+.header{clear:both;width:100%;height:100px;overflow:hidden;background:url(../images/top.jpg) no-repeat right top;}
+.header .logo{width:560px;height:100px;float:left;}
+
+.user{clear:both;width:auto;height:32px;padding:0 15px 0 40px;line-height:32px;background:url(../images/icon/welcome.png) no-repeat 15px 11px;color:#c6c6c6;}
+.user .loginout{float:right;background:url(../images/icon/out.png) no-repeat left 9px;line-height:32px;padding-left:20px;}
+
+.path{float:right;height:32px;line-height:32px;background:url(../images/icon/home.png) no-repeat left center;padding-left:22px;}
+
+/* .menu{float:left;width:110px;height:32px;margin-right:5px;line-height:32px;text-align:center;color:#222;position:relative;overflow:hidden;}
+.menuOver{background:url(../images/nav.gif) no-repeat left top;}
+.menuOut{background:url(../images/nav.gif) no-repeat -110px top;}
+.closeMenu{position:absolute;right:5px;top:5px;}
+.closeMenu a{width:9px;height:9px;background:url(../images/x.gif) no-repeat -9px top;display:block;}
+.closeMenu a:hover{background:url(../images/x.gif) no-repeat left top;} 
+*/
+
+.bgWel{height:465px;background:#fdfdfd url(../images/bg/welcome.jpg) no-repeat left bottom;}
+.bgOne{background:#fdfdfd url(../images/bg/bg1.jpg) no-repeat right bottom;}
+.bgTwo{background:#fdfdfd url(../images/bg/bg2.jpg) no-repeat right bottom;}
+
+
+.welcome{margin:50px;height:65px;background:url(../images/welfont.png) no-repeat left center;}
+
+.update{clear:both;margin:50px;}
+.update p{clear:both;line-height:26px;height:auto;overflow:hidden;padding:3px 0;}
+.update span{width:150px;float:left;line-height:26px;}
+.update .file{height:24px;width:500px;}
+.clearDate{clear:both;margin:50px;height:70px;background:#f8e7cf url(../images/icon/clear.png) no-repeat 30px center;border:#edd1b9 solid 1px;padding:10px 30px 10px 120px;line-height:70px;font-size:18px;font-weight:bold;}
+.clearBtn{width:161px;height:80px;}

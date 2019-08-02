@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.accessoryintention.AccessoryQuotedAccessoryDao">
+	<resultMap type="com.powere2e.sco.model.accessoryintention.AccessoryQuotedAccessory" id="accessoryQuotedAccessoryMap">
+		<result property="enquiryCode" column="enquiryCode"/>
+		<result property="quotedCode" column="quotedCode"/>
+		<result property="accessoryCode" column="accessoryCode"/>
+		<result property="accessoryName" column="accessoryName"/>
+		<result property="orderCount" column="orderCount"/>
+		<result property="brand" column="brand"/>
+		<result property="origin" column="origin"/>
+		<result property="priceUnit" column="priceUnit"/>
+		<result property="price" column="price"/>
+		<result property="wastage" column="wastage"/>
+		<result property="cost" column="cost"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <!-- 查询辅料报价-辅料信息(可分页)-->
+    <select id="searchAccessoryQuotedAccessory" resultMap="accessoryQuotedAccessoryMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.enquiry_code enquiryCode,t.quoted_code quotedCode,t.accessory_code accessoryCode,t.order_count orderCount,t.brand brand,t.origin origin,t.price_unit priceUnit,t.price price,t.wastage wastage,t.cost cost
+       		,k.accessory_name accessoryName
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM accessory_quoted_accessory t
+      		inner join accessory_enquiry_accessory k on t.accessory_code=k.accessory_code
+    	<where>
+    		1=1
+	    	<if test= "enquiryCode != null and enquiryCode!=''">
+			AND t.enquiry_code =#{enquiryCode}
+			</if>
+	    	<if test= "quotedCode != null and quotedCode!=''">
+			AND t.quoted_code in (${quotedCode})  
+			</if>
+	    	<if test= "accessoryCode != null and accessoryCode!=''">
+			AND t.accessory_code = #{accessoryCode}
+			</if>
+	    	<if test= "orderCount != null and orderCount!=''">
+			AND t.order_count = #{orderCount}
+			</if>
+	    	<if test= "brand != null and brand!=''">
+			AND t.brand=#{brand}
+			</if>
+	    	<if test= "origin != null and origin!=''">
+			AND t.origin=#{origin}
+			</if>
+	    	<if test= "priceUnit != null and priceUnit!=''">
+			AND t.price_unit = #{priceUnit}
+			</if>
+	    	<if test= "price != null and price!=''">
+			AND t.price = #{price}
+			</if>
+	    	<if test= "wastage != null and wastage!=''">
+			AND t.wastage = #{wastage}
+			</if>
+	    	<if test= "cost != null and cost!=''">
+			AND t.cost = #{cost}
+			</if>
+			<if test= "accessoryName != null and accessoryName!=''">
+			AND k.accessory_name = #{accessoryName}
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 根据主键查询某个辅料报价-辅料信息(可分页)-->
+    <select id="loadAccessoryQuotedAccessory" resultMap="accessoryQuotedAccessoryMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.enquiry_code enquiryCode,t.quoted_code quotedCode,t.accessory_code accessoryCode,t.order_count orderCount,t.brand brand,t.origin origin,t.price_unit priceUnit,t.price price,t.wastage wastage,t.cost cost
+       		,t.created,	t.updated 
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM accessory_quoted_accessory t
+    	<where>
+    		1=1
+	    	<if test= "accessoryCode != null and accessoryCode!=''">
+			AND  t.ACCESSORY_CODE = #{accessoryCode}
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.created DESC
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 增加辅料报价-辅料信息 --> 
+	<insert id="saveAccessoryQuotedAccessory" parameterType="hashmap">
+		INSERT INTO accessory_quoted_accessory(enquiry_code,quoted_code,accessory_code,order_count,brand,origin,price_unit,price,wastage,cost) 
+			 VALUES(#{enquiryCode},#{quotedCode},#{accessoryCode},#{orderCount},#{brand},#{origin},#{priceUnit},#{price},#{wastage},#{cost})
+    </insert>
+    <!-- 修改辅料报价-辅料信息  -->
+    <update id="updateAccessoryQuotedAccessory" parameterType="hashmap">
+		UPDATE	
+				accessory_quoted_accessory	
+		   SET	
+		   		enquiry_code=#{enquiryCode},
+		   		quoted_code=#{quotedCode},
+		   		order_count=#{orderCount},
+		   		brand=#{brand},
+		   		origin=#{origin},
+		   		price_unit=#{priceUnit},
+		   		price=#{price},
+		   		wastage=#{wastage},
+		   		cost=#{cost}		   		
+		 WHERE	
+		 		ACCESSORY_CODE=#{accessoryCode}
+    </update>
+    <!-- 删除辅料报价-辅料信息 -->
+    <delete id="deleteAccessoryQuotedAccessory" parameterType="hashmap">
+        DELETE FROM 
+        			accessory_quoted_accessory 
+        WHERE 
+        			QUOTED_CODE=#{quotedCode} <!--AND client_id=#{app_user_clientID}-->
+    </delete>
+</mapper>

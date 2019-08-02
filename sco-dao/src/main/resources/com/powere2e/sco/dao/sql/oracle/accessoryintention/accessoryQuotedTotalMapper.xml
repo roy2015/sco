@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.accessoryintention.AccessoryQuotedTotalDao">
+	<resultMap type="com.powere2e.sco.model.accessoryintention.AccessoryQuotedTotal" id="accessoryQuotedTotalMap">
+		<result property="enquiryCode" column="enquiryCode"/>
+		<result property="quotedCode" column="quotedCode"/>
+		<result property="orderCount" column="orderCount"/>
+		<result property="proofingCycle" column="proofingCycle"/>
+		<result property="dailyCapacity" column="dailyCapacity"/>
+		<result property="productionCycle" column="productionCycle"/>
+		<result property="unitPrice" column="unitPrice"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <!-- 查询辅料报价-总报价(可分页)-->
+    <select id="searchAccessoryQuotedTotal" resultMap="accessoryQuotedTotalMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.enquiry_code enquiryCode,t.quoted_code quotedCode,t.order_count orderCount,t.proofing_cycle proofingCycle,t.daily_capacity dailyCapacity,t.production_cycle productionCycle,t.unit_price unitPrice
+			
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM accessory_quoted_total t
+    	<where>
+    		1=1
+	    	<if test= "enquiryCode != null and enquiryCode!=''">
+			AND t.enquiry_code = #{enquiryCode}
+			</if>
+	    	<if test= "quotedCode != null and quotedCode!=''">
+			AND t.quoted_code = #{quotedCode}
+			</if>
+	    	<if test= "orderCount != null and orderCount!=''">
+			AND t.order_count=#{orderCount}
+			</if>
+	    	<if test= "proofingCycle != null and proofingCycle!=''">
+			AND t.proofing_cycle = #{proofingCycle}
+			</if>
+	    	<if test= "dailyCapacity != null and dailyCapacity!=''">
+			AND t.daily_capacity=#{dailyCapacity}
+			</if>
+	    	<if test= "productionCycle != null and productionCycle!=''">
+			AND t.production_cycle = #{productionCycle}
+			</if>
+	    	<if test= "unitPrice != null and unitPrice!=''">
+			AND t.unit_price = #{unitPrice}
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		
+    	</if>
+    </select>
+    
+    <!-- 根据主键查询某个辅料报价-总报价(可分页)-->
+    <select id="loadAccessoryQuotedTotal" resultMap="accessoryQuotedTotalMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.enquiry_code enquiryCode,t.quoted_code quotedCode,t.order_count orderCount,t.proofing_cycle proofingCycle,t.daily_capacity dailyCapacity,t.production_cycle productionCycle,t.unit_price unitPrice
+       		,t.supplier_code supplierCode
+		   
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM accessory_quoted_total t
+    	<where>
+    		1=1
+	    	<if test= "enquiryCode != null and enquiryCode!=''">
+			AND  t.ENQUIRY_CODE = #{enquiryCode}
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		
+    	</if>
+    </select>
+    
+    <!-- 增加辅料报价-总报价 --> 
+	<insert id="saveAccessoryQuotedTotal" parameterType="hashmap">
+		INSERT INTO accessory_quoted_total(enquiry_code,quoted_code,order_count,proofing_cycle,daily_capacity,production_cycle,unit_price,supplier_code) 
+			 VALUES(#{enquiryCode},#{quotedCode},#{orderCount},#{proofingCycle},#{dailyCapacity},#{productionCycle},#{unitPrice},#{supplierCode})
+    </insert>
+    <!-- 修改辅料报价-总报价  -->
+    <update id="updateAccessoryQuotedTotal" parameterType="hashmap">
+		UPDATE	
+				accessory_quoted_total	
+		   SET	
+		   		quoted_code=#{quotedCode},
+		   		order_count=#{orderCount},
+		   		proofing_cycle=#{proofingCycle},
+		   		daily_capacity=#{dailyCapacity},
+		   		production_cycle=#{productionCycle},
+		   		unit_price=#{unitPrice},
+		   		supplier_code=#{supplierCode}		   		
+		 WHERE	
+		 		ENQUIRY_CODE=#{enquiryCode}
+    </update>
+    <!-- 删除辅料报价-总报价 -->
+    <delete id="deleteAccessoryQuotedTotal" parameterType="hashmap">
+        DELETE FROM 
+        			accessory_quoted_total 
+        WHERE 
+        			ENQUIRY_CODE=#{enquiryCode} <!--AND client_id=#{app_user_clientID}-->
+    </delete>
+     <!-- 删除辅料报价-总报价 根据报价单号 -->
+    <delete id="deleteAccessoryQuotedTotalFromQuotedCode" parameterType="hashmap">
+        DELETE FROM 
+        			accessory_quoted_total 
+        WHERE 
+        			QUOTED_CODE=#{quotedCode} <!--AND client_id=#{app_user_clientID}-->
+    </delete>
+</mapper>

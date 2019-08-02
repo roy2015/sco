@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.powere2e.sco.interfaces.dao.datamaintenance.purchaserdata.websitename.WebsiteNameMaintenanceDao">
+	<resultMap type="com.powere2e.sco.model.datamaintenance.purchaserdata.websitename.Website" id="websiteMap">
+		<result property="websiteCode" column="websiteCode" />
+		<result property="websiteName" column="websiteName" />
+		<result property="websiteUrl" column="websiteUrl" />
+		<result property="materialName" column="materialName" />
+		<result property="materialCode" column="materialCode" />
+		<result property="priceRegion" column="priceRegion" />
+		<result property="materialRegionCode" column="materialRegionCode" />
+		<result property="updatedate" column="updatedate" />
+		<result property="updateby" column="updateby" />
+		<result property="createUserName" column="createUserName" />
+		<result property="updateUserName" column="updateUserName" />
+		<result property="recordCount" column="record_count" />
+	</resultMap>
+	<!-- 查询公示网站名称维护(可分页) -->
+	<select id="searchWebsite" resultMap="websiteMap">
+		select 
+			<if test="page_count == null">
+		      material.websiteCode,
+		      material.websiteName,
+		      material.materialName,
+		      material.materialCode,
+		      material.websiteUrl,
+		      material.materialRegionCode,
+		      material.priceRegion,
+		      priceDate.price_date updatedate,
+		      priceDate.updateby
+		    </if>
+		    <if test="page_count != null">
+				count(1) AS record_count
+			</if>
+		 from 
+		(
+		select 
+			  w.website_code websiteCode,
+		      w.website_name websiteName,
+		      m.material_name materialName,
+		      m.material_code materialCode,
+		      mr.website_url websiteUrl,
+		      mr.material_region_code materialRegionCode,
+		      mr.MATERIAL_REGION_NAME priceRegion 
+		from WEBSITE w
+		left join MATERIAL m on w.website_code=m.website_code
+		left join MATERIAL_REGION mr on m.MATERIAL_CODE=mr.MATERIAL_CODE
+		<where>
+			1=1
+			<if test="websiteCode != null and websiteCode!=''">
+				AND w.website_code = #{websiteCode}
+			</if>
+			<if test="websiteName != null and websiteName!=''">
+				AND UPPER(w.website_name) LIKE UPPER('%'||#{websiteName}||'%')
+			</if>
+			<if test="materialName != null and materialName !=''">
+				AND UPPER(m.material_name) LIKE UPPER('%'||#{materialName}||'%')
+			</if>
+			<if test="priceRegion != null and priceRegion !=''">
+				AND UPPER(mr.MATERIAL_REGION_NAME) LIKE UPPER('%'||#{priceRegion}||'%')
+			</if>
+		</where>
+		) material 
+		<if test="updateby == null or updateby ==''">
+			left join
+		</if>
+		<if test="updateby != null and updateby !=''">
+			right join
+		</if>
+		(select 
+			  t2.material_code,
+		      to_char(t2.price_date,'yyyy-mm-dd') price_date,
+		      (select u.real_name from pub_user u where u.user_id=t2.createby) updateby
+		from (
+		  select 
+		    t.material_code,
+		    t.material_region_code, 
+		    max(t.price_date) max_price_date
+		  from MATERIAL_PRICE t 
+		  group by t.material_code, t.material_region_code
+		) t1
+		left join MATERIAL_PRICE t2 on t1.material_code = t2.material_code and t1.material_region_code = t2.material_region_code and t1.max_price_date = t2.price_date
+		where 1=1
+			<if test="updateby != null and updateby!=''">
+				AND UPPER((select u.real_name from pub_user u where u.user_id=t2.createby)) LIKE UPPER('%'||#{updateby}||'%')
+			</if>
+		) priceDate on priceDate.material_code=material.materialCode
+		<if test="page_count == null">
+			<if test="app_orderby !=null">
+				ORDER BY ${app_orderby}
+			</if>
+			<if test="app_orderby ==null">
+				ORDER BY material.websiteName,material.materialName DESC
+			</if>
+		</if>
+	</select>
+	<!-- 查询网址下拉列表 -->
+	<select id="listQualitative" resultType="com.powere2e.security.model.Option">
+		SELECT
+		website_code id, website_name text
+		FROM
+		WEBSITE 
+		ORDER BY website_name 
+	</select>
+	<!-- 根据主键查询某个公示网站名称维护(可分页) -->
+	<select id="loadWebsite" resultMap="websiteMap">
+		SELECT
+		<if test="page_count == null">
+			w.website_code websiteCode,
+			w.website_name websiteName
+			<!-- w.website_url websiteUrl -->
+		</if>
+		<if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		from WEBSITE w
+		<where>
+			1=1
+			<if test="websiteName != null and websiteName!=''">
+				AND w.website_name = #{websiteName}
+			</if>
+		</where>
+		<if test="page_count == null">
+			<if test="app_orderby !=null">
+				ORDER BY ${app_orderby}
+			</if>
+			<if test="app_orderby ==null">
+				ORDER BY w.created DESC
+			</if>
+		</if>
+	</select>
+	<!-- 查询公示网站名称是否存在于商品中中 -->
+	<select id="searchmaterial" resultType="Integer">
+		select count(*) from MATERIAL where WEBSITE_CODE='${websiteCode}'
+	</select>
+	<!-- 增加公示网站名称维护 -->
+	<insert id="saveWebsite" parameterType="hashmap">
+		INSERT INTO website(website_code,website_name,created,createby)
+		VALUES(S_WEBSITE.NEXTVAL,#{websiteName},sysdate,#{app_create_by})
+	</insert>
+	<!-- 删除公示网站名称维护 -->
+	<delete id="deleteWebsite" parameterType="hashmap">
+		DELETE FROM
+		website
+		WHERE
+		WEBSITE_CODE in
+		<foreach collection="websiteCode" item="websiteCode" open="(" close=")" separator=",">
+			#{websiteCode}
+		</foreach>
+	</delete>
+</mapper>

@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+	<bean id="accessoryIntentionService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.accessoryintention.AccessoryIntentionServiceImpl">
+				<property name="accessoryIntentionDao" ref="accessoryIntentionDao" />
+				<property name="accessoryEnquiryService" ref="accessoryEnquiryService" />
+				<property name="accessoryEnquiryMaterialService" ref="accessoryEnquiryMaterialService" />
+				<property name="accessoryEnquiryAccessoryService" ref="accessoryEnquiryAccessoryService" />
+				<property name="accessoryEnquiryPackingService" ref="accessoryEnquiryPackingService" />
+				<property name="accessoryEnquiryTechnologyService" ref="accessoryEnquiryTechnologyService" />
+				<property name="accessoryEnquiryQuotedCountService" ref="accessoryEnquiryQuotedCountService" />
+				<property name="accessoryEnquiryElseService" ref="accessoryEnquiryElseService" />
+				<property name="accessoryQuotedMaterialService" ref="accessoryQuotedMaterialService" />
+				<property name="accessoryQuotedElectronicService" ref="accessoryQuotedElectronicService" />
+				<property name="accessoryQuotedAccessoryService" ref="accessoryQuotedAccessoryService" />
+				<property name="accessoryQuotedPackingService" ref="accessoryQuotedPackingService" />
+				<property name="accessoryQuotedTechnologyService" ref="accessoryQuotedTechnologyService" />
+				<property name="accessoryQuotedElseService" ref="accessoryQuotedElseService" />
+				<property name="accessoryQuotedTotalService" ref="accessoryQuotedTotalService" />
+				<property name="accessoryProofingService" ref="accessoryProofingService" />
+				<property name="accessoryQuotedScanService" ref="accessoryQuotedScanService" />
+			</bean>
+		</property>
+	</bean>
+	<bean id="accessoryEnquiryService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.accessoryintention.AccessoryEnquiryServiceImpl">
+				<property name="accessoryEnquiryDao" ref="accessoryEnquiryDao" />
+			</bean>
+		</property>
+	</bean>
+	<bean id="accessoryEnquiryMaterialService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.accessoryintention.AccessoryEnquiryMaterialServiceImpl">
+				<property name="accessoryEnquiryMaterialDao" ref="accessoryEnquiryMaterialDao" />
+			</bean>
+		</property>
+	</bean>
+	<bean id="accessoryEnquiryAccessoryService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.accessoryintention.AccessoryEnquiryAccessoryServiceImpl">
+				<property name="accessoryEnquiryAccessoryDao" ref="accessoryEnquiryAccessoryDao" />
+			</bean>
+		</property>
+	</bean>
+	<bean id="accessoryEnquiryPackingService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.accessoryintention.AccessoryEnquiryPackingServiceImpl">
+				<property name="accessoryEnquiryPackingDao" ref="accessoryEnquiryPackingDao" />
+			</bean>
+		</property>
+	</bean>
+	<bean id="accessoryEnquiryTechnologyService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.accessoryintention.AccessoryEnquiryTechnologyServiceImpl">
+				<property name="accessoryEnquiryTechnologyDao" ref="accessoryEnquiryTechnologyDao" />
+			</bean>
+		</property>
+	</bean>
+	<bean id="accessoryEnquiryQuotedCountService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.accessoryintention.AccessoryEnquiryQuotedCountServiceImpl">
+				<property name="accessoryEnquiryQuotedCountDao" ref="accessoryEnquiryQuotedCountDao" />
+			</bean>
+		</property>
+	</bean>
+	<bean id="accessoryEnquiryElseService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.accessoryintention.AccessoryEnquiryElseServiceImpl">
+				<property name="accessoryEnquiryElseDao" ref="accessoryEnquiryElseDao" />
+			</bean>
+		</property>
+	</bean>
+	<!-- 导入报价单 -->
+	<bean id="accessoryQuotedMaterialService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.accessoryintention.AccessoryQuotedMaterialServiceImpl">
+				<property name="accessoryQuotedMaterialDao" ref="accessoryQuotedMaterialDao" />
+			</bean>
+		</property>
+	</bean>
+	<bean id="accessoryQuotedElectronicService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.accessoryintention.AccessoryQuotedElectronicServiceImpl">
+				<property name="accessoryQuotedElectronicDao" ref="accessoryQuotedElectronicDao" />
+			</bean>
+		</property>
+	</bean>
+	<bean id="accessoryQuotedAccessoryService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.accessoryintention.AccessoryQuotedAccessoryServiceImpl">
+				<property name="accessoryQuotedAccessoryDao" ref="accessoryQuotedAccessoryDao" />
+			</bean>
+		</property>
+	</bean>
+	<bean id="accessoryQuotedPackingService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.accessoryintention.AccessoryQuotedPackingServiceImpl">
+				<property name="accessoryQuotedPackingDao" ref="accessoryQuotedPackingDao" />
+			</bean>
+		</property>
+	</bean>
+	<bean id="accessoryQuotedTechnologyService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.accessoryintention.AccessoryQuotedTechnologyServiceImpl">
+				<property name="accessoryQuotedTechnologyDao" ref="accessoryQuotedTechnologyDao" />
+			</bean>
+		</property>
+	</bean>
+	<bean id="accessoryQuotedElseService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.accessoryintention.AccessoryQuotedElseServiceImpl">
+				<property name="accessoryQuotedElseDao" ref="accessoryQuotedElseDao" />
+			</bean>
+		</property>
+	</bean>
+	<bean id="accessoryQuotedTotalService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.accessoryintention.AccessoryQuotedTotalServiceImpl">
+				<property name="accessoryQuotedTotalDao" ref="accessoryQuotedTotalDao" />
+			</bean>
+		</property>
+	</bean>
+	<bean id="accessoryProofingService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.accessoryintention.AccessoryProofingServiceImpl">
+				<property name="accessoryProofingDao" ref="accessoryProofingDao" />
+			</bean>
+		</property>
+	</bean>
+	<bean id="accessoryQuotedScanService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.accessoryintention.AccessoryQuotedScanServiceImpl">
+				<property name="accessoryQuotedScanDao" ref="accessoryQuotedScanDao" />
+			</bean>
+		</property>
+	</bean>
+	<bean id="reportsService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.reports.ReportsServiceImpl">
+				<property name="reportsDao" ref="reportsDao" />
+			</bean>
+		</property>
+	</bean>
+	<bean id="committeeApplyService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.accessoryoaapplication.CommitteeApplyServiceImpl">
+				<property name="committeeApplyDao" ref="committeeApplyDao" />
+				<property name="oaApplicationService" ref="oaApplicationService" />
+				<property name="applicationReportAccessoryService" ref="applicationReportAccessoryService" />
+				<property name="subscribeAccessoryService" ref="subscribeAccessoryService" />
+				<property name="applicationQuotedService" ref="applicationQuotedService" />
+				<property name="accessoryQuotedElectronicService" ref="accessoryQuotedElectronicService" />
+				<property name="dhInfoService" ref="dhInfoService" />
+				<property name="wlInfoService" ref="wlInfoService" />
+			</bean>
+		</property>
+	</bean>
+	<bean id="nonFoodApplyService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.accessoryoaapplication.NonFoodApplyServiceImpl">
+				<property name="nonFoodApplyDao" ref="nonFoodApplyDao" />
+				<property name="oaApplicationService" ref="oaApplicationService" />
+				<property name="applicationReportAccessoryService" ref="applicationReportAccessoryService" />
+				<property name="subscribeAccessoryService" ref="subscribeAccessoryService" />
+				<property name="applicationQuotedService" ref="applicationQuotedService" />
+				<property name="accessoryQuotedElectronicService" ref="accessoryQuotedElectronicService" />
+				<property name="dhInfoService" ref="dhInfoService" />
+				<property name="wlInfoService" ref="wlInfoService" />
+			</bean>
+		</property>
+	</bean>
+	<bean id="compareApplyService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.accessoryoaapplication.CompareApplyServiceImpl">
+				<property name="compareApplyDao" ref="compareApplyDao" />
+				<property name="oaApplicationService" ref="oaApplicationService" />
+				<property name="applicationReportAccessoryService" ref="applicationReportAccessoryService" />
+				<property name="subscribeAccessoryService" ref="subscribeAccessoryService" />
+				<property name="applicationQuotedService" ref="applicationQuotedService" />
+				<property name="accessoryQuotedElectronicService" ref="accessoryQuotedElectronicService" />
+				<property name="dhInfoService" ref="dhInfoService" />
+				<property name="wlInfoService" ref="wlInfoService" />
+			</bean>
+		</property>
+	</bean>
+	<bean id="oaApplicationService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.accessoryoaapplication.OaApplicationServiceImpl">
+				<property name="oaApplicationDao" ref="oaApplicationDao" />
+			</bean>
+		</property>
+	</bean>
+	<bean id="applicationReportAccessoryService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.accessoryoaapplication.ApplicationReportAccessoryServiceImpl">
+				<property name="applicationReportAccessoryDao" ref="applicationReportAccessoryDao" />
+			</bean>
+		</property>
+	</bean>
+	<bean id="subscribeAccessoryService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.accessoryoaapplication.SubscribeAccessoryServiceImpl">
+				<property name="subscribeAccessoryDao" ref="subscribeAccessoryDao" />
+			</bean>
+		</property>
+	</bean>
+	<bean id="applicationQuotedService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.accessoryoaapplication.ApplicationQuotedServiceImpl">
+				<property name="applicationQuotedDao" ref="applicationQuotedDao" />
+			</bean>
+		</property>
+	</bean>
+	<bean id="dhInfoService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.accessoryoaapplication.DhInfoServiceImpl">
+				<property name="dhInfoDao" ref="dhInfoDao" />
+			</bean>
+		</property>
+	</bean>
+	<bean id="wlInfoService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.accessoryoaapplication.WlInfoServiceImpl">
+				<property name="wlInfoDao" ref="wlInfoDao" />
+			</bean>
+		</property>
+	</bean>
+	<bean id="totalcostanalysisService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.accessoryintentioncostanalysis.totalcostanalysis.TotalcostanalysisServiceImpl">
+				<property name="totalcostanalysisDao" ref="totalcostanalysisDao" />
+			</bean>
+		</property>
+	</bean>
+	
+	<bean id="costAnalogyService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.accessoryintentioncostanalysis.costanalogy.CostAnalogyServiceImpl">
+				<property name="costAnalogyDao" ref="costAnalogyDao" />
+			</bean>
+		</property>
+	</bean>
+	
+	<bean id="historicalQuoteSupplierService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.accessoryintentioncostanalysis.historicalquotesupplier.HistoricalQuoteSupplierServiceImpl">
+				<property name="historicalQuoteSupplierDao" ref="historicalQuoteSupplierDao" />
+			</bean>
+		</property>
+	</bean>
+	
+	<bean id="supplierComprehensiveAnalysisService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.suppliercomprehensiveanalysis.SupplierComprehensiveAnalysisServiceImpl">
+				<property name="supplierComprehensiveAnalysisDao" ref="supplierComprehensiveAnalysisDao" />
+			</bean>
+		</property>
+	</bean>
+	
+	<bean id="applicationVisitFactoryService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.service.impl.peripheral.webservice.ApplicationVisitFactoryServiceImpl">
+        <property name="applicationVisitFactoryDao" ref="applicationVisitFactoryDao"/>
+      </bean>
+    </property>
+  </bean>
+  <bean id="applicationPackageDesignService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.service.impl.peripheral.webservice.ApplicationPackageDesignServiceImpl">
+        <property name="applicationPackageDesignDao" ref="applicationPackageDesignDao"/>
+      </bean>
+    </property>
+  </bean>
+  <bean id="applicationVisitFactoryMService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.service.impl.peripheral.webservice.ApplicationVisitFactoryMServiceImpl">
+        <property name="applicationVisitFactoryMDao" ref="applicationVisitFactoryMDao"/>
+      </bean>
+    </property>
+  </bean>
+  <bean id="applicationPackageDesignMService" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.service.impl.peripheral.webservice.ApplicationPackageDesignMServiceImpl">
+        <property name="applicationPackageDesignMDao" ref="applicationPackageDesignMDao"/>
+      </bean>
+    </property>
+  </bean>
+</beans>

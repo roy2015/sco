@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.AccessoryIntentionDao">
+	<resultMap type="com.powere2e.sco.model.AccessoryIntention" id="accessoryIntentionMap">
+		<result property="intentionCode" column="intentionCode"/>
+		<result property="intentionName" column="intentionName"/>
+		<result property="centreType" column="centreType"/>
+		<result property="smallType" column="smallType"/>
+		<result property="detailType" column="detailType"/>
+		<result property="fineType" column="fineType"/>
+		<result property="createDate" column="createDate"/>
+		<result property="createName" column="createName"/>
+		<result property="updateDate" column="updateDate"/>
+		<result property="updateName" column="updateName"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    
+    <resultMap type="com.powere2e.sco.model.AccessoryIntentionSupplier" id="accessoryIntentionSupplierMap">
+       <result property="intentionSupplierCode" column="intentionSupplierCode"/>
+		<result property="intentionSupplierName" column="intentionSupplierName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <select id="searchAccessoryIntentionSupplier" resultMap="accessoryIntentionSupplierMap">
+   SELECT
+    	     <if test="page_count == null">
+    		    m.intentionSupplierCode intentionSupplierCode,
+    			m.intentionSupplierName intentionSupplierName
+    		 </if>
+	    	 <if test="page_count != null">
+	       		count(1) AS record_count
+	    	 </if>
+    	FROM(
+    	SELECT 
+    	a.SUPPLIER_CODE intentionSupplierCode,t.INTENTION_SUPPLIER_NAME intentionSupplierName
+      		FROM INTENTION_SUPPLIER_ACCESSORY a , ACCESSORY_INTENTION_SUPPLIER t
+    	<where>
+    	1=1 and t.INTENTION_SUPPLIER_CODE=a.SUPPLIER_CODE
+	    	<if test= "intentionCode != null and intentionCode!=''">
+			AND a.intention_code = #{intentionCode}
+			</if>
+	    	
+			</where>
+    	Union
+    	SELECT  
+    	
+       		a.SUPPLIER_CODE intentionSupplierCode,t.SUPPLIER_NAME intentionSupplierName
+      		FROM INTENTION_SUPPLIER_ACCESSORY a , SUPPLIER t
+    	<where>
+    	1=1 and t.SUPPLIER_CODE=a.SUPPLIER_CODE
+	    	<if test= "intentionCode != null and intentionCode!=''">
+			AND a.intention_code = #{intentionCode}
+			</if>
+	    	
+			</where>
+			) m
+    </select>
+    <!-- 查询辅料意向品(可分页)-->
+    <select id="searchAccessoryIntention" resultMap="accessoryIntentionMap">
+  SELECT
+    <if test="page_count == null">
+    	  t1.intentionCode,t1.intentionName,t1.centreType,t1.smallType,t1.detailType,t1.fineType,t1.createDate,t1.createName,t1.updateDate,t1.updateName
+       		,t1.created,	t1.updated 
+       		  </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+       		FROM(
+    	  SELECT 
+       		t.intention_code intentionCode,t.intention_name intentionName,t.centre_type centreType,t.small_type smallType,t.detail_type detailType,t.fine_type fineType,t.created createDate,t.CREATEBY createName,t.updated updateDate,t.UPDATEBY updateName
+       		,t.created,	t.updated 
+      		FROM accessory_intention t
+      		left join INTENTION_SUPPLIER_ACCESSORY m on t.intention_code=m.intention_code
+         
+           left join (select INTENTION_SUPPLIER_CODE as supplierCode ,INTENTION_SUPPLIER_NAME as supplierName from ACCESSORY_INTENTION_SUPPLIER union select SUPPLIER_CODE as supplierCode ,SUPPLIER_NAME as supplierName from SUPPLIER)
+           g   ON  g.supplierCode=m.supplier_code 
+    	<where>
+    		1=1
+	    	<if test= "intentionCode != null and intentionCode!=''">
+			AND t.intention_code = #{intentionCode}
+			</if>
+	    	<if test= "intentionName != null and intentionName!=''">
+			AND UPPER(t.intention_name) LIKE UPPER('%'||#{intentionName}||'%')
+			</if>
+	    	<if test= "centreType != null and centreType!=''">
+			AND UPPER(t.centre_type) LIKE UPPER('%'||#{centreType}||'%')
+			</if>
+	    	<if test= "smallType != null and smallType!=''">
+			AND UPPER(t.small_type) LIKE UPPER('%'||#{smallType}||'%')
+			</if>
+	    	<if test= "detailType != null and detailType!=''">
+			AND UPPER(t.detail_type) LIKE UPPER('%'||#{detailType}||'%')
+			</if>
+	    	<if test= "fineType != null and fineType!=''">
+			AND UPPER(t.fine_type) LIKE UPPER('%'||#{fineType}||'%')
+			</if>
+			<if test= "supplierCode != null and supplierCode !=''">
+			AND UPPER(m.supplier_code) LIKE UPPER('%'||#{supplierCode}||'%')
+			</if>
+			<if test= "supplierName != null and supplierName !=''">
+			AND UPPER(g.supplierName) LIKE UPPER('%'||#{supplierName}||'%')
+			</if>
+	    	<if test= "created != null ">
+			AND	t.created>=#{created}
+			</if>
+			<if test= "createdEnd != null ">
+			AND	t.created<![CDATA[<=]]> #{createdEnd}
+			</if>
+	    	<if test= "createName != null and createName!=''">
+			AND UPPER(t.CREATEBY) LIKE UPPER('%'||#{createName}||'%')
+			</if>
+	    	<if test= "updateDate != null and updateDate!=''">
+			AND	convert(varchar,t.updated,120) LIKE (#{updateDate})
+			</if>
+	    	<if test= "updateName != null and updateName!=''">
+			AND UPPER(t.UPDATEBY) LIKE UPPER('%'||#{updateName}||'%')
+			</if>
+    	</where>
+    	group by t.intention_code ,t.intention_name,t.centre_type ,t.small_type,t.detail_type ,t.fine_type,t.created ,t.CREATEBY ,t.updated ,t.UPDATEBY
+           ,t.created,  t.updated
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.created DESC
+    		</if>
+    	</if>
+    )t1	
+    </select>
+    
+    <!-- 根据主键查询某个辅料意向品(可分页)-->
+    <select id="loadAccessoryIntention" resultMap="accessoryIntentionMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.intention_code intentionCode,t.intention_name intentionName,t.centre_type centreType,t.small_type smallType,t.detail_type detailType,t.fine_type fineType,t.created createDate,t.CREATEBY createName,t.updated updateDate,t.UPDATEBY updateName
+       		,t.created,	t.updated 
+		   ,(select u.login_name from pub_user u where u.user_id=t.createby) as createUserName,
+           	(select u.login_name from pub_user u where u.user_id=t.updateby) as updateUserName
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM accessory_intention t
+    	<where>
+    		1=1
+	    	<if test= "intentionCode != null and intentionCode!=''">
+			AND  t.INTENTION_CODE = #{intentionCode}
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.created DESC
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 增加辅料意向品 --> 
+	<insert id="saveAccessoryIntention" parameterType="hashmap">
+		INSERT INTO accessory_intention(intention_code,intention_name,centre_type,small_type,detail_type,fine_type) 
+			 VALUES(#{intentionCode},#{intentionName},#{centreType},#{smallType},#{detailType},#{fineType})
+    </insert>
+     <!-- 增加关联供应商 --> 
+	<insert id="insertAccessoryIntentionupplier" parameterType="hashmap">
+		INSERT INTO INTENTION_SUPPLIER_ACCESSORY(INTENTION_CODE,SUPPLIER_CODE) 
+			 VALUES(#{intentionCode},#{supplierCode})
+    </insert>
+    <!-- 页面增加供应商 到表--> 
+	<insert id="insertIntentionupplier" parameterType="hashmap">
+		INSERT INTO ACCESSORY_INTENTION_SUPPLIER(INTENTION_SUPPLIER_CODE,INTENTION_SUPPLIER_NAME) 
+			 VALUES(#{supplierCode},#{supplierName})
+    </insert>
+    <!-- 修改辅料意向品  -->
+    <update id="updateAccessoryIntention" parameterType="hashmap">
+		UPDATE	
+				accessory_intention	
+		   SET	
+		   		intention_name=#{intentionName},
+		   		centre_type=#{centreType},
+		   		small_type=#{smallType},
+		   		detail_type=#{detailType},
+		   		fine_type=#{fineType},
+		   		created=#{createDate},
+		   		CREATEBY=#{createName},
+		   		updated=#{updateDate},
+		   		UPDATEBY=#{updateName}		   		
+		 WHERE	
+		 		INTENTION_CODE=#{intentionCode}
+    </update>
+    <!-- 删除辅料意向品 -->
+    <delete id="deleteAccessoryIntention" parameterType="hashmap">
+        DELETE FROM 
+        			accessory_intention 
+        WHERE 
+        			INTENTION_CODE=#{intentionCode} <!--AND client_id=#{app_user_clientID}-->
+    </delete>
+      <!-- 删除关联供应商 -->
+    <delete id="deleteAccessoryIntentionSupplier" parameterType="hashmap">
+        DELETE FROM 
+        			INTENTION_SUPPLIER_ACCESSORY 
+        WHERE 
+        			INTENTION_CODE=#{intentionCode} AND SUPPLIER_CODE=#{intentionSupplierCode}
+    </delete>
+    
+     <!-- 查询供应商-->
+	<select id="listSupplier" resultType="com.powere2e.security.model.Option">
+		SELECT
+			SUPPLIER_CODE id, (SUPPLIER_CODE||'-'||SUPPLIER_NAME) text
+		FROM
+			SUPPLIER 
+		<where>
+			<if test="supplierCode != '' and supplierCode != null ">
+				SUPPLIER_CODE = #{supplierCode}		
+			</if>
+		</where>
+		Union
+		SELECT
+			INTENTION_SUPPLIER_CODE id, (INTENTION_SUPPLIER_CODE||'-'||INTENTION_SUPPLIER_NAME) text
+		FROM
+			ACCESSORY_INTENTION_SUPPLIER 
+		<where>
+			<if test="intentionSupplierCode != '' and intentionSupplierCode != null ">
+				INTENTION_SUPPLIER_CODE = #{intentionSupplierCode}		
+			</if>
+		</where>
+	</select>
+	 <!-- 查询辅料细分类-->
+	<select id="listMinceType" resultType="com.powere2e.security.model.Option">
+		SELECT
+			FINE_TYPE_CODE id, FINE_TYPE_NAME text
+		FROM
+			ACCESSORY_FINE_TYPE
+		ORDER BY FINE_TYPE_NAME 
+	</select>
+</mapper>

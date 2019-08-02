@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.powere2e.sco.interfaces.dao.merchandiseoaapplication.reportnewoaapplication.applicationschedule.ApplicationScheduleNewDao">
+	<resultMap type="com.powere2e.sco.model.merchandiseoaapplication.reportnewoaapplication.applicatonSchedule.ApplicationScheduleaNew" id="acs">
+		<result property="applicationCode" column="applicationCode"/>
+		<result property="intentionCode" column="intentionCode"/>
+		<result property="intentionName" column="intentionName"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="supplierName" column="supplierName"/>
+		<result property="firstDate" column="firstDate"/>
+		<result property="publishDate" column="publishDate"/>
+
+		<result property="recordCount" column="record_count" />
+	</resultMap>
+	
+	<!-- 进度信息列表 -->
+	<select id="listApplicationScheduleNew" resultMap="acs">
+		SELECT  
+    	<if test="page_count == null">
+			t.intention_code intentionCode,	<!-- 意向品/商品编号 -->
+			ai.intention_name intentionName,	<!-- 意向品/商品名称 -->
+			t.supplier_code intentionSupplierCode,	<!-- 供应商/意向供应商编号 -->
+			t.enquiry_code enquiryCode,
+			ais.intention_supplier_name intentionSupplierName,	<!-- 供应商/意向供应商名称 -->
+			t.quoted_code quotedCode,			<!-- 报价单号 -->
+			sa.enquiry_count enquiryCount, 		<!-- 询价数量 -->
+			wl.purchase_count realPurCount,		<!-- 实际采购数量 -->
+			wl.contract_price contractPrice,	<!-- 合同进价 -->
+			wl.purchase_money realPurPrice,		<!-- 实际采购金额 -->
+			ar.subscribe_bill_date subscribeBillDate,  <!-- 收到申购单日期 -->
+			asa.sjwg_date sjwgDate,					   <!-- 设计完稿日期 -->
+			ar.requirements_dw_date requirementsDwDate,<!-- 要求到货日期 -->
+			oa.oa_initiate_date jjdtjDate, 	<!-- 竞价单提交日期 -->
+			oa.oa_approve_date jjdwcDate, 	<!-- 竞价单完成日期 -->
+			TRUNC(oa.oa_approve_date-oa.oa_initiate_date) jjdspwcts, <!-- 竞价单审批完成天数 -->
+			asa.order_date orderDate,		<!-- 下达采购订单日期 -->
+			asa.aog_date aogDate,			<!-- 实际到货日期 -->
+			(
+				SELECT 
+					TRUNC(MAX(PROOFING_DATE) - MIN(ASK_PROOFING_DATE)) proofingCycle
+				FROM 
+					accessory_proofing 
+				WHERE t.quoted_code = quoted_code 
+			) proofingCycle,	<!-- 样品打样周期 -->
+			asa.normal_flow_date normalFlowDate, 	<!-- 正常作业流程时间(天) -->
+			TRUNC(ar.subscribe_bill_date-asa.aog_date) realityFlowDate,	<!-- 实际作业流程时间(天) -->
+			(normal_flow_date-(TRUNC(ar.subscribe_bill_date-asa.aog_date))) differenceDate <!-- 差异天数 -->
+		</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM 
+				(
+					SELECT * FROM application_quoted 
+					WHERE 
+						application_code = #{applicationCode}
+						AND quoted_code in (${quotedCodes}) 
+				) t    <!-- 报价单(辅料OA) -->
+				LEFT JOIN accessory_intention ai ON t.intention_code = ai.intention_code <!-- 辅料意向品 -->
+				LEFT JOIN accessory_intention_supplier ais ON t.supplier_code = ais.intention_supplier_code <!-- 辅料意向品供应商 -->
+				LEFT JOIN application_report_accessory ar ON t.application_code = ar.application_code <!-- 申请报告(辅料OA) -->
+				LEFT JOIN subscribe_accessory sa ON t.application_code = sa.application_code <!-- 申购产品信息 -->
+					and t.intention_code = sa.intention_code 
+					and t.enquiry_code = sa.enquiry_code
+				LEFT JOIN wl_info wl ON t.intention_code = wl.intention_code <!-- 物料信息 -->
+					and t.supplier_code = wl.supplier_code
+				LEFT JOIN oa_application oa ON t.application_code = oa.application_code <!-- 商品OA申请单 -->
+				LEFT JOIN application_schedule_a asa ON t.application_code = asa.application_code <!-- 申请进度信息 -->
+					AND t.intention_code = asa.intention_code 
+					AND t.supplier_code = asa.supplier_code 
+					AND t.enquiry_code = asa.enquiry_code 
+					AND t.quoted_code = asa.quoted_code
+    	<if test="page_count == null">
+   			ORDER BY t.intention_code,t.accessory_code
+    	</if>
+	</select>
+	
+	<!-- 保存进度信息 -->
+	<update id="insertApplicationScheduleNew">
+		MERGE INTO application_schedule_a T1
+      	USING (
+			<!-- <foreach collection="dataArray" item="item" separator="union all" > -->  
+			(
+				SELECT 
+				s1.c,s2.applicationCode,s2.intentionCode,s2.intentionSupplierCode,
+				s2.quotedCode,s2.enquiryCode,
+				s2.sjwgDate,s2.orderDate,s2.aogDate,s2.normalFlowDate 
+			FROM 
+				(
+				 SELECT 
+				 	ROWNUM c,
+					ar.application_code applicationCode,
+					ar.intention_code intentionCode, 
+					ar.supplier_code intentionSupplierCode,
+					ar.quoted_code quotedCode,
+					ar.enquiry_code enquiryCode 
+	             FROM 
+	             	application_schedule_a ar 
+	             WHERE 
+	             	ar.application_code = #{applicationCode}
+					AND ar.intention_code = #{intentionCode} 
+					AND ar.supplier_code = #{intentionSupplierCode}
+					AND ar.quoted_code = #{quotedCode}
+					AND ar.enquiry_code = #{enquiryCode} 
+	           	 ) s1 
+	            RIGHT JOIN 
+	            (
+            	 SELECT 
+					#{applicationCode} applicationCode,
+					#{intentionCode} intentionCode,
+					#{intentionSupplierCode} intentionSupplierCode,
+					#{quotedCode} quotedCode,
+					#{enquiryCode} enquiryCode,
+					#{sjwgDate} sjwgDate,
+					#{orderDate} orderDate,
+					#{aogDate} aogDate,
+					#{normalFlowDate} normalFlowDate 
+	             FROM dual  
+            	) s2 
+           		ON s1.applicationCode = s2.applicationCode 
+	           		AND s1.intentionCode = s2.intentionCode 
+	           		AND s1.intentionSupplierCode = s2.intentionSupplierCode 
+	           		AND s1.quotedCode = s2.quotedCode 
+	           		AND s1.enquiryCode = s2.enquiryCode  
+	         )
+           	<!-- </foreach> -->	
+           ) T2 
+		ON (T2.c > 0)  
+		WHEN MATCHED THEN															 <!-- 更新 -->
+		     UPDATE SET 
+		     	T1.sjwg_date = T2.sjwgDate,
+		     	T1.order_date = T2.orderDate,
+		     	T1.aog_date = T2.aogDate,
+		     	T1.normal_flow_date = T2.normalFlowDate  
+          		 WHERE 
+          			T1.application_code = T2.applicationCode
+					AND T1.intention_code = T2.intentionCode 
+					AND T1.supplier_code = T2.intentionSupplierCode
+					AND T1.quoted_code = T2.quotedCode
+					AND T1.enquiry_code = T2.enquiryCode 
+		WHEN NOT MATCHED THEN 
+		      INSERT (application_code, intention_code, supplier_code, quoted_code, enquiry_code, 
+		      	sjwg_date, order_date, aog_date, normal_flow_date)         <!-- 新增 -->
+   			VALUES(T2.applicationCode, T2.intentionCode,T2.intentionSupplierCode,T2.quotedCode,T2.enquiryCode,
+   				T2.sjwgDate,T2.orderDate,T2.aogDate,T2.normalFlowDate)
+	</update>
+	
+</mapper>

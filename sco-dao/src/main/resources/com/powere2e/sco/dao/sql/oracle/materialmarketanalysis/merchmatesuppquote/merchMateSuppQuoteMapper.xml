@@ -1,0 +1,421 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.powere2e.sco.interfaces.dao.materialmarketanalysis.merchmatesuppquote.MerchMateSuppQuoteDao">
+	<resultMap type="com.powere2e.sco.model.datamaintenance.purchaserdata.relevancematerialandwebsite.RelevanceMaterialAndWebsite" id="merMateSuppMap">
+		<result property="merchandiseCode" column="merchandiseCode"/>
+		<result property="merchandiseName" column="merchandiseName"/>
+		<result property="materialCode" column="materialCode"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="supplierName" column="supplierName"/>
+		<result property="dxRoleName" column="dxRoleName"/>
+		<result property="dlRoleName" column="dlRoleName"/>
+		<result property="centreName" column="centreName"/>
+		<result property="smallName" column="smallName"/>
+		<result property="detailName" column="detailName"/>
+		<result property="fineName" column="fineName"/>
+		<result property="materialTypeName" column="materialTypeName"/>
+		<result property="ingredientCodeName" column="ingredientCodeName"/>
+		
+		<result property="created" column="created"/>
+		<result property="createby" column="createby"/>
+		
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    
+    <!-- 历史数据 -->
+    <resultMap type="com.powere2e.sco.model.materialmarketanalysis.merchmatesuppquote.MerchMateSuppQuote" id="merMateQup">
+	    <result property="priceYear" column="priceYear"/>
+		<result property="price" column="price"/>	
+    	
+    	<collection property="webList" ofType="com.powere2e.sco.model.materialmarketanalysis.merchmatesuppquote.MerchMateSuppQuote">
+   			<result property="priceYear" column="wPriceYear"/>
+			<result property="price" column="wValue"/>	
+				<collection property="list" ofType="com.powere2e.sco.model.materialmarketanalysis.websitehistory.WebsiteHistory">
+					<result property="priceDate" column="wPriceDate"/>
+					<result property="price" column="wPrice"/>	
+					<result property="priceYear" column="wYear"/>	
+   				</collection>		
+    	</collection>
+    	<collection property="purList" ofType="com.powere2e.sco.model.materialmarketanalysis.merchmatesuppquote.MerchMateSuppQuote">
+   			<result property="priceYear" column="pPriceYear"/>
+			<result property="price" column="pValue"/>	
+    	</collection>
+    	<collection property="soldList" ofType="com.powere2e.sco.model.materialmarketanalysis.merchmatesuppquote.MerchMateSuppQuote">
+   			<result property="priceYear" column="sPriceYear"/>
+			<result property="price" column="sValue"/>	
+    	</collection>
+    </resultMap>
+    
+    <!-- 查询原料采购价格、投料占比 -->
+    <resultMap type="com.powere2e.sco.model.materialmarketanalysis.merchmatesuppquote.MerchMateSuppQuote" id="accIngMap">
+    	<result property="priceYear" column="priceYear"/>
+	   	<collection property="accList" ofType="com.powere2e.sco.model.materialmarketanalysis.merchmatesuppquote.MerchMateSuppQuote">
+  			<result property="priceYear" column="priceYear"/>
+			<result property="price" column="aValue"/>	
+	   	</collection>
+	   	<collection property="ingList" ofType="com.powere2e.sco.model.materialmarketanalysis.merchmatesuppquote.MerchMateSuppQuote">
+  			<result property="priceYear" column="priceYear"/>
+			<result property="price" column="iValue"/>	
+	   	</collection>
+    </resultMap>
+    
+    <!-- 查询商品原料 -->
+    <select id="listMerchandise" resultMap="merMateSuppMap">
+   	 SELECT 
+       	<if test="page_count == null">
+	        m.merchandise_code merchandiseCode,m.merchandise_name merchandiseName,
+	   		s.supplier_code supplierCode,s.supplier_name supplierName,
+	   		
+	   		dx.role_name dxRoleName,dl.role_name dlRoleName, 
+	   		ct.centre_type_name centreName, sm.small_type_name smallName, 
+			dt.detail_type_name detailName, ft.fine_type_name fineName,
+			mc.value_string materialTypeName,
+			ii.ingredient_code ingredientCode,ii.material_name ingredientCodeName,
+			ii.material_code materialCode 
+		</if>
+		<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+   	FROM
+		material mt  <!-- 原料 -->
+       	LEFT JOIN 
+       	(
+			SELECT
+				t2.material_code,t2.merchandise_code,t2.supplier_code,t2.merchandise_material_code,
+				t2.material_region_code,t2.created,t2.createby
+			FROM
+			(
+				SELECT
+					MAX(created) created, MAX(id) id
+				FROM
+					merchandise_relevance_material
+				GROUP BY merchandise_material_code,merchandise_code,supplier_code 
+			) t1
+			INNER JOIN merchandise_relevance_material t2 ON t1.id = t2.id
+       	)t ON mt.material_code = t.material_code  	<!-- 商品原料关联表 -->
+		LEFT JOIN ingredient_item ii ON t.merchandise_material_code = ii.material_code 		<!-- 投料表-细 -->  
+       	INNER JOIN 
+	       (
+	       	SELECT 
+				g4.accounting_code,g.merchandise_code merchandise_code, g.supplier_code supplier_code,
+				max(g.imCode) imCode, max(g.isCode) isCode
+			FROM
+	            (  SELECT 
+	            		MAX(oa2.application_code) application_code, oa2.merchandise_code, oa2.supplier_code,
+	            		max(oa2.imCode)imCode,max(oa2.isCode)isCode
+	            	FROM 
+	               (  SELECT 										<!-- 最新记录 -->
+		                am.merchandise_code,
+		                am.supplier_code,
+		                max(oa.oa_approve_date) maxDate
+		              FROM oa_application oa, 
+		              (SELECT 											<!-- 新品引进 -->
+	              		    t1.application_code,
+	              		    t3.merchandise_code merchandise_code,
+	              		    t3.supplier_code supplier_code,
+	              		    t1.merchandise_code imCode,t1.supplier_code isCode
+	              	    FROM 
+	              	    	(SELECT 
+	              	    		application_code 
+	                  		FROM oa_application 
+	                 			WHERE 
+	                 				UPPER(application_type) = 'MERCHANDISE_NEW' 
+	              	    		AND UPPER(application_status) = 'SPTG'
+	              	    	) t2
+	              		INNER JOIN application_merchandise t1 ON t2.application_code = t1.application_code 
+	              		INNER JOIN intention_supplier_merchandise t3 ON t3.intention_code = t1.merchandise_code
+	              		 AND t3.intention_supplier_code = t1.supplier_code AND t3.merchandise_code IS NOT NULL 
+	              		 AND t3.supplier_code is not null
+	              	 UNION 
+	              		SELECT 												<!-- 非新品引进 -->		
+	              	        t1.application_code,
+	              	        t1.merchandise_code merchandise_code,
+	              	        t1.supplier_code supplier_code,
+	              	        t1.merchandise_code imCode,t1.supplier_code isCode
+	                      FROM 
+	                      	(
+	                     		SELECT 
+	                     			application_code FROM oa_application 
+	                     		WHERE 
+	                     			UPPER(application_type) LIKE 'MERCHANDISE%' 
+	                      	AND	UPPER(application_type) != 'MERCHANDISE_NEW' 
+	                      	AND UPPER(application_status) = 'SPTG' 
+	                     	) t2 
+	                  	INNER JOIN application_merchandise t1 ON t2.application_code = t1.application_code 
+	              		)  am
+		              WHERE
+		              	UPPER(oa.application_type) LIKE 'MERCHANDISE%'
+		              	AND oa.application_code = am.application_code AND UPPER(oa.application_status) = 'SPTG' -- 审批通过 -->
+		              GROUP BY am.merchandise_code, am.supplier_code
+		            )oa1
+	              	INNER JOIN 
+	               (
+	                   SELECT 										<!-- 最新记录的其他字段 -->			
+	   	                am.application_code,
+	   	                am.merchandise_code,
+	   	                am.supplier_code,
+	   	                max(oa.oa_approve_date) maxDate,
+	   	                MAX(am.imCode) imCode,MAX(am.isCode) isCode
+	   	              
+	   	              FROM oa_application oa, 
+	   	                       (SELECT 											<!-- 新品引进 -->
+	                		    t1.application_code,
+	                		    t3.merchandise_code merchandise_code,
+	                		    t3.supplier_code supplier_code,
+	                		    t1.merchandise_code imCode,t1.supplier_code isCode
+	                	    FROM 
+	                	    	(SELECT 
+	                	    		application_code 
+	                    		FROM oa_application 
+	                   			WHERE 
+	                   				UPPER(application_type) = 'MERCHANDISE_NEW' 
+	                	    		AND UPPER(application_status) = 'SPTG'
+	                	    	) t2
+	                		INNER JOIN application_merchandise t1 ON t2.application_code = t1.application_code 
+	                		INNER JOIN intention_supplier_merchandise t3 ON t3.intention_code = t1.merchandise_code
+	                		 AND t3.intention_supplier_code = t1.supplier_code AND t3.merchandise_code IS NOT NULL 
+	                		 AND t3.supplier_code is not null
+	                	 UNION 
+	                		SELECT 												<!-- 非新品引进 -->		
+	                	        t1.application_code,
+	                	        t1.merchandise_code merchandise_code,
+	                	        t1.supplier_code supplier_code,
+	                	        t1.merchandise_code imCode,t1.supplier_code isCode
+	                        FROM 
+	                        	(
+	                       		SELECT 
+	                       			application_code FROM oa_application 
+	                       		WHERE 
+	                       			UPPER(application_type) LIKE 'MERCHANDISE%' 
+	                        	AND	UPPER(application_type) != 'MERCHANDISE_NEW' 
+	                        	AND UPPER(application_status) = 'SPTG' 
+	                       	) t2 
+	                    	INNER JOIN application_merchandise t1 ON t2.application_code = t1.application_code 
+	                		)
+		             am
+	   	              WHERE 
+	   	              	UPPER(oa.application_type) LIKE 'MERCHANDISE%' 
+	  	              		AND oa.application_code = am.application_code and UPPER(oa.application_status) = 'SPTG' 
+	   	              GROUP BY am.merchandise_code, am.supplier_code, am.application_code
+	                  ORDER BY am.merchandise_code, am.supplier_code, am.application_code      
+	               ) oa2 
+	              ON oa1.merchandise_code = oa2.merchandise_code AND oa1.supplier_code = oa2.supplier_code 
+	              		AND oa1.maxDate = oa2.maxDate
+	              GROUP BY oa2.merchandise_code, oa2.supplier_code 	<!-- 审批通过日期一致时选择审批号较大的那个 -->
+	             ) g 
+	          	INNER JOIN analysis_reports_m g3 ON g.application_code = g3.application_code
+	          	INNER JOIN cost_analysis_merchandise g4 ON g3.reports_code = g4.reports_code 
+	          		AND g.imCode = g4.merchandise_code AND g.isCode = g4.supplier_code	<!-- 成本分析-商品 -->
+		  	GROUP BY g4.accounting_code,g.merchandise_code,g.supplier_code 
+	       ) au ON ii.ingredient_code= au.accounting_code 
+        	AND t.merchandise_code = au.merchandise_code 
+        	AND t.supplier_code = au.supplier_code	<!-- 审批通过最新记录 -->
+		LEFT JOIN intention_supplier_merchandise ism 	<!-- 意向品供应商关联表 -->
+		ON 
+		 (
+		  (au.merchandise_code = ism.merchandise_code AND au.supplier_code = ism.supplier_code) 
+		 )
+		AND 	
+		  (au.imCode = ism.intention_code AND au.isCode = ism.intention_supplier_code) 
+		<!-- 关联意向品 -->
+		LEFT JOIN merchandise_intention mi ON ism.intention_code = mi.intention_code
+		LEFT JOIN merchandise m ON au.merchandise_code = m.merchandise_code	
+			AND au.supplier_code = m.supplier_code	<!-- 商品表 -->
+		LEFT JOIN supplier s ON au.supplier_code = s.supplier_code <!-- 供应商表 -->
+		LEFT JOIN merchandise_role mr ON m.merchandise_code = mr.merchandise_code <!-- 商品角色关联 -->
+		LEFT JOIN merchandise_dx_role dx ON mr.dx_role_code = dx.role_code <!-- 定性角色表 -->
+		LEFT JOIN merchandise_dl_role dl ON mr.dl_role_code = dl.role_code <!-- 定量角色表 -->
+		LEFT JOIN merchandise_centre_type ct ON m.centre_type_code = ct.centre_type_code <!-- 中分类 -->
+		LEFT JOIN merchandise_small_type sm ON m.small_type_code = sm.small_type_code <!-- 小分类 -->
+		
+		LEFT JOIN merchandise_detail_type dt ON m.detail_type_code = dt.detail_type_code <!-- 明细类 -->
+		LEFT JOIN merchandise_fine_type ft ON dt.detail_type_code = ft.detail_type_code 
+			AND mi.fine_type_code = ft.fine_type_code <!-- 关联商品意向品细分类 -->
+		
+       	LEFT JOIN material_big_type b ON mt.material_big_type_code = b.material_big_type_code <!-- 原料大类 -->
+		LEFT JOIN material_small_type s ON mt.material_small_type_code = s.material_small_type_code 
+			AND mt.material_big_type_code = s.material_big_type_code <!-- 原料小类 -->
+
+      	LEFT JOIN common_mapping_config mc ON ii.material_type = mc.code_string 
+			AND UPPER(mc.key_type) = 'MATERIAL_TYPE' 
+		WHERE 1 = 1 
+		<if test= "supplierCode != null and supplierCode != ''">
+			AND UPPER(s.supplier_code) LIKE UPPER('%'||#{supplierCode}||'%')
+		</if>
+    	<if test= "supplierName != null and supplierName != ''">
+			AND UPPER(s.supplier_name) LIKE UPPER('%'||#{supplierName}||'%')
+		</if>
+    	<if test= "merchandiseCode != null and merchandiseCode != ''">
+			AND UPPER(m.merchandise_code) LIKE UPPER('%'||#{merchandiseCode}||'%')
+		</if>
+    	<if test= "merchandiseName != null and merchandiseName != ''">
+			AND UPPER(m.merchandise_name) LIKE UPPER('%'||#{merchandiseName}||'%')
+		</if>
+    	<if test= "dxRoleCode != null and dxRoleCode != ''">
+			AND UPPER(dx.role_code) LIKE UPPER(#{dxRoleCode})
+		</if>
+    	<if test= "dlRoleCode != null and dlRoleCode != ''">
+			AND UPPER(dl.role_code) LIKE UPPER(#{dlRoleCode})
+		</if>
+    	<if test= "centreType != null and centreType != ''">
+			AND UPPER(ct.centre_type_code) LIKE UPPER(#{centreType})
+		</if>
+    	<if test= "smallType != null and smallType != ''">
+			AND UPPER(sm.small_type_code) LIKE UPPER(#{smallType})
+		</if>
+    	<if test= "detailType != null and detailType != ''">
+			AND UPPER(dt.detail_type_code) LIKE UPPER(#{detailType})
+		</if>
+    	<if test= "fineType != null and fineType != ''">
+			AND UPPER(ft.fine_type_code) LIKE UPPER(#{fineType})
+		</if>
+    	<if test= "materialType != null and materialType != ''">
+			AND UPPER(ii.material_type) LIKE UPPER(#{materialType})
+		</if>
+		<if test= "ingredientCodeName != null and ingredientCodeName != ''">
+			AND UPPER(ii.material_name) LIKE UPPER('%'||#{ingredientCodeName}||'%')
+		</if>
+		<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby == null">
+    			ORDER BY m.merchandise_code DESC,s.supplier_code DESC
+    		</if>
+    	</if>
+    </select>
+	
+	<!-- 查询原料采购价格、投料占比 -->
+	<select id="listAccAndIng" resultMap="accIngMap">
+    	SELECT 
+          au.maxDate priceYear,
+          ROUND(ii.purchase_price,2) aValue,
+          ROUND(ii.input_count_proportion,2) iValue 
+    	FROM 
+    		( SELECT * FROM merchandise_relevance_material WHERE merchandise_material_code = #{materialCode}) t 	<!-- 商品原料关联表 -->
+		LEFT JOIN 
+		(SELECT * FROM ingredient_item WHERE purchase_price IS NOT NULL ) ii 
+		ON t.merchandise_material_code = ii.material_code <!-- 投料表-细 -->  
+       	INNER JOIN 
+       	( SELECT 
+       		g4.accounting_code,g.maxDate
+       	FROM 
+          (  
+              SELECT 										
+                am.application_code,
+                TO_CHAR(oa.oa_approve_date, 'yyyy-mm') maxDate
+              FROM 
+              	oa_application oa, application_merchandise am
+              WHERE 
+              	oa.application_code = am.application_code and UPPER(oa.application_status) = 'SPTG' 
+              	AND oa.oa_approve_date <![CDATA[<]]> TO_DATE(#{endYear}, 'yyyy-mm')
+              GROUP BY am.application_code,TO_CHAR(oa.oa_approve_date, 'yyyy-mm')
+              ORDER BY am.application_code,TO_CHAR(oa.oa_approve_date, 'yyyy-mm')
+            ) g,
+             analysis_reports_m g3, cost_analysis_merchandise g4 
+             WHERE  g.application_code = g.application_code
+   			    AND g.application_code = g3.application_code
+   			    AND g3.reports_code = g4.reports_code  
+   			  GROUP BY g4.accounting_code,g.maxDate
+        ) au ON ii.ingredient_code= au.accounting_code 
+	</select>
+	
+	<!-- 查看商品原料历史价格  -->
+	<select id="listMerMateHisPrice" resultMap="merMateQup">
+		<foreach collection="list" item="item" separator="union" >  
+			SELECT
+				SUBSTR(a.priceYear,0, INSTR(a.priceYear,'-')-1) priceYear,
+				a.priceYear sPriceYear,ROUND(s.sell_price,2) sValue, 		<!-- 商品售价 --> 
+				a.priceYear pPriceYear,ROUND(p.purchase_price,2) pValue, 	<!-- 商品进价 --> 
+				SUBSTR(a.priceYear,0, INSTR(a.priceYear,'-')-1) wPriceDate,
+				w.w1Name wPriceYear,ROUND(w.price,2) wPrice,
+				TO_NUMBER(SUBSTR(a.priceYear, INSTR(a.priceYear,'-')+1, length(a.priceYear))) wYear 
+			FROM 
+				(
+					<foreach collection="item" item="it" separator="union" >  
+	                  	SELECT ${it} priceYear FROM DUAL 
+	               	</foreach>
+				) a
+			LEFT JOIN                        <!-- 商品售价 -->
+		     (
+		     SELECT 
+		     	TO_CHAR(p2.price_date,'yyyy-mm') price_date, MAX(p2.sell_price) sell_price
+		     FROM 
+		       ( 
+		        SELECT
+		              MAX(price_date) price_date 
+		        FROM 
+		        	merchandise_price 
+		        WHERE merchandise_code = #{merchandiseCode} AND supplier_code = #{supplierCode} AND sell_region='X001'
+		        GROUP BY TO_CHAR(price_date,'yyyy-mm')
+		        ) p1
+		     INNER JOIN 
+		        (
+		          SELECT 
+		          	 price_date,sell_price 
+		          FROM 
+		          	merchandise_price 
+		          WHERE merchandise_code = #{merchandiseCode} AND supplier_code = #{supplierCode} AND sell_region='X001'
+		        )p2 ON p1.price_date = p2.price_date 
+	         GROUP BY p2.price_date
+		     ) s ON a.priceYear = s.price_date
+		    LEFT JOIN                        <!-- 商品进价 -->
+		     (
+		     	  
+		        SELECT 
+			     	TO_CHAR(p2.price_date,'yyyy-mm') price_date, max(p2.purchase_price) purchase_price
+			     FROM 
+			       ( 
+			        SELECT
+		              	MAX(price_date) price_date 
+			        FROM 
+			        	merchandise_purchase_price 
+		         	WHERE merchandise_code = #{merchandiseCode} AND supplier_code = #{supplierCode} AND warehouse_code = 'X001'
+		        	GROUP BY TO_CHAR(price_date,'yyyy-mm')
+			        ) p1
+			     INNER JOIN 
+		        	(
+			          SELECT 
+			          	price_date,purchase_price
+		          	FROM 
+			          	merchandise_purchase_price 
+		          	   WHERE merchandise_code = #{merchandiseCode} AND supplier_code = #{supplierCode} AND warehouse_code = 'X001'
+		        	)p2 ON p1.price_date = p2.price_date 
+		      	GROUP BY p2.price_date
+		     ) p ON a.priceYear = p.price_date 
+		     LEFT JOIN 			<!-- 公示网站 -->
+		     (
+		     	SELECT 
+		     		t.* 
+		     	FROM 
+		     	(
+					<foreach collection="item" item="it" separator="union" >  
+	                  	SELECT ${it} priceYear FROM DUAL 
+	               	</foreach>
+				) a
+		     INNER JOIN 
+		       (
+		     	SELECT 
+						w.website_name||'-'||mt.material_name w1Name,p.price_date,p.price
+			       FROM 
+						merchandise_relevance_material t  
+				      	INNER JOIN merchandise m ON t.merchandise_code = m.merchandise_code	
+				      		AND t.supplier_code = m.supplier_code 
+				     	INNER JOIN supplier s ON t.supplier_code = s.supplier_code 		<!-- 供应商表 -->  
+				      	INNER JOIN material mt ON t.material_code = mt.material_code 	<!-- 原料 -->
+						INNER JOIN website w ON mt.website_code = w.website_code   		<!-- 公示网站 --> 
+						LEFT JOIN (
+				        	SELECT
+				              	material_code,TO_CHAR(price_date,'yyyy-mm') price_date, avg(price) price 
+					        FROM  
+								material_price 
+						    GROUP BY  material_code ,TO_CHAR(price_date,'yyyy-mm')     
+				    	)p ON t.material_code = p.material_code
+				    WHERE t.merchandise_code =  #{merchandiseCode}
+				    AND m.supplier_code = #{supplierCode}
+		     	) t ON a.priceYear = t.price_date
+		     ) w ON a.priceYear = w.price_date
+	     </foreach>
+<!-- 	     ORDER BY a.priceYear  -->
+	</select>
+</mapper>

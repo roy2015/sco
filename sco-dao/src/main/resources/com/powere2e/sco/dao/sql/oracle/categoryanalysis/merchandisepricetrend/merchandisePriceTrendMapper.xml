@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.powere2e.sco.interfaces.dao.categoryanalysis.merchandisepricetrend.MerchandisePriceTrendDao">
+	<resultMap
+		type="com.powere2e.sco.model.categoryanalysis.merchandisepricetrend.MerchandisePriceTrend"
+		id="merchandisePrice">
+		<result property="merchandiseCode" column="merchandiseCode" />
+		<result property="merchandiseName" column="merchandiseName" />
+		<result property="supplierCode" column="supplierCode" />
+		<result property="supplierName" column="supplierName" />
+		<result property="regionCode" column="regionCode" />
+		<result property="regionName" column="regionName" />
+		<result property="qlStartDate" column="qlStartDate" />
+		<result property="qlEndDate" column="qlEndDate" />
+		<result property="dxRoleName" column="dxRoleName" />
+		<result property="dlRoleName" column="dlRoleName" />
+		<result property="centreName" column="centreName" />
+		<result property="smallName" column="smallName" />
+		<result property="detailName" column="detailName" />
+		<result property="fineName" column="fineName" />
+		<result property="itemValue" column="itemValue" />
+		<result property="onlyDirect" column="onlyDirect" />
+		<result property="onlyJoin" column="onlyJoin" />
+		<result property="directAndJoin" column="directAndJoin" />
+		<result property="merchandiseCodes" column="merchandiseCodes" />
+		<result property="fineName" column="fineName" />
+		<result property="recordCount" column="record_count" />
+	</resultMap>
+	<!-- 地区信息查询 -->
+	<select id="searchRegion" resultType="com.powere2e.security.model.Option">
+		select
+			region_code id, region_name text
+		from
+			region 
+		where region_code=#{regionCode}
+		order by region_name 
+	</select>
+	<!-- 查询商品数据 -->
+	<select id="listMerchandiseData" resultMap="merchandisePrice">
+		SELECT
+		<if test="page_count == null">
+			m.merchandise_code merchandiseCode, m.merchandise_name
+			merchandiseName,
+			s.supplier_code supplierCode,s.supplier_name
+			supplierName,
+			dx.role_name dxRoleName,dl.role_name dlRoleName,
+			ct.centre_type_name centreName, sm.small_type_name smallName,
+			dt.detail_type_name detailName,ft.fine_type_name fineName
+		</if>
+		<if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		FROM
+		merchandise m
+		LEFT JOIN supplier s ON m.supplier_code =s.supplier_code  <!-- 供应商表 -->
+		LEFT JOIN merchandise_role mr ON m.merchandise_code =mr.merchandise_code <!-- 商品角色关联表 -->
+		LEFT JOIN merchandise_dx_role dx ON mr.dx_role_code = dx.role_code <!--定性角色表 -->
+		LEFT JOIN merchandise_dl_role dl ON mr.dl_role_code = dl.role_code <!--定量角色表 -->
+		LEFT JOIN merchandise_centre_type ct ON m.centre_type_code =ct.centre_type_code <!-- 中分类 -->
+		LEFT JOIN merchandise_small_type sm ON m.small_type_code =sm.small_type_code <!-- 小分类 -->
+		LEFT JOIN merchandise_detail_type dt ON m.detail_type_code =dt.detail_type_code <!-- 明细类 -->
+		left join INTENTION_SUPPLIER_MERCHANDISE ism on ism.merchandise_code=m.merchandise_code and ism.SUPPLIER_CODE=m.SUPPLIER_CODE
+		left join MERCHANDISE_INTENTION mi on ism.intention_code=mi.intention_code
+		LEFT JOIN merchandise_fine_type ft ON dt.detail_type_code = ft.detail_type_code AND mi.fine_type_code = ft.fine_type_code	<!-- 细分类 -->
+		WHERE 1=1
+		<if test="supplierCode != null and supplierCode != ''">
+			AND UPPER(s.supplier_code) like
+			UPPER('%'||#{supplierCode}||'%')
+		</if>
+		<if test="supplierName != null and supplierName != ''">
+			AND UPPER(s.supplier_name) like
+			UPPER('%'||#{supplierName}||'%')
+		</if>
+		<if test="merchandiseCode != null and merchandiseCode != ''">
+			AND UPPER(m.merchandise_code) like
+			UPPER('%'||#{merchandiseCode}||'%')
+		</if>
+		<if test="merchandiseName != null and merchandiseName != ''">
+			AND UPPER(m.merchandise_name) like
+			UPPER('%'||#{merchandiseName}||'%')
+		</if>
+		<if test="dlRoleCode != null and dlRoleCode != ''">
+			AND UPPER(mr.dl_role_code) like UPPER(#{dlRoleCode})
+		</if>
+		<if test="dxRoleCode != null and dxRoleCode != ''">
+			AND UPPER(mr.dx_role_code) like UPPER(#{dxRoleCode})
+		</if>
+		<if test="centreType != null and centreType != ''">
+			AND UPPER(m.centre_type_code) like UPPER(#{centreType})
+		</if>
+		<if test="smallType != null and smallType != ''">
+			AND UPPER(m.small_type_code) like UPPER(#{smallType})
+		</if>
+		<if test="detailType != null and detailType != ''">
+			AND UPPER(m.detail_type_code) like UPPER(#{detailType})
+		</if>
+		<if test="fineType != null and fineType != ''">
+			AND UPPER(ft.fine_type_code) like UPPER(#{fineType})
+		</if>
+		<if test="purchaseDepartments != null and purchaseDepartments != ''">
+			AND UPPER(m.purchase_departments) like UPPER(#{purchaseDepartments})
+		</if>
+		<if test="page_count == null">
+			<if test="app_orderby !=null">
+				ORDER BY ${app_orderby}
+			</if>
+		</if>
+	</select>
+
+	<!-- 查询商品主数据和价格数据 -->
+	<select id="listMerchandisePriceData" resultMap="merchandisePrice">
+		SELECT
+		<if test="page_count == null">
+			*
+		</if>
+		<if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		from
+		(select 
+		
+		m.merchandise_code merchandiseCode,
+        m.merchandise_name merchandiseName,
+        m.supplier_code supplierCode,
+        s.supplier_name supplierName,
+        m.net_weight specification,
+        ct.centre_type_name centreName,
+        sm.small_type_name smallName,
+        dt.detail_type_name detailName
+
+		FROM  merchandise m  <!--商品表 -->
+		left JOIN supplier s ON m.supplier_code = s.supplier_code <!-- 供应商表 -->
+		LEFT JOIN merchandise_centre_type ct ON m.centre_type_code = ct.centre_type_code <!-- 中分类 -->
+		LEFT JOIN merchandise_small_type sm ON m.small_type_code = sm.small_type_code  <!-- 小分类 -->
+		LEFT JOIN merchandise_detail_type dt ON m.detail_type_code = dt.detail_type_code <!-- 明细类 -->
+		WHERE 1=1
+		<foreach collection="merchandise"  item="item" index="index" separator="or" open="and (" close=")">
+        		(m.merchandise_code=#{item.merchandiseCode} AND m.supplier_code=#{item.supplierCode})
+        	</foreach>
+		) m
+		 inner join (
+        select 
+          mp.merchandise_code,
+          mp.supplier_code,
+          mp.sell_region regionCode,
+          r.region_name regionName,
+          <!-- mp.direct_join , -->
+          avg(mp.sell_price) sellPrice,
+          to_char(mp.price_date,'yyyy-mm-dd') priceChangeDate
+        from 
+          MERCHANDISE_PRICE_GROUP mp
+          inner join merchandise m on m.merchandise_code=mp.merchandise_code and m.supplier_code=mp.supplier_code
+          left join REGION r on r.REGION_CODE=mp.SELL_REGION
+          where 1=1
+          
+          		<foreach collection="merchandise"  item="item" index="index" separator="or" open="and (" close=")">
+        		(m.merchandise_code=#{item.merchandiseCode} AND m.supplier_code=#{item.supplierCode})
+        	</foreach>
+            <if test="show ==1">
+		        and mp.direct_join='直营'
+		      </if>
+		      <if test="show ==2">
+					 and mp.direct_join='加盟'
+				</if>
+				<if test="regionCode != null and regionCode != '' and regionCode != 'all' ">
+					AND UPPER(mp.sell_region) like UPPER(#{regionCode})
+				</if>
+				<if test="qlStartDate != null">
+					AND mp.price_date between to_date(#{qlStartDate},'yyyy-mm-dd') and to_date(#{qlEndDate},'yyyy-mm-dd')+1
+				</if>
+				group by mp.merchandise_code, mp.supplier_code,to_char(mp.price_date,'yyyy-mm-dd'),r.region_name,mp.sell_region
+				order by priceChangeDate asc
+        ) mp on m.merchandiseCode=mp.merchandise_code and m.supplierCode=mp.supplier_Code	
+		<if test="page_count == null">
+			<if test="app_orderby ==null">
+				ORDER BY m.merchandiseCode,m.supplierCode,mp.priceChangeDate ASC
+			</if>
+		</if>
+	</select>
+<!-- 查看价格变动日期和变动价格 -->
+	<select id="searchPriceOrDate" resultMap="merchandisePrice">
+	    select 
+	    <if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		<if test="page_count == null">
+	    	merchandise_code merchandiseCode,
+	    	avg(mp.sell_price) sellPrice,
+	    	to_char(mp.price_date,'yyyy-mm-dd') priceChangeDate 
+	    </if>
+	    from MERCHANDISE_PRICE_GROUP mp
+	    where  (
+				merchandise_code = #{merchandiseCode}
+				AND
+				supplier_code =#{supplierCode}
+				)
+			<if test="regionCode != null and regionCode != '' and regionCode != 'all' ">
+				and mp.sell_region=#{regionCode}
+			</if>
+	       <if test="show ==1 ">
+				and mp.direct_join='直营'
+			</if>
+			<if test="show ==2">
+				 and mp.direct_join='加盟'
+			</if> 
+	    	and PRICE_DATE between to_date(#{qlStartDate},'yyyy-mm-dd') and to_date(#{qlEndDate},'yyyy-mm-dd')
+	    	group by merchandise_code,to_char(mp.price_date,'yyyy-mm-dd')
+	    order by to_char(PRICE_DATE,'yyyy-mm-dd') asc
+	</select>
+	<!-- 查询商品销售数据 -->
+	<select id="merchandiseSellData" resultMap="merchandisePrice">
+		WITH MJP as( <!--商品进货权限 -->
+			select 
+				mjp.merchandise_code,
+				mjp.supplier_code,
+				sum(mjp.permission_store_quantity) permissionStoreQuantity
+			FROM MERCHANDISE_JH_PERMISSION mjp
+			WHERE 1=1
+			<if test="merchandiseCode != null and merchandiseCode != ''">
+				AND UPPER(mjp.merchandise_code) like UPPER(#{merchandiseCode})
+			</if>
+			<if test="supplierCode != null and supplierCode != ''">
+				AND UPPER(mjp.supplier_code) like UPPER(#{supplierCode})
+			</if>
+			<if test="regionCode != null and regionCode != '' and regionCode != 'all' ">
+				AND UPPER(mjp.region_code) like UPPER(#{regionCode})
+			</if>
+			<if test="qlStartDate != null">
+				AND mjp.permission_date between to_date(#{qlStartDate},'yyyy-mm-dd') and to_date(#{qlEndDate},'yyyy-mm-dd')-1
+			</if>
+			<if test="show ==1 ">
+				and mjp.store_type='直营'
+			</if>
+			<if test="show ==2">
+				 and mjp.store_type='加盟'
+			</if> 
+			<if test="page_count == null">
+				GROUP BY mjp.merchandise_code,mjp.supplier_code
+			</if>
+			),
+			MDSS as( 
+			select 
+			msdd.merchandise_code,
+			msdd.supplier_code,
+			sum(msdd.sell_quantity) sellQuantity,
+			sum(msdd.sell_total_price) sellTotalPrice,
+			sum(msdd.sell_profit) sellProfit,
+			sum(msdd.sell_store_quantity) sellStoreQuantity
+			FROM
+			<if test="show ==1 ">
+				merchandise_sell_direct_day msdd
+			</if>
+			<if test="show ==2">
+				 merchandise_sell_join_day msdd
+			</if>
+			<if test="show ==3">
+				 merchandise_sell_d_j_day msdd
+			</if>  
+			
+			WHERE 1=1
+			<if test="merchandiseCode != null and merchandiseCode != ''">
+				AND UPPER(msdd.merchandise_code) like UPPER(#{merchandiseCode})
+			</if>
+			<if test="supplierCode != null and supplierCode != ''">
+				AND UPPER(msdd.supplier_code) like UPPER(#{supplierCode})
+			</if>
+			<if test="regionCode != null and regionCode != '' and regionCode != 'all' ">
+				AND UPPER(msdd.sell_region) like UPPER(#{regionCode})
+			</if>
+			<if test="qlStartDate != null">
+				AND msdd.sell_date between to_date(#{qlStartDate},'yyyy-mm-dd') and to_date(#{qlEndDate},'yyyy-mm-dd')-1
+			</if>
+			<if test="page_count == null">
+				GROUP BY msdd.merchandise_code,msdd.supplier_code
+			</if>
+			)
+			SELECT
+			<if test="page_count == null">
+				m.merchandise_code merchandiseCode,
+				m.supplier_code supplierCode,
+				sum(msdd.sellQuantity) sellQuantity,
+				sum(msdd.sellTotalPrice) sellTotalPrice,
+				sum(msdd.sellProfit) sellProfit,
+				nvl(sum(msdd.sellQuantity),0)/decode(nvl(sum(msdd.sellStoreQuantity),1),0,1,nvl(sum(msdd.sellStoreQuantity),1)) psdSellQuantity,
+				nvl(sum(msdd.sellTotalPrice),0)/decode(nvl(sum(msdd.sellStoreQuantity),1),0,1,nvl(sum(msdd.sellStoreQuantity),1)) psdSellTotalPrice,
+				nvl(sum(msdd.sellProfit),0)/decode(nvl(sum(msdd.sellStoreQuantity),1),0,1,nvl(sum(msdd.sellStoreQuantity),1)) psdSellProfit,
+				sum(msdd.sellStoreQuantity) sellStoreQuantity,
+				sum(mjp.permissionStoreQuantity) permissionStoreQuantity
+			</if>
+			<if test="page_count != null">
+				count(1) AS record_count
+			</if>
+			FROM
+			MERCHANDISE m
+			LEFT JOIN MJP mjp ON m.merchandise_code=mjp.merchandise_code and m.supplier_code=mjp.supplier_code <!--商品进货权限 -->
+			LEFT JOIN MDSS msdd ON m.merchandise_code=msdd.merchandise_code and m.supplier_code=msdd.supplier_code <!--商品区域销售情况（日直营） -->
+			WHERE 1=1
+			<if test="merchandiseCode != null and merchandiseCode != ''">
+				AND UPPER(m.merchandise_code) like UPPER(#{merchandiseCode})
+			</if>
+			<if test="supplierCode != null and supplierCode != ''">
+				AND UPPER(m.supplier_code) like UPPER(#{supplierCode})
+			</if>
+			group by m.merchandise_code,m.supplier_code
+	</select>
+</mapper>

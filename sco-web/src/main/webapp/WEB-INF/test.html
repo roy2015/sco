@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<style>
+			table {
+				border-collapse: collapse;
+				border: solid #ddd 1px;
+				widtd: 1800px;
+				font-family: "微软雅黑";
+				font-size: 13px;
+				white-space: nowrap;
+				background-color: #EEEEEE;
+			}
+			td,th {
+				padding: 5px 10px;
+			}
+		</style>
+		<script type="text/javascript" src="js/echarts/echarts.js" />
+		<script type="text/javascript">
+			function allShowChart(data) {
+				var priceChangeDateArr = [], sellPriceGainsArr = [], psdSalesGainsArr = [], psdResultsGainsArr = [], psdGrossProfitGainsArr = [];
+				var priceChangeDateArrs = [], sellPriceGainsArrs = [], psdSalesGainsArrs = [], psdResultsGainsArrs = [], psdGrossProfitGainsArrs = [];
+				var row=data;
+	// 			console.info(row.length);
+				for(var i in row){
+					var json=row[i];
+					//var line="<div id='line"+i+"' style='height:400px;width:50%;float:left;'></div>";
+					//var lines="<div id='lines"+i+"' style='height:400px;width:50%;float:left;'></div>";
+					//if(i!=0){
+						//line += document.getElementById("line"+i);//是这样么。。。。我也不知
+						//lines += document.getElementById("lines"+i);
+						//line.appendTo(document.getElementById("line"+i));
+						//lines.appendTo(document.getElementById("lines"+i));
+					//}
+					priceChangeDateArr = [];
+					sellPriceGainsArr = [];
+					psdSalesGainsArr = [];
+					psdResultsGainsArr = [];
+					psdGrossProfitGainsArr = [];
+					priceChangeDateArrs = [];
+					sellPriceGainsArrs = [];
+					psdSalesGainsArrs = [];
+					psdResultsGainsArrs = [];
+					psdGrossProfitGainsArrs = [];
+	
+	
+							priceChangeDateArr.push(json.time);
+							sellPriceGainsArr.push(json.sellQuantityA);
+							psdSalesGainsArr.push(json.sellQuantityAB);
+							psdResultsGainsArr.push(json.sellQuantityD);
+							psdGrossProfitGainsArr.push(json.sellQuantityDB);
+	
+							priceChangeDateArrs.push(json.time);
+							sellPriceGainsArrs.push(json.sellTotalPriceA);
+							psdSalesGainsArrs.push(json.sellTotalPriceAB);
+							psdResultsGainsArrs.push(json.sellTotalPriceD);
+							psdGrossProfitGainsArrs.push(json.sellTotalPriceDB);
+				}
+				
+				require.config({
+					paths : {
+						echarts : 'js/echarts'
+					}
+				});
+	
+				// 使用
+				require([ 'echarts', 'echarts/chart/line' // 使用柱状图就加载bar模块，按需加载
+				], function(ec) {
+					// 基于准备好的dom，初始化echarts图表
+					var myChart = ec.init(document.getElementById("line"+i));
+					var myCharts = ec.init(document.getElementById("lines"+i));
+					var lineOptions = {
+							tooltip : {
+								trigger : 'axis'
+							},
+							legend : {
+								data : [ '单品日销售额VS促销后开始日期当天销售额', '单品平均销售额vs促销后开始日期当天销售额', '公司日销售额vs促销后开始日期当天销售额', '公司平均销售量vs促销后开始日期当天销售额' ]
+							},
+							toolbox : {
+								show : false,
+								feature : {
+									mark : {
+										show : true
+									},
+									dataView : {
+										show : true,
+										readOnly : false
+									},
+									magicType : {
+										show : true,
+										type : [ 'line', 'bar' ]
+									},
+									restore : {
+										show : true
+									},
+									saveAsImage : {
+										show : true
+									}
+								}
+							},
+							calculable : false,
+							xAxis : [ {
+								type : 'category',
+								boundaryGap : false,
+								data : priceChangeDateArrs
+							} ],
+							yAxis : [ {
+								type : 'value',
+								axisLabel : {
+									formatter : '{value} %'
+								}
+							} ],
+							series : [ {
+								name : '单品日销售额VS促销后开始日期当天销售额',
+								type : 'line',
+								data : sellPriceGainsArrs
+							}, {
+								name : '单品平均销售额vs促销后开始日期当天销售额',
+								type : 'line',
+							 	data : psdSalesGainsArrs
+							}, {
+								name : '公司日销售额vs促销后开始日期当天销售额',
+								type : 'line',
+								data : psdResultsGainsArrs
+							}, {
+								name : '公司平均销售量vs促销后开始日期当天销售额',
+								type : 'line',
+								data : psdGrossProfitGainsArrs
+							} ]
+						};
+						var lineOption = {
+							tooltip : {
+								trigger : 'axis'
+							},
+							legend : {
+								data : [ '单品日销量VS促销后开始日期当天销量', '单品平均销量vs促销后开始日期当天销量', '公司日销量vs促销后开始日期当天销量', '公司平均销售量vs促销后开始日期当天销量' ]
+							},
+							toolbox : {
+								show : false,
+								feature : {
+									mark : {
+										show : true
+									},
+									dataView : {
+										show : true,
+										readOnly : false
+									},
+									magicType : {
+										show : true,
+										type : [ 'line', 'bar' ]
+									},
+									restore : {
+										show : true
+									},
+									saveAsImage : {
+										show : true
+									}
+								}
+							},
+							calculable : false,
+							xAxis : [ {
+								type : 'category',
+								boundaryGap : false,
+							 	data : priceChangeDateArr
+							} ],
+							yAxis : [ {
+								type : 'value',
+								axisLabel : {
+									formatter : '{value} %'
+								}
+							} ],
+							series : [ {
+								name : '单品日销量VS促销后开始日期当天销量',
+								type : 'line',
+								data : sellPriceGainsArr
+							}, {
+								name : '单品平均销量vs促销后开始日期当天销量',
+								type : 'line',
+								data : psdSalesGainsArr
+							}, {
+								name : '公司日销量vs促销后开始日期当天销量',
+								type : 'line',
+								data : psdResultsGainsArr
+							}, {
+								name : '公司平均销售量vs促销后开始日期当天销量',
+								type : 'line',
+								data : psdGrossProfitGainsArr
+							} ]
+						};
+			
+					// 为echarts对象加载数据
+					myChart.setOption(lineOption);
+					myCharts.setOption(lineOptions);
+				});
+			}
+		</script>
+	</head>
+	<body>
+		<div id="line0" style="height:400px;width:50%;float:left;"></div>
+		<div id="lines0" style="height:400px;width:50%;float:left;"></div>
+		<script type="text/javascript">
+			allShowChart([{"active":0,"bfb":"","centreName":"","centreTypeCode":"","clientId":"","clientName":"","createUserName":"","createby":"","created":null,"day":0,"dayA":0,"dayD":0,"dayS":0,"detailName":"","detailTypeCode":"","dlRoleCode":"","dlRoleName":"","dxRoleCode":"","dxRoleName":"","endDate":null,"fieldMap":{},"fineTypeCode":"","maxDate":"","merchandiseCode":"","merchandiseName":"","minDate":"","netWeight":"","orgId":"","orgName":"","permissionStoreQuantity":0,"promotionName":"","psdSellProfit":0,"psdSellProfitA":0,"psdSellProfitD":0,"psdSellProfitS":0,"psdSellQuantity":0,"psdSellQuantityA":0,"psdSellQuantityD":0,"psdSellQuantityS":0,"psdSellTotalPrice":0,"psdSellTotalPriceA":0,"psdSellTotalPriceD":0,"psdSellTotalPriceS":0,"searchTable":"","sellDate":null,"sellPrice":0,"sellProfit":0,"sellProfitA":0,"sellProfitD":0,"sellProfitP":0,"sellProfitPA":0,"sellProfitPD":0,"sellProfitPS":0,"sellProfitProportionD":0,"sellProfitProportionM":0,"sellProfitProportionS":0,"sellProfitS":0,"sellQuantity":0,"sellQuantityA":100,"sellQuantityAB":100,"sellQuantityD":100,"sellQuantityDB":150,"sellQuantityP":0,"sellQuantityPA":0,"sellQuantityPD":0,"sellQuantityPS":0,"sellQuantityProportionD":0,"sellQuantityProportionM":0,"sellQuantityProportionS":0,"sellQuantityS":0,"sellRegion":"","sellRegionName":"","sellStoreQuantity":0,"sellTotalPrice":0,"sellTotalPriceA":100,"sellTotalPriceAB":95.45,"sellTotalPriceD":100,"sellTotalPriceDB":145.45,"sellTotalPriceP":0,"sellTotalPricePA":0,"sellTotalPricePD":0,"sellTotalPricePS":0,"sellTotalPriceProportionD":0,"sellTotalPriceProportionM":0,"sellTotalPriceProportionS":0,"sellTotalPriceS":0,"sku":0,"smallName":"","smallTypeCode":"","startDate":null,"supplierCode":"","supplierName":"","time":"2015-05-31","toDaySellQuantity":0,"toDaySellQuantityS":0,"toDaySellTotalPrice":0,"toDaySellTotalPriceS":0,"type":"","updateUserName":"","updateby":"","updated":null,"wlType":""},{"active":0,"bfb":"","centreName":"","centreTypeCode":"","clientId":"","clientName":"","createUserName":"","createby":"","created":null,"day":0,"dayA":0,"dayD":0,"dayS":0,"detailName":"","detailTypeCode":"","dlRoleCode":"","dlRoleName":"","dxRoleCode":"","dxRoleName":"","endDate":null,"fieldMap":{},"fineTypeCode":"","maxDate":"","merchandiseCode":"","merchandiseName":"","minDate":"","netWeight":"","orgId":"","orgName":"","permissionStoreQuantity":0,"promotionName":"","psdSellProfit":0,"psdSellProfitA":0,"psdSellProfitD":0,"psdSellProfitS":0,"psdSellQuantity":0,"psdSellQuantityA":0,"psdSellQuantityD":0,"psdSellQuantityS":0,"psdSellTotalPrice":0,"psdSellTotalPriceA":0,"psdSellTotalPriceD":0,"psdSellTotalPriceS":0,"searchTable":"","sellDate":null,"sellPrice":0,"sellProfit":0,"sellProfitA":0,"sellProfitD":0,"sellProfitP":0,"sellProfitPA":0,"sellProfitPD":0,"sellProfitPS":0,"sellProfitProportionD":0,"sellProfitProportionM":0,"sellProfitProportionS":0,"sellProfitS":0,"sellQuantity":0,"sellQuantityA":100,"sellQuantityAB":100,"sellQuantityD":200,"sellQuantityDB":150,"sellQuantityP":0,"sellQuantityPA":0,"sellQuantityPD":0,"sellQuantityPS":0,"sellQuantityProportionD":0,"sellQuantityProportionM":0,"sellQuantityProportionS":0,"sellQuantityS":0,"sellRegion":"","sellRegionName":"","sellStoreQuantity":0,"sellTotalPrice":0,"sellTotalPriceA":90.91,"sellTotalPriceAB":95.45,"sellTotalPriceD":190.91,"sellTotalPriceDB":145.45,"sellTotalPriceP":0,"sellTotalPricePA":0,"sellTotalPricePD":0,"sellTotalPricePS":0,"sellTotalPriceProportionD":0,"sellTotalPriceProportionM":0,"sellTotalPriceProportionS":0,"sellTotalPriceS":0,"sku":0,"smallName":"","smallTypeCode":"","startDate":null,"supplierCode":"","supplierName":"","time":"2015-06-05","toDaySellQuantity":0,"toDaySellQuantityS":0,"toDaySellTotalPrice":0,"toDaySellTotalPriceS":0,"type":"","updateUserName":"","updateby":"","updated":null,"wlType":""},{"active":0,"bfb":"","centreName":"","centreTypeCode":"","clientId":"","clientName":"","createUserName":"","createby":"","created":null,"day":0,"dayA":0,"dayD":0,"dayS":0,"detailName":"","detailTypeCode":"","dlRoleCode":"","dlRoleName":"","dxRoleCode":"","dxRoleName":"","endDate":null,"fieldMap":{},"fineTypeCode":"","maxDate":"","merchandiseCode":"","merchandiseName":"","minDate":"","netWeight":"","orgId":"","orgName":"","permissionStoreQuantity":0,"promotionName":"","psdSellProfit":0,"psdSellProfitA":0,"psdSellProfitD":0,"psdSellProfitS":0,"psdSellQuantity":0,"psdSellQuantityA":0,"psdSellQuantityD":0,"psdSellQuantityS":0,"psdSellTotalPrice":0,"psdSellTotalPriceA":0,"psdSellTotalPriceD":0,"psdSellTotalPriceS":0,"searchTable":"","sellDate":null,"sellPrice":0,"sellProfit":0,"sellProfitA":0,"sellProfitD":0,"sellProfitP":0,"sellProfitPA":0,"sellProfitPD":0,"sellProfitPS":0,"sellProfitProportionD":0,"sellProfitProportionM":0,"sellProfitProportionS":0,"sellProfitS":0,"sellQuantity":0,"sellQuantityA":100,"sellQuantityAB":100,"sellQuantityD":100,"sellQuantityDB":100,"sellQuantityP":0,"sellQuantityPA":0,"sellQuantityPD":0,"sellQuantityPS":0,"sellQuantityProportionD":0,"sellQuantityProportionM":0,"sellQuantityProportionS":0,"sellQuantityS":0,"sellRegion":"","sellRegionName":"","sellStoreQuantity":0,"sellTotalPrice":0,"sellTotalPriceA":90.91,"sellTotalPriceAB":90.91,"sellTotalPriceD":90.91,"sellTotalPriceDB":90.91,"sellTotalPriceP":0,"sellTotalPricePA":0,"sellTotalPricePD":0,"sellTotalPricePS":0,"sellTotalPriceProportionD":0,"sellTotalPriceProportionM":0,"sellTotalPriceProportionS":0,"sellTotalPriceS":0,"sku":0,"smallName":"","smallTypeCode":"","startDate":null,"supplierCode":"","supplierName":"","time":"2015-05-26","toDaySellQuantity":0,"toDaySellQuantityS":0,"toDaySellTotalPrice":0,"toDaySellTotalPriceS":0,"type":"","updateUserName":"","updateby":"","updated":null,"wlType":""},{"active":0,"bfb":"","centreName":"","centreTypeCode":"","clientId":"","clientName":"","createUserName":"","createby":"","created":null,"day":0,"dayA":0,"dayD":0,"dayS":0,"detailName":"","detailTypeCode":"","dlRoleCode":"","dlRoleName":"","dxRoleCode":"","dxRoleName":"","endDate":null,"fieldMap":{},"fineTypeCode":"","maxDate":"","merchandiseCode":"","merchandiseName":"","minDate":"","netWeight":"","orgId":"","orgName":"","permissionStoreQuantity":0,"promotionName":"","psdSellProfit":0,"psdSellProfitA":0,"psdSellProfitD":0,"psdSellProfitS":0,"psdSellQuantity":0,"psdSellQuantityA":0,"psdSellQuantityD":0,"psdSellQuantityS":0,"psdSellTotalPrice":0,"psdSellTotalPriceA":0,"psdSellTotalPriceD":0,"psdSellTotalPriceS":0,"searchTable":"","sellDate":null,"sellPrice":0,"sellProfit":0,"sellProfitA":0,"sellProfitD":0,"sellProfitP":0,"sellProfitPA":0,"sellProfitPD":0,"sellProfitPS":0,"sellProfitProportionD":0,"sellProfitProportionM":0,"sellProfitProportionS":0,"sellProfitS":0,"sellQuantity":0,"sellQuantityA":100,"sellQuantityAB":100,"sellQuantityD":200,"sellQuantityDB":100,"sellQuantityP":0,"sellQuantityPA":0,"sellQuantityPD":0,"sellQuantityPS":0,"sellQuantityProportionD":0,"sellQuantityProportionM":0,"sellQuantityProportionS":0,"sellQuantityS":0,"sellRegion":"","sellRegionName":"","sellStoreQuantity":0,"sellTotalPrice":0,"sellTotalPriceA":100,"sellTotalPriceAB":100,"sellTotalPriceD":200,"sellTotalPriceDB":100,"sellTotalPriceP":0,"sellTotalPricePA":0,"sellTotalPricePD":0,"sellTotalPricePS":0,"sellTotalPriceProportionD":0,"sellTotalPriceProportionM":0,"sellTotalPriceProportionS":0,"sellTotalPriceS":0,"sku":0,"smallName":"","smallTypeCode":"","startDate":null,"supplierCode":"","supplierName":"","time":"2015-06-15","toDaySellQuantity":0,"toDaySellQuantityS":0,"toDaySellTotalPrice":0,"toDaySellTotalPriceS":0,"type":"","updateUserName":"","updateby":"","updated":null,"wlType":""}]);
+		</script>
+	</body>
+</html>

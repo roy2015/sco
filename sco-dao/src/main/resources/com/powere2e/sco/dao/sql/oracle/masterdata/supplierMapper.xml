@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.masterdata.SupplierDao">
+	<resultMap type="com.powere2e.sco.model.masterdata.Supplier" id="supplierMap">
+		<result property="companyPhone" column="companyPhone"/>
+		<result property="companyFax" column="companyFax"/>
+		<result property="postcode" column="postcode"/>
+		<result property="syncDate" column="syncDate"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="supplierName" column="supplierName"/>
+		<result property="companyType" column="companyType"/>
+		<result property="contacts" column="contacts"/>
+		<result property="contactsPhone" column="contactsPhone"/>
+		<result property="companySite" column="companySite"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <!-- 查询供应商(可分页)-->
+    <select id="searchSupplier" resultMap="supplierMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.company_phone companyPhone,t.company_fax companyFax,t.postcode postcode,t.sync_date syncDate,t.supplier_code supplierCode,t.supplier_name supplierName,t.company_type companyType,t.contacts contacts,t.contacts_phone contactsPhone,t.company_site companySite
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM supplier t
+    	<where>
+    		1=1
+	    	<if test= "companyPhone != null and companyPhone!=''">
+			AND UPPER(t.company_phone) LIKE UPPER('%'||#{companyPhone}||'%')
+			</if>
+	    	<if test= "companyFax != null and companyFax!=''">
+			AND UPPER(t.company_fax) LIKE UPPER('%'||#{companyFax}||'%')
+			</if>
+	    	<if test= "postcode != null and postcode!=''">
+			AND UPPER(t.postcode) LIKE UPPER('%'||#{postcode}||'%')
+			</if>
+	    	<if test= "syncDate != null and syncDate!=''">
+			AND	convert(varchar,t.sync_date,120) LIKE (#{syncDate})
+			</if>
+	    	<if test= "supplierCode != null and supplierCode!=''">
+			AND UPPER(t.supplier_code) LIKE UPPER('%'||#{supplierCode}||'%')
+			</if>
+	    	<if test= "supplierName != null and supplierName!=''">
+			AND UPPER(t.supplier_name) LIKE UPPER('%'||#{supplierName}||'%')
+			</if>
+	    	<if test= "companyType != null and companyType!=''">
+			AND UPPER(t.company_type) LIKE UPPER('%'||#{companyType}||'%')
+			</if>
+	    	<if test= "contacts != null and contacts!=''">
+			AND UPPER(t.contacts) LIKE UPPER('%'||#{contacts}||'%')
+			</if>
+	    	<if test= "contactsPhone != null and contactsPhone!=''">
+			AND UPPER(t.contacts_phone) LIKE UPPER('%'||#{contactsPhone}||'%')
+			</if>
+	    	<if test= "companySite != null and companySite!=''">
+			AND UPPER(t.company_site) LIKE UPPER('%'||#{companySite}||'%')
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.supplier_code DESC
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 根据主键查询某个供应商(可分页)-->
+    <select id="loadSupplier" resultMap="supplierMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.company_phone companyPhone,t.company_fax companyFax,t.postcode postcode,t.sync_date syncDate,t.supplier_code supplierCode,t.supplier_name supplierName,t.company_type companyType,t.contacts contacts,t.contacts_phone contactsPhone,t.company_site companySite
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM supplier t
+    	<where>
+    		1=1
+	    	<if test= "id != null and id!=''">
+			AND  t.supplier_code = #{id}
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.supplier_code DESC
+    		</if>
+    	</if>
+    </select>
+     <!-- 根据主键查询某个供应商(可分页)-->
+    <select id="loadIntentionSupplier" resultMap="supplierMap">
+    	SELECT  
+       		t.intention_supplier_code supplierCode,t.intention_supplier_name supplierName
+    	
+      		FROM merchandise_intention_supplier t
+    	<where>
+    		1=1
+	    	<if test= "id != null and id!=''">
+			AND  t.intention_supplier_code = #{id}
+			</if>
+    	</where>
+    	
+    </select>
+    <!-- 查询供应商质量星级中所有供应商编号-->
+    <select id="searchSupplierCode" resultType="String">
+    	SELECT 
+    	     distinct s.supplier_code supplierCode
+      	FROM 
+      	    supplier s
+    </select>
+    <!-- 增加供应商 --> 
+	<insert id="saveSupplier" parameterType="hashmap">
+		INSERT INTO supplier(company_phone,company_fax,postcode,sync_date,supplier_code,supplier_name,company_type,contacts,contacts_phone,company_site) 
+			 VALUES(#{companyPhone},#{companyFax},#{postcode},#{syncDate},#{supplierCode},#{supplierName},#{companyType},#{contacts},#{contactsPhone},#{companySite})
+    </insert>
+    <!-- 修改供应商  -->
+    <update id="updateSupplier" parameterType="hashmap">
+		UPDATE	
+				supplier	
+		   SET	
+		   		company_phone=#{companyPhone},
+		   		company_fax=#{companyFax},
+		   		postcode=#{postcode},
+		   		sync_date=#{syncDate},
+		   		supplier_code=#{supplierCode},
+		   		supplier_name=#{supplierName},
+		   		company_type=#{companyType},
+		   		contacts=#{contacts},
+		   		contacts_phone=#{contactsPhone},
+		   		company_site=#{companySite}		   		
+		 WHERE	
+		 		supplier_code=#{supplierCode}
+    </update>
+	<!-- 删除供应商 -->
+	<delete id="deleteSupplier" parameterType="hashmap">
+		DELETE FROM
+			supplier
+		WHERE
+			supplier_code=#{supplierCode}
+	</delete>
+</mapper>

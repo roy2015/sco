@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN" "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+  <package name="gavillen" extends="pubstruts" namespace="/">
+    
+    <!-- 商品收货单信息模块 -->
+    <action name="merchandiseReceipt" method="{1}" class="com.powere2e.sco.action.masterdata.MerchandiseReceiptAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+
+    <!-- 签量数据维护模块 -->
+    <action name="signedQuantity" method="{1}" class="com.powere2e.sco.action.datamaintenance.purchaserdata.signedquantity.SignedQuantityAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+
+    <!-- 商品模块 -->
+    <action name="merchandise" method="{1}" class="com.powere2e.sco.action.masterdata.MerchandiseAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+    
+    <!-- 竞品价格数据维护模块 -->
+    <action name="marketSurveyData" method="{1}" class="com.powere2e.sco.action.datamaintenance.purchaserdata.marketsurveydata.MarketSurveyDataAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+
+    <!-- 公示网站原料数据模块 -->
+    <action name="websiteMaterial" method="{1}" class="com.powere2e.sco.action.datamaintenance.purchaserdata.websitematerial.WebsiteMaterialAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+
+	<!-- 原料相关属性 -->
+    <action name="materialProperties" method="{1}" class="com.powere2e.sco.action.common.MaterialPropertiesAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+    
+    <!-- 供应商证件数据模块 -->
+    <action name="supplierCertificate" method="{1}" class="com.powere2e.sco.action.datamaintenance.purchaserdata.suppliercertificate.SupplierCertificateAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+    
+    <!-- 关联商品原料与公示网站原料模块 -->
+    <action name="relevanceMaterialAndWebsite" method="{1}" class="com.powere2e.sco.action.datamaintenance.purchaserdata.relevancematerialandwebsite.RelevanceMaterialAndWebsiteAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+    
+    <!-- 关联辅料与公示网站原料模块 -->
+    <action name="relevanceAccessoryAndWebsite" method="{1}" class="com.powere2e.sco.action.datamaintenance.purchaserdata.relevanceaccessoryandwebsite.RelevanceAccessoryAndWebsiteAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+
+    <!-- 新品引进报表分析模块 -->
+    <action name="analysisReportNew" method="{1}" class="com.powere2e.sco.action.merchandiseoaapplication.reportnewoaapplication.reportanalysis.AnalysisReportNewAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+
+    <!-- 新品引进物料信息模块 -->
+    <action name="wlInfoNew" method="{1}" class="com.powere2e.sco.action.merchandiseoaapplication.reportnewoaapplication.wlinfo.WlInfoNewAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+
+    <!-- 新品引进进度信息模块 -->
+    <action name="applicationScheduleNew" method="{1}" class="com.powere2e.sco.action.merchandiseoaapplication.reportnewoaapplication.applicationschedule.ApplicationScheduleNewAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+
+    <!-- 旧品新上报表分析模块 -->
+    <action name="analysisReportOld" method="{1}" class="com.powere2e.sco.action.merchandiseoaapplication.reportoldupoaapplication.reportanalysis.AnalysisReportOldAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+
+    <!-- 旧品新上物料信息模块 -->
+    <action name="wlInfoOld" method="{1}" class="com.powere2e.sco.action.merchandiseoaapplication.reportoldupoaapplication.wlinfo.WlInfoOldAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+    
+    <!-- 旧品新上进度信息模块 -->
+    <action name="applicationScheduleOld" method="{1}" class="com.powere2e.sco.action.merchandiseoaapplication.reportoldupoaapplication.applicationschedule.ApplicationScheduleOldAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+
+    <!-- 商品正常调价报表分析模块 -->
+    <action name="analysisReportAdjustPrice" method="{1}" class="com.powere2e.sco.action.merchandiseoaapplication.reportadjustpriceoaapplication.reportanalysis.AnalysisReportAdjustPriceAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+
+    <!-- 商品正常调价物料信息模块 -->
+    <action name="wlInfoAdjust" method="{1}" class="com.powere2e.sco.action.merchandiseoaapplication.reportadjustpriceoaapplication.wlinfo.WlInfoAdjustAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+    
+    <!-- 商品快速调价物料信息模块 -->
+    <action name="wlInfoFastAdjust" method="{1}" class="com.powere2e.sco.action.merchandiseoaapplication.fastadjustpriceoaapplication.wlinfo.WlInfoFastAdjustAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+    
+    <!-- 辅料采购委员会竞价报表分析模块 -->
+    <action name="analysisReportCommittee" method="{1}" class="com.powere2e.sco.action.accessoryoaapplication.committeeApply.reportanalysis.CommitteeReportAnalysisAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+
+    <!-- 辅料采购委员会竞价进度信息模块 -->
+    <action name="applicationScheduleCommittee" method="{1}" class="com.powere2e.sco.action.accessoryoaapplication.committeeApply.applicationschedule.CommitteeApplicationScheduleAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+
+    <!-- 非食品竞价单OA申请报表分析模块 -->
+    <action name="analysisReportNonFood" method="{1}" class="com.powere2e.sco.action.accessoryoaapplication.nonFoodApply.reportanalysis.NonFoodReportAnalysisAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+    
+    <!-- 非食品竞价单OA申请进度信息模块 -->
+    <action name="applicationScheduleNonFood" method="{1}" class="com.powere2e.sco.action.accessoryoaapplication.nonFoodApply.applicationschedule.NonFoodApplicationScheduleAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+    
+    <!-- 非食品竞价单OA申请报表分析模块 -->
+    <action name="analysisReportCompare" method="{1}" class="com.powere2e.sco.action.accessoryoaapplication.compareApply.reportanalysis.CompareReportAnalysisAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+    
+    <!-- 非食品竞价单OA申请进度信息模块 -->
+    <action name="applicationScheduleCompare" method="{1}" class="com.powere2e.sco.action.accessoryoaapplication.compareApply.applicationschedule.CompareApplicationScheduleAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+    
+    <!-- 所有商品价格带 -->
+    <action name="allCategoryPrice" method="{1}" class="com.powere2e.sco.action.categoryanalysis.allcategoryprice.AllCategoryPriceAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+
+    <!-- 小分类价格带 -->
+    <action name="smallTypePrice" method="{1}" class="com.powere2e.sco.action.categoryanalysis.smalltypeprice.SmallTypePriceAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+	
+    <!-- 明细类价格带 -->
+    <action name="detailTypePrice" method="{1}" class="com.powere2e.sco.action.categoryanalysis.detailtypeprice.DetailTypePriceAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+
+    <!-- 自选商品价格带 -->
+    <action name="customTypePrice" method="{1}" class="com.powere2e.sco.action.categoryanalysis.customtypeprice.CustomCategoryPriceAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+
+    <!-- 公示网站原料历史行情 -->
+    <action name="websiteHistory" method="{1}" class="com.powere2e.sco.action.materialmarketanalysis.websitehistory.WebsiteHistoryAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+	
+    <!-- 商品原料供应商报价 -->
+    <action name="merchMateSuppQuote" method="{1}" class="com.powere2e.sco.action.materialmarketanalysis.merchmatesuppquote.MerchMateSuppQuoteAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+	
+	<!-- 商品原料预警记录  -->
+    <action name="materialWarnRec" method="{1}" class="com.powere2e.sco.action.materialmarketanalysis.materialwarningrecord.MaterialWarningRecordAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+    
+	<!-- 商品预警记录  -->
+    <action name="merWarningRec" method="{1}" class="com.powere2e.sco.action.materialmarketanalysis.merchandisewarningrecord.MerchandiseWarningRecordAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+
+	<!-- 辅料商品预警记录  -->
+    <action name="accIntRec" method="{1}" class="com.powere2e.sco.action.materialmarketanalysis.accessoryintentionrecord.AccessoryIntentionRecordAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+    
+    <!-- 商品引进标准进度信息维护 -->
+    <action name="merStandProInfo" method="{1}" class="com.powere2e.sco.action.datamaintenance.purchaserdata.merstandproinfo.MerStandProInfoAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+    
+    <!-- 商品快速引进 -->
+    <action name="fastImportApplication" method="{1}" class="com.powere2e.sco.action.merchandiseoaapplication.fastimportoaapplication.ApplicationFastImportAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+
+	<!-- 快速引进：申请文件 -->
+    <action name="fastImportAttachment" method="{1}" class="com.powere2e.sco.action.merchandiseoaapplication.fastimportoaapplication.attachment.FastImportAttachmentAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+
+	<!-- 快速引进：物料信息 -->
+    <action name="fastImportWlInfo" method="{1}" class="com.powere2e.sco.action.merchandiseoaapplication.fastimportoaapplication.wlinfo.FastImportWlInfoAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+
+	<!-- 单点登录 -->
+    <action name="singleLogin" method="{1}" class="com.powere2e.sco.action.singlelogin.SingleLoginAction">
+      <interceptor-ref name="mydefault"/>
+    </action>
+    
+  </package>
+</struts>

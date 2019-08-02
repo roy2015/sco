@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.accessoryintention.AccessoryQuotedTechnologyDao">
+	<resultMap type="com.powere2e.sco.model.accessoryintention.AccessoryQuotedTechnology" id="accessoryQuotedTechnologyMap">
+		<result property="enquiryCode" column="enquiryCode"/>
+		<result property="quotedCode" column="quotedCode"/>
+		<result property="technologyCode" column="technologyCode"/>
+		<result property="technologyName" column="technologyName"/>
+		<result property="orderCount" column="orderCount"/>
+		<result property="priceUnit" column="priceUnit"/>
+		<result property="cost" column="cost"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <!-- 查询辅料报价-工艺信息(可分页)-->
+    <select id="searchAccessoryQuotedTechnology" resultMap="accessoryQuotedTechnologyMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.enquiry_code enquiryCode,t.quoted_code quotedCode,t.technology_code technologyCode,t.order_count orderCount,t.price_unit priceUnit,t.cost cost
+       		,k.technology_name technologyName
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM accessory_quoted_technology t
+      		inner join accessory_enquiry_technology k on t.technology_code=k.technology_code
+    	<where>
+    		1=1
+	    	<if test= "enquiryCode != null and enquiryCode!=''">
+			AND t.enquiry_code =#{enquiryCode}
+			</if>
+	    	<if test= "quotedCode != null and quotedCode!=''">
+			AND t.quoted_code in (${quotedCode})
+			</if>
+	    	<if test= "technologyCode != null and technologyCode!=''">
+			AND t.technology_code = #{technologyCode}
+			</if>
+	    	<if test= "orderCount != null and orderCount!=''">
+			AND t.order_count=#{orderCount}
+			</if>
+	    	<if test= "priceUnit != null and priceUnit!=''">
+			AND t.price_unit=#{priceUnit}
+			</if>
+	    	<if test= "cost != null and cost!=''">
+			AND t.cost = #{cost}
+			</if>
+			<if test= "technologyName != null and technologyName!=''">
+			AND k.technology_name = #{technologyName}
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 根据主键查询某个辅料报价-工艺信息(可分页)-->
+    <select id="loadAccessoryQuotedTechnology" resultMap="accessoryQuotedTechnologyMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.enquiry_code enquiryCode,t.quoted_code quotedCode,t.technology_code technologyCode,t.order_count orderCount,t.price_unit priceUnit,t.cost cost
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM accessory_quoted_technology t
+    	<where>
+    		1=1
+	    	<if test= "technologyCode != null and technologyCode!=''">
+			AND  t.TECHNOLOGY_CODE = #{technologyCode}
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 增加辅料报价-工艺信息 --> 
+	<insert id="saveAccessoryQuotedTechnology" parameterType="hashmap">
+		INSERT INTO accessory_quoted_technology(enquiry_code,quoted_code,technology_code,order_count,price_unit,cost) 
+			 VALUES(#{enquiryCode},#{quotedCode},#{technologyCode},#{orderCount},#{priceUnit},#{cost})
+    </insert>
+    <!-- 修改辅料报价-工艺信息  -->
+    <update id="updateAccessoryQuotedTechnology" parameterType="hashmap">
+		UPDATE	
+				accessory_quoted_technology	
+		   SET	
+		   		enquiry_code=#{enquiryCode},
+		   		quoted_code=#{quotedCode},
+		   		order_count=#{orderCount},
+		   		price_unit=#{priceUnit},
+		   		cost=#{cost}		   		
+		 WHERE	
+		 		TECHNOLOGY_CODE=#{technologyCode}
+    </update>
+    <!-- 删除辅料报价-工艺信息 -->
+    <delete id="deleteAccessoryQuotedTechnology" parameterType="hashmap">
+        DELETE FROM 
+        			accessory_quoted_technology 
+        WHERE 
+        			quoted_code=#{quotedCode} <!--AND client_id=#{app_user_clientID}-->
+    </delete>
+</mapper>

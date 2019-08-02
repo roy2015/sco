@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.security.dao.AgentDao">          <!-- 完成 -->
+    
+    <resultMap type="com.powere2e.security.model.User" id="userMap">
+		<id property="userId" column="userId"/>
+		<result property="loginName" column="loginName"/>
+		<result property="realName" column="realName"/>
+		<result property="startTime" column="startTime"/>
+		<result property="endTime" column="endTime"/>
+		<result property="email" column="email"/>
+		<result property="phone" column="phone"/>
+		<result property="mobile" column="mobile"/>
+		<collection property="roles" ofType="com.powere2e.security.model.Role">
+			<id property="roleId" column="roleId" />
+			<result property="name" column="name" />
+		</collection>
+    </resultMap>
+    
+    <!-- 查询我的代理用户 -->
+    <select id="listAgent" resultMap="userMap">
+    	SELECT 
+    			u.user_id userId, u.login_name loginName, u.real_name realName, r.role_id roleId, r.name name,
+    			ag.start_time startTime,ag.end_time endTime
+    	FROM
+    			pub_user u LEFT JOIN pub_user_role ur ON u.user_id = ur.user_id AND ur.client_id = #{app_user_clientID} 
+    							  LEFT JOIN pub_role r ON ur.role_id = r.role_id AND r.client_id = #{app_user_clientID} 
+    							  LEFT JOIN pub_agent ag on u.user_id=ag.agent_id
+    	WHERE	
+    			u.client_id = #{app_user_clientID} 
+    			AND u.user_id IN (
+					SELECT    	
+							a.agent_id
+					FROM
+							pub_agent a
+					WHERE		
+    						a.user_id = #{userId} 
+    						AND a.client_id = #{app_user_clientID} 
+    			)
+    </select>
+
+	<!-- 查询我的非代理用户 -->
+    <select id="listNonAgent" resultMap="com.powere2e.security.dao.UserDao.userMap">
+    	SELECT 
+    		<if test="page_count == null">
+    			u.user_id userId, u.login_name loginName, u.real_name realName
+    		</if>
+	    	<if test="page_count != null">
+	       		count(1) AS record_count
+	    	</if>
+    	FROM
+    			pub_user u 
+    	WHERE 
+    			u.client_id = #{app_user_clientID} 
+    			AND u.user_id NOT IN (
+					SELECT    	
+							a.agent_id
+					FROM
+							pub_agent a
+					WHERE	
+    						a.user_id = #{userId} 
+    						AND a.client_id = #{app_user_clientID} 
+    			) 
+    			AND u.user_id <![CDATA[<>]]> #{userId} 
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY u.created DESC
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 查询被代理用户的代理用户 -->
+    <select id="listAgentTarget" parameterType="hashmap" resultMap="com.powere2e.security.dao.UserDao.userMap">
+    	SELECT
+    		t.agent_id userId, u.login_name loginName, u.real_name realName
+       	FROM
+   			pub_agent t,pub_user u
+       	WHERE
+			t.agent_id = u.user_id 
+			AND t.user_id=#{userId} 
+			AND t.client_id = #{app_user_clientID} 
+			AND u.client_id = #{app_user_clientID} 
+		   <if test="agentTargetId !=null and agentTargetId !=''">
+			AND t.agent_id = #{agentTargetId}
+		   </if>
+    </select>
+    
+    <!-- 给我添加代理用户    Oracle 9i之后-->
+    <insert id="insertAgent">
+    	MERGE INTO pub_agent T1
+      	USING (
+	            SELECT 
+		            #{userId} as user_id, #{agentId} as agentId,	
+		            #{startTime} as startTime,
+		            #{endTime} as endTime,	
+		            #{app_created} as app_created,	
+		            #{app_create_by} as app_create_by, 
+		            #{app_user_clientID} as app_user_clientID 
+		        FROM dual
+               ) T2              <!-- 现将需操作的数据从临时表中查出来 -->
+		ON ( T1.user_id = T2.user_id)    <!-- 更新还是插入判断条件 -->
+		WHEN MATCHED THEN
+			UPDATE SET 					 <!-- 满足条件则更新 -->
+				T1.agent_id = T2.agentId,
+				T1.start_time = T2.startTime,
+				T1.end_time = T2.endTime,
+				T1.UPDATED = #{app_updated},
+				T1.UPDATEBY = #{app_update_by} 
+		WHEN NOT MATCHED THEN 			 <!-- 不满足条件则插入 -->
+			INSERT (user_id,agent_id,start_time,end_time,created,createby,client_id) 
+				VALUES(T2.user_id,T2.agentId,T2.startTime,T2.endTime,T2.app_created,T2.app_create_by,T2.app_user_clientID) 
+    </insert>
+     
+   	<!-- 删除我的代理用户  -->
+    <delete id="deleteAgent">
+    	DELETE
+    	FROM
+   			pub_agent
+    	<where>
+   			user_id = #{userId} 
+   			AND client_id = #{app_user_clientID} 
+   			<if test="agentIds != null">
+	    		AND agent_id IN 
+    			<foreach collection="agentIds" item="agentId"
+    				open="(" separator="," close=")">
+    				#{agentId}	
+    			</foreach>
+    		</if>
+		</where>
+    </delete>
+    
+    
+    <select id="listAgentWithDate" resultMap="userMap">
+		SELECT 
+			u.user_id userId, u.login_name loginName, u.real_name realName, 
+			r.role_id roleId, r.name name,ag.START_TIME startTime,
+			ag.END_TIME endTime,u.email,u.phone,u.mobile        
+		FROM 
+			pub_agent ag 
+		LEFT JOIN  
+			pub_user u ON ag.agent_id=u.user_id
+		LEFT JOIN 
+			pub_user_role ur ON u.user_id = ur.user_id 
+			AND ur.client_id = #{app_user_clientID} 
+		LEFT JOIN 
+			pub_role r ON ur.role_id = r.role_id 
+			AND r.client_id = #{app_user_clientID}
+				 
+		WHERE	
+			ag.client_id = #{app_user_clientID} 
+			AND u.client_id = #{app_user_clientID} 
+			AND ag.user_id =#{userId} 
+</select>
+    
+</mapper>
+
+

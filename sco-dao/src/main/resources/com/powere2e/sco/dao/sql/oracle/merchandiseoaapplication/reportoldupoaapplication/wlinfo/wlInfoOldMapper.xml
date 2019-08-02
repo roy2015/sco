@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.powere2e.sco.interfaces.dao.merchandiseoaapplication.reportoldupoaapplication.wlinfo.WlInfoOldDao">
+	<resultMap type="com.powere2e.sco.model.merchandiseoaapplication.reportnewoaapplication.wlinfo.MerchandiseWlInfo" id="mwl">
+		<result property="applicationCode" column="applicationCode"/>
+		<result property="intentionCode" column="intentionCode"/>
+		<result property="intentionName" column="intentionName"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="supplierName" column="supplierName"/>
+		<result property="accessorySAPCode" column="accessorySAPCode"/>
+		<result property="supplierSAPCode" column="supplierSAPCode"/>
+
+		<collection property="areaList" resultMap="areaList" />
+	</resultMap>
+	<!-- 核算表下的价格地区 -->
+	<resultMap id="areaList"  type="com.powere2e.sco.model.merchandiseoaapplication.reportnewoaapplication.wlinfo.MerchandiseWlInfo">
+		<result property="applicationCode" column="applicationCode"/>
+		<result property="region" column="region"/>
+		<result property="sumPrice" column="sumPrice"/>
+	</resultMap>
+	
+	<!-- 进度信息列表 -->
+	<select id="listWlInfoOld" resultMap="mwl">
+		SELECT 													
+		     a.application_code applicationCode,
+             DECODE(m.merchandise_code,NULL,mi.intention_code,m.merchandise_code) intentionCode,
+		     DECODE(m.merchandise_code,NULL,mi.intention_name,m.merchandise_name) intentionName,
+		     DECODE(s.supplier_code,NULL,mis.intention_supplier_code,s.supplier_code) supplierCode,
+		     DECODE(s.supplier_code,NULL,mis.intention_supplier_name,s.supplier_name) supplierName,
+           	 im.merchandise_code accessorySAPCode,im.supplier_code supplierSAPCode ,
+           	 ar.region, mp.price sumPrice 
+		FROM 
+	     (SELECT * FROM application_merchandise WHERE application_code = #{applicationCode})  a      
+	     LEFT JOIN merchandise_intention_supplier mis ON a.supplier_code = mis.intention_supplier_code 
+	     LEFT JOIN supplier s ON a.supplier_code = s.supplier_code                                     
+	     LEFT JOIN merchandise m ON a.merchandise_code = m.merchandise_code 
+	     	AND a.supplier_code = m.supplier_code                           
+	     LEFT JOIN merchandise_intention mi ON a.merchandise_code = mi.intention_code  
+         INNER JOIN analysis_reports_m ar ON a.application_code = ar.application_code  
+         INNER JOIN 
+         (SELECT * FROM reports WHERE reports_type_code = 'MCA') r ON ar.reports_code = r.reports_code   
+	     INNER JOIN cost_analysis_merchandise cm ON r.reports_code = cm.reports_code 	
+	     	AND a.merchandise_code = cm.merchandise_code AND a.supplier_code = cm.supplier_code	<!-- 成本分析表 -->
+         LEFT JOIN intention_merchandise_sap im ON a.application_code = im.application_code <!-- 物料号维护 -->
+	         AND DECODE(m.merchandise_code,NULL,mi.intention_code,m.merchandise_code) = im.intention_code
+	         AND DECODE(s.supplier_code,NULL,mis.intention_supplier_code,s.supplier_code) = im.intention_supplier_code
+
+         INNER JOIN accounting_region ar ON cm.accounting_code = ar.accounting_code 	<!-- 地区 -->
+         LEFT JOIN merchandise_contract_price mp ON a.application_code = mp.application_code <!-- 地区价格 -->
+             AND DECODE(m.merchandise_code,NULL,mi.intention_code,m.merchandise_code) = mp.merchandise_code 
+             AND DECODE(s.supplier_code,NULL,mis.intention_supplier_code,s.supplier_code) = mp.supplier_code 
+             AND ar.region = mp.region 
+         ORDER BY mp.created 
+	</select>
+	
+	<!-- 通过审批单号查询SAP信息 -->
+	<select id="listWlInfoByApplicationCode" resultMap="mwl">
+		SELECT 
+			sap.merchandise_code accessorySAPCode,
+			sap.supplier_code supplierSAPCode 
+			<!-- NVL(sap.merchandise_code,t.merchandiseCode) accessorySAPCode, 
+			NVL(sap.supplier_code,t.supplierCode) supplierSAPCode --> 
+		FROM 
+           	<!-- (
+			<foreach collection="list" item="item" separator="union" >  
+            	SELECT 
+                  #{item.merchandiseCode} merchandiseCode, #{item.supplierCode} supplierCode 
+            	FROM DUAL
+           	</foreach>
+           	) t
+       	INNER JOIN 
+ -->			(SELECT * FROM intention_merchandise_sap WHERE application_code = #{applicationCode}) sap 
+			<!-- ON t.merchandiseCode = sap.intention_code AND t.supplierCode = sap.intention_supplier_code -->
+			
+			WHERE sap.merchandise_code IS NOT NULL OR sap.merchandise_code != ''
+	</select>
+	
+	<!-- 更新物料号维护 -->
+	<update id="insertIntentionMerchandiseSap">
+		MERGE INTO intention_merchandise_sap T1
+      	USING (
+			(
+				SELECT 
+				s1.c,
+				s2.applicationCode,s2.intentionCode,s2.supplierCode,
+				s2.accessorySAPCode,s2.supplierSAPCode
+			FROM 
+				(
+				 SELECT 
+				 	ROWNUM c,
+					application_code applicationCode,
+					intention_code intentionCode,
+					intention_supplier_code supplierCode 
+	             FROM 
+	             	intention_merchandise_sap ar 
+	             WHERE 
+	             	ar.application_code = #{applicationCode}
+					AND ar.intention_code = #{intentionCode} 
+					AND ar.intention_supplier_code = #{supplierCode}
+	           	 ) s1 
+	            RIGHT JOIN 								<!-- 以虚表为主,判断更新/插入 -->
+	            (
+            	 SELECT 
+					#{applicationCode} applicationCode,
+					#{intentionCode} intentionCode,
+					#{supplierCode} supplierCode,
+					#{accessorySAPCode} accessorySAPCode,
+					#{supplierSAPCode} supplierSAPCode 
+	             FROM dual  
+            	) s2 
+           		ON  s1.applicationCode = s2.applicationCode 
+	           		AND s1.intentionCode = s2.intentionCode 
+	           		AND s1.supplierCode = s2.supplierCode 
+	         )
+           ) T2 
+		ON (T2.c > 0)  
+		WHEN MATCHED THEN								<!-- 更新 -->
+			UPDATE SET 
+		     	T1.merchandise_code = T2.accessorySAPCode,
+		     	T1.supplier_code = T2.supplierSAPCode 
+       		WHERE 
+         			T1.application_code = T2.applicationCode
+				AND T1.intention_code = T2.intentionCode 
+				AND T1.intention_supplier_code = T2.supplierCode 
+		WHEN NOT MATCHED THEN 
+	    	INSERT (application_code, intention_code, intention_supplier_code, 
+		      	merchandise_code, supplier_code)         <!-- 新增 -->
+   			 VALUES(T2.applicationCode, T2.intentionCode,T2.supplierCode,
+   			 	T2.accessorySAPCode,T2.supplierSAPCode) 
+	</update>
+	
+	<!-- 更新商品合同价 -->
+	<update id="insertMerchandiseContractPrice">
+		MERGE INTO merchandise_contract_price T1
+      	USING (
+			(
+			SELECT 
+				s1.c,
+				s2.applicationCode,s2.intentionCode,s2.supplierCode,
+				s2.region,s2.price,s2.updated,s2.updateby 
+			FROM 
+				(
+				 SELECT 
+				 	ROWNUM c,
+					application_code applicationCode,
+					merchandise_code intentionCode,
+					supplier_code supplierCode,
+					region  
+	             FROM 
+	             	merchandise_contract_price ar 
+	             WHERE 
+	             	ar.application_code = #{applicationCode}
+					AND ar.merchandise_code = #{intentionCode} 
+					AND ar.supplier_code = #{supplierCode}
+					AND ar.region = #{region} 
+	           	 ) s1 
+	            RIGHT JOIN 
+	            (
+            	 SELECT 
+					#{applicationCode} applicationCode,
+					#{intentionCode} intentionCode,
+					#{supplierCode} supplierCode,
+					#{region} region,
+					#{sumPrice} price,
+					#{app_created} updated,
+					#{app_create_by} updateby 
+	             FROM dual  
+            	) s2 
+           		ON  s1.applicationCode = s2.applicationCode 
+	           		AND s1.intentionCode = s2.intentionCode 
+	           		AND s1.supplierCode = s2.supplierCode 
+	           		AND s1.region = s2.region 
+	         )
+           ) T2 
+		ON (T2.c > 0)  
+		WHEN MATCHED THEN															 <!-- 更新 -->
+			UPDATE SET 
+		     	T1.price = T2.price,
+		     	T1.updated = T2.updated,
+		     	T1.updateby = T2.updateby 
+       		WHERE 
+         			T1.application_code = T2.applicationCode
+				AND T1.merchandise_code = T2.intentionCode 
+				AND T1.supplier_code = T2.supplierCode 
+				AND T1.region = T2.region 
+		WHEN NOT MATCHED THEN 
+	    	INSERT (application_code, merchandise_code, supplier_code, 
+		      	region, price, created, createby, updated, updateby)         <!-- 新增 -->
+   			 VALUES(T2.applicationCode, T2.intentionCode,T2.supplierCode,
+   			 	T2.region,T2.price,T2.updated,T2.updateby,T2.updated,T2.updateby) 
+	</update>
+	
+</mapper>

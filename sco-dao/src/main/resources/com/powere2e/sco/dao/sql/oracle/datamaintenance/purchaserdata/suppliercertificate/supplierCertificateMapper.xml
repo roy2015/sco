@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.powere2e.sco.interfaces.dao.datamaintenance.purchaserdata.suppliercertificate.SupplierCertificateDao">
+	<resultMap type="com.powere2e.sco.model.datamaintenance.purchaserdata.suppliercertificate.SupplierCertificate" id="supplierCertificateMap">
+		<result property="certificateCode" column="certificateCode" />
+		<result property="supplierCode" column="supplierCode" />
+		<result property="supplierName" column="supplierName" />
+		<result property="intentionSupplierName" column="intentionSupplierName" />
+		<result property="certificateName" column="certificateName" />
+		<result property="certificateTypeCode" column="certificateTypeCode" />
+		<result property="certificateTypeName" column="certificateTypeName" />
+		<result property="startDate" column="startDate" />
+		<result property="endDate" column="endDate" />
+		<result property="isperpetual" column="isperpetual" />
+		<result property="path" column="path" />
+		<result property="validRegion" column="validRegion" />
+		<result property="recordCount" column="record_count" />
+	</resultMap>
+
+	<!-- 查询供应商证件 (可分页) -->
+	<select id="listSupplierCertificate" resultMap="supplierCertificateMap">
+		SELECT
+		<if test="page_count == null">
+			t.certificate_code certificateCode,t.supplier_code supplierCode,
+			NVL(s.supplier_name, NVL(mis.intention_supplier_name, ais.intention_supplier_name)) supplierName,
+			c.certificate_type_name certificateTypeName,
+			(DECODE(t.start_date,null,'无有效期',TO_CHAR(t.start_date, 'yyyy-mm-dd')
+			||' --- '||DECODE(t.end_date,null,'永久',TO_CHAR(t.end_date,'yyyy-mm-dd')))) as validRegion,
+			t.start_date startDate,t.end_date endDate,
+			t.path path,t.created,
+			u.real_name createby
+		</if>
+		<if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		FROM supplier_certificate t
+		LEFT JOIN supplier s ON t.supplier_code = s.supplier_code <!-- 供应商 -->
+		LEFT JOIN merchandise_intention_supplier mis on t.supplier_code = mis.intention_supplier_code <!-- 意向供应商 -->
+		LEFT JOIN accessory_intention_supplier ais on t.supplier_code = ais.intention_supplier_code <!-- 辅料意向品供应商 -->
+		INNER JOIN supplier_certificate_type c ON t.certificate_type_code = c.certificate_type_code <!-- 证件类型 -->
+		INNER JOIN pub_user u ON t.createby = u.user_id
+		<where>
+			1=1
+			<if test="supplierCode != null and supplierCode !=''">
+				AND UPPER(t.supplier_code) like UPPER('%'||#{supplierCode}||'%')
+			</if>
+			<if test="supplierName != null and supplierName != ''">
+				AND (
+					UPPER(s.supplier_name) LIKE UPPER('%'||#{supplierName}||'%')
+					OR UPPER(mis.intention_supplier_name) LIKE UPPER('%'||#{supplierName}||'%')
+					OR UPPER(ais.intention_supplier_name) LIKE UPPER('%'||#{supplierName}||'%')
+				)
+			</if>
+			<if test="certificateTypeCode != null and certificateTypeCode != ''">
+				AND UPPER(c.certificate_type_code) LIKE UPPER(#{certificateTypeCode})
+			</if>
+			<if test="createby != null and createby != ''">
+				AND UPPER(u.real_name) LIKE UPPER('%'||#{createby}||'%')
+			</if>
+			<if test="endDate != null">
+				AND t.end_date = #{endDate}
+			</if>
+		</where>
+		<if test="page_count == null">
+			<if test="app_orderby !=null">
+				ORDER BY ${app_orderby}
+			</if>
+			<if test="app_orderby ==null">
+				ORDER BY t.supplier_code DESC ,t.created DESC
+			</if>
+		</if>
+	</select>
+	
+	<!-- 查询所有供应商证件 (可分页) -->
+	<select id="listSupplierCertificateAll" resultMap="supplierCertificateMap">
+		SELECT
+		<if test="page_count == null">
+			t.certificate_code certificateCode,t.supplier_code supplierCode,
+			c.certificate_type_name certificateTypeName,
+			(DECODE(t.start_date,null,'无有效期',TO_CHAR(t.start_date, 'yyyy-mm-dd')
+			||' --- '||DECODE(t.end_date,null,'永久',TO_CHAR(t.end_date,'yyyy-mm-dd')))) as validRegion,
+			t.created,
+			u.real_name createby
+		</if>
+		<if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		FROM supplier_certificate t
+		LEFT JOIN supplier s ON t.supplier_code = s.supplier_code <!-- 供应商 -->
+    	LEFT JOIN  merchandise_intention_supplier mis on t.supplier_code=mis.intention_supplier_code <!-- 意向供应商 -->
+		INNER JOIN supplier_certificate_type c ON t.certificate_type_code = c.certificate_type_code <!-- 证件类型 -->
+		INNER JOIN pub_user u ON t.createby = u.user_id
+		<where>
+			1=1
+			<if test="supplierCode != null and supplierCode !=''">
+				AND UPPER(t.supplier_code) like UPPER('%'||#{supplierCode}||'%')
+			</if>
+			<if test="supplierName != null and supplierName != ''">
+				AND UPPER(s.supplier_name) LIKE UPPER('%'||#{supplierName}||'%')
+			</if>
+			<if test="certificateTypeCode != null and certificateTypeCode != ''">
+				AND UPPER(c.certificate_type_code) LIKE UPPER(#{certificateTypeCode})
+			</if>
+			<if test="createby != null and createby != ''">
+				AND UPPER(u.real_name) LIKE UPPER('%'||#{createby}||'%')
+			</if>
+			<if test="endDate != null">
+				AND t.end_date = #{endDate}
+			</if>
+		</where>
+		<if test="page_count == null">
+			<if test="app_orderby !=null">
+				ORDER BY ${app_orderby}
+			</if>
+			<if test="app_orderby ==null">
+				ORDER BY t.created DESC
+			</if>
+		</if>
+	</select>
+	
+	<!-- 根据参数 查询供应商证件 -->
+	<select id="loadSupplierCertificate" resultMap="supplierCertificateMap">
+		select * from 
+			(select t.certificate_code certificateCode,t.supplier_code supplierCode from supplier_certificate t where createby=#{createby} order by created desc)
+		 where rownum &lt; 2
+	</select>
+	
+	<!-- 根据报表编号查询报表路径 -->
+	<select id="loadCertificateByCode" resultMap="supplierCertificateMap">
+		SELECT
+			c.certificate_type_code certificateTypeCode, 
+			ct.certificate_type_name certificateTypeName,
+			c.path path
+		FROM
+			supplier_certificate c ,supplier_certificate_type ct 
+		WHERE 
+			c.certificate_type_code = ct.certificate_type_code	
+			AND c.certificate_code = #{certificateCode}
+	</select>
+	
+	<!-- 增加供应商证件 -->
+	<insert id="insertSupplierCertificate" parameterType="hashmap">
+		MERGE INTO supplier_certificate T1
+		USING (
+			SELECT
+			#{certificateCode} as certificate_code,
+			#{supplierCode} as supplier_code,
+			#{certificateTypeCode} as certificate_type_code,
+			#{startDate} as start_date,
+			#{endDate} as end_date,
+			#{isperpetual} as isperpetual,
+			#{path} as path,
+			#{app_user_id} as createby,
+			#{app_updated} as updated
+			FROM dual
+		) T2
+		ON (T1.supplier_code = T2.supplier_code AND T1.certificate_type_code = T2.certificate_type_code)      <!-- 判断条件 -->
+		WHEN MATCHED THEN
+			UPDATE SET 											  <!-- 修改 -->
+				T1.start_date = T2.start_date,
+				T1.end_date = T2.end_date,
+				T1.isperpetual = T2.isperpetual,
+				T1.path = T2.path,
+				T1.createby = T2.createby,
+				T1.created = T2.updated,
+				T1.updated = T2.updated,
+				T1.updateby = T2.createby
+		WHEN NOT MATCHED THEN
+			INSERT (certificate_code, supplier_code, certificate_type_code, start_date,
+				end_date, isperpetual, path, created, createby) <!-- 新增 -->
+			VALUES(T2.certificate_code, T2.supplier_code,T2.certificate_type_code,T2.start_date,
+				T2.end_date,T2.isperpetual,T2.path,T2.updated,T2.createby)
+	</insert>
+
+	<!-- 查询供应商证件类型 -->
+	<select id="listSupplierCertificateType" resultType="com.powere2e.security.model.Option">
+		SELECT
+			certificate_type_code id, certificate_type_name text
+		FROM
+			supplier_certificate_type 
+			ORDER BY certificate_type_name 
+	</select>
+
+	<!-- 删除正式供应商证件 -->
+	<delete id="deleteSupplierCertificate">
+		DELETE FROM
+			supplier_certificate
+		WHERE
+			certificate_code IN (${certificateCodes})
+	</delete>
+
+	<!-- 删除意向供应商证件 -->
+	<delete id="deleteIntetionSupplierCertificate">
+		DELETE FROM
+			supplier_certificate_m 
+		WHERE
+			certificate_code IN (${certificateCodes})
+	</delete>	
+	
+	<!-- 删除辅料供应商证件 -->
+	<delete id="deleteAcessorySupplierCertificate">
+		DELETE FROM
+			supplier_certificate_a 
+		WHERE
+			certificate_code IN (${certificateCodes})
+	</delete>	
+	
+</mapper>

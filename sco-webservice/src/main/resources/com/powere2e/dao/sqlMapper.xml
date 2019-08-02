@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<properties>
+		<!-- 数据库方言 -->
+		<property name="dialect" value="oracle" />
+	</properties>
+	<mappers>
+		<!-- oracle数据库对应的映射文件 -->
+		<mapper resource="com/powere2e/security/dao/sql/oracle/publicMapper.xml" />
+		<mapper resource="com/powere2e/security/dao/sql/oracle/userMapper.xml" />
+		<mapper resource="com/powere2e/security/dao/sql/oracle/agentMapper.xml" />
+		<mapper resource="com/powere2e/security/dao/sql/oracle/roleMapper.xml" />
+		<mapper resource="com/powere2e/security/dao/sql/oracle/funcMapper.xml" />
+		<mapper resource="com/powere2e/security/dao/sql/oracle/onlineUserMapper.xml" />
+		<mapper resource="com/powere2e/security/dao/sql/oracle/haltMapper.xml" />
+		<mapper resource="com/powere2e/security/dao/sql/oracle/publicDataPowerMapper.xml" />
+		<mapper resource="com/powere2e/security/dao/sql/oracle/sysParamMapper.xml" />
+		<!-- 业务映射文件 -->
+		<!-- gavin start -->
+		<!-- 辅料意向品管理模块 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/accessoryintention/accessoryIntentionMapper.xml" />
+		<!-- 辅料意向品管理模块 询价单 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/accessoryintention/accessoryEnquiryMapper.xml" />
+		<!-- 辅料意向品管理模块 询价单原材料 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/accessoryintention/accessoryEnquiryMaterialMapper.xml" />
+		<!-- 辅料意向品管理模块 询价单辅料 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/accessoryintention/accessoryEnquiryAccessoryMapper.xml" />
+		<!-- 辅料意向品管理模块 询价单内外包装材料 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/accessoryintention/accessoryEnquiryPackingMapper.xml" />
+		<!-- 辅料意向品管理模块 询价单工艺 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/accessoryintention/accessoryEnquiryTechnologyMapper.xml" />
+		<!-- 辅料意向品管理模块 询价单其他要求 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/accessoryintention/accessoryEnquiryElseMapper.xml" />
+		<!-- 辅料意向品管理模块 询价单报价数量 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/accessoryintention/accessoryEnquiryQuotedCountMapper.xml" />
+		<!-- 辅料意向品管理模块 导入报价单原材料 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/accessoryintention/accessoryQuotedMaterialMapper.xml" />
+		<!-- 辅料意向品管理模块 辅料报价单-电子版 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/accessoryintention/accessoryQuotedElectronicMapper.xml" />
+		<!-- 辅料意向品管理模块 导入报价单辅料 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/accessoryintention/accessoryQuotedAccessoryMapper.xml" />
+		<!-- 辅料意向品管理模块 导入报价单内外包装 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/accessoryintention/accessoryQuotedPackingMapper.xml" />
+		<!-- 辅料意向品管理模块 导入报价单工艺 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/accessoryintention/accessoryQuotedTechnologyMapper.xml" />
+		<!-- 辅料意向品管理模块 导入报价单其他要求 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/accessoryintention/accessoryQuotedElseMapper.xml" />
+		<!-- 辅料意向品管理模块 导入报价单总报价 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/accessoryintention/accessoryQuotedTotalMapper.xml" />
+		<!-- 辅料意向品管理模块 导入报价单打样信息 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/accessoryintention/accessoryProofingMapper.xml" />
+		<!-- 辅料意向品管理模块 导入报价单 扫描版 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/accessoryintention/accessoryQuotedScanMapper.xml" />
+		<!-- 我的报表 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/reports/reportsMapper.xml" />
+		<!-- 采购委员会竞价单OA申请 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/accessoryoaapplication/committeeApplyMapper.xml" />
+		<!-- 非食品竞价单OA申请 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/accessoryoaapplication/nonFoodApplyMapper.xml" />
+		<!-- 询价比较OA申请 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/accessoryoaapplication/compareApplyMapper.xml" />
+		<!-- 进度信息(询价单比较) -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/accessoryoaapplication/compareApply/applicationschedule/compareApplicationScheduleMapper.xml" />
+		<!-- 分析报表(询价单比较) -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/accessoryoaapplication/compareApply/reportanalysis/analysisReportCompareMapper.xml" />
+		<!-- 分析报表(非食品竞价单) -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/accessoryoaapplication/nonFoodApply/reportanalysis/analysisReportNonFoodMapper.xml" />
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/accessoryoaapplication/nonFoodApply/applicationschedule/nonFoodApplicationScheduleMapper.xml" />
+		<!-- 辅料OA申请 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/accessoryoaapplication/oaApplicationMapper.xml" />
+		<!-- 申请报告(辅料OA) -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/accessoryoaapplication/applicationReportAccessoryMapper.xml" />
+		<!-- 分析报表(辅料采购委员会竞价单OA) -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/accessoryoaapplication/committeeApply/reportanalysis/analysisReportCommitteeMapper.xml" />
+		<!-- 进度信息(辅料采购委员会竞价单OA) -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/accessoryoaapplication/committeeApply/applicationschedule/committeeApplicationScheduleMapper.xml" />
+		<!-- 申购产品信息 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/accessoryoaapplication/subscribeAccessoryMapper.xml" />
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/accessoryoaapplication/applicationQuotedMapper.xml" />
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/accessoryoaapplication/dhInfoMapper.xml" />
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/accessoryoaapplication/wlInfoMapper.xml" />
+		<!-- 总价分析 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/accessoryintentioncostanalysis/totalcostanalysis/totalcostanalysisMapper.xml" />
+		<!-- 成本类比分析 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/accessoryintentioncostanalysis/costanalogy/costAnalogyMapper.xml" />
+		<!-- 供应商历史报价分析 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/accessoryintentioncostanalysis/historicalquotesupplier/historicalQuoteSupplierMapper.xml" />
+		<!-- 供应商综合分析 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/suppliercomprehensiveanalysis/supplierComprehensiveAnalysisMapper.xml" />
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/peripheral/webservice/applicationVisitFactoryMapper.xml" />
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/peripheral/webservice/applicationPackageDesignMapper.xml" />
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/peripheral/webservice/applicationVisitFactoryMMapper.xml" />
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/peripheral/webservice/applicationPackageDesignMMapper.xml" />
+		<!-- gavin end -->
+		<!-- 商品意向品管理模块 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/merchandiseintention/merchandiseIntentionMapper.xml" />
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/merchandiseintention/merchandiseQuotedMapper.xml" />
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/merchandiseintention/quotedCompareMapper.xml" />
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/merchandiseintention/foretasteFeedbackMapper.xml" />
+		<!-- 商品核算表管理模块 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/merchandisecostanalysis/accountingingredient/accounting/accountingMapper.xml" />
+		<!-- 商品投料表管理 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/merchandisecostanalysis/accountingingredient/ingredient/ingredientMapper.xml" />
+		<!-- SAP主数据中的类型及管理员维护的细分类 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/common/masterDataTypeMapper.xml" />
+		<!-- 原料相关属性数据查询 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/common/materialPropertiesMapper.xml" />
+		<!-- 商品角色查询 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/masterdata/merchandiseRoleMapper.xml" />
+		<!-- 商品收货单信息 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/masterdata/merchandiseReceiptMapper.xml" />
+		<!-- 商品主数据模块 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/masterdata/merchandiseMapper.xml" />
+		<!-- 供应商数据列表 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/supplierDataMapper.xml" />
+		<!-- 签量数据维护模块 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/datamaintenance/purchaserdata/signedquantity/signedQuantityMapper.xml" />
+		<!-- 竞品价格数据列表 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/datamaintenance/purchaserdata/marketsurveydata/marketSurveyDataMapper.xml" />
+		<!-- 公示网站原料数据模块 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/datamaintenance/purchaserdata/websitematerial/websiteMaterialMapper.xml" />
+		<!-- 供应商证件数据模块 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/datamaintenance/purchaserdata/suppliercertificate/supplierCertificateMapper.xml" />
+		<!-- 签量提醒设置模块 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/parameterset/qlremindconfig/qlRemindConfigMapper.xml" />
+		<!-- 证件过期提醒设置 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/parameterset/certificateoutofdateconfig/certificateOutofdateConfigMapper.xml" />
+		<!-- 原料行情预警设置 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/parameterset/materialwarnconfig/materialWarnConfigMapper.xml" />
+		<!-- 让步接收数据 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/datamaintenance/inventorydata/concessionreceive/concessionReceiveMapper.xml" />
+		<!-- 供应商质量星级 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/datamaintenance/gradecontroldata/supplierqualitylevel/supplierQualityLevelMapper.xml" />
+		<!-- 供应商年度千万元客诉 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/datamaintenance/gradecontroldata/suppliercomplaints/supplierComplaintsMapper.xml" />
+		<!-- 供应商年度巡厂得分 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/datamaintenance/gradecontroldata/suppliervisitfactory/supplierVisitFactoryMapper.xml" />
+		<!-- 商品回收记录 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/datamaintenance/gradecontroldata/merchandiserecycle/merchandiseRecycleMapper.xml" />
+		<!-- 定性角色 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/datamaintenance/assortmentdata/merchandiserole/merchandiseDxRoleMapper.xml" />
+		<!-- 定量角色 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/datamaintenance/assortmentdata/merchandiserole/merchandiseDlRoleMapper.xml" />
+		<!-- 供应商 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/masterdata/supplierMapper.xml" />
+		<!-- 关联商品原料与公示网站原料 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/datamaintenance/purchaserdata/relevancematerialandwebsite/relevanceMaterialAndWebsiteMapper.xml" />
+		<!-- 商品细分类 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/datamaintenance/assortmentdata/merchandisefinetype/merchandiseFineTypeMapper.xml" />
+		<!-- 辅助细分类 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/datamaintenance/purchaserdata/accessoryfinetype/accessoryFineTypeMapper.xml" />
+		<!-- 商品促销进货价格维护 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/datamaintenance/purchaserdata/merchandisepromotionpurchasedata/merchandisePromotionPurchaseDataMapper.xml" />
+		<!-- 公示网站名称 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/datamaintenance/purchaserdata/websitename/websiteNameMaintenanceMapper.xml" />
+		<!-- 原料大类 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/datamaintenance/purchaserdata/materialrolemaintenance/materialBigTypeMapper.xml" />
+		<!-- 原料小类 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/datamaintenance/purchaserdata/materialrolemaintenance/materialSmallTypeMapper.xml" />
+		<!-- 原料 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/datamaintenance/purchaserdata/materialrolemaintenance/materialMapper.xml" />
+		<!-- 证件名称 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/datamaintenance/systemmanagerdata/suppliercertificatetype/supplierCertificateTypeMapper.xml" />
+		<!-- 关联辅料原料与公示网站原料 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/datamaintenance/purchaserdata/relevanceaccessoryandwebsite/relevanceAccessoryAndWebsiteMapper.xml" />
+		<!-- 商品OA申请 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/merchandiseoaapplication/merchandiseOaApplicationMapper.xml" />
+		<!-- 商品新品引进OA申请 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/merchandiseoaapplication/reportnewoaapplication/applicationReportNewMapper.xml" />
+		<!-- 新品引进 (分析报告模块) -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/merchandiseoaapplication/reportnewoaapplication/reportanalysis/analysisReportNewMapper.xml" />
+		<!-- 新品引进 (物料信息模块) -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/merchandiseoaapplication/reportnewoaapplication/wlinfo/wlInfoNewMapper.xml" />
+		<!-- 新品引进 (进度信息模块) -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/merchandiseoaapplication/reportnewoaapplication/applicationschedule/applicationScheduleNewMapper.xml" />
+		<!-- 商品老品新上OA申请 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/merchandiseoaapplication/reportoldupoaapplication/applicationReportOldupMapper.xml" />
+		<!-- 老品新上 (分析报告模块) -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/merchandiseoaapplication/reportoldupoaapplication/reportanalysis/analysisReportOldMapper.xml" />
+		<!-- 老品新上 (物料信息模块) -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/merchandiseoaapplication/reportoldupoaapplication/wlinfo/wlInfoOldMapper.xml" />
+		<!-- 老品新上 (进度信息模块) -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/merchandiseoaapplication/reportoldupoaapplication/applicationschedule/applicationScheduleOldMapper.xml" />
+		<!-- 商品正常调价OA申请 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/merchandiseoaapplication/reportadjustpriceoaapplication/applicationReportAdjustpriceMapper.xml" />
+		<!-- 商品正常调价 (分析报告模块) -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/merchandiseoaapplication/reportadjustpriceoaapplication/reportanalysis/analysisReportAdjustPriceMapper.xml" />
+		<!-- 商品正常调价 (物料信息模块) -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/merchandiseoaapplication/reportadjustpriceoaapplication/wlinfo/wlInfoAdjustMapper.xml" />
+		<!-- 商品快速调价OA申请 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/merchandiseoaapplication/fastadjustpriceoaapplication/applicationFastadjustpriceMapper.xml" />
+		<!-- 商品快速调价 (物料信息) -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/merchandiseoaapplication/fastadjustpriceoaapplication/wlinfo/wlInfoFastAdjustMapper.xml" />
+		<!-- 商品抽检不合格记录 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/datamaintenance/gradecontroldata/merchandiseunqualified/merchandiseUnqualifiedMapper.xml" />
+		<!-- 数据核算 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/merchandisecostanalysis/accountingingredient/accounting/accountingDataMapper.xml" />
+		<!-- 供应商附件 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/merchandiseoaapplication/reportnewoaapplication/supplierattachment/supplierAttachmentMMapper.xml" />
+		<!-- 供应商证件 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/merchandiseoaapplication/reportnewoaapplication/suppliercertificate/supplierCertificateMMapper.xml" />
+		<!-- 商品价格(新品引进) -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/merchandiseoaapplication/reportnewoaapplication/reportnew/merchandisePriceNewMapper.xml" />
+		<!-- 供应商附件（辅料OA） -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/accessoryoaapplication/committeeApply/supplierattachment/supplierAttachmentAMapper.xml" />
+		<!-- 关联扫描版（辅料OA） -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/accessoryoaapplication/committeeApply/supplierattachment/quotedElectronicOfScanMapper.xml" />
+		<!-- 供应商证件（辅料OA） -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/accessoryoaapplication/committeeApply/suppliercertificate/supplierCertificateAMapper.xml" />
+		<!-- 历史与本次价格(老品新上) -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/merchandiseoaapplication/reportoldupoaapplication/reportoldup/historyPriceOldupMapper.xml" />
+		<!-- 商品分项成本类比 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/merchandisecostanalysis/merchandiseitemcost/merchandiseItemCostMapper.xml" />
+		<!-- 商品总成本类比分析 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/merchandisecostanalysis/totalcostanalogyanalysis/totalCostAnalogyAnalysisMapper.xml" />
+		<!-- 销售分析 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/sharefunctionanalysis/sellanalysis/selldetail/sellDetailMapper.xml" />
+		<!-- 历史与本次价格(正常调价) -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/merchandiseoaapplication/reportadjustpriceoaapplication/reportadjustprice/historyPriceAdjustpriceMapper.xml" />
+		<!-- 供应商考评模板 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/sharefunctionanalysis/supplieranalysis/supplierevaluatetemplate/supplierEvaluateTemplateMapper.xml" />
+		<!-- 供应商考评表 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/sharefunctionanalysis/supplieranalysis/supplierevaluatetable/supplierEvaluateTableMapper.xml" />
+		<!-- 商品价格趋势 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/categoryanalysis/merchandisepricetrend/merchandisePriceTrendMapper.xml" />
+		<!-- 公司大盘促销分析 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/sharefunctionanalysis/sellanalysis/marketpromotionanalysis/marketPromotionAnalysisMapper.xml" />
+		<!-- 销售同比分析 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/sharefunctionanalysis/sellanalysis/sellyearonyearanalysis/sellYearOnYearAnalysisMapper.xml" />
+		<!-- 商品价格带公共模块 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/categoryanalysis/categoryPriceMapper.xml" />
+		<!-- 商品促销分析 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/sharefunctionanalysis/sellanalysis/merchandisepromotionanalysis/merchandisePromotionAnalysisMapper.xml" />
+
+		<!-- 明细类销售同比分析 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/sharefunctionanalysis/sellanalysis/sellyearonyearanalysis/detailSellYearOnYearAnalysisMapper.xml" />
+		<!-- 小分类销售同比分析 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/sharefunctionanalysis/sellanalysis/sellyearonyearanalysis/smallSellYearOnYearAnalysisMapper.xml" />
+		<!-- 大盘销售同比分析 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/sharefunctionanalysis/sellanalysis/sellyearonyearanalysis/marketSellYearOnYearAnalysisMapper.xml" />
+		<!-- 待办事项提醒 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/remind/gtasksRemindMapper.xml" />
+		<!-- 其他提醒 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/remind/elseRemindMapper.xml" />
+		<!-- 其他提醒-已选清除 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/remind/elseRemindFlagMapper.xml" />
+		<!-- 原料预警记录 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/remind/materialWarnMapper.xml" />
+		<!-- 商品预警记录 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/remind/merchandiseWarnMapper.xml" />
+		<!-- 辅料商品预警记录 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/remind/accessoryWarnMapper.xml" />
+
+		<!-- 单品销售环比分析 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/sharefunctionanalysis/sellanalysis/selllinkrelative/merchandiseLinkRelativeMapper.xml" />
+		<!-- 明细类销售环比分析 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/sharefunctionanalysis/sellanalysis/selllinkrelative/detailLinkRelativeMapper.xml" />
+		<!-- 小分类销售环比分析 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/sharefunctionanalysis/sellanalysis/selllinkrelative/smallLinkRelativeMapper.xml" />
+		<!-- 大盘销售环比分析 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/sharefunctionanalysis/sellanalysis/selllinkrelative/marketLinkRelativeMapper.xml" />
+
+		<!-- 商品进货明细 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/sharefunctionanalysis/purchasinganalysis/merchandisestockdetail/merchandiseStockDetailMapper.xml" />
+		<!-- 商品长期进价调整报表 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/sharefunctionanalysis/purchasinganalysis/merchandiselongbuypriceadjust/merchandiseLongBuyPriceAdjustMapper.xml" />
+		<!-- 商品促销进价调整报表 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/sharefunctionanalysis/purchasinganalysis/merchandisepromotionbuypriceadjust/merchandisePromotionBuyPriceAdjustMapper.xml" />
+		<!-- 公示网站原料历史行情 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/materialmarketanalysis/websitehistory/websiteHistoryMapper.xml" />
+		<!-- 商品原料供应商报价 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/materialmarketanalysis/merchmatesuppquote/merchMateSuppQuoteMapper.xml" />
+		<!-- 原料预警记录 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/materialmarketanalysis/materialwarning/materialWarningRecordMapper.xml" />
+		<!-- 商品预警记录 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/materialmarketanalysis/merchandisewarningrecord/merchandiseWarningRecordMapper.xml" />
+		<!-- 辅料商品预警记录 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/materialmarketanalysis/accessoryintentionrecord/accessoryIntentionRecordMapper.xml" />
+		<!-- 供应商销售贡献度排行 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/sharefunctionanalysis/supplieranalysis/suppliersalescontribution/supplierSalesContributionMapper.xml" />
+		<!-- 商品引进标准进度信息维护 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/datamaintenance/purchaserdata/merstandproinfo/merStandProInfoMapper.xml" />
+		<!-- 商品快速引进 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/merchandiseoaapplication/fastimportoaapplication/applicationFastImportMapper.xml" />
+		<!-- 商品快速引进申请文件 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/merchandiseoaapplication/fastimportoaapplication/attachment/fastImportAttachmentMapper.xml" />
+		<!-- 商品快速引进物料信息 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/merchandiseoaapplication/fastimportoaapplication/wlinfo/fastImportWlInfoMapper.xml" />
+
+		<!--BW模块 -->
+		<!-- 商品区域销售情况(日直营) -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/peripheral/bw/merchandiseSellDirectDayMapper.xml" />
+		<!-- 商品区域销售情况(日加盟) -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/peripheral/bw/merchandiseSellJoinDayMapper.xml" />
+		<!-- 商品区域销售情况(日直营+日加盟) -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/peripheral/bw/merchandiseSellDjDayMapper.xml" />
+		<!-- 商品区域销售情况(月直营) -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/peripheral/bw/merchandiseSellDirectMonthMapper.xml" />
+		<!-- 商品区域销售情况(月加盟) -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/peripheral/bw/merchandiseSellJoinMonthMapper.xml" />
+		<!-- 商品区域销售情况(月直营+月加盟) -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/peripheral/bw/merchandiseSellDjMonthMapper.xml" />
+		<!-- 商品订货单信息 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/peripheral/bw/merchandiseOrderMapper.xml" />
+		<!-- 商品收货单信息 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/peripheral/bw/merchandiseReceiptMapper.xml" />
+		<!--商品进货权限 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/peripheral/bw/merchandiseJhPermissionMapper.xml" />
+
+		<!--SAP模块 -->
+		<!-- 商品历史物料号 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/peripheral/sap/merchandiseHistoryMapper.xml" />
+		<!--商品供应商信息 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/peripheral/sap/merchandiseSupplierMapper.xml" />
+		<!--商品中分类 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/peripheral/sap/merchandiseCentreTypeMapper.xml" />
+		<!--商品小分类 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/peripheral/sap/merchandiseSmallTypeMapper.xml" />
+		<!--商品明细类 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/peripheral/sap/merchandiseDetailTypeMapper.xml" />
+		<!--供应商历史物料号 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/peripheral/sap/merchandiseSupplierHistoryMapper.xml" />
+		<!--区域信息 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/peripheral/sap/regionMapper.xml" />
+		<!--仓库 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/peripheral/sap/warehouseMapper.xml" />
+		<!--仓位 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/peripheral/sap/warehouseSiteMapper.xml" />
+
+		<!--商品 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/peripheral/sap/merchandiseSapMapper.xml" />
+		<!--商品进货价格信息 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/peripheral/sap/merchandisePurchasePriceMapper.xml" />
+		<!--商品销售价格信息 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/peripheral/sap/merchandisePriceMapper.xml" />
+		<!--商品促销进货价 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/peripheral/sap/merchandisePromotionPurchaseMapper.xml" />
+		<!--商品促销销售价 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/peripheral/sap/merchandisePromotionSellMapper.xml" />
+		<!-- 单点登陆模块 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/singlelogin/singleloginMapper.xml" />
+		<!-- 商品引进标准进度信息维护 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/datamaintenance/purchaserdata/merstandproinfo/merStandProInfoMapper.xml" />
+		
+		<!-- 工作日 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/peripheral/sap/workingDayMapper.xml" />
+		<!-- 上下市信息 -->
+		<mapper resource="com/powere2e/sco/dao/sql/oracle/masterdata/merchandiseMarketMapper.xml" />
+	</mappers>
+</configuration>

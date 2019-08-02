@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<!-- 商品核算表 -->
+	<bean id="accountingService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.merchandisecostanalysis.accountingingredient.accounting.AccountingServiceImpl">
+				<property name="accountingDao" ref="accountingDao" />
+				<property name="ingredientDao" ref="ingredientDao" />
+			</bean>
+		</property>
+	</bean>
+	<!-- 商品投料表 -->
+	<bean id="ingredientService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.merchandisecostanalysis.accountingingredient.ingredient.IngredientServiceImpl">
+				<property name="ingredientDao" ref="ingredientDao" />
+				<property name="accountingDao" ref="accountingDao" />
+				<property name="masterDataTypeService" ref="masterDataTypeService" />
+			</bean>
+		</property>
+	</bean>
+	<!-- 商品价格趋势 -->
+	<bean id="merchandisePriceTrendService" parent="baseTxProxy">
+		<property name="target">
+			<bean class="com.powere2e.sco.service.impl.categoryanalysis.merchandisepricetrend.MerchandisePriceTrendServiceImpl">
+				<property name="merchandisePriceTrendDao" ref="merchandisePriceTrendDao" />
+			</bean>
+		</property>
+	</bean>
+</beans>

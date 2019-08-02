@@ -1,0 +1,1286 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.categoryanalysis.CategoryPriceDao">
+	<resultMap type="com.powere2e.sco.model.categoryanalysis.CategoryPrice" id="allCMap">
+		<result property="regionCode" column="regionCode"/>
+		<result property="regionName" column="regionName"/>
+		<result property="merchandiseCode" column="merchandiseCode"/>
+		<result property="merchandiseName" column="merchandiseName"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="supplierName" column="supplierName"/>
+		<result property="dxRoleCode" column="dxRoleCode"/>
+		<result property="dlRoleCode" column="dlRoleCode"/>
+		<result property="dxRoleName" column="dxRoleName"/>
+		<result property="dlRoleName" column="dlRoleName"/>
+		<result property="centreTypeName" column="centreTypeName"/>
+		<result property="smallTypeName" column="smallTypeName"/>
+		<result property="detailTypeName" column="detailTypeName"/>
+		<result property="powerCount" column="powerCount"/>
+		<result property="powerPercent" column="powerPercent"/>
+		<result property="aCount" column="aCount"/>
+		<result property="bCount" column="bCount"/>
+		<result property="cCount" column="cCount"/>
+		<result property="dCount" column="dCount"/>
+		<result property="actSoldStorCount" column="actSoldStorCount"/>
+		<result property="actSoldStorPercent" column="actSoldStorPercent"/>
+		<result property="bucketPercent" column="bucketPercent"/>
+		<result property="volumePercent" column="volumePercent"/>
+		<result property="valPercent" column="valPercent"/>
+		
+		<result property="regionStoreSum" column="regionStoreSum"/>
+		<result property="regionSKUSum" column="regionSKUSum"/>
+		<result property="regionPrice" column="regionPrice"/>
+		<result property="skuUnits" column="skuUnits"/>
+		<result property="skuPercent" column="skuPercent"/>
+		<result property="soldUnits" column="soldUnits"/>
+		<result property="soldPrice" column="soldPrice"/>
+		<result property="grossProfit" column="grossProfit"/>
+		<result property="soldPercent" column="soldPercent"/>
+		<result property="soldPricePercent" column="soldPricePercent"/>
+		<result property="grossProfitPenrcent" column="grossProfitPenrcent"/>
+		<result property="powerShopDay" column="powerShopDay"/>
+		<result property="soldShopDay" column="soldShopDay"/>
+		<result property="vitality" column="vitality"/>
+		<result property="powerShopDayPercent" column="powerShopDayPercent"/>
+		<result property="soldShopPercent" column="soldShopPercent"/>
+		<result property="psdUnits" column="psdUnits"/>
+		<result property="psdSoldPrice" column="psdSoldPrice"/>
+		<result property="psdGrossProfit" column="psdGrossProfit"/>
+		<result property="notLessPsdUnitsSku" column="notLessPsdUnitsSku"/>
+		<result property="lessPsdUnitsSku" column="lessPsdUnitsSku"/>
+		<result property="notLessPsdSoldPrice" column="notLessPsdSoldPrice"/>
+		<result property="lessPsdSoldPrice" column="lessPsdSoldPrice"/>
+		<result property="notLessPsdGrossProfit" column="notLessPsdGrossProfit"/>
+		<result property="lessPsdGrossProfit" column="lessPsdGrossProfit"/>
+		
+		<result property="recordCount" column="record_count" />
+	</resultMap>
+	
+	<!-- 通过条件处理价格表(商品价格未变化时,在某一个时间断内可能没有数据) -->
+	<sql id="arrangeMerPrice">
+		SELECT 
+			merchandise_code,supplier_code,sell_region,
+			direct_join,sell_price,price_date
+		FROM 
+		 (
+			(									<!-- 价格发生变化的商品会有记录 -->
+				SELECT 
+					merchandise_code,supplier_code,sell_region,
+					direct_join,sell_price,price_date
+				FROM  
+					merchandise_price_group
+				WHERE
+					sell_region = #{regionCode} 
+					AND price_date >= #{sellMinDate} 
+					AND price_date <![CDATA[<]]> ADD_MONTHS(#{sellMaxDate},1) 
+					<if test="selectedData != null"> <!-- 自选商品 --> 
+						AND merchandise_code||'-'||supplier_code IN (${selectedData}) 
+					</if>
+					<if test='dataType == "D"'>
+						AND direct_join = '直营' 
+					</if>	
+					<if test='dataType == "J"'>
+						AND direct_join = '加盟' 
+					</if>	
+					<if test='dataType == "A"'>
+						AND direct_join IN ('直营','加盟') 
+					</if>
+	      	)  
+		   UNION ALL							<!-- 价格未发生变化的商品不会有记录,所以要查最新的记录 -->
+			 (
+				SELECT 
+					sp.merchandise_code,sp.supplier_code,sp.sell_region,
+					sp.direct_join,sp.sell_price,sp.price_date
+				FROM 
+					(SELECT 
+							merchandise_code,supplier_code,MAX(price_date) price_date
+						FROM 
+							merchandise_price_group
+						WHERE
+							sell_region = #{regionCode} 
+							AND price_date <![CDATA[<]]> ADD_MONTHS(#{sellMaxDate},1) 
+							<if test="selectedData != null"> <!-- 自选商品 --> 
+								AND merchandise_code||'-'||supplier_code IN (${selectedData}) 
+							</if>
+							<if test='dataType == "D"'>
+								AND direct_join = '直营' 
+							</if>	
+							<if test='dataType == "J"'>
+								AND direct_join = '加盟' 
+							</if>	
+							<if test='dataType == "A"'>
+								AND direct_join IN ('直营','加盟') 
+							</if>
+						GROUP BY merchandise_code,supplier_code
+					) np
+					INNER JOIN 
+					(
+						SELECT 
+							merchandise_code,supplier_code,sell_region,
+							direct_join,sell_price,price_date 
+						FROM 
+							merchandise_price_group 
+						WHERE 
+							sell_region = #{regionCode} 
+							AND price_date <![CDATA[<]]> ADD_MONTHS(#{sellMaxDate},1) 
+							<if test="selectedData != null"> <!-- 自选商品 --> 
+								AND merchandise_code||'-'||supplier_code IN (${selectedData}) 
+							</if>
+							<if test='dataType == "D"'>
+								AND direct_join = '直营' 
+							</if>	
+							<if test='dataType == "J"'>
+								AND direct_join = '加盟' 
+							</if>	
+							<if test='dataType == "A"'>
+								AND direct_join IN ('直营','加盟') 
+							</if>
+           			) sp ON np.merchandise_code = sp.merchandise_code 
+           			AND np.supplier_code = sp.supplier_code
+           			AND np.price_date = sp.price_date
+		      ) 
+		)
+		GROUP BY merchandise_code,supplier_code,sell_region,direct_join,sell_price,price_date 
+	</sql>
+	
+	<!-- 符合条件的商品价格表数据分组(不到供应商级别) -->
+    <sql id="merPriceGroup">
+    	SELECT g.merchandise_code,g.sell_price FROM 
+			(
+				SELECT 
+					merchandise_code,AVG(sell_price) sell_price 
+				FROM (
+					SELECT 
+						mp.merchandise_code,mp.sell_price 
+					FROM (<include refid="arrangeMerPrice" />) mp 
+					INNER JOIN  
+						(											<!-- 商品属性 -->
+							SELECT 
+								m.merchandise_code,m.supplier_code 
+							FROM merchandise m
+							<if test="dxRoleCode != null or dlRoleCode != null ">
+								INNER JOIN merchandise_role mr ON m.merchandise_code = mr.merchandise_code 	<!-- 商品角色关联 -->
+							</if>  
+							WHERE 1 = 1
+							<!-- <if test="merchandiseCode != null and merchandiseCode != ''">
+								AND UPPER(m.merchandise_code) LIKE UPPER('%'||#{merchandiseCode}||'%')  
+							</if> -->
+							<if test="dxRoleCode != null and dxRoleCode != ''">
+								AND mr.dx_role_code = #{dxRoleCode}
+							</if>
+							<if test="dlRoleCode != null and dlRoleCode != ''">
+								AND mr.dl_role_code = #{dlRoleCode}
+							</if>
+							<if test="netWeightType != null and netWeightType != ''">
+								<if test='netWeightType == "1"'>
+									AND m.net_weight = '1'
+								</if> 
+								<if test='netWeightType != "1"'>
+									AND m.net_weight != '1'
+								</if> 
+							</if>
+							<!-- <if test="merchandiseName != null and merchandiseName != ''">
+								AND UPPER(m.merchandise_name) LIKE UPPER('%'||#{merchandiseName}||'%') 
+							</if> -->
+							<if test= "centreTypeCode != null and centreTypeCode != ''">
+								AND m.centre_type_code = #{centreTypeCode}
+							</if>
+					    	<if test= "smallTypeCode != null and smallTypeCode != ''">
+								AND m.small_type_code = #{smallTypeCode}
+							</if>
+					    	<if test= "detailTypeCode != null and detailTypeCode != ''">
+								AND m.detail_type_code = #{detailTypeCode}
+							</if>
+							<if test="selectedData != null"> <!-- 自选商品 --> 
+								AND m.merchandise_code||'-'||m.supplier_code IN (${selectedData}) 
+							</if>
+						) mc ON mp.merchandise_code = mc.merchandise_code AND mp.supplier_code = mc.supplier_code 
+						WHERE mp.sell_region = #{regionCode} 
+						<if test='dataType == "D"'>
+							AND direct_join = '直营' 
+						</if>	
+						<if test='dataType == "J"'>
+							AND direct_join = '加盟' 
+						</if>	
+						<if test='dataType == "A"'>
+							AND direct_join IN ('直营','加盟') 
+						</if>
+						<!-- 价格在计算时已经过滤过 -->	
+						<!-- AND mp.price_date >= #{sellMinDate} 
+						AND mp.price_date <![CDATA[<]]> ADD_MONTHS(#{sellMaxDate},1)  -->
+						AND								<!-- 变更：商品编码必须在以下的范围内 -->
+						   (
+						    mp.merchandise_code BETWEEN 10000 AND 59999
+						    OR mp.merchandise_code BETWEEN 70000 AND 79999
+						    OR mp.merchandise_code BETWEEN 814000000 AND 814999999
+						    OR mp.merchandise_code BETWEEN 900000000 AND 99999999
+						   )
+						GROUP BY mp.merchandise_code,mp.sell_price    <!-- 先去重 -->
+					)
+				GROUP BY merchandise_code 							  <!-- 再平均 -->
+			) g 
+		<if test="handSetPri != null and handSetPri != ''">	
+			INNER JOIN
+			 	( SELECT                          						 <!-- 价格带(区间) -->
+		              DECODE(d.b, NULL, (d.a + 0.000000000000001), d.a) a, d.b         
+		           FROM 
+		           ( 
+		           	<foreach collection="list" item="item" separator="union" >  
+		             	SELECT (${item.id} + 0) a,(${item.text} + 0) b FROM DUAL 
+		            	</foreach>
+		            ) d
+		        )r
+	       ON NVL(g.sell_price,0) >= r.a AND NVL(g.sell_price,0) <![CDATA[<]]> NVL(r.b, 999999999999999) 
+       </if>
+	</sql>
+	
+	<!-- 商品进货权限(权限店天数) -->
+	<sql id="jhPermission">
+		SELECT 
+	     	mp.merchandise_code,mp.supplier_code,
+	     	SUM(permission_store_quantity) sellStoreQuantity 
+	      FROM 
+	         merchandise_jh_permission mp 
+	      WHERE mp.region_code = #{regionCode} 
+	   		<if test='dataType == "D"'>
+			AND mp.store_type = '直营' 
+			</if>	
+			<if test='dataType == "J"'>
+				AND mp.store_type = '加盟' 
+			</if>	
+			<if test='dataType == "A"'>
+				AND mp.store_type IN ('直营','加盟') 
+			</if>
+   			AND permission_date >= #{sellMinDate} 
+ 			AND permission_date <![CDATA[<]]> ADD_MONTHS(#{sellMaxDate}, 1) 
+ 			AND								<!-- 变更：商品编码必须在以下的范围内 -->
+			   (
+			    mp.merchandise_code BETWEEN 10000 AND 59999
+			    OR mp.merchandise_code BETWEEN 70000 AND 79999
+			    OR mp.merchandise_code BETWEEN 814000000 AND 814999999
+			    OR mp.merchandise_code BETWEEN 900000000 AND 99999999
+			   )
+         GROUP BY mp.merchandise_code,supplier_code
+	</sql>
+	
+	<!-- 查询月[直营、加盟]数据 -->
+	<sql id="searSellData">
+		SELECT 
+			sell_region,merchandise_code,supplier_code,sell_quantity,
+			sell_total_price,sell_profit,sell_store_quantity 
+		FROM 
+	      	<if test='dataType == "D"'>				<!-- 月直营 -->
+	     		merchandise_sell_direct_month 
+	      	</if>
+	      	<if test='dataType == "J"'>				<!-- 月加盟 -->
+    			merchandise_sell_join_month 
+	      	</if>
+	      	<if test='dataType == "A"'>				<!-- 月直营+加盟 -->
+	     		merchandise_sell_d_j_month 
+			</if>
+  		WHERE 
+   			sell_region = #{regionCode} 
+   			<if test="selectedData != null"> <!-- 自选商品 --> 
+				AND merchandise_code||'-'||supplier_code IN (${selectedData}) 
+			</if>
+			AND sell_month >= #{dateRegionStr}  <!-- 日期 -->
+			AND sell_month <![CDATA[<=]]> #{dateRegionStr2} 
+			AND								<!-- 变更：商品编码必须在以下的范围内 -->
+			   (
+			    merchandise_code BETWEEN 10000 AND 59999
+			    OR merchandise_code BETWEEN 70000 AND 79999
+			    OR merchandise_code BETWEEN 814000000 AND 814999999
+			    OR merchandise_code BETWEEN 900000000 AND 99999999
+			   )
+	</sql>
+	
+	<!-- 查询各个价格带相关统计 -->
+    <sql id="calculatePriceRegion">
+    	SELECT   
+			#{regionCode} region_code,         
+        	a.regionPrice, 						<!-- 地区价格带 -->
+	      	COUNT(DISTINCT(a.merchandise_code)) skuUnits,
+	       	NVL(SUM(a.price_sell_quantity),0) priceSellQuantity,
+	       	NVL(SUM(a.soldPrice),0) priceSoldPrice,
+	       	NVL(SUM(a.grossProfit),0) priceGrossProfit,
+	       	NVL(SUM(a.priceSellStoreQuantity),0) pricePowerStoreDay,
+	       	NVL(SUM(a.priceSoldStoreDay),0) priceSoldStoreDay
+	    FROM 
+	        (
+              SELECT 
+                DECODE(r.b, NULL, '>'||(r.a - 0.000000000000001), r.a||'-'||r.b) regionPrice,g.* 
+              FROM
+                (
+                  SELECT 
+                        m.merchandise_code,
+                        NVL(m.sell_quantity,0) price_sell_quantity ,
+                        NVL(mp.sell_price,0) sell_price, <!-- 取自商品价格表 -->
+                        NVL(m.sell_total_price,0) soldPrice,
+                        NVL(m.sell_profit,0) grossProfit,
+                        NVL(p.priceSellStoreQuantity,0) priceSellStoreQuantity,
+                        NVL(m.sell_store_quantity,0) priceSoldStoreDay 
+                  FROM  
+                    (<include refid="searSellData" /> ) m 
+                	INNER JOIN  											<!-- 商品角色属性 -->
+                	(
+                      SELECT 
+                      	m.merchandise_code,m.supplier_code 
+                      FROM merchandise m
+                      <if test="dxRoleCode != null or dlRoleCode != null ">
+          				INNER JOIN merchandise_role mr ON m.merchandise_code = mr.merchandise_code 	<!-- 商品角色关联 -->
+          			  </if>
+          			 WHERE 1 = 1 
+					<if test="dxRoleCode != null and dxRoleCode != ''">
+						AND mr.dx_role_code = #{dxRoleCode}
+					</if>
+					<if test="dlRoleCode != null and dlRoleCode != ''">
+						AND mr.dl_role_code = #{dlRoleCode}
+					</if>
+					<if test="netWeightType != null and netWeightType != ''">
+						<if test='netWeightType == "1"'>
+					 		AND m.net_weight = '1'
+						</if> 
+						<if test='netWeightType != "1"'>
+					 		AND m.net_weight != '1'
+						</if>
+					</if>
+					<if test="selectedData != null"> <!-- 自选商品 --> 
+						AND m.merchandise_code||'-'||m.supplier_code IN (${selectedData}) 
+					</if>
+					<if test= "centreTypeCode != null and centreTypeCode != ''">
+						AND m.centre_type_code = #{centreTypeCode}
+					</if>
+			    	<if test= "smallTypeCode != null and smallTypeCode != ''">
+						AND m.small_type_code = #{smallTypeCode}
+					</if>
+			    	<if test= "detailTypeCode != null and detailTypeCode != ''">
+						AND m.detail_type_code = #{detailTypeCode}
+					</if>
+                    ) mc 
+                   ON m.merchandise_code = mc.merchandise_code AND m.supplier_code = mc.supplier_code 
+                   INNER JOIN (<include refid="merPriceGroup" />) mp ON m.merchandise_code = mp.merchandise_code   <!-- 商品价格表  -->
+                   LEFT JOIN 												<!-- 权限店天 -->
+	                      (
+	                       SELECT 
+	                            mp.merchandise_code, mp.supplier_code,
+	                        	SUM(permission_store_quantity) priceSellStoreQuantity 
+	                         FROM 
+	                              merchandise_jh_permission mp 
+	                         WHERE mp.region_code = #{regionCode}
+	                         	<if test='dataType == "D"'>
+									AND mp.store_type = '直营' 
+								</if>	
+								<if test='dataType == "J"'>
+									AND mp.store_type = '加盟' 
+								</if>	
+								<if test='dataType == "A"'>
+									AND mp.store_type IN ('直营','加盟') 
+								</if>
+	                         	AND permission_date >= #{sellMinDate} 
+	     					    AND permission_date <![CDATA[<]]> ADD_MONTHS(#{sellMaxDate},1) 
+	     					    AND								<!-- 变更：商品编码必须在以下的范围内 -->
+								   (
+								    mp.merchandise_code BETWEEN 10000 AND 59999
+								    OR mp.merchandise_code BETWEEN 70000 AND 79999
+								    OR mp.merchandise_code BETWEEN 814000000 AND 814999999
+								    OR mp.merchandise_code BETWEEN 900000000 AND 99999999
+								   )
+	                         GROUP BY mp.merchandise_code,supplier_code
+	                     ) p 
+	                   ON m.merchandise_code = p.merchandise_code AND m.supplier_code = p.supplier_code
+                 ) g 
+           	  RIGHT JOIN 
+                ( SELECT                          						 <!-- 价格带(区间) -->
+                     DECODE(d.b, NULL, (d.a + 0.000000000000001), d.a) a, d.b         
+                  FROM 
+                  ( 
+                  	<foreach collection="list" item="item" separator="union" >  
+	                   	SELECT (${item.id} + 0) a,(${item.text} + 0) b FROM DUAL 
+                   	</foreach>
+                   ) d
+               )r
+              ON NVL(g.sell_price,0) >= r.a AND NVL(g.sell_price,0) <![CDATA[<]]> NVL(r.b, 999999999999999)
+          ) a 
+      GROUP BY a.regionPrice 
+    </sql>
+
+    <!-- 区域内每个商品不同阶段的PSD销量 -->
+    <select id="listSoldQty" resultMap="allCMap">
+    	SELECT   
+			#{regionCode} regionCode,
+        	a.regionPrice,<!-- 地区价格带 -->
+        	a.merchandise_code merchandiseCode,
+    		(DECODE(SUM(a.priceSoldStoreDay),0,0,
+   			SUM(a.priceSellQuantity)/SUM(a.priceSoldStoreDay))) psdUnits <!-- PSD销量 -->
+	    FROM 
+	        (
+              SELECT 
+                DECODE(r.b, NULL, '>'||(r.a - 0.000000000000001), r.a||'-'||r.b) regionPrice,g.* 
+              FROM
+                (
+                  SELECT 
+                        m.merchandise_code,
+                        NVL(m.sell_quantity,0) priceSellQuantity ,
+                        NVL(mp.sell_price,0) sell_price,<!-- 取自商品价格表 -->
+                        NVL(m.sell_store_quantity,0) priceSoldStoreDay <!-- 销售店天 -->
+                  FROM  
+                    (																 
+                    	SELECT 
+                    		merchandise_code,supplier_code,
+                    		sell_quantity,sell_store_quantity
+                    	FROM 	
+	                    	<if test='dataType == "D"'>
+	                  			merchandise_sell_direct_month 
+	                    	</if>
+	                    	<if test='dataType == "J"'>
+	                  			merchandise_sell_join_month 
+	                    	</if>
+	                    	<if test='dataType == "A"'>
+	                  			merchandise_sell_d_j_month 
+	                    	</if>
+               		  	WHERE 
+               		  		sell_region = #{regionCode}
+                   		  	<if test="selectedData != null"> <!-- 自选商品 --> 
+								AND merchandise_code||'-'||supplier_code IN (${selectedData}) 
+							</if> 
+							AND sell_month >= #{dateRegionStr}  <!-- 日期 -->
+							AND sell_month <![CDATA[<=]]> #{dateRegionStr2} 
+							AND								<!-- 变更：商品编码必须在以下的范围内 -->
+							   (
+							    merchandise_code BETWEEN 10000 AND 59999
+							    OR merchandise_code BETWEEN 70000 AND 79999
+							    OR merchandise_code BETWEEN 814000000 AND 814999999
+							    OR merchandise_code BETWEEN 900000000 AND 99999999
+							   )
+                     ) m 
+                	INNER JOIN  											<!-- 商品角色属性 -->
+	                	(
+	                      SELECT 
+	                      	m.merchandise_code,m.supplier_code 
+	                      FROM merchandise m
+	                      <if test="dxRoleCode != null or dlRoleCode != null ">
+	           				INNER JOIN merchandise_role mr ON m.merchandise_code = mr.merchandise_code 	<!-- 商品角色关联 -->
+	           			  </if>
+	           			 WHERE 1 = 1 
+						<if test="dxRoleCode != null and dxRoleCode != ''">
+							AND mr.dx_role_code = #{dxRoleCode}
+						</if>
+						<if test="dlRoleCode != null and dlRoleCode != ''">
+							AND mr.dl_role_code = #{dlRoleCode}
+						</if>
+						<if test="netWeightType != null and netWeightType != ''">
+							<if test='netWeightType == "1"'>
+						 		AND m.net_weight = '1'
+							</if> 
+							<if test='netWeightType != "1"'>
+						 		AND m.net_weight != '1'
+							</if> 
+						</if>
+						<if test="selectedData != null"> <!-- 自选商品 --> 
+							AND m.merchandise_code||'-'||m.supplier_code IN (${selectedData}) 
+						</if>
+						<!-- <if test="merchandiseName != null and merchandiseName != ''">
+		                     AND UPPER(m.merchandise_name) like UPPER('%'||#{merchandiseName}||'%') 商品名称
+						</if> --> 
+						<if test= "centreTypeCode != null and centreTypeCode != ''">
+							AND m.centre_type_code = #{centreTypeCode}
+						</if>
+				    	<if test= "smallTypeCode != null and smallTypeCode != ''">
+							AND m.small_type_code = #{smallTypeCode}
+						</if>
+				    	<if test= "detailTypeCode != null and detailTypeCode != ''">
+							AND m.detail_type_code = #{detailTypeCode}
+						</if>
+	                    ) mc 
+                   		ON m.merchandise_code = mc.merchandise_code AND m.supplier_code = mc.supplier_code 
+                   INNER JOIN (<include refid="merPriceGroup" />) mp ON m.merchandise_code = mp.merchandise_code   <!-- 商品价格表  -->
+               	 ) g 
+           	  RIGHT JOIN     
+                ( SELECT                          								<!-- 价格带(区间) -->
+                      DECODE(d.b, NULL, (d.a+0.000000000000001), d.a) a, d.b       
+                  FROM 
+                  ( 
+                  	<foreach collection="list" item="item" separator="union" >  
+	                   	SELECT 
+                          (${item.id} + 0) a,(${item.text} + 0) b 
+	                   	FROM DUAL 
+                   	</foreach>
+                   ) d
+               )r
+              ON  NVL(g.sell_price,0) >= r.a AND NVL(g.sell_price,0) <![CDATA[<]]> NVL(r.b, 999999999999999)
+          ) a     
+      GROUP BY a.regionPrice, a.merchandise_code 
+      ORDER BY DECODE(INSTR(a.regionPrice,'-'),0,999999999999999,SUBSTR(a.regionPrice, INSTR(a.regionPrice,'-')+1)+0)
+    </select>
+
+	<!-- 区域内每个商品不同阶段的PSD销售额 -->
+    <select id="listSoldPrice" resultMap="allCMap">
+    	SELECT   
+			#{regionCode} regionCode,         
+        	a.regionPrice,<!-- 地区价格带 -->
+        	a.merchandise_code merchandiseCode,
+    		(DECODE(SUM(a.priceSoldStoreDay),0,0,
+   			SUM(a.priceSoldPrice)/SUM(a.priceSoldStoreDay))) psdSoldPrice <!-- PSD销量 -->
+	    FROM 
+	        (
+              SELECT 
+                DECODE(r.b, NULL, '>'||(r.a - 0.000000000000001), r.a||'-'||r.b) regionPrice,g.* 
+              FROM
+                (
+                  SELECT 
+                        m.merchandise_code,
+                        NVL(m.sell_quantity,0) priceSellQuantity ,
+                        NVL(m.sell_total_price,0) priceSoldPrice,
+                        NVL(mp.sell_price, 0) sell_price,
+                        NVL(m.sell_store_quantity,0) priceSoldStoreDay <!-- 销售店天 -->
+                  FROM  
+                    (																 
+                   		SELECT 
+                   			merchandise_code,supplier_code,
+                   			sell_quantity,sell_total_price,sell_store_quantity
+                   		FROM 	
+	                     	<if test='dataType == "D"'>
+	                    			merchandise_sell_direct_month 
+	                     	</if>
+	                     	<if test='dataType == "J"'>
+	                    			merchandise_sell_join_month 
+	                     	</if>
+	                     	<if test='dataType == "A"'>
+	                   			merchandise_sell_d_j_month  
+	                     	</if>
+               		  	WHERE 
+               		  		sell_region = #{regionCode} 
+                   		  	<if test="selectedData != null"> <!-- 自选商品 --> 
+								AND merchandise_code||'-'||supplier_code IN (${selectedData}) 
+							</if>
+							AND sell_month >= #{dateRegionStr}  <!-- 日期 -->
+							AND sell_month <![CDATA[<=]]> #{dateRegionStr2} 
+							AND								<!-- 变更：商品编码必须在以下的范围内 -->
+							   (
+							    merchandise_code BETWEEN 10000 AND 59999
+							    OR merchandise_code BETWEEN 70000 AND 79999
+							    OR merchandise_code BETWEEN 814000000 AND 814999999
+							    OR merchandise_code BETWEEN 900000000 AND 99999999
+							   )
+                     ) m 
+                	INNER JOIN  											<!-- 商品角色属性 -->
+                	(
+                      SELECT m.merchandise_code,m.supplier_code FROM merchandise m
+                      <if test="dxRoleCode != null or dlRoleCode != null ">
+           				INNER JOIN merchandise_role mr ON m.merchandise_code = mr.merchandise_code 	<!-- 商品角色关联 -->
+           			  </if>
+           			 WHERE 1 = 1 
+					<if test="dxRoleCode != null and dxRoleCode != ''">
+						AND mr.dx_role_code = #{dxRoleCode}
+					</if>
+					<if test="dlRoleCode != null and dlRoleCode != ''">
+						AND mr.dl_role_code = #{dlRoleCode}
+					</if>
+					<if test="netWeightType != null and netWeightType != ''">
+						<if test='netWeightType == "1"'>
+					 		AND m.net_weight = '1'
+						</if> 
+						<if test='netWeightType != "1"'>
+					 		AND m.net_weight != '1'
+						</if>
+					</if>
+					<if test="selectedData != null"> <!-- 自选商品 --> 
+						AND m.merchandise_code||'-'||m.supplier_code IN (${selectedData}) 
+					</if>
+					<if test= "centreTypeCode != null and centreTypeCode != ''">
+						AND m.centre_type_code = #{centreTypeCode}
+					</if>
+			    	<if test= "smallTypeCode != null and smallTypeCode != ''">
+						AND m.small_type_code = #{smallTypeCode}
+					</if>
+			    	<if test= "detailTypeCode != null and detailTypeCode != ''">
+						AND m.detail_type_code = #{detailTypeCode}
+					</if>
+                    ) mc ON m.merchandise_code = mc.merchandise_code AND m.supplier_code = mc.supplier_code 
+                   INNER JOIN (<include refid="merPriceGroup" />) mp ON m.merchandise_code = mp.merchandise_code   <!-- 商品价格表  -->
+               	 ) g 
+           	  RIGHT JOIN     
+                ( SELECT                          								<!-- 价格带(区间) -->
+                      DECODE(d.b, NULL, (d.a+0.000000000000001), d.a) a, d.b      
+                  FROM 
+                  ( 
+                  	<foreach collection="list" item="item" separator="union" >  
+	                   	SELECT 
+                          (${item.id} + 0) a,(${item.text} + 0) b 
+	                   	FROM DUAL 
+                   	</foreach>
+                   ) d
+               )r
+              ON  NVL(g.sell_price,0) >= r.a AND NVL(g.sell_price,0) <![CDATA[<]]> NVL(r.b, 999999999999999) 
+          ) a     
+      GROUP BY a.regionPrice, a.merchandise_code 
+      ORDER BY DECODE(INSTR(a.regionPrice,'-'),0,999999999999,SUBSTR(a.regionPrice, INSTR(a.regionPrice,'-')+1)+0)
+    </select>
+	
+	<!-- 区域内每个商品不同阶段的PSD毛利额 -->
+	<select id="listGrossFitQty" resultMap="allCMap">
+		SELECT   
+			#{regionCode} regionCode,         
+        	a.regionPrice,<!-- 地区价格带 -->
+        	a.merchandise_code merchandiseCode,
+  		    (DECODE(SUM(a.priceSoldStoreDay),0,0,
+  		    	SUM(a.priceGrossProfit)/SUM(a.priceSoldStoreDay))) psdGrossProfit 
+	    FROM 
+	        (
+              SELECT 
+                DECODE(r.b, NULL, '>'||(r.a - 0.000000000000001), r.a||'-'||r.b) regionPrice,g.* 
+              FROM
+                (
+                  SELECT 
+                        m.merchandise_code,
+                        NVL(m.sell_quantity,0) priceSellQuantity ,
+                        NVL(mp.sell_price,0) sell_price,
+                        NVL(m.sell_profit,0) priceGrossProfit,
+                        NVL(m.sell_store_quantity,0) priceSoldStoreDay <!-- 销售店天 -->
+                  FROM  
+                    (																 
+                   		SELECT
+                   			merchandise_code,supplier_code,
+                   			sell_quantity,sell_profit,sell_store_quantity
+                   		FROM 	
+                     		<if test='dataType == "D"'>
+                    			merchandise_sell_direct_month 
+	                     	</if>
+	                     	<if test='dataType == "J"'>
+                    			merchandise_sell_join_month 
+	                     	</if>
+	                     	<if test='dataType == "A"'>
+                    			merchandise_sell_d_j_month 
+	                     	</if>
+               		  	WHERE 
+               		  		sell_region = #{regionCode} 
+                   		  	<if test="selectedData != null"> <!-- 自选商品 --> 
+								AND merchandise_code||'-'||supplier_code IN (${selectedData}) 
+							</if>
+							AND sell_month >= #{dateRegionStr}  <!-- 日期 -->
+							AND sell_month <![CDATA[<=]]> #{dateRegionStr2} 
+							AND								<!-- 变更：商品编码必须在以下的范围内 -->
+							   (
+							    merchandise_code BETWEEN 10000 AND 59999
+							    OR merchandise_code BETWEEN 70000 AND 79999
+							    OR merchandise_code BETWEEN 814000000 AND 814999999
+							    OR merchandise_code BETWEEN 900000000 AND 99999999
+							   )
+                     ) m 
+                	INNER JOIN  											<!-- 商品角色属性 -->
+                	(
+                      SELECT m.merchandise_code,m.supplier_code FROM merchandise m
+                      <if test="dxRoleCode != null or dlRoleCode != null ">
+           				INNER JOIN merchandise_role mr ON m.merchandise_code = mr.merchandise_code 	<!-- 商品角色关联 -->
+           			  </if>
+           			 WHERE 1 = 1 
+					<if test="dxRoleCode != null and dxRoleCode != ''">
+						AND mr.dx_role_code = #{dxRoleCode}
+					</if>
+					<if test="dlRoleCode != null and dlRoleCode != ''">
+						AND mr.dl_role_code = #{dlRoleCode}
+					</if>
+					<if test="netWeightType != null and netWeightType != ''">
+						<if test='netWeightType == "1"'>
+					 		AND m.net_weight = '1'
+						</if> 
+						<if test='netWeightType != "1"'>
+					 		AND m.net_weight != '1'
+						</if>
+					</if>
+					<if test="selectedData != null"> <!-- 自选商品 --> 
+						AND m.merchandise_code||'-'||m.supplier_code IN (${selectedData}) 
+					</if>
+					<if test= "centreTypeCode != null and centreTypeCode != ''">
+						AND m.centre_type_code = #{centreTypeCode}
+					</if>
+			    	<if test= "smallTypeCode != null and smallTypeCode != ''">
+						AND m.small_type_code = #{smallTypeCode}
+					</if>
+			    	<if test= "detailTypeCode != null and detailTypeCode != ''">
+						AND m.detail_type_code = #{detailTypeCode}
+					</if>
+                    ) mc  ON m.merchandise_code = mc.merchandise_code AND m.supplier_code = mc.supplier_code 
+                    INNER JOIN (<include refid="merPriceGroup" />) mp ON m.merchandise_code = mp.merchandise_code   <!-- 商品价格表  -->
+               	 ) g 
+           	  RIGHT JOIN     
+                ( SELECT                          								<!-- 价格带(区间) -->
+                      DECODE(d.b, NULL, (d.a+0.000000000000001), d.a) a, d.b       
+                  FROM 
+                  ( 
+                  	<foreach collection="list" item="item" separator="union" >  
+	                   	SELECT 
+                          (${item.id} + 0) a,(${item.text} + 0) b 
+	                   	FROM DUAL 
+                   	</foreach>
+                   ) d
+               )r
+              ON  NVL(g.sell_price,0) >= r.a AND NVL(g.sell_price,0) <![CDATA[<]]> NVL(r.b, 999999999999999)
+          ) a     
+      GROUP BY a.regionPrice, a.merchandise_code 
+      ORDER BY DECODE(INSTR(a.regionPrice,'-'),0,999999999999,SUBSTR(a.regionPrice, INSTR(a.regionPrice,'-')+1)+0)
+	</select>
+	
+	<!-- 显示汇总数据 -->
+	<select id="listCollectData" resultMap="allCMap">
+		SELECT
+			<if test="page_count == null">
+			t.region_code regionCode,t.region_name regionName,
+	        ROUND(t.direct_store_quantity,0) regionStoreSum,
+	        ROUND(t.regionSKUSum,0) regionSKUSum, d.regionPrice,
+	        ROUND(d.skuUnits,0) skuUnits,
+	        ROUND(DECODE(t.regionSKUSum,0,0,d.skuUnits/t.regionSKUSum),4) skuPercent,
+	        ROUND(d.priceSellQuantity,2) soldUnits,ROUND(d.priceSoldPrice,2) soldPrice,
+	        ROUND(d.priceGrossProfit,2) grossProfit,
+	        ROUND(DECODE(t.soldUnits,0,0,d.priceSellQuantity/t.soldUnits),4) soldPercent,
+	        ROUND(DECODE(t.soldPrice,0,0,d.priceSoldPrice/t.soldPrice),4) soldPricePercent,
+	        ROUND(DECODE(t.grossProfit,0,0,d.priceGrossProfit/t.grossProfit),4) grossProfitPenrcent,
+	        ROUND(d.pricePowerStoreDay,0) powerShopDay,ROUND(d.priceSoldStoreDay,0) soldShopDay,
+	        ROUND(DECODE(t.powerShopDay,0,0,d.priceSellQuantity/t.powerShopDay),4) vitality,
+	        ROUND(DECODE(t.powerShopDay,0,0,d.pricePowerStoreDay/t.powerShopDay),4) powerShopDayPercent,
+	        ROUND(DECODE(t.soldShopDay,0,0,d.priceSoldStoreDay/t.soldShopDay),4) soldShopPercent,
+	        (DECODE(d.priceSoldStoreDay,0,0,d.priceSellQuantity/d.priceSoldStoreDay)) psdUnits,
+	        (DECODE(d.priceSoldStoreDay,0,0,d.priceSoldPrice/d.priceSoldStoreDay)) psdSoldPrice,
+	        (DECODE(d.priceSoldStoreDay,0,0,d.priceGrossProfit/d.priceSoldStoreDay)) psdGrossProfit 
+	    </if>
+	     <if test="page_count != null">
+       		count(1) AS record_count 
+    	 </if>
+	    FROM 
+		  (<include refid="calculatePriceRegion" />) d  
+        LEFT JOIN 													<!-- 该区间的总计 -->
+		      (
+		           SELECT 
+	                   #{regionCode} region_code ,MIN(r.region_name) region_name,
+	                   NVL(COUNT(DISTINCT(mm.merchandise_code)),0) regionSKUSum,
+	                   <if test='dataType == "D"'>
+	                   	NVL(MIN(r.direct_store_quantity),0) direct_store_quantity,
+	                   </if>
+	                   <if test='dataType == "J"'>
+	                   	NVL(MIN(r.join_store_quantity),0) direct_store_quantity,
+	                   </if>
+	                   <if test='dataType == "A"'>
+	                   	NVL(MIN(r.direct_store_quantity),0)+NVL(MIN(r.join_store_quantity),0) direct_store_quantity,
+	                   </if>
+	                   NVL(SUM(mm.sell_quantity),0) soldUnits,
+	                   NVL(SUM(mm.sell_total_price),0) soldPrice,
+	                   NVL(SUM(mm.sell_profit),0) grossProfit,
+	                   NVL(SUM(p.sellStoreQuantity),0) powerShopDay,
+	                   NVL(SUM(mm.sell_store_quantity),0) soldShopDay 
+	              FROM  
+	              		(SELECT region_code,region_name,direct_store_quantity,join_store_quantity FROM region WHERE region_code = #{regionCode}) r 
+              	  LEFT JOIN 
+	               (   
+	                  SELECT m.* FROM   
+	                    ( <include refid="searSellData" /> ) m 
+	                INNER JOIN  
+	                	(														<!-- 商品属性 -->
+	                      SELECT m.merchandise_code,m.supplier_code FROM merchandise m 
+	                    <if test="dxRoleCode != null or dlRoleCode != null ">
+	                      INNER JOIN merchandise_role mr ON m.merchandise_code = mr.merchandise_code 	<!-- 商品角色关联 -->
+	                    </if>  
+              			WHERE 1 = 1
+						<if test="dxRoleCode != null and dxRoleCode != ''">
+							AND mr.dx_role_code = #{dxRoleCode}
+						</if>
+						<if test="dlRoleCode != null and dlRoleCode != ''">
+							AND mr.dl_role_code = #{dlRoleCode}
+						</if>
+						<if test="netWeightType != null and netWeightType != ''">
+							<if test='netWeightType == "1"'>
+						 		AND m.net_weight = '1'
+							</if> 
+							<if test='netWeightType != "1"'>
+						 		AND m.net_weight != '1'
+							</if>
+						</if> 
+						<if test="selectedData != null"> <!-- 自选商品 --> 
+							AND m.merchandise_code||'-'||m.supplier_code IN (${selectedData}) 
+						</if>
+						<if test= "centreTypeCode != null and centreTypeCode != ''">
+							AND m.centre_type_code = #{centreTypeCode}
+						</if>
+				    	<if test= "smallTypeCode != null and smallTypeCode != ''">
+							AND m.small_type_code = #{smallTypeCode}
+						</if>
+				    	<if test= "detailTypeCode != null and detailTypeCode != ''">
+							AND m.detail_type_code = #{detailTypeCode}
+						</if>
+						AND								<!-- 变更：商品编码必须在以下的范围内 -->
+						   (
+						    m.merchandise_code BETWEEN 10000 AND 59999
+						    OR m.merchandise_code BETWEEN 70000 AND 79999
+						    OR m.merchandise_code BETWEEN 814000000 AND 814999999
+						    OR m.merchandise_code BETWEEN 900000000 AND 99999999
+						   )
+	                    ) mc 
+	                   ON m.merchandise_code = mc.merchandise_code AND m.supplier_code = mc.supplier_code 
+		               INNER JOIN (<include refid="merPriceGroup" />) pg ON m.merchandise_code = pg.merchandise_code 
+	                ) mm ON r.region_code = mm.sell_region  
+               	LEFT JOIN (<include refid="jhPermission" />) p ON mm.merchandise_code = p.merchandise_code	
+               		AND mm.supplier_code = p.supplier_code	<!-- 该地区总权限店天 -->
+              GROUP BY r.region_code 
+		   ) t 
+	     ON d.region_code = t.region_code 
+	     ORDER BY DECODE(INSTR(d.regionPrice,'-'),0,999999999999,SUBSTR(d.regionPrice, INSTR(d.regionPrice,'-')+1)+0)
+	</select>	
+	
+	<!-- 表格上方的统计 -->
+	<select id="listCalculateTotal" resultType="java.lang.String">
+		SELECT * FROM
+		(
+			(SELECT to_char(WMSYS.WM_CONCAT(t.regionPrice)) maxSku FROM (<include refid="calculatePriceRegion" />) t 
+				WHERE t.skuunits = (SELECT DECODE(MAX(w.skuunits), 0, -99999, MAX(w.skuunits)) FROM (<include refid="calculatePriceRegion" />) w ) )
+			UNION ALL
+			(SELECT to_char(WMSYS.WM_CONCAT(t.regionPrice)) maxSoldSku FROM (<include refid="calculatePriceRegion" />) t 
+			WHERE t.pricesellquantity = (SELECT DECODE(MAX(w.pricesellquantity), 0, -99999, MAX(w.pricesellquantity)) FROM (<include refid="calculatePriceRegion" />) w ) ) 
+			UNION ALL
+			(SELECT to_char(WMSYS.WM_CONCAT(t.regionPrice)) maxSoldPrice FROM (<include refid="calculatePriceRegion" />) t 
+				WHERE t.priceSoldPrice = (SELECT DECODE(MAX(w.priceSoldPrice), 0, -99999, MAX(w.priceSoldPrice)) FROM (<include refid="calculatePriceRegion" />) w ) ) 
+			UNION ALL
+			(SELECT to_char(WMSYS.WM_CONCAT(t.regionPrice)) maxGrossProfit FROM (<include refid="calculatePriceRegion" />) t 
+				WHERE t.priceGrossProfit =(SELECT DECODE(MAX(w.priceGrossProfit), 0, -99999, MAX(w.priceGrossProfit)) FROM (<include refid="calculatePriceRegion" />) w ) )
+		) c 
+	</select>
+	
+	<!-- 自动计算商品价格 -->
+	<sql id="autoCalPrice">
+		SELECT g.merchandise_code,g.sell_price FROM 
+		(
+			SELECT 
+				merchandise_code,AVG(sell_price) sell_price 
+			FROM (
+				SELECT 
+					mp.merchandise_code,mp.sell_price 
+				FROM (<include refid="arrangeMerPrice" />)mp 							<!-- 商品价格 -->
+				INNER JOIN  
+					(												<!-- 商品属性 -->
+					SELECT m.merchandise_code,m.supplier_code FROM merchandise m
+						<if test="dxRoleCode != null or dlRoleCode != null ">
+							INNER JOIN merchandise_role mr ON m.merchandise_code = mr.merchandise_code 	<!-- 商品角色关联 -->
+						</if>  
+						WHERE 1 = 1
+						<!-- <if test="merchandiseCode != null and merchandiseCode != ''">
+							AND UPPER(m.merchandise_code) LIKE UPPER('%'||#{merchandiseCode}||'%')  
+						</if> -->
+						<if test="dxRoleCode != null and dxRoleCode != ''">
+							AND mr.dx_role_code = #{dxRoleCode}
+						</if>
+						<if test="dlRoleCode != null and dlRoleCode != ''">
+							AND mr.dl_role_code = #{dlRoleCode}
+						</if>
+						<if test="netWeightType != null and netWeightType != ''">
+							<if test='netWeightType == "1"'>
+								AND m.net_weight = '1'
+							</if> 
+							<if test='netWeightType != "1"'>
+								AND m.net_weight != '1'
+							</if> 
+						</if>
+						<!-- <if test="merchandiseName != null and merchandiseName != ''">
+							AND UPPER(m.merchandise_name) LIKE UPPER('%'||#{merchandiseName}||'%') 
+						</if> -->
+						<if test= "centreTypeCode != null and centreTypeCode != ''">
+							AND m.centre_type_code = #{centreTypeCode}
+						</if>
+				    	<if test= "smallTypeCode != null and smallTypeCode != ''">
+							AND m.small_type_code = #{smallTypeCode}
+						</if>
+				    	<if test= "detailTypeCode != null and detailTypeCode != ''">
+							AND m.detail_type_code = #{detailTypeCode}
+						</if>
+						<if test="selectedData != null"> <!-- 自选商品 --> 
+							AND m.merchandise_code||'-'||m.supplier_code IN (${selectedData}) 
+						</if>
+					) mc ON mp.merchandise_code = mc.merchandise_code AND mp.supplier_code = mc.supplier_code 
+				INNER JOIN 													<!-- 在所查询时间/地区有销售记录  -->
+					(SELECT 
+							distinct merchandise_code,supplier_code 
+						FROM 
+							<if test='dataType == "D"'>
+	                   			merchandise_sell_direct_month
+	                    	</if>
+							<if test='dataType == "J"'>
+	                   			merchandise_sell_join_month 
+	                    	</if>
+							<if test='dataType == "A"'>
+	                   			merchandise_sell_d_j_month 
+	                    	</if>
+						WHERE sell_region = #{regionCode}
+							AND sell_month >= #{dateRegionStr}  <!-- 日期 -->
+							AND sell_month <![CDATA[<=]]> #{dateRegionStr2} 
+				   ) rd ON mp.merchandise_code = rd.merchandise_code AND mp.supplier_code = rd.supplier_code
+				WHERE mp.sell_region = #{regionCode} 
+				<if test='dataType == "D"'>
+					AND direct_join = '直营' 
+				</if>	
+				<if test='dataType == "J"'>
+					AND direct_join = '加盟' 
+				</if>	
+				<if test='dataType == "A"'>
+					AND direct_join IN ('直营','加盟') 
+				</if>	
+<!-- 				AND mp.price_date >= #{sellMinDate}  -->
+<!-- 				AND mp.price_date <![CDATA[<]]> ADD_MONTHS(#{sellMaxDate},1)  -->
+				AND								<!-- 变更：商品编码必须在以下的范围内 -->
+				   (
+				    mp.merchandise_code BETWEEN 10000 AND 59999
+				    OR mp.merchandise_code BETWEEN 70000 AND 79999
+				    OR mp.merchandise_code BETWEEN 814000000 AND 814999999
+				    OR mp.merchandise_code BETWEEN 900000000 AND 99999999
+				   )
+				GROUP BY mp.merchandise_code,mp.sell_price 
+			)
+		  GROUP BY merchandise_code 
+		) g 
+		<if test="handSetPri != null and handSetPri != ''">	
+			INNER JOIN
+			 	( SELECT                          						 <!-- 价格带(区间) -->
+		              DECODE(d.b, NULL, (d.a + 0.000000000000001), d.a) a, d.b         
+		           FROM 
+		           ( 
+		           	<foreach collection="list" item="item" separator="union" >  
+		             	SELECT (${item.id} + 0) a,(${item.text} + 0) b FROM DUAL 
+		            	</foreach>
+		            ) d
+		        )r
+	       ON NVL(g.sell_price,0) >= r.a AND NVL(g.sell_price,0) <![CDATA[<]]> NVL(r.b, 999999999999999) 
+       </if>
+	</sql>
+	
+	<!-- 自动计算价格带的步长、最大价格 -->
+	<select id="listPriceRegionDate" resultType="java.lang.String">
+    	SELECT 
+			'0'|| '|' || NVL(ROUND(m.endPrice), 0)|| '|' || NVL(ROUND(s.stepPrice), 0)   <!-- 价格区间起步0, 价格带最大的值, 步长 -->
+		FROM 
+			(
+				SELECT 
+					AVG(sell_price) stepPrice					<!-- 步长 -->
+				FROM 
+				 (  SELECT g.sell_price  FROM (<include refid="autoCalPrice" />) g)
+			 ) s
+		INNER JOIN 
+			(
+				SELECT 
+					MAX(sell_price) endprice 					<!-- 最大值 -->
+				FROM 
+					(SELECT t.sell_price FROM (<include refid="autoCalPrice" />) t )
+			)m ON 1 = 1
+	</select>
+
+	<!-- 查询明细数据 -->
+	<select id="listDetailData" resultMap="allCMap">
+		SELECT 
+		<if test="page_count == null">
+			mt.*
+		</if>
+	    <if test="page_count != null">
+			count(1) AS record_count 
+    	</if>
+		FROM 
+		 (
+		 	SELECT 
+				t.region_name regionName,
+				ROUND(t.direct_store_quantity,0) regionStoreSum,
+				m.merchandise_code merchandiseCode,m.merchandise_name merchandiseName,
+				m.supplier_code supplierCode,m.supplier_name supplierName,m.dxRoleName,m.dlRoleName,
+				m.centreTypeName,m.smallTypeName,m.detailTypeName,m.regionPrice,
+				ROUND(m.pricePowerDay/${days},2) powerCount,
+				ROUND(DECODE(t.direct_store_quantity, 0,0, m.pricePowerDay/ (${days})
+					/ t.direct_store_quantity), 2) powerPercent,
+				ROUND(m.aCount,0) aCount,ROUND(m.bCount,0) bCount,
+				ROUND(m.cCount,0) cCount,ROUND(m.dCount,0) dCount,
+				ROUND(m.actSoldStorCount,0) actSoldStorCount, <!-- 实际销售门店数 -->
+				ROUND(DECODE(m.pricePowerDay, 0,0, 
+					m.actSoldStorCount/(m.pricePowerDay/${days})),4) actSoldStorPercent,
+				ROUND(m.sell_quantity,2) soldUnits,ROUND(m.sell_total_price,2) soldPrice,
+				ROUND(m.sell_profit,2) grossProfit,
+				ROUND(DECODE(t.soldUnits, 0,0, m.sell_quantity/t.soldUnits),4) soldPercent,
+				ROUND(DECODE(t.soldPrice, 0,0, m.sell_total_price/t.soldPrice),4) soldPricePercent,
+				ROUND(DECODE(t.grossProfit, 0,0, m.sell_profit/t.grossProfit),4) grossProfitPenrcent,
+				ROUND(m.pricePowerDay,0) powerShopDay,ROUND(m.sell_store_quantity,0) soldShopDay,
+				ROUND(DECODE(m.pricePowerDay, 0,0, m.sell_store_quantity/m.pricePowerDay),4) vitality,
+				ROUND(DECODE(t.powerShopDay, 0,0, m.pricePowerDay/t.powerShopDay),4) powerShopDayPercent,
+				ROUND(DECODE(t.soldShopDay, 0,0, m.sell_store_quantity/t.soldShopDay),4) soldShopPercent,
+				ROUND(DECODE(m.sell_store_quantity, 0,0, m.sell_quantity/m.sell_store_quantity),2) psdUnits,
+				ROUND(DECODE(m.sell_store_quantity, 0,0, m.sell_total_price/m.sell_store_quantity),2) psdSoldPrice,
+				ROUND(DECODE(m.sell_store_quantity, 0,0, m.sell_profit/m.sell_store_quantity),2) psdGrossProfit,
+				ROUND(DECODE(m.sell_store_quantity, 0,0, m.sell_quantity/m.sell_store_quantity - t.psdUnits),2) notLessPsdUnitsSku,
+				ROUND(DECODE(m.sell_store_quantity, 0,0, m.sell_total_price/m.sell_store_quantity) - t.psdSoldPrice, 2) notLessPsdSoldPrice,
+				ROUND(DECODE(m.sell_store_quantity, 0,0, m.sell_profit/m.sell_store_quantity) - t.psdGrossProfit, 2) notLessPsdGrossProfit,
+				ROUND(DECODE(t.powerCount, 0,0, m.pricePowerDay/${days} /t.powerCount),8) bucketPercent,
+				
+				ROUND(DECODE(DECODE(t.powerCount, 0,0, ROUND(m.pricePowerDay/${days} /t.powerCount,4)) ,0,0, 
+					(DECODE(t.soldUnits, 0, 0,ROUND((m.sell_quantity/t.soldUnits),4)) - DECODE(t.powerCount, 0,0, ROUND((m.pricePowerDay/${days} /t.powerCount),4)))
+					/DECODE(t.powerCount, 0,0, ROUND((m.pricePowerDay/${days} /t.powerCount),4))),4) volumePercent,
+				
+				ROUND(DECODE(DECODE(t.powerCount, 0,0, ROUND((m.pricePowerDay/${days} /t.powerCount),4)), 0,0, 
+					(DECODE(t.soldPrice,0,0, ROUND(m.sell_total_price/t.soldPrice,4)) - DECODE(t.powerCount, 0,0, ROUND((m.pricePowerDay/${days} /t.powerCount),4)))
+					/DECODE(t.powerCount, 0,0, ROUND((m.pricePowerDay/${days} /t.powerCount),4))),4) valPercent 
+         	FROM 
+				(
+				SELECT 
+					DECODE(r.b, NULL, DECODE(r.a,NULL,'>${MAXREGIONPRICE}','>'||(r.a - 0.000000000000001)), r.a||'-'||r.b) regionPrice,   
+					g.merchandise_code,g.merchandise_name,g.supplier_code,g.supplier_name,
+					g.dxRoleName,g.dlRoleName,g.centreTypeName,g.smallTypeName,g.detailTypeName,
+					NVL(SUM(p.pricePowerDay),0) pricePowerDay,NVL(SUM(p.aCount),0) aCount,NVL(SUM(p.bCount),0) bCount,
+					NVL(SUM(p.cCount),0) cCount,NVL(SUM(p.dCount),0) dCount,
+					NVL(SUM(sd.actSoldStorCount),0) actSoldStorCount,
+					NVL(SUM(g.sell_quantity),0) sell_quantity,NVL(SUM(g.sell_total_price),0) sell_total_price,
+					NVL(SUM(g.sell_profit),0) sell_profit,NVL(SUM(g.sell_store_quantity),0) sell_store_quantity 
+				FROM 
+					(  
+						SELECT 
+							a.merchandise_code,a.merchandise_name,a.supplier_code,a.supplier_name,
+							a.dxRoleName,a.dlRoleName,a.centreTypeName,a.smallTypeName,
+							a.detailTypeName,a.sell_quantity,a.sellPrice sell_price,sell_total_price,
+							a.sell_profit,a.sell_store_quantity 
+						FROM 
+					(
+						SELECT 
+							m.*,mc.merchandise_name,s.supplier_name,mc.dxRoleName,mc.dlRoleName,mp.sell_price sellPrice,
+							ct.centre_type_name centreTypeName,sm.small_type_name smallTypeName,dt.detail_type_name detailTypeName  
+						FROM   
+						(	 
+	                      <include refid="searSellData" /> 
+	 					 <!--  <if test="merchandiseCode != null and merchandiseCode != ''">
+	               			AND UPPER(merchandise_code) LIKE UPPER('%'||#{merchandiseCode}||'%')  
+	               		  </if> -->
+						) m 
+		                INNER JOIN  <!-- 商品定量、非定量为必选 -->
+	                	(														<!-- 商品属性 -->
+							SELECT 
+								m.merchandise_code,m.supplier_code,dx.role_name dxRoleName,dl.role_name dlRoleName,
+								m.merchandise_name,m.centre_type_code,m.small_type_code,m.detail_type_code
+							FROM merchandise m 
+							<if test="dxRoleCode != null or dlRoleCode != null ">
+							  INNER JOIN 
+							</if>  
+							<if test="dxRoleCode == null and dlRoleCode == null ">
+							  LEFT JOIN 
+							</if>  
+		                    merchandise_role mr ON m.merchandise_code = mr.merchandise_code 	<!-- 商品角色关联 -->
+		                    LEFT JOIN merchandise_dx_role dx ON mr.dx_role_code = dx.role_code 
+		                    LEFT JOIN merchandise_dl_role dl ON mr.dl_role_code = dl.role_code 
+		             		WHERE 1 = 1
+							<!-- <if test="merchandiseCode != null and merchandiseCode != ''">
+		              			AND UPPER(m.merchandise_code) like UPPER('%'||#{merchandiseCode}||'%')  
+		             		</if> -->
+							<if test="dxRoleCode != null and dxRoleCode != ''">
+								AND mr.dx_role_code = #{dxRoleCode}
+							</if>
+							<if test="dlRoleCode != null and dlRoleCode != ''">
+								AND mr.dl_role_code = #{dlRoleCode}
+							</if>
+							<if test="netWeightType != null and netWeightType != ''">
+								<if test='netWeightType == "1"'>
+							 		AND m.net_weight = '1'
+								</if> 
+								<if test='netWeightType != "1"'>
+							 		AND m.net_weight != '1'
+								</if>
+							</if>
+							<if test="selectedData != null"> <!-- 自选商品 --> 
+								AND m.merchandise_code||'-'||m.supplier_code IN (${selectedData}) 
+							</if>
+							<!-- <if test="merchandiseName != null and merchandiseName != ''">
+			                     AND UPPER(m.merchandise_name) LIKE UPPER('%'||#{merchandiseName}||'%') 
+							</if>  -->
+							<if test= "centreTypeCode != null and centreTypeCode != ''">
+								AND m.centre_type_code = #{centreTypeCode}
+							</if>
+					    	<if test= "smallTypeCode != null and smallTypeCode != ''">
+								AND m.small_type_code = #{smallTypeCode}
+							</if>
+					    	<if test= "detailTypeCode != null and detailTypeCode != ''">
+								AND m.detail_type_code = #{detailTypeCode}
+							</if>
+	                    ) mc  ON m.merchandise_code = mc.merchandise_code AND m.supplier_code = mc.supplier_code
+		                INNER JOIN (<include refid="merPriceGroup" />) mp ON m.merchandise_code = mp.merchandise_code   <!-- 商品价格表  --> 
+		                LEFT JOIN supplier s on m.supplier_code = s.supplier_code
+						LEFT JOIN merchandise_centre_type ct ON mc.centre_type_code = ct.centre_type_code 
+						LEFT JOIN merchandise_small_type sm ON mc.small_type_code = sm.small_type_code 
+						LEFT JOIN merchandise_detail_type dt ON mc.detail_type_code = dt.detail_type_code 
+						)a 
+					) g  
+					LEFT JOIN 
+					(
+						SELECT 
+							mp.merchandise_code,mp.supplier_code,
+							(SUM(a_store_quantity)/${days}) aCount,
+							(SUM(b_store_quantity)/${days}) bCount,
+							(SUM(c_store_quantity)/${days}) cCount,
+							(SUM(d_store_quantity)/${days}) dCount,
+							(SUM(permission_store_quantity)) pricePowerDay 
+						FROM 
+							merchandise_jh_permission mp 
+						WHERE mp.region_code = #{regionCode} 
+							<if test='dataType == "D"'>
+								AND mp.store_type = '直营' 
+							</if>	
+							<if test='dataType == "J"'>
+								AND mp.store_type = '加盟' 
+							</if>	
+							<if test='dataType == "A"'>
+								AND mp.store_type IN ('直营','加盟') 
+							</if>
+		                  	AND permission_date >= #{sellMinDate} 
+					   		AND permission_date <![CDATA[<]]> ADD_MONTHS(#{sellMaxDate}, 1) 
+					   		AND								<!-- 变更：商品编码必须在以下的范围内 -->
+							   (
+							    mp.merchandise_code BETWEEN 10000 AND 59999
+							    OR mp.merchandise_code BETWEEN 70000 AND 79999
+							    OR mp.merchandise_code BETWEEN 814000000 AND 814999999
+							    OR mp.merchandise_code BETWEEN 900000000 AND 99999999
+							   )
+						GROUP BY mp.merchandise_code,mp.supplier_code
+					)p ON g.merchandise_code = p.merchandise_code AND g.supplier_code = p.supplier_code
+					LEFT JOIN 
+						(SELECT 
+							merchandise_code,supplier_code,(SUM(sell_store_quantity)/${days}) actSoldStorCount 
+						FROM 
+							(<include refid="searSellData" />) 
+						GROUP BY merchandise_code,supplier_code
+						) sd ON g.merchandise_code = sd.merchandise_code AND g.supplier_code = sd.supplier_code
+					LEFT JOIN 
+						( SELECT                          						 <!-- 价格带(区间) -->
+		                     DECODE(d.b, NULL, (d.a+0.000000000000001), d.a) a, d.b         
+		                  FROM 
+		                  ( 
+		                  	<foreach collection="list" item="item" separator="union" >  
+			                   	SELECT (${item.id} + 0) a,(${item.text} + 0) b FROM DUAL 
+		                   	</foreach>
+		                   ) d
+		               	 )r	ON NVL(g.sell_price,0) >= r.a AND NVL(g.sell_price,0) <![CDATA[<]]> NVL(r.b, 999999999999999)
+					GROUP BY (DECODE(r.b, NULL, DECODE(r.a, NULL,'>${MAXREGIONPRICE}','>'||(r.a - 0.000000000000001)), r.a||'-'||r.b)),g.merchandise_code ,(g.merchandise_name),
+						(g.supplier_code),(g.supplier_name),(g.dxRoleName),(g.dlRoleName),(g.centreTypeName),(g.smallTypeName),(g.detailTypeName)
+	             ) m       
+				,
+	    		(
+					SELECT 
+						#{regionCode} region_code ,MIN(r.region_name) region_name,
+					 	<if test='dataType == "D"'>
+							NVL(MIN(r.direct_store_quantity), 0) direct_store_quantity,
+						</if>
+						<if test='dataType == "J"'>
+							NVL(MIN(r.join_store_quantity),0) direct_store_quantity,
+						</if>
+						<if test='dataType == "A"'>
+							NVL(MIN(r.direct_store_quantity),0)+NVL(MIN(r.join_store_quantity),0) direct_store_quantity,
+						</if>
+						NVL(SUM(mm.sell_quantity),0) soldUnits, <!-- 所有商品销量合计 -->
+						NVL(SUM(mm.sell_total_price),0) soldPrice, <!-- 所有商品销售额合计 -->
+						NVL(SUM(mm.sell_profit),0) grossProfit, <!-- 所有毛利额合计 -->
+						NVL(SUM(p.powerShopDay),0) powerShopDay, <!-- 所有权限店天合计 -->
+						NVL(SUM(mm.sell_store_quantity),0) soldShopDay, <!-- 所有销售店天合计 -->
+						NVL(DECODE(SUM(mm.sell_store_quantity),0,0,SUM(mm.sell_quantity)/SUM(mm.sell_store_quantity)),0)   psdUnits,       <!-- 平均PSD销量 -->
+						NVL(DECODE(SUM(mm.sell_store_quantity),0,0,SUM(mm.sell_total_price)/SUM(mm.sell_store_quantity)),0) psdSoldPrice,  <!-- 平均PSD销售额 -->
+						NVL(DECODE(SUM(mm.sell_store_quantity),0,0,SUM(mm.sell_profit)/SUM(mm.sell_store_quantity)),0) psdGrossProfit,     <!-- 平均PSD毛利额 -->
+						NVL(SUM(p.powerShopDay) / ${days},0) powerCount                                                                                                <!-- 总权限数 -->
+					FROM  
+						(SELECT region_code,region_name,direct_store_quantity,join_store_quantity FROM region WHERE region_code = #{regionCode}) r 
+						LEFT JOIN 
+						(   
+							SELECT m.* FROM   
+			                   	(
+			                    	 <include refid="searSellData" />
+			                   		<!-- <if test="merchandiseCode != null and merchandiseCode != ''">
+		                   				AND UPPER(merchandise_code) like UPPER('%'||#{merchandiseCode}||'%')  
+		                  			</if> -->
+			                    ) m 
+				                INNER JOIN  <!-- 商品定量、非定量为必选 -->
+			                	(														<!-- 商品属性 -->
+			                      SELECT m.merchandise_code,m.supplier_code FROM merchandise m 
+			                    <if test="dxRoleCode != null or dlRoleCode != null ">
+			                      	INNER JOIN 
+			                    </if>  
+			                    <if test="dxRoleCode == null and dlRoleCode == null ">
+			                    	LEFT JOIN 
+			                    </if>  
+			                      	merchandise_role mr ON m.merchandise_code = mr.merchandise_code 	<!-- 商品角色关联 -->
+			             		WHERE 1 = 1
+								<if test="dxRoleCode != null and dxRoleCode != ''">
+									AND mr.dx_role_code = #{dxRoleCode}
+								</if>
+								<if test="dlRoleCode != null and dlRoleCode != ''">
+									AND mr.dl_role_code = #{dlRoleCode}
+								</if>
+								<if test="netWeightType != null and netWeightType != ''">
+									<if test='netWeightType == "1"'>
+								 		AND m.net_weight = '1'
+									</if> 
+									<if test='netWeightType != "1"'>
+								 		AND m.net_weight != '1'
+									</if>
+								</if> 
+								<if test="selectedData != null"> <!-- 自选商品 --> 
+									AND m.merchandise_code||'-'||m.supplier_code IN (${selectedData}) 
+								</if>
+								<!-- <if test="merchandiseCode != null and merchandiseCode != ''">
+		              				AND UPPER(m.merchandise_code) LIKE UPPER('%'||#{merchandiseCode}||'%')  
+		             			</if>
+								<if test="merchandiseName != null and merchandiseName != ''">
+				                     AND UPPER(m.merchandise_name) LIKE UPPER('%'||#{merchandiseName}||'%') 
+								</if>  -->
+								<if test= "centreTypeCode != null and centreTypeCode != ''">
+									AND m.centre_type_code = #{centreTypeCode}
+								</if>
+						    	<if test= "smallTypeCode != null and smallTypeCode != ''">
+									AND m.small_type_code = #{smallTypeCode}
+								</if>
+						    	<if test= "detailTypeCode != null and detailTypeCode != ''">
+									AND m.detail_type_code = #{detailTypeCode}
+								</if>
+								AND								<!-- 变更：商品编码必须在以下的范围内 -->
+								   (
+								    m.merchandise_code BETWEEN 10000 AND 59999
+								    OR m.merchandise_code BETWEEN 70000 AND 79999
+								    OR m.merchandise_code BETWEEN 814000000 AND 814999999
+								    OR m.merchandise_code BETWEEN 900000000 AND 99999999
+								   )
+			                    ) mc 
+			                   ON m.merchandise_code = mc.merchandise_code AND m.supplier_code = mc.supplier_code 
+			             	INNER JOIN (<include refid="merPriceGroup" />) mp ON m.merchandise_code = mp.merchandise_code   <!-- 商品价格表  --> 
+			             ) mm ON r.region_code = mm.sell_region  
+						LEFT JOIN 													
+						(
+		                  SELECT 
+		                   	mp.merchandise_code,mp.supplier_code,
+		                   	SUM(permission_store_quantity) powerShopDay 
+		                    FROM 
+		                       merchandise_jh_permission mp 
+		                    WHERE mp.region_code = #{regionCode} 
+		                    <if test='dataType == "D"'>
+								AND mp.store_type = '直营' 
+							</if>	
+							<if test='dataType == "J"'>
+								AND mp.store_type = '加盟' 
+							</if>	
+							<if test='dataType == "A"'>
+								AND mp.store_type IN ('直营','加盟') 
+							</if>
+		                  		AND permission_date >= #{sellMinDate} 
+					   		AND permission_date <![CDATA[<]]> ADD_MONTHS(#{sellMaxDate}, 1) 
+					   		AND								<!-- 变更：商品编码必须在以下的范围内 -->
+							   (
+							    mp.merchandise_code BETWEEN 10000 AND 59999
+							    OR mp.merchandise_code BETWEEN 70000 AND 79999
+							    OR mp.merchandise_code BETWEEN 814000000 AND 814999999
+							    OR mp.merchandise_code BETWEEN 900000000 AND 99999999
+							   )
+		                    GROUP BY mp.merchandise_code,mp.supplier_code 			
+		               ) p 
+		               ON mm.merchandise_code = p.merchandise_code AND mm.supplier_code = p.supplier_code
+					GROUP BY r.region_code 
+				) t
+				ORDER BY DECODE(INSTR(m.regionPrice,'-'),0,999999999999,SUBSTR(m.regionPrice, INSTR(m.regionPrice,'-')+1)+0),m.merchandise_code,m.supplier_code 
+		) mt WHERE 1=1
+		<if test="merchandiseCode != null and merchandiseCode != ''">
+			AND UPPER(mt.merchandiseCode) like UPPER('%'||#{merchandiseCode}||'%') 
+		</if>
+		<if test="merchandiseName != null and merchandiseName != ''">
+            AND UPPER(mt.merchandiseName) LIKE UPPER('%'||#{merchandiseName}||'%') 
+		</if>
+	</select>
+	
+</mapper>

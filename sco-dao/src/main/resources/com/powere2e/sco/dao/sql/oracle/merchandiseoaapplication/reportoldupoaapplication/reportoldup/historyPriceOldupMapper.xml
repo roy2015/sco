@@ -1,0 +1,494 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.merchandiseoaapplication.reportoldupoaapplication.reportOldup.HistoryPriceOldupDao">
+	<resultMap type="com.powere2e.sco.model.merchandiseoaapplication.reportoldupoaapplication.reportoldup.HistoryPriceOldup" id="historyPriceOldupMap">
+		<result property="reportCode" column="reportCode"/>
+		<result property="piceType" column="piceType"/>
+		<result property="stockSite" column="stockSite"/>
+		<result property="purchasePrice" column="purchasePrice"/>
+		<result property="purchaseUnits" column="purchaseUnits"/>
+		<result property="sellRegion" column="sellRegion"/>
+		<result property="sellPrice" column="sellPrice"/>
+		<result property="sellUnits" column="sellUnits"/>
+		<result property="profitRate" column="profitRate"/>
+		
+		<result property="profitRatePercent" column="profitRatePercent"/>
+		<result property="purchasePricePercent" column="purchasePricePercent"/>
+		<result property="sellPricePercent" column="sellPricePercent"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    
+    <!-- 商品原料情况 -->
+    <resultMap type="com.powere2e.sco.model.merchandiseoaapplication.reportadjustpriceoaapplication.reportadjustprice.MerchandiseMaterial" id="merchandiseMaterialMap">
+		<result property="reportCode" column="reportCode"/>
+		<result property="reportType" column="reportType"/>
+		<result property="materialName" column="materialName"/>
+		<result property="materialSite" column="materialSite"/>
+		<result property="materialDate" column="materialDate"/>
+		<result property="materialCount" column="materialCount"/>
+		<result property="sellDate" column="sellDate"/>
+		<result property="remarks" column="remarks"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    
+    <!-- 查询历史与本次价格(老品新上)(可分页)-->
+    <select id="searchHistoryPriceOldup" resultMap="historyPriceOldupMap">
+    	SELECT  
+    	<if test="page_count == null">
+           	   t1.report_code reportCode,
+           	   t1.pice_type piceType,
+		       t1.stock_site stockSite,
+		       t1.purchase_price purchasePrice,
+		       t1.purchase_units purchaseUnits,
+       		   t1.sell_region sellRegion,
+		       t1.sell_price sellPrice,
+		       t1.sell_units sellUnits,
+		       t1.profit_rate profitRate,
+		       CONCAT(t1.profit_rate*100,'%') profitRatePercent,
+		       t2.application_code applicationCode,
+		       t2.merchandise_code merchandiseCode,
+		       t2.supplier_code supplierCode
+	    </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      FROM 	  history_price_oldup t1,application_report_oldup t2
+  	   WHERE  t1.report_code=t2.report_code
+  	  AND 	  UPPER(t1.pice_type) = UPPER(#{piceType})
+  	  AND 	  t2.application_code = #{applicationCode}
+	    	
+	    	<if test= "intentionCode != null and intentionCode !=''">
+			AND t2.merchandise_code= #{intentionCode}
+			</if>
+		    <if test= "supplierCode != null and supplierCode !=''">
+			AND t2.supplier_code= #{supplierCode}
+			</if>
+    </select>
+    
+    <!-- 查询本次价格比历史价格高(老品新上)(可分页)-->
+    <select id="searchComparePriceOldup" resultMap="historyPriceOldupMap">
+    	SELECT  
+    	<if test="page_count == null">
+           	   d2.stockSite stockSite,
+       		   d2.purchaseUnits purchaseUnits,
+		       d2.purchasePrice - d1.purchasePrice  purchasePrice,
+		       to_char(ROUND((d2.purchasePrice - d1.purchasePrice)*100 /DECODE(d1.purchasePrice,0,1,d1.purchasePrice), 2),'fm9999999990.00')||'%' purchasePricePercent,
+		       d2.sellRegion sellRegion,
+		       d2.sellUnits sellUnits,
+		       (d2.sellPrice - d1.sellPrice) sellPrice,
+		       to_char(ROUND((d2.sellPrice - d1.sellPrice)*100  /DECODE(d1.sellPrice,0,1,d1.sellPrice), 2),'fm9999999990.00')||'%' sellPricePercent,
+		       to_char(ROUND((d2.profitRate - d1.profitRate)*100 /DECODE(d1.profitRate,0,1,d1.profitRate),2),'fm9999999990.00')||'%'  profitRatePercent
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      FROM 	 (SELECT rownum        priceIndex,
+               t1.report_code      reportCode,
+               t1.pice_type        piceType,
+               t1.stock_site       stockSite,
+               t1.purchase_price   purchasePrice,
+               t1.purchase_units   purchaseUnits,
+               t1.sell_region      sellRegion,
+               t1.sell_price       sellPrice,
+               t1.sell_units       sellUnits,
+               t1.profit_rate      profitRate,
+               t2.application_code applicationCode,
+               t2.merchandise_code merchandiseCode,
+               t2.supplier_code    supplierCode
+        
+          FROM history_price_oldup t1, application_report_oldup t2
+         WHERE t1.report_code = t2.report_code
+           AND t1.pice_type = 'old'
+           AND 	t2.application_code = #{applicationCode}
+           
+            <if test= "intentionCode != null and intentionCode !=''">
+			AND t2.merchandise_code= #{intentionCode}
+			</if>
+		    <if test= "supplierCode != null and supplierCode !=''">
+			AND t2.supplier_code= #{supplierCode}
+			</if>
+           ) d1,
+           (SELECT rownum        priceIndex,
+               t1.report_code      reportCode,
+               t1.pice_type        piceType,
+               t1.stock_site       stockSite,
+               t1.purchase_price   purchasePrice,
+               t1.purchase_units   purchaseUnits,
+               t1.sell_region      sellRegion,
+               t1.sell_price       sellPrice,
+               t1.sell_units       sellUnits,
+               t1.profit_rate      profitRate,
+               t2.application_code applicationCode,
+               t2.merchandise_code merchandiseCode,
+               t2.supplier_code    supplierCode
+        
+          FROM history_price_oldup t1, application_report_oldup t2
+         WHERE t1.report_code = t2.report_code
+           AND t1.pice_type = 'now'
+           AND t2.application_code = #{applicationCode}
+           
+            <if test= "intentionCode != null and intentionCode !=''">
+			AND t2.merchandise_code= #{intentionCode}
+			</if>
+		    <if test= "supplierCode != null and supplierCode !=''">
+			AND t2.supplier_code= #{supplierCode}
+			</if>
+           ) d2
+      WHERE 
+      		d1.priceIndex = d2.priceIndex   
+	    	
+    </select>
+    
+    <!-- 增加历史与本次价格(老品新上) --> 
+	<insert id="saveHistoryPriceOldup" parameterType="hashmap">
+		INSERT INTO history_price_oldup(report_code,pice_type,stock_site,purchase_price,purchase_units,sell_region,sell_price,sell_units,profit_rate) 
+			 VALUES(#{reportCode},#{piceType},#{stockSite},#{purchasePrice},#{purchaseUnits},#{sellRegion},#{sellPrice},#{sellUnits},#{profitRate})
+    </insert>
+    <!-- 删除历史与本次价格(老品新上) -->
+    <delete id="deleteHistoryPriceOldup" parameterType="hashmap">
+        DELETE FROM 
+        			history_price_oldup 
+        WHERE 
+        			REPORT_CODE=#{reportCode}
+    </delete>
+    <!-- 根据申请单号删除历史与本次价格(老品新上) -->
+    <delete id="deleteHistoryPriceOldupByCode" parameterType="hashmap">
+        DELETE FROM 
+        			history_price_oldup 
+        WHERE 
+        			REPORT_CODE IN (SELECT report_code FROM　application_report_oldup　WHERE APPLICATION_CODE IN (${applicationCodes}))
+    </delete>
+    
+    <!-- 上下市时间(老品新上) -->
+    <resultMap type="com.powere2e.sco.model.merchandiseoaapplication.reportoldupoaapplication.reportoldup.UpDownMarketOldup" id="upDownMarketOldupMap">
+		<result property="reportCode" column="reportCode"/>
+		<result property="upDate" column="upDate"/>
+		<result property="downDate" column="downDate"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <!-- 查询上下市时间(老品新上)(可分页)-->
+    <select id="searchUpDownMarketOldup" resultMap="upDownMarketOldupMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t1.report_code reportCode,
+       		t1.up_date upDate,
+       		t1.down_date downDate,
+       		t2.application_code applicationCode,
+		    t2.merchandise_code merchandiseCode,
+		    t2.supplier_code supplierCode
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM up_down_market_oldup t1,application_report_oldup t2
+  	   WHERE  t1.report_code=t2.report_code
+	    	
+	    	<if test= "intentionCode != null and intentionCode !=''">
+			AND t2.merchandise_code= #{intentionCode}
+			</if>
+		    <if test= "supplierCode != null and supplierCode !=''">
+			AND t2.supplier_code= #{supplierCode}
+			</if>
+    </select>
+    
+    <!-- 增加上下市时间(老品新上) --> 
+	<insert id="saveUpDownMarketOldup" parameterType="hashmap">
+		INSERT INTO up_down_market_oldup(report_code,up_date,down_date) 
+			 VALUES(#{reportCode},#{upDate},#{downDate})
+    </insert>
+    <!-- 删除上下市时间(老品新上) -->
+    <delete id="deleteUpDownMarketOldup" parameterType="hashmap">
+        DELETE FROM 
+        			up_down_market_oldup 
+        WHERE 
+        			REPORT_CODE=#{reportCode} <!--AND client_id=#{app_user_clientID}-->
+    </delete>
+     <!-- 根据申请单号删除上下市时间(老品新上) -->
+    <delete id="deleteUpDownMarketOldupByCode" parameterType="hashmap">
+        DELETE FROM 
+        			up_down_market_oldup 
+        WHERE 
+        			REPORT_CODE IN (SELECT report_code FROM　application_report_oldup　WHERE APPLICATION_CODE IN (${applicationCodes}))
+    </delete>
+     
+    <!-- 查询商品上下市信息(可分页)-->
+    <select id="listUpDownMarketOldup" resultMap="upDownMarketOldupMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		  t1.merchandise_code merchandiseCode,
+		      t1.supplier_code supplierCode,
+		      t1.market_type marketType,
+		      t1.market_date as "upDate",
+		      (SELECT  a1.market_date FROM merchandise_market a1 
+		      WHERE    a1.merchandise_code = t2.merchandise_code
+			           AND a1.supplier_code = t2.supplier_code
+			           AND a1.market_type = '下市') as "downDate"
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+		       FROM    merchandise_market t1,merchandise t2
+		       WHERE   t1.merchandise_code=t2.merchandise_code
+		       AND     t1.supplier_code=t2.supplier_code
+		       AND     t1.market_type='上市'
+				 <if test= "intentionCode != null and intentionCode !=''">
+				AND t2.merchandise_code= #{intentionCode}
+				</if>
+					<if test= "supplierCode != null and supplierCode !=''">
+				AND t2.supplier_code= #{supplierCode}
+				</if>
+    </select>
+    
+    <!-- 报告检验标准(老品新上) -->
+    <resultMap type="com.powere2e.sco.model.merchandiseoaapplication.reportoldupoaapplication.reportoldup.CheckStandardOldup" id="checkStandardOldupMap">
+		<result property="reportCode" column="reportCode"/>
+		<result property="oldStandardColour" column="oldStandardColour"/>
+		<result property="newStandardColour" column="newStandardColour"/>
+		<result property="oldStandardSmell" column="oldStandardSmell"/>
+		<result property="newStandardSmell" column="newStandardSmell"/>
+		<result property="oldStandardFrom" column="oldStandardFrom"/>
+		<result property="newStandardForm" column="newStandardForm"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <!-- 查询报告检验标准(老品新上)(可分页)-->
+    <select id="searchCheckStandardOldup" resultMap="checkStandardOldupMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		   t1.report_code         reportCode,
+		       t1.old_standard_colour oldStandardColour,
+		       t1.new_standard_colour newStandardColour,
+		       t1.old_standard_smell  oldStandardSmell,
+		       t1.new_standard_smell  newStandardSmell,
+		       t1.old_standard_from   oldStandardFrom,
+		       t1.new_standard_form   newStandardForm,
+		       t2.application_code    applicationCode,
+		       t2.merchandise_code    merchandiseCode,
+		       t2.supplier_code       supplierCode
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM check_standard_oldup  t1,application_report_oldup t2
+  	   WHERE  t1.report_code=t2.report_code
+    		
+    		<if test= "intentionCode != null and intentionCode !=''">
+			AND t2.merchandise_code= #{intentionCode}
+			</if>
+		    <if test= "supplierCode != null and supplierCode !=''">
+			AND t2.supplier_code= #{supplierCode}
+			</if>
+    </select>
+    
+    <!-- 增加报告检验标准(老品新上) --> 
+	<insert id="saveCheckStandardOldup" parameterType="hashmap">
+		INSERT INTO check_standard_oldup(report_code,old_standard_colour,new_standard_colour,old_standard_smell,new_standard_smell,old_standard_from,new_standard_form,
+			old_moisture_content,new_moisture_content) 
+		 VALUES(#{reportCode},#{oldStandardColour},#{newStandardColour},#{oldStandardSmell},#{newStandardSmell},#{oldStandardFrom},#{newStandardForm},
+		 	#{oldMoistureContent},#{newMoistureContent})
+    </insert>
+    <!-- 删除报告检验标准(老品新上) -->
+    <delete id="deleteCheckStandardOldup" parameterType="hashmap">
+        DELETE FROM 
+        			check_standard_oldup 
+        WHERE 
+        			REPORT_CODE=#{reportCode} <!--AND client_id=#{app_user_clientID}-->
+    </delete>
+     <!-- 根据申请单号删除报告检验标准(老品新上) -->
+    <delete id="deleteCheckStandardOldupByCode" parameterType="hashmap">
+        DELETE FROM 
+        			check_standard_oldup 
+        WHERE 
+        			REPORT_CODE IN (SELECT report_code FROM　application_report_oldup　WHERE APPLICATION_CODE IN (${applicationCodes}))
+    </delete>
+    
+    <!-- 同类商品市场零售价(老品新上) -->
+    <resultMap type="com.powere2e.sco.model.merchandiseoaapplication.reportoldupoaapplication.reportoldup.SameMerchandiseOldup" id="sameMerchandiseOldupMap">
+		<result property="reportCode" column="reportCode"/>
+		<result property="reportType" column="reportType"/>
+		<result property="trademark" column="trademark"/>
+		<result property="merchandiseName" column="merchandiseName"/>
+		<result property="sellChannel" column="sellChannel"/>
+		<result property="sellUnits" column="sellUnits"/>
+		<result property="sellPrice" column="sellPrice"/>
+		<result property="kgPrice" column="kgPrice"/>
+		<result property="remarks" column="remarks"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <!-- 查询同类商品市场零售价(老品新上)(可分页)-->
+    <select id="searchSameMerchandiseOldup" resultMap="sameMerchandiseOldupMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		   t1.report_code      reportCode,
+		       t1.report_type      reportType,
+		       t1.trademark        trademark,
+		       t1.merchandise_name merchandiseName,
+		       t1.sell_channel     sellChannel,
+		       t1.sell_units       sellUnits,
+		       t1.sell_price       sellPrice,
+		       t1.kg_price         kgPrice,
+		       t1.remarks,
+		       t2.application_code    applicationCode,
+		       t2.merchandise_code    merchandiseCode,
+		       t2.supplier_code       supplierCode
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM same_merchandise_oldup  t1,application_report_oldup t2
+  	   WHERE  t1.report_code=t2.report_code
+  	    AND   t2.application_code = #{applicationCode}
+    		
+    		<if test= "intentionCode != null and intentionCode !=''">
+			AND t2.merchandise_code= #{intentionCode}
+			</if>
+		    <if test= "supplierCode != null and supplierCode !=''">
+			AND t2.supplier_code= #{supplierCode}
+			</if>
+    </select>
+    
+    <!-- 增加同类商品市场零售价(老品新上) --> 
+	<insert id="saveSameMerchandiseOldup" parameterType="hashmap">
+		INSERT INTO same_merchandise_oldup(report_code,report_type,trademark,merchandise_name,sell_channel,sell_units,sell_price,kg_price,remarks) 
+			 VALUES(#{reportCode},#{reportType},#{trademark},#{merchandiseName},#{sellChannel},#{sellUnits},#{sellPrice},#{kgPrice},#{remarks})
+    </insert>
+    <!-- 删除同类商品市场零售价(老品新上) -->
+    <delete id="deleteSameMerchandiseOldup" parameterType="hashmap">
+        DELETE FROM 
+        			same_merchandise_oldup 
+        WHERE 
+        			REPORT_CODE=#{reportCode} <!--AND client_id=#{app_user_clientID}-->
+    </delete>
+     <!-- 根据申请单号删除同类商品市场零售价(老品新上) -->
+    <delete id="deleteSameMerchandiseOldupByCode" parameterType="hashmap">
+        DELETE FROM 
+        			same_merchandise_oldup 
+        WHERE 
+        			REPORT_CODE IN (SELECT report_code FROM　application_report_oldup　WHERE APPLICATION_CODE IN (${applicationCodes}))
+    </delete>
+    
+    <!-- 商品销售预计(老品新上) -->
+    <resultMap type="com.powere2e.sco.model.merchandiseoaapplication.reportoldupoaapplication.reportoldup.AnticipatedSellOld" id="anticipatedSellOldMap">
+		<result property="reportCode" column="reportCode"/>
+		<result property="sellRegion" column="sellRegion"/>
+		<result property="sellStoreCount" column="sellStoreCount"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <!-- 查询同类商品市场零售价(老品新上)(可分页)-->
+    <select id="searchAnticipatedSellOld" resultMap="anticipatedSellOldMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t1.report_code      reportCode,
+	        t1.sell_region      sellRegion,
+	        t1.sell_store_count sellStoreCount,
+	        t2.application_code applicationCode,
+	        t2.merchandise_code merchandiseCode,
+	        t2.supplier_code    supplierCode
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM anticipated_sell_old t1,application_report_oldup t2
+  	   WHERE  t1.report_code=t2.report_code
+  	    AND   t2.application_code = #{applicationCode}
+    		
+    		<if test= "intentionCode != null and intentionCode !=''">
+			AND t2.merchandise_code= #{intentionCode}
+			</if>
+		    <if test= "supplierCode != null and supplierCode !=''">
+			AND t2.supplier_code= #{supplierCode}
+			</if>
+    </select>
+    
+    <!-- 增加同类商品市场零售价(老品新上) --> 
+	<insert id="saveAnticipatedSellOld" parameterType="hashmap">
+		INSERT INTO anticipated_sell_old(report_code,sell_region,sell_store_count) 
+			 VALUES(#{reportCode},#{sellRegion},#{sellStoreCount})
+    </insert>
+    <!-- 删除同类商品市场零售价(老品新上) -->
+    <delete id="deleteAnticipatedSellOld" parameterType="hashmap">
+        DELETE FROM 
+        			anticipated_sell_old 
+        WHERE 
+        			REPORT_CODE=#{reportCode} <!--AND client_id=#{app_user_clientID}-->
+    </delete>
+     <!-- 根据申请单号删除同类商品市场零售价(老品新上) -->
+    <delete id="deleteAnticipatedSellOldByCode" parameterType="hashmap">
+        DELETE FROM 
+        			anticipated_sell_old 
+        WHERE 
+        			REPORT_CODE IN (SELECT report_code FROM　application_report_oldup　WHERE APPLICATION_CODE IN (${applicationCodes}))
+    </delete>
+    
+      <!-- 根据申请单号删除关联分析报表(商品OA) -->
+    <delete id="deleteAnalysisReportsMByApplicationCode" parameterType="hashmap">
+        DELETE FROM 
+        			analysis_reports_m 
+        WHERE 
+        			APPLICATION_CODE IN (${applicationCodes})
+    </delete>
+    
+     <!-- 查询商品原料情况(调价)(可分页)-->
+    <select id="searchMerchandiseMaterial" resultMap="merchandiseMaterialMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		   t1.report_code    reportCode,
+		       t1.report_type    reportType,
+		       t1.material_name  materialName,
+		       t1.material_site  materialSite,
+		       t1.material_date  materialDate,
+		       t1.material_count materialCount,
+		       t1.sell_date      sellDate,
+		       t1.remarks        remarks,
+		        t2.application_code    applicationCode,
+		       t2.merchandise_code    merchandiseCode,
+		       t2.supplier_code       supplierCode
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM merchandise_material_oldup t1,application_report_oldup t2
+  	   WHERE  		
+  	   			t1.report_code=t2.report_code
+    		AND t2.application_code=#{applicationCode}	
+    		<if test= "intentionCode != null and intentionCode !=''">
+			AND t2.merchandise_code= #{intentionCode}
+			</if>
+		    <if test= "supplierCode != null and supplierCode !=''">
+			AND t2.supplier_code= #{supplierCode}
+			</if>
+    </select>
+    
+    <!-- 增加商品原料情况(老品新上) --> 
+	<insert id="saveMerchandiseMaterial" parameterType="hashmap">
+		INSERT INTO merchandise_material_oldup(report_code,report_type,material_name,material_site,material_date,material_count,sell_date,remarks) 
+			 VALUES(#{reportCode},#{reportType},#{materialName},#{materialSite},#{materialDate},#{materialCount},#{sellDate},#{remarks})
+    </insert>
+    
+    <!-- 删除商品原料情况(老品新上) -->
+    <delete id="deleteMerchandiseMaterial" parameterType="hashmap">
+        DELETE FROM 
+  			merchandise_material_oldup 
+        WHERE 
+  			report_code = #{reportCode} <!--AND client_id=#{app_user_clientID}-->
+    </delete>
+    
+    <!-- 删除商品原料情况(新品引进) -->
+    <delete id="deleteMerchandiseMaterialByCode" parameterType="hashmap">
+        DELETE FROM 
+ 			merchandise_material_oldup 
+      	WHERE 
+  			report_code IN (SELECT report_code FROM　application_report_oldup　WHERE application_code IN (${applicationCodes}))
+    </delete>
+</mapper>

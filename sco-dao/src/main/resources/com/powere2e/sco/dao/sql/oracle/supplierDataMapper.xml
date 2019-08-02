@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.SupplierDataDao">
+   <resultMap type="com.powere2e.sco.model.merchandiseintention.MerchandiseIntentionSupplier" id="supplerMap">
+		<result property="id" column="id"/>
+		<result property="text" column="text"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+   
+   	<!-- 查询意向供应商 -->
+	<select id="listAllSupplier" resultMap="supplerMap">
+	   SELECT
+	   <if test="page_count == null">
+       		d1.id id,
+       		d1.text text
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+     FROM(
+		SELECT
+			t1.intention_supplier_code id, 
+			t1.intention_supplier_name text
+		FROM
+			merchandise_intention_supplier t1 <!--意向供应商-->
+		WHERE
+			 1=1
+			 <if test= "supplierCode != null and supplierCode !=''">
+			 AND UPPER(t1.intention_supplier_code) LIKE UPPER('%'||#{supplierCode}||'%')
+			 </if>	
+			 <if test= "supplierName != null and supplierName !=''">
+			 AND UPPER(t1.intention_supplier_name) LIKE UPPER('%'||#{supplierName}||'%')
+			 </if>	
+	UNION 
+		SELECT
+			t2.supplier_code id, 
+			t2.supplier_name text
+		FROM
+			supplier t2 <!-- 供应商 -->
+		WHERE
+			 1=1
+			 <if test= "supplierCode != null and supplierCode !=''">
+			 AND UPPER(t2.supplier_code) LIKE UPPER('%'||#{supplierCode}||'%')
+			 </if>	
+			 <if test= "supplierName != null and supplierName !=''">
+			 AND UPPER(t2.supplier_name) LIKE UPPER('%'||#{supplierName}||'%')
+			 </if>		
+	  ) d1
+	  ORDER BY d1.text 
+	</select>
+	<!-- 查询辅料意向供应商 -->
+	<select id="listAllSupplierFl" resultMap="supplerMap">
+	   SELECT
+	   <if test="page_count == null">
+       		d1.id id,
+       		d1.text text
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+     FROM(
+		SELECT
+			t1.intention_supplier_code id, 
+			t1.intention_supplier_name text
+		FROM
+			accessory_intention_supplier t1 <!--意向供应商-->
+		WHERE
+			 1=1
+			 <if test= "supplierCode != null and supplierCode !=''">
+			 AND UPPER(t1.intention_supplier_code) LIKE UPPER('%'||#{supplierCode}||'%')
+			 </if>	
+			 <if test= "supplierName != null and supplierName !=''">
+			 AND UPPER(t1.intention_supplier_name) LIKE UPPER('%'||#{supplierName}||'%')
+			 </if>	
+	UNION 
+		SELECT
+			t2.supplier_code id, 
+			t2.supplier_name text
+		FROM
+			supplier t2 <!-- 供应商 -->
+		WHERE
+			 1=1
+			 <if test= "supplierCode != null and supplierCode !=''">
+			 AND UPPER(t2.supplier_code) LIKE UPPER('%'||#{supplierCode}||'%')
+			 </if>	
+			 <if test= "supplierName != null and supplierName !=''">
+			 AND UPPER(t2.supplier_name) LIKE UPPER('%'||#{supplierName}||'%')
+			 </if>		
+	  ) d1
+	 ORDER BY d1.text 
+	</select>
+	
+	<!-- 查询SAP供应商 -->
+	<select id="listMasterSupplier" resultMap="supplerMap">
+		SELECT 
+		 <if test="page_count == null">
+			t2.supplier_code id, 
+			t2.supplier_name text 
+		 </if>
+		 <if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+		FROM
+			supplier t2 <!-- 主数据中供应商 --> 
+		WHERE
+			 1=1
+			 <if test= "supplierCode != null and supplierCode !=''">
+			 	AND UPPER(t2.supplier_code) LIKE UPPER('%'||#{supplierCode}||'%')
+			 </if>	
+			 <if test= "supplierName != null and supplierName !=''">
+			 	AND UPPER(t2.supplier_name) LIKE UPPER('%'||#{supplierName}||'%')
+			 </if>
+		ORDER BY t2.supplier_name 
+	</select>
+	
+</mapper>

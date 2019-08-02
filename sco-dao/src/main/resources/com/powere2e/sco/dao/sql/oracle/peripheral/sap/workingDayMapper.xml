@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.peripheral.sap.WorkingDayDao">
+	<resultMap type="com.powere2e.sco.model.peripheral.sap.WorkingDay" id="workingDayMap">
+		<result property="workingDay" column="workingDay"/>
+		<result property="dayType" column="dayType"/>
+		<result property="syncDate" column="syncDate"/>
+    </resultMap>
+    <!-- 增加工作日信息 --> 
+	<insert id="saveWorkingDay" parameterType="hashmap">
+		INSERT INTO WORKINGDAY(workingday,day_type,sync_date) 
+			  <foreach collection="list" item="item" index="index" separator="union all" > 
+		         (
+		         SELECT 
+			         #{item.workingDay}, 
+			         #{item.dayType},
+			         #{app_created}
+		         FROM　DUAL
+		         )
+		     </foreach>
+    </insert>
+    <!-- 删除工作日信息 -->
+    <delete id="deleteWorkingDay">
+        delete from WORKINGDAY
+        where 1=1 
+        and
+        <foreach collection="list" item="item" index="index" separator="and" > 
+		     (
+		     	workingday=#{item.workingDay}
+		     	and 
+		     	day_type=#{item.dayType}
+		     )
+		 </foreach>
+    </delete>
+    
+    <!-- 查询两个日期间的工作日期天数 -->
+	<select id="searchWeekDayByDate" resultType="int">
+		SELECT 
+			count(1) 
+		FROM 
+			workingday 
+		WHERE 
+			workingday >= #{startDate} 
+			AND workingday <![CDATA[<=]]> #{endDate} 
+			AND UPPER(day_type) = 'NORM'
+	</select>
+	
+</mapper>

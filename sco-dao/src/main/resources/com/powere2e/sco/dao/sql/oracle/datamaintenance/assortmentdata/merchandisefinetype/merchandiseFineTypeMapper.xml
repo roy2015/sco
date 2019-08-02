@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.datamaintenance.assortmentdata.merchandisefinetype.MerchandiseFineTypeDao">
+	<resultMap type="com.powere2e.sco.model.datamaintenance.assortmentdata.merchandisefinetype.MerchandiseFineType" id="merchandiseFineTypeMap">
+		<result property="fineTypeCode" column="fineTypeCode"/>
+		<result property="fineTypeName" column="fineTypeName"/>
+		<result property="centreTypeName" column="centreTypeName"/>
+		<result property="smallTypeName" column="smallTypeName"/>
+		<result property="detailTypeName" column="detailTypeName"/>
+		<result property="detailTypeCode" column="detailTypeCode"/>
+		<result property="created" column="created"/>
+		<result property="createby" column="createby"/>
+		<result property="updated" column="updated"/>
+		<result property="updateby" column="updateby"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>	
+    <!-- 查询商品细分类维护(可分页)-->
+    <select id="searchMerchandiseFineType" resultMap="merchandiseFineTypeMap">
+        SELECT  
+    	<if test="page_count == null">
+       		mct.centre_type_name centreTypeName,
+       		mst.small_type_name smallTypeName,
+       		mdt.detail_type_name detailTypeName,
+       		mft.fine_type_name fineTypeName,
+       		mft.fine_type_code fineTypeCode
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM merchandise_fine_type mft 
+            left join MERCHANDISE_DETAIL_TYPE mdt on mft.detail_type_code=mdt.detail_type_code 
+            left join MERCHANDISE_SMALL_TYPE mst on mdt.small_type_code=mst.small_type_code 
+            left join MERCHANDISE_CENTRE_TYPE mct on mst.centre_type_code=mct.centre_type_code
+    	<where>
+    		1=1
+	    	<if test="centreType != null and centreType != ''">
+				AND UPPER(mct.centre_type_code) like UPPER(#{centreType}) 
+			</if>
+			<if test="smallType != null and smallType != ''">
+				AND UPPER(mst.small_type_code) like UPPER(#{smallType}) 
+			</if>
+			<if test="detailType != null and detailType != ''">
+				AND UPPER(mdt.detail_type_code) like UPPER(#{detailType}) 
+			</if>
+			<if test= "fineTypeNameAU != null and fineTypeNameAU !=''">
+				AND mft.fine_type_name = #{fineTypeNameAU}
+			</if>
+			<if test= "detailTypeCodeAU != null and detailTypeCodeAU != ''">
+				AND  mft.DETAIL_TYPE_CODE = #{detailTypeCodeAU}
+			</if>
+	    	<if test= "fineTypeName != null and fineTypeName!=''">
+				AND UPPER(mft.fine_type_name) LIKE UPPER('%'||#{fineTypeName}||'%')
+			</if>
+			
+			<if test= "detailTypeCode != null and detailTypeCode != ''">
+				AND  UPPER(mft.DETAIL_TYPE_CODE)LIKE UPPER('%'||#{detailTypeCode}||'%')
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY mct.centre_type_name,mst.small_type_name,mdt.detail_type_name,mft.fine_type_name asc
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 根据名称查询某个商品细分类维护(可分页)-->
+    <select id="loadMerchandiseFineType" resultMap="merchandiseFineTypeMap">
+    	SELECT  
+       		mct.centre_type_name centreTypeName,
+       		mst.small_type_name smallTypeName,
+       		mdt.detail_type_name detailTypeName,
+       		mft.fine_type_name fineTypeName,
+       		mft.fine_type_code fineTypeCode
+      		FROM merchandise_fine_type mft 
+            left join MERCHANDISE_DETAIL_TYPE mdt on mft.detail_type_code=mdt.detail_type_code 
+            left join MERCHANDISE_SMALL_TYPE mst on mdt.small_type_code=mst.small_type_code 
+            left join MERCHANDISE_CENTRE_TYPE mct on mst.centre_type_code=mct.centre_type_code;
+    	<where>
+    		1=1
+    		<if test= "detailTypeCode != null and detailTypeCode != ''">
+				AND  mft.DETAIL_TYPE_CODE = #{detailTypeCode}
+			</if>
+	    	<if test= "fineTypeName != null and fineTypeName != ''">
+				AND  mft.FINE_TYPE_NAME = #{fineTypeName}
+			</if>
+    	</where>
+    	ORDER BY mct.centre_type_name,mst.small_type_name,mdt.detail_type_name,mft.fine_type_name asc
+    </select>
+    <!-- 查询细分类是否存在与商品中 -->
+    <select id="searchMerchandise" resultType="Integer">
+            select count(*) from 
+            MERCHANDISE_INTENTION mi
+            where mi.FINE_TYPE_CODE=#{fineTypeCode}
+    </select>
+    <!-- 增加商品细分类维护 --> 
+	<insert id="saveMerchandiseFineType" parameterType="hashmap">
+		INSERT INTO merchandise_fine_type(fine_type_code,fine_type_name,detail_type_code,created,createby) 
+			 VALUES(S_MERCHANDISE_FINE_TYPE.NEXTVAL,#{fineTypeName},#{detailTypeCode},sysdate,#{app_create_by})
+    </insert>
+    <!-- 删除商品细分类维护 -->
+    <delete id="deleteMerchandiseFineType" parameterType="hashmap">
+        DELETE FROM 
+        			merchandise_fine_type 
+        WHERE 
+        			FINE_TYPE_CODE in 
+        			<foreach collection="fineTypeCode"  item="fineTypeCode" separator="," open="(" close=")">
+        			    #{fineTypeCode}
+        			</foreach>
+    </delete>
+    <!-- 定性角色数据查询 -->
+	<select id="listQualitative" resultType="com.powere2e.security.model.Option">
+		SELECT
+		fine_type_code id, fine_type_name text
+		FROM
+		merchandise_fine_type
+		ORDER BY fine_type_name 
+	</select>
+</mapper>

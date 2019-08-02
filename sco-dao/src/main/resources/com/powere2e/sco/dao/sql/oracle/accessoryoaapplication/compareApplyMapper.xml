@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.accessoryoaapplication.CompareApplyDao">
+	<resultMap type="com.powere2e.sco.model.accessoryoaapplication.CompareApply" id="CompareApplyMap">
+		<result property="applicationCode" column="applicationCode"/>
+		<result property="applicationCreateby" column="applicationCreateby"/>
+		<result property="intentionCode" column="intentionCode"/>
+		<result property="intentionName" column="intentionName"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="supplierName" column="supplierName"/>
+		<result property="intentionSupplierCode" column="intentionSupplierCode"/>
+		<result property="intentionSupplierName" column="intentionSupplierName"/>
+		<result property="applicationStatus" column="applicationStatus"/>
+		<result property="centreTypeCode" column="centreTypeCode"/>
+		<result property="smallTypeCode" column="smallTypeCode"/>
+		<result property="detailTypeCode" column="detailTypeCode"/>
+		<result property="fineTypeCodes" column="fineTypeCodes"/>
+		<result property="centreTypeName" column="centreTypeName"/>
+		<result property="smallTypeName" column="smallTypeName"/>
+		<result property="detailTypeName" column="detailTypeName"/>
+		<result property="fineTypeName" column="fineTypeName"/>
+		
+		<result property="enquiryCode" column="enquiryCode"/>
+		<result property="enquiryCreated" column="enquiryCreated"/>
+		<result property="enquiryCreateby" column="enquiryCreateby"/>
+		<result property="quotedCode" column="quotedCode"/>
+		<result property="quotedDate" column="quotedDate"/>
+		<result property="quotedCreated" column="quotedCreated"/>
+		<result property="intentionCreated" column="intentionCreated"/>
+		<result property="accessorySapCode" column="accessorySapCode"/>
+		<result property="oaApplicationCode" column="oaApplicationCode"/>
+		<result property="oaApplicationUrl" column="oaApplicationUrl"/>
+		<result property="oaContacts" column="oaContacts"/>
+		<result property="created" column="created"/>
+		<result property="createby" column="createby"/>
+		<result property="updated" column="updated"/>
+		<result property="updateby" column="updateby"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    
+    
+    
+     <!-- 查询采购委员会竞价单OA申请列表(可分页)-->
+    <select id="listCompareApplyIntentionApplication" resultMap="CompareApplyMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.quoted_code quotedCode,t.enquiry_code enquiryCode,t.intention_code intentionCode,t.intention_supplier_code intentionSupplierCode,t.quoted_date quotedDate
+       		,t.created quotedCreated ,m.intention_supplier_name intentionSupplierName,n.supplier_name supplierName,
+       		p.application_code applicationCode,p.application_status applicationStatus,(select u.real_name from pub_user u where u.user_id=p.CREATEBY) as applicationCreateby,a.INTENTION_NAME intentionName,
+       		p.oa_application_code oaApplicationCode,p.application_link oaApplicationUrl,p.oa_contacts oaContacts,
+			c.centre_type_name centreTypeName,s.small_type_name smallTypeName,d.detail_type_name detailTypeName,f.fine_type_name fineTypeName,
+			e.created enquiryCreated,(select u.real_name from pub_user u where u.user_id=e.createby) as enquiryCreateby,k.ACCESSORY_SAP_CODE accessorySapCode
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM accessory_quoted_electronic t
+      		left join ACCESSORY_INTENTION_SUPPLIER m on t.intention_supplier_code=m.intention_supplier_code
+      		left join SUPPLIER n on t.intention_supplier_code=n.SUPPLIER_CODE
+      		left join ACCESSORY_INTENTION a on t.intention_code=a.intention_code
+      		left join ACCESSORY_ENQUIRY e on t.enquiry_code=e.enquiry_code
+      		left join APPLICATION_QUOTED q on t.quoted_code=q.quoted_code
+      		left join OA_APPLICATION p on q.application_code=p.application_code 
+      		
+      		left join MERCHANDISE_CENTRE_TYPE c on a.centre_type_code=c.centre_type_code
+           left join MERCHANDISE_SMALL_TYPE s on a.small_type_code=s.small_type_code
+           left join MERCHANDISE_DETAIL_TYPE d on a.detail_type_code=d.detail_type_code
+           left join ACCESSORY_FINE_TYPE f on a.fine_type_code=f.fine_type_code
+          left join WL_INFO k on t.intention_code=k.intention_code and t.QUOTED_CODE=k.QUOTED_CODE
+      		
+    	<where>
+    		1=1
+	    	and (p.application_type='ACCESSORY_XJBJ' or p.application_type='' or p.application_type is null)
+			
+			<if test= "search != null and search!=''">
+			AND UPPER(t.quoted_code) LIKE UPPER('%'||#{quotedCode}||'%')
+			</if>
+			<if test= "search == null or search==''">
+	    	<if test= "quotedCode != null and quotedCode!=''">
+			AND t.quoted_code = #{quotedCode}
+			</if>
+			</if>
+			 <if test= "applicationCode != null and applicationCode!=''">
+			AND UPPER(p.application_code) LIKE UPPER('%'||#{applicationCode}||'%')
+			</if>
+			<if test= "applicationStatus != null and applicationStatus!=''">
+			AND DECODE(p.application_status,null,'W',p.application_status,p.application_status) =#{applicationStatus} 
+			</if>
+	    	<if test= "enquiryCode != null and enquiryCode!=''">
+			AND UPPER(t.enquiry_code) LIKE UPPER('%'||#{enquiryCode}||'%')
+			</if>
+	    	<if test= "intentionCode != null and intentionCode!=''">
+			AND UPPER(t.intention_code) LIKE UPPER('%'||#{intentionCode}||'%')
+			</if>
+			<if test= "intentionName != null and intentionName!=''">
+			AND UPPER(a.intention_name) LIKE UPPER('%'||#{intentionName}||'%')
+			</if>
+	    	<if test= "intentionSupplierCode != null and intentionSupplierCode!=''">
+			AND ( UPPER(m.intention_supplier_code) LIKE UPPER('%'||#{intentionSupplierCode}||'%')
+			</if>
+	    	<if test= "supplierCode != null and supplierCode!=''">
+			or UPPER(n.supplier_code) LIKE UPPER('%'||#{supplierCode}||'%') )
+			</if>
+	    	<if test= "intentionSupplierName != null and intentionSupplierName!=''">
+			AND ( UPPER(m.intention_supplier_name) LIKE UPPER('%'||#{intentionSupplierName}||'%')
+			</if>
+	    	<if test= "supplierName != null and supplierName!=''">
+			or UPPER(n.supplier_name) LIKE UPPER('%'||#{supplierName}||'%')   )
+			</if>
+			<if test= "centreTypeCode != null and centreTypeCode!=''">
+			AND UPPER(a.centre_type_code) LIKE UPPER('%'||#{centreTypeCode}||'%')
+			</if>
+	    	<if test= "smallTypeCode != null and smallTypeCode!=''">
+			AND UPPER(a.small_type_code) LIKE UPPER('%'||#{smallTypeCode}||'%')
+			</if>
+	    	<if test= "detailTypeCode != null and detailTypeCode!=''">
+			AND UPPER(a.detail_type_code) LIKE UPPER('%'||#{detailTypeCode}||'%')
+			</if>
+	    	<if test= "fineTypeCodes != null and fineTypeCodes!=''">
+			AND UPPER(a.fine_type_code) LIKE UPPER('%'||#{fineTypeCodes}||'%')
+			</if>
+	    	<if test= "quotedDate != null and quotedDate!=''">
+			AND	convert(varchar,t.quoted_date,120) LIKE (#{quotedDate})
+			</if>
+	    	<if test= "enquiryCreated != null ">
+			AND	e.created>=#{enquiryCreated}
+			</if>
+			<if test= "enquiryCreatedEnd != null ">
+			AND	e.created<![CDATA[<]]> ( #{enquiryCreatedEnd}+ 1)
+			</if>
+			<if test= "quotedCreated != null ">
+			AND	t.created>=#{quotedCreated}
+			</if>
+			<if test= "quotedCreatedEnd != null ">
+			AND	t.created<![CDATA[<]]> (#{quotedCreatedEnd}+ 1)
+			</if>
+			<if test= "intentionCreated != null ">
+			AND	a.created>=#{intentionCreated}
+			</if>
+			<if test= "intentionCreatedEnd != null ">
+			AND	a.created<![CDATA[<]]>(#{intentionCreatedEnd}+ 1)
+			</if>
+	    	
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY p.application_code desc nulls last
+    		</if>
+    	</if>
+    </select>
+    
+     <!-- 根据主键查询某个辅料打样(可分页)-->
+    <select id="loadCompareApplyIntentionApplication" resultMap="CompareApplyMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.quoted_code quotedCode,t.enquiry_code enquiryCode,t.intention_code intentionCode,t.intention_supplier_code intentionSupplierCode,t.quoted_date quotedDate
+       		,t.created quotedCreated ,m.intention_supplier_name intentionSupplierName,n.supplier_name supplierName,
+       		p.application_code applicationCode,p.application_status applicationStatus,p.CREATEBY applicationCreateby,a.INTENTION_NAME intentionName,
+			c.centre_type_name centreTypeName,s.small_type_name smallTypeName,d.detail_type_name detailTypeName,f.fine_type_name fineTypeName,
+			e.created enquiryCreated,e.createby enquiryCreateby,k.ACCESSORY_SAP_CODE accessorySapCode
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM accessory_quoted_electronic t
+      		left join ACCESSORY_INTENTION_SUPPLIER m on t.intention_supplier_code=m.intention_supplier_code
+      		left join SUPPLIER n on t.intention_supplier_code=n.SUPPLIER_CODE
+      		left join ACCESSORY_INTENTION a on t.intention_code=a.intention_code
+      		left join ACCESSORY_ENQUIRY e on t.enquiry_code=e.enquiry_code
+      		left join APPLICATION_QUOTED q on t.quoted_code=q.quoted_code
+      		left join OA_APPLICATION p on q.application_code=p.application_code
+      		
+      		left join MERCHANDISE_CENTRE_TYPE c on a.centre_type_code=c.centre_type_code
+           left join MERCHANDISE_SMALL_TYPE s on a.small_type_code=s.small_type_code
+           left join MERCHANDISE_DETAIL_TYPE d on a.detail_type_code=d.detail_type_code
+           left join ACCESSORY_FINE_TYPE f on a.fine_type_code=f.fine_type_code
+           left join WL_INFO k on t.intention_code=k.intention_code and t.QUOTED_CODE=k.QUOTED_CODE
+    	<where>
+    		1=1
+	    	<if test= "quotedCode != null and quotedCode!=''">
+			AND  t.quoted_code = #{quotedCode}
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.created DESC
+    		</if>
+    	</if>
+    </select>
+     <!-- 修改关联表 -->
+    <update id="updateIntentionSupplierAccessory" parameterType="hashmap">
+		UPDATE	
+				intention_supplier_accessory	
+		   SET	
+		   		merchandise_code=#{accessorySapCode}
+		   		<if test= "supplierSapCode != null and supplierSapCode!=''">
+		   		,
+		   		supplier_code=#{supplierSapCode}
+		   		</if>	   		
+		 WHERE	
+		 		intention_code=#{intentionCode}
+    </update>
+</mapper>

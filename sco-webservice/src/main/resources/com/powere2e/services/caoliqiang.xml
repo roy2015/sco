@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+  
+  <!-- 商品抽检不合格记录 -->
+  <bean id="merchandiseUnqualifiedManager" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.service.impl.datamaintenance.gradecontroldata.merchandiseunqualified.MerchandiseUnqualifiedServiceImpl">
+        <property name="merchandiseUnqualifiedDao" ref="merchandiseUnqualifiedDao"/>
+      </bean>
+    </property>
+  </bean>
+  <!-- 供应商考评模版 -->
+  <bean id="supplierEvaluateTemplateManager" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.service.impl.sharefunctionanalysis.supplieranalysis.supplierevaluatetemplate.SupplierEvaluateTemplateServiceImpl">
+        <property name="supplierEvaluateTemplateDao" ref="supplierEvaluateTemplateDao"/>
+      </bean>
+    </property>
+  </bean>
+  <!-- 供应商考评表 -->
+  <bean id="supplierEvaluateTableManager" parent="baseTxProxy">
+    <property name="target">
+      <bean class="com.powere2e.sco.service.impl.sharefunctionanalysis.supplieranalysis.supplierevaluatetable.SupplierEvaluateTableServiceImpl">
+        <property name="supplierEvaluateTableDao" ref="supplierEvaluateTableDao"/>
+      </bean>
+    </property>
+  </bean>
+</beans>

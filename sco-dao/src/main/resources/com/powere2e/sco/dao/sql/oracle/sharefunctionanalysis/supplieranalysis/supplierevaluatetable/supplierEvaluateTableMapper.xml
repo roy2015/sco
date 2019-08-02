@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.sharefunctionanalysis.supplieranalysis.supplierevaluatetable.SupplierEvaluateTableDao">
+	<resultMap type="com.powere2e.sco.model.sharefunctionanalysis.supplieranalysis.supplierevaluatetable.SupplierEvaluateScore" id="supplierEvaluateTableMap">
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="supplierName" column="supplierName"/>
+		<result property="evaluateTableCode" column="evaluateTableCode"/>
+		<result property="evaluateDate" column="evaluateDate"/>
+		<result property="evaluateItemScore" column="evaluateItemScore"/>
+		<result property="evaluateItemCode" column="evaluateItemCode"/>
+		<result property="evaluateItemName" column="evaluateItemName" />
+		<result property="created" column="created"/>
+		<result property="createby" column="createby"/>
+		<result property="updated" column="updated"/>
+		<result property="updateby" column="updateby"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="templateCode" column="templateCode"/>
+		<result property="templateName" column="templateName"/>
+		<result property="templateType" column="templateType"/>
+		<result property="evaluateStartDate" column="evaluateStartDate"/>
+		<result property="evaluateEndDate" column="evaluateEndDate"/>
+		<result property="status" column="status"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		<result property="publishDate" column="publishDate" />
+		<result property="evaluateItemScore" column="evaluateItemScore" />
+		<result property="departments" column="departments" />
+		<result property="according" column="according" />
+		<result property="standard" column="standard" />
+		<result property="recordCount" column="record_count" />
+		<result property="scoreCG" column="scoreCG" />
+		<result property="scorePK" column="scorePK" />
+		<result property="scoreKC" column="scoreKC" />
+		<result property="scorePL" column="scorePL" />
+		<result property="scoreTotal" column="scoreTotal" />
+    </resultMap>
+    <!-- 查询供应商考评表(可分页)-->
+    <select id="searchSupplierEvaluateTableDetails" resultMap="supplierEvaluateTableMap">
+        SELECT
+    	<if test="page_count == null">
+    	    m.*,(case
+					when scoreTotal is null then null
+					else rank() over (partition by templateCode,templateType order by scoreTotal desc nulls last)
+				 end) scoreRank
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if> 
+    	from  
+    	    (
+	    	    select 
+	    		t.template_code templateCode,
+	       		t.template_name templateName,
+	       		t.evaluate_start_date evaluateStartDate,
+	       		to_char(t.evaluate_start_date,'yyyy-mm-dd')||'~'||to_char(t.evaluate_end_date,'yyyy-mm-dd') evaluateDate,
+	       		t.evaluate_end_date evaluateEndDate,
+	       		t.publish_date publishDate,
+	       		t.status status,
+	       		t.template_type templateType,
+	          	se.evaluate_table_code evaluateTableCode,
+	          	a.supplier_code supplierCode,
+	       		a.supplier_name supplierName,
+	       		(select round(sum((ses.evaluate_item_score*sei.weight/100*t.evaluate_full_score/100)),2) from supplier_evaluate_item sei
+		        left join supplier_evaluate_score ses on sei.evaluate_item_code = ses.evaluate_item_code
+            	left join supplier_evaluate_template t on sei.template_code = t.template_code
+		        where sei.departments = '采购部门' and sei.template_code=t.template_code AND SES.EVALUATE_TABLE_CODE=se.EVALUATE_TABLE_CODE) scoreCG,
+		        (select round(sum((ses.evaluate_item_score*sei.weight/100*t.evaluate_full_score/100)),2) from supplier_evaluate_item sei
+		        left join supplier_evaluate_score ses on sei.evaluate_item_code = ses.evaluate_item_code
+            	left join supplier_evaluate_template t on sei.template_code = t.template_code
+		        where sei.departments = '品控部门' and sei.template_code=t.template_code AND SES.EVALUATE_TABLE_CODE=se.EVALUATE_TABLE_CODE) scorePK,
+		        (select round(sum((ses.evaluate_item_score*sei.weight/100*t.evaluate_full_score/100)),2) from supplier_evaluate_item sei
+		        left join supplier_evaluate_score ses on sei.evaluate_item_code = ses.evaluate_item_code
+            	left join supplier_evaluate_template t on sei.template_code = t.template_code
+		        where sei.departments = '库存部门' and sei.template_code=t.template_code AND SES.EVALUATE_TABLE_CODE=se.EVALUATE_TABLE_CODE) scoreKC,
+		        (select round(sum((ses.evaluate_item_score*sei.weight/100*t.evaluate_full_score/100)),2) from supplier_evaluate_item sei
+		        left join supplier_evaluate_score ses on sei.evaluate_item_code = ses.evaluate_item_code
+            	left join supplier_evaluate_template t on sei.template_code = t.template_code
+		        where sei.departments = '品类部门' and sei.template_code=t.template_code AND SES.EVALUATE_TABLE_CODE=se.EVALUATE_TABLE_CODE) scorePL,
+		        (select round(sum((ses.evaluate_item_score*sei.weight/100*t.evaluate_full_score/100)),2) from supplier_evaluate_item sei
+		        left join supplier_evaluate_score ses on sei.evaluate_item_code = ses.evaluate_item_code
+            	left join supplier_evaluate_template t on sei.template_code = t.template_code
+		        where sei.template_code=t.template_code AND SES.EVALUATE_TABLE_CODE=se.EVALUATE_TABLE_CODE) scoreTotal,
+	       		(select u.real_name from pub_user u where u.user_id=se.createby) as createby
+	  
+    		FROM
+    		supplier_evaluate se 
+    		LEFT JOIN supplier a ON a.supplier_code = se.supplier_code 
+    		LEFT JOIN supplier_evaluate_template t ON t.template_code = se.template_code
+    	<where>
+    		1=1
+    		<if test= "supplierCode != null and supplierCode !=''">
+			AND UPPER(a.supplier_code) LIKE UPPER('%'||#{supplierCode}||'%')
+			</if>
+    		<if test= "supplierName != null and supplierName!=''">
+			AND UPPER(a.supplier_name) LIKE UPPER('%'||#{supplierName}||'%')
+			</if>
+			<if test= "createby != null and createby !=''">
+			AND se.createby in (select u.user_id from pub_user u where UPPER(u.real_name) LIKE UPPER('%'||#{createby}||'%'))
+			</if>
+	    	<if test= "templateName != null and templateName!=''">
+			AND UPPER(t.template_name) LIKE UPPER('%'||#{templateName}||'%')
+			</if>
+			<if test= "createbySE != null and createbySE !=''">
+			AND t.createby in (select u.user_id from pub_user u where UPPER(u.real_name) LIKE UPPER('%'||#{createbySE}||'%'))
+			</if>
+			<if test= "status != null and status != ''">
+			AND UPPER(t.status) LIKE UPPER('%'||#{status}||'%')
+			</if>
+			<if test= "status == null or status == ''">
+			AND (UPPER(t.status) LIKE UPPER('YFB') or UPPER(t.status) LIKE UPPER('YGB')) 
+			</if>
+			<if test= "minPublishDate != null and minPublishDate != ''">
+			AND	(t.publish_date between TO_DATE(#{minPublishDate},'YYYY-MM-DD') and TO_DATE(#{maxPublishDate},'YYYY-MM-DD')+1)
+			</if>
+	    	<if test= "evaluateStartDate != null and evaluateStartDate != ''">
+			AND UPPER(t.evaluate_start_date) >= TO_DATE(#{evaluateStartDate},'YYYY-MM-DD')
+			</if>
+	    	<if test= "evaluateEndDate != null and evaluateEndDate != ''">
+			AND UPPER(t.evaluate_end_date) <![CDATA[<=]]> TO_DATE(#{evaluateEndDate},'YYYY-MM-DD')
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		ORDER BY scoreTotal desc
+    	</if>
+    	) m
+    </select>
+    <select id="searchRealName" resultType="string">
+    	select u.real_name from pub_user u where u.user_id = #{createby}
+    </select>
+    <select id="selectSupplierCode" resultMap="supplierEvaluateTableMap">
+        select 
+        	s.supplier_code supplierCode,s.supplier_name supplierName
+        from supplier_evaluate se
+        left join supplier s on s.supplier_code=se.supplier_code
+         where 
+		<foreach collection="item" item="item" index="index" separator="or">
+    		se.supplier_code=#{item.supplierCode} and se.template_code=#{item.templateCode}
+    	</foreach>
+    </select>
+    <!-- 查询供应商考评模板-->
+    <select id="searchSupplierEvaluateTable" resultMap="supplierEvaluateTableMap">
+    	SELECT  
+    	<if test="page_count == null">
+    		t.template_code templateCode,
+       		t.template_name templateName,
+       		t.evaluate_start_date evaluateStartDate,
+       		t.evaluate_end_date evaluateEndDate,
+       		to_char(t.evaluate_start_date,'yyyy-mm-dd')||'~'||to_char(t.evaluate_end_date,'yyyy-mm-dd') evaluateDate,
+       		t.publish_date publishDate,
+       		t.status status,
+       		(select u.real_name from pub_user u where u.user_id=t.createby) as createby
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM supplier_evaluate_template t
+    	<where>
+    		1=1
+	    	<if test= "templateName != null and templateName !=''">
+			AND UPPER(t.template_name) LIKE UPPER('%'||#{templateName}||'%')
+			</if>
+			<if test= "createbySE != null and createbySE!=''">
+			AND t.createby in (select u.user_id from pub_user u where UPPER(u.real_name) LIKE UPPER('%'||#{createbySE}||'%'))
+			</if>
+			<if test= "status != null and status != ''">
+			AND UPPER(t.status) LIKE UPPER('%'||#{status}||'%')
+			</if>
+			<if test= "status == null or status == ''">
+			AND (UPPER(t.status) LIKE UPPER('YFB') or UPPER(t.status) LIKE UPPER('YGB')) 
+			</if>
+			<if test= "minPublishDate != null and minPublishDate != ''">
+			AND	(t.publish_date between TO_DATE(#{minPublishDate},'YYYY-MM-DD') and TO_DATE(#{maxPublishDate},'YYYY-MM-DD')+1)
+			</if>
+	    	<if test= "evaluateStartDate != null and evaluateStartDate != ''">
+			AND (t.evaluate_start_date between TO_DATE(#{evaluateStartDate},'YYYY-MM-DD') and TO_DATE(#{evaluateEndDate},'YYYY-MM-DD'))
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.created DESC
+    		</if>
+    	</if>
+    </select>
+    <resultMap type="com.powere2e.sco.model.masterdata.Supplier" id="supplier">
+		<result property="supplierCode" column="supplierCode" />
+		<result property="supplierName" column="supplierName" />
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <!-- 查询供应商(可分页)-->
+    <select id="searchSupplier" resultMap="supplier">
+    	SELECT  
+    	<if test="page_count == null">
+    		*
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+    	from(
+    		select 
+    		distinct
+    	    t.supplier_code supplierCode,
+       		t.supplier_name supplierName
+      		FROM supplier t
+      		left JOIN merchandise m ON m.supplier_code = t.supplier_code
+      		left join INTENTION_SUPPLIER_MERCHANDISE ism on ism.merchandise_code=m.merchandise_code and ism.SUPPLIER_CODE=t.SUPPLIER_CODE
+			left join MERCHANDISE_INTENTION mi on ism.intention_code=mi.intention_code
+    	<where>
+    		1=1
+	    	<if test= "supplierName != null and supplierName !='' ">
+			AND UPPER(t.supplier_name) LIKE UPPER('%'||#{supplierName}||'%')
+			</if>
+			<if test= "supplierCode != null and supplierCode !='' ">
+			AND UPPER(t.supplier_code) LIKE UPPER('%'||#{supplierCode}||'%')
+			</if>
+			<if test= "centreTypeCode != null and centreTypeCode != ''">
+			AND UPPER(m.centre_type_code) LIKE UPPER('%'||#{centreTypeCode}||'%')
+			</if>
+			<if test= "smallTypeCode != null and smallTypeCode != ''">
+			AND UPPER(m.small_type_code) LIKE UPPER('%'||#{smallTypeCode}||'%')
+			</if>
+			<if test= "detailTypeCode != null and detailTypeCode != ''">
+			AND UPPER(m.detail_type_code) LIKE UPPER('%'||#{detailTypeCode}||'%')
+			</if>
+			<if test= "fineTypeCode != null and fineTypeCode != ''">
+			AND UPPER(mi.fine_type_code) LIKE UPPER('%'||#{fineTypeCode}||'%')
+			</if>
+			<if test= "fTypeCode != null and fTypeCode != ''">
+			AND UPPER(mi.fine_type_code) LIKE UPPER('%'||#{fTypeCode}||'%')
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.supplier_code DESC
+    		</if>
+    	</if>
+    	)
+    </select>
+    <!-- 查询考核项编号 -->
+    <select id="selectEvaluateItemCode" parameterType="hashmap" resultType="string">
+    	SELECT s.evaluate_item_code FROM supplier_evaluate_item s WHERE s.template_code = #{templateCode}
+    </select>
+     <!-- 发布供应商考评表 --> 
+	<insert id="saveSupplierEvaluateTable" parameterType="hashmap">
+		INSERT INTO  supplier_evaluate_score
+		(evaluate_table_code,supplier_code,template_code,evaluate_item_code,evaluate_item_score,created,createby,updated,updateby) 
+		VALUES	 
+		(#{evaluateTableCode},#{supplierCode},#{templateCode},#{evaluateItemCode},#{evaluateItemScore},SYSDATE,#{app_create_by},SYSDATE,#{app_create_by})
+    </insert>
+    <insert id="saveSupplierEvaluate" parameterType="hashmap">
+		INSERT INTO supplier_evaluate
+		(evaluate_table_code,template_code,supplier_code,created,createby,updated,updateby) 
+		VALUES	 
+		(#{evaluateTableCode},#{templateCode},#{supplierCode},SYSDATE,#{app_create_by},SYSDATE,#{app_create_by})
+    </insert>
+    <!-- 根据考评表编号查询某个供应商考评表-->
+    <select id="loadSupplierEvaluateTable" resultMap="supplierEvaluateTableMap">
+    	SELECT  
+    	<if test="page_count == null">
+    		t.template_name templateName,
+    		t.evaluate_full_score evaluateFullScore,
+    		t.evaluate_start_date evaluateStartDate,
+    		t.evaluate_end_date evaluateEndDate,
+    		s.supplier_code supplierCode,
+    		s.supplier_name supplierName,
+    		sei.weight weight,
+    		round((sei.weight/100*ses.evaluate_item_score*t.evaluate_full_score)/100,2) score,
+    		sei.evaluate_item_name evaluateItemName,
+    		ses.evaluate_table_code evaluateTableCode,
+    		ses.evaluate_item_score evaluateItemScore,
+    		ses.evaluate_item_code evaluateItemCode,
+    		sei.departments departments,
+    		sei.according according,
+    		sei.standard standard,
+       		t.template_type templateType
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+    		FROM supplier_evaluate se
+	        left join supplier_evaluate_score ses on se.evaluate_table_code=ses.evaluate_table_code
+	        left join supplier s ON s.supplier_code = se.supplier_code
+	        left join supplier_evaluate_template t ON se.template_code = t.template_code
+	        left join supplier_evaluate_item sei on sei.template_code = t.template_code
+    	<where>
+    		1=1 and sei.evaluate_item_code = ses.evaluate_item_code
+	    	<if test= "evaluateTableCode != null and evaluateTableCode !='' ">
+			AND  ses.evaluate_table_code = #{evaluateTableCode}
+			</if>
+			<if test= "type != null and type !='' ">
+	    		and (
+	    			(sei.departments in (SELECT t.name FROM  pub_role t,pub_user_role a 
+									WHERE t.role_id = a.role_id AND a.user_id =#{app_create_by}))
+					or 
+	          			(t.template_type='FL' and ('辅料采购员' in (SELECT t.name FROM  pub_role t,pub_user_role a 
+		                  WHERE t.role_id = a.role_id AND a.user_id =#{app_create_by}) or '辅料采购部门经理' in (SELECT t.name FROM  pub_role t,pub_user_role a 
+		                  WHERE t.role_id = a.role_id AND a.user_id =#{app_create_by}))  )
+		            or
+		            	(sei.departments='采购部门' and (
+		            		'商品采购员' in (SELECT t.name FROM  pub_role t,pub_user_role a 
+			                  WHERE t.role_id = a.role_id AND a.user_id =#{app_create_by}) or '商品采购部门经理' in (SELECT t.name FROM  pub_role t,pub_user_role a 
+			                  WHERE t.role_id = a.role_id AND a.user_id =#{app_create_by})
+		            	))
+				)
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY sei.evaluate_item_code
+    		</if>
+    	</if>
+    </select>
+    <!-- 查询考评权重总分-->
+    <select id="searchSumScore" resultMap="supplierEvaluateTableMap">
+    	SELECT  
+    		sum(round((sei.weight/100*ses.evaluate_item_score*t.evaluate_full_score)/100,2)) scoreTotal
+    		FROM supplier_evaluate se
+	        left join supplier_evaluate_score ses on se.evaluate_table_code=ses.evaluate_table_code
+	        left join supplier s ON s.supplier_code = se.supplier_code
+	        left join supplier_evaluate_template t ON se.template_code = t.template_code
+	        left join supplier_evaluate_item sei on sei.template_code = t.template_code
+    	<where>
+    		1=1 
+    		and sei.evaluate_item_code = ses.evaluate_item_code
+			and ses.evaluate_table_code = #{evaluateTableCode}
+    	</where>
+    </select>
+    <!-- 给供应商考评表打分 -->
+    <update id="updateSupplierEvaluateScoreByEvaluateItemCode" parameterType="hashmap">
+    	<foreach collection="list" item="item" index="index" separator=";" open="begin" close=";end;">
+    		UPDATE SUPPLIER_EVALUATE_SCORE
+		   	<set>
+		   		evaluate_item_score = #{item.score}
+		   	</set>
+		   	WHERE evaluate_item_code = #{item.evaluateItemCode} AND evaluate_table_code =#{item.evaluateTableCode}
+    	</foreach>
+    </update>
+</mapper>

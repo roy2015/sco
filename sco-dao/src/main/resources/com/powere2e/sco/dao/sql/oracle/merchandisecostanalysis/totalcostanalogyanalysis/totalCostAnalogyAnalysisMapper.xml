@@ -1,0 +1,563 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.powere2e.sco.interfaces.dao.merchandisecostanalysis.totalcostanalogyanalysis.TotalCostAnalogyAnalysisDao">
+	<resultMap
+		type="com.powere2e.sco.model.merchandisecostanalysis.accountingingredient.accounting.AccountingBo"
+		id="accountingBoMap">
+		<result property="merchandiseDxRoleCode" column="merchandiseDxRole" />
+		<result property="merchandiseDlRoleCode" column="merchandiseDlRole" />
+		<result property="merchandiseDxRoleName" column="dxRoleName" />
+		<result property="merchandiseDlRoleName" column="dlRoleName" />
+		<result property="oaApproveDate" column="approveDate" />
+		<result property="recordCount" column="record_count" />
+	</resultMap>
+	
+	<!-- 查询对照品商品 -->
+	<select id="searchReferMerchandiseList" resultMap="accountingBoMap">
+		SELECT
+		<if test="page_count == null">
+		  z.merchandiseCode, 
+	      z.merchandiseName, 
+	      z.supplierCode, 
+	      z.supplierName, 
+	      z.dxRoleName, 
+	      z.dlRoleName, 
+	      z.centreTypeName, 
+	      z.smallTypeName, 
+	      z.detailTypeName, 
+	      z.fineTypeName, 
+	      z.purchaseDepartments, 
+	      z.purchaseType, 
+	      z.storageForm,
+	      z.netWeight,
+	      z.applicationCode, 
+	      z.accountingCode, 
+	      z.approveDate,
+	      z.sumPrice,
+	      z.price contractPrice,
+	      z.oaContacts
+		</if>
+		<if test="page_count != null">
+			COUNT(1) AS record_count
+		</if>
+		FROM
+		(
+		SELECT 
+	        DECODE(ac.merchandise_code,NULL,NVL(f.merchandise_code,f.intention_code),f.merchandise_code) merchandiseCode,
+	        DECODE(ac.merchandise_code,NULL,NVL(f.merchandise_name,f.intention_name),f.merchandise_name) merchandiseName,
+	        DECODE(ac.supplier_code,NULL,NVL(f.supplier_code,f.intention_supplier_code),f.supplier_code) supplierCode,
+	        DECODE(ac.supplier_code,NULL,NVL(f.supplier_name,f.intention_supplier_name),f.supplier_name) supplierName,
+	        f.dxRoleName, 
+	        f.dlRoleName, 
+	        f.centre_type_name centreTypeName, 
+	        f.small_type_name smallTypeName, 
+	        f.detail_type_name detailTypeName, 
+	        f.fine_type_name fineTypeName, 
+	        f.purchase_departments purchaseDepartments, 
+	        DECODE(f.net_weight, 1, '公斤装', '定量装') netWeight, 
+	        (SELECT value_string FROM common_mapping_config WHERE key_type = 'PURCHASE_TYPE' AND code_string = f.purchase_type) purchaseType, 
+	        f.storage_form storageForm, 
+	        oa.application_code applicationCode, 
+	        ac.accounting_code accountingCode,
+	        ac.created created,
+	        ac.quoted_currency quotedCurrency,
+	        oa.oa_approve_date approveDate, 
+	        aar.sum_price sumPrice,
+	        mcp.price price,
+	        oa.oa_contacts oaContacts
+		FROM
+	    (
+	      <include refid="merchandiseSql"/>
+	    ) f INNER JOIN
+		(
+		    select * from accounting
+		) ac 
+		 ON 
+		 NVL(ac.merchandise_code,ac.intention_code) = DECODE(ac.merchandise_code,NULL,f.intention_code,f.merchandise_code)
+    	 AND ((NVL(ac.supplier_code,ac.intention_supplier_code) = f.intention_supplier_code) OR (NVL(ac.supplier_code,ac.intention_supplier_code) = f.supplier_code))
+        <choose>
+            <when test="lastrecord == 'checked' or minApproveDate != null or maxApproveDate != null">
+            	INNER JOIN 
+            </when>
+            <when test="lastrecord != 'checked' and minApproveDate == null and maxApproveDate == null">
+            	LEFT JOIN 
+            </when>
+            <otherwise>
+            </otherwise>
+	    </choose>
+        (																							  
+			SELECT
+			a.*,
+        	cam.accounting_code
+			FROM
+			(
+			<if test="lastrecord == 'checked'">
+				SELECT 
+			    last_oa.application_code,
+			    last_oa.oa_merchandise_code merchandise_code,
+			    last_oa.oa_supplier_code supplier_code,
+			    oa.application_status,
+			    oa.oa_approve_date,
+			    oa.oa_contacts
+			    FROM v_merchandise_last_oa last_oa
+			    LEFT JOIN oa_application oa ON oa.application_code = last_oa.application_code AND oa.oa_approve_date = last_oa.oa_approve_date
+			</if>
+			<if test="lastrecord != 'checked'">
+				SELECT
+				am.application_code,
+				am.merchandise_code,
+				am.supplier_code,
+				oa.oa_contacts,
+				oa.application_status,
+				oa.application_type,
+				oa.oa_approve_date
+				FROM oa_application oa, application_merchandise am
+				WHERE oa.application_code = am.application_code
+				<if test="minApproveDate != null or maxApproveDate != null">
+		      		AND oa.application_status = 'SPTG'
+		        </if>
+			</if>
+		    ) a
+		    LEFT JOIN analysis_reports_m arm ON arm.application_code = a.application_code
+            LEFT JOIN cost_analysis_merchandise cam ON cam.reports_code = arm.reports_code AND cam.merchandise_code = a.merchandise_code AND cam.supplier_code = a.supplier_code
+		  ) oa ON ac.accounting_code = oa.accounting_code
+		  AND ((ac.merchandise_code = oa.merchandise_code AND ac.supplier_code = oa.supplier_code) OR (ac.intention_code = oa.merchandise_code AND ac.intention_supplier_code = oa.supplier_code))
+		  LEFT JOIN accounting_aggregate_region aar ON aar.accounting_code = ac.accounting_code AND aar.region = 'X001'
+      	  LEFT JOIN merchandise_contract_price mcp ON mcp.application_code = oa.application_code AND mcp.region = 'X001' AND mcp.merchandise_code = oa.merchandise_code AND mcp.supplier_code = oa.supplier_code
+		  <where>
+		      <if test="minApproveDate != null">
+					AND oa.oa_approve_date >= #{minApproveDate}
+			  </if>
+			  <if test="maxApproveDate != null">
+					AND oa.oa_approve_date <![CDATA[<]]>(#{maxApproveDate}+1)
+			  </if>
+<!-- 			  <if test="minCreateDate == null and maxCreateDate == null">
+				    AND ac.row_number = 1
+              </if> -->
+		  </where>
+		  <if test="(quotedCurrency == null or quotedCurrency =='') and minCreateDate == null and maxCreateDate == null">
+		UNION 
+		  ( <!-- 快速调价的 -->
+		    SELECT 
+	          f.merchandise_code merchandiseCode, 
+	          f.merchandise_name merchandiseName, 
+	          f.supplier_code supplierCode, 
+	          f.supplier_name supplierName, 
+	          f.dxRoleName, 
+	          f.dlRoleName, 
+	          f.centre_type_name centreTypeName, 
+	          f.small_type_name smallTypeName, 
+	          f.detail_type_name detailTypeName, 
+	          f.fine_type_name fineTypeName, 
+	          f.purchase_departments purchaseDepartments, 
+	          DECODE(f.net_weight, 1, '公斤装', '定量装') netWeight, 
+	          (SELECT value_string FROM common_mapping_config WHERE key_type = 'PURCHASE_TYPE' AND code_string = f.purchase_type) purchaseType, 
+	          f.storage_form storageForm, 
+	          oa.application_code applicationCode, 
+	          null accountingCode,
+	          null created,
+	          null quotedCurrency,
+	          oa.oa_approve_date approveDate, 
+	          null sumPrice,
+	          mcp.price price,
+	          oa.oa_contacts oaContacts 
+		    FROM 
+		    (
+		     <include refid="merchandiseSql"/>
+		    ) f
+		     INNER JOIN
+		    (
+			   <if test="lastrecord == 'checked'">
+				SELECT 
+			    last_oa.application_code,
+			    last_oa.oa_merchandise_code merchandise_code,
+			    last_oa.oa_supplier_code supplier_code,
+			    oa.application_status,
+			    oa.oa_approve_date,
+			    oa.oa_contacts
+			    FROM v_merchandise_last_oa last_oa
+			    LEFT JOIN oa_application oa ON oa.application_code = last_oa.application_code AND oa.oa_approve_date = last_oa.oa_approve_date
+	            WHERE last_oa.application_type = 'MERCHANDISE_FASTADJUSTPRICE'
+				</if>
+				<if test="lastrecord != 'checked'">
+					SELECT
+						am.application_code,
+						am.merchandise_code,
+						am.supplier_code,
+						oa.oa_contacts,
+						oa.application_status,
+						oa.application_type,
+						oa.oa_approve_date
+					FROM oa_application oa, application_merchandise am
+					WHERE oa.application_code = am.application_code 
+					AND oa.application_type = 'MERCHANDISE_FASTADJUSTPRICE'
+					<if test="minApproveDate != null or maxApproveDate != null">
+						AND oa.application_status = 'SPTG'
+					</if>
+				</if>
+		    ) oa ON oa.merchandise_code = f.merchandise_code AND oa.supplier_code = f.supplier_code
+		    LEFT JOIN merchandise_contract_price mcp ON mcp.application_code = oa.application_code AND mcp.region = 'X001' AND mcp.merchandise_code = oa.merchandise_code AND mcp.supplier_code = oa.supplier_code
+	        <where>
+	        	 	1=1
+		      <if test="minApproveDate != null">
+					AND oa.oa_approve_date >= #{minApproveDate}
+			  </if>
+			  <if test="maxApproveDate != null">
+					AND oa.oa_approve_date <![CDATA[<]]>(#{maxApproveDate}+1)
+			  </if>
+	        </where>
+		  )
+		 </if>
+		) z
+		<where>
+			1=1
+			<if test="quotedCurrency != null and quotedCurrency !=''">
+				AND UPPER(z.quotedCurrency) like
+				UPPER('%'||#{quotedCurrency}||'%')
+			</if>
+			<if test="minCreateDate != null">
+				AND z.created >= #{minCreateDate}
+			</if>
+			<if test="maxCreateDate != null">
+				AND z.created <![CDATA[<]]>(#{maxCreateDate}+1)
+			</if>
+		</where> 
+		<if test="page_count == null">
+			<if test="app_orderby !=null">
+				ORDER BY ${app_orderby}
+			</if>
+			<if test="app_orderby ==null">
+				ORDER BY z.merchandiseCode DESC
+			</if>
+		</if>
+	</select>
+	
+	<!-- 查询商品的信息 -->
+	<sql id="merchandiseSql">
+	   SELECT 
+        m.merchandise_code, 
+        m.merchandise_name,
+        s.supplier_code, 
+        s.supplier_name, 
+        mi.intention_code,
+        mi.intention_name,
+        ism.intention_supplier_code,
+        NVL(mis.intention_supplier_name,s.supplier_name) intention_supplier_name,
+        m.purchase_departments, 
+        m.storage_form, 
+        mi.purchase_type, 
+        m.net_weight, 
+        dl.role_code dlRoleCode, 
+        dx.role_code dxRoleCode, 
+        dx.role_name dxRoleName, 
+        dl.role_name dlRoleName, 
+        ct.centre_type_code, 
+        ct.centre_type_name, 
+        sm.small_type_code, 
+        sm.small_type_name, 
+        dt.detail_type_code, 
+        dt.detail_type_name, 
+        ft.fine_type_code, 
+        ft.fine_type_name 
+      FROM 
+      merchandise m
+      LEFT JOIN supplier s ON s.supplier_code = m.supplier_code
+      LEFT JOIN intention_supplier_merchandise ism ON ism.merchandise_code = m.merchandise_code AND s.supplier_code = ism.supplier_code
+      LEFT JOIN merchandise_intention mi ON mi.intention_code = ism.intention_code 
+      LEFT JOIN merchandise_intention_supplier mis on mis.intention_supplier_code = ism.intention_supplier_code
+      LEFT JOIN merchandise_centre_type ct ON m.centre_type_code = ct.centre_type_code 
+      LEFT JOIN merchandise_small_type sm ON m.small_type_code = sm.small_type_code 
+      LEFT JOIN merchandise_detail_type dt ON m.detail_type_code = dt.detail_type_code 
+      LEFT JOIN merchandise_fine_type ft ON mi.fine_type_code = ft.fine_type_code 
+      LEFT JOIN merchandise_role r ON r.merchandise_code = m.merchandise_code 
+      LEFT JOIN merchandise_dx_role dx ON dx.role_code = r.dx_role_code 
+      LEFT JOIN merchandise_dl_role dl ON dl.role_code = r.dl_role_code
+      <where>
+		1=1
+		<if test="merchandiseCode !=null and merchandiseCode != ''">
+			AND UPPER(m.merchandise_code) LIKE
+			UPPER('%'||#{merchandiseCode}||'%')
+		</if>
+		<if test="merchandiseName !=null and merchandiseName != ''">
+			AND UPPER(m.merchandise_name) LIKE
+			UPPER('%'||#{merchandiseName}||'%')
+		</if>
+		<if test="supplierCode !=null and supplierCode !=''">
+			AND UPPER(s.supplier_code) LIKE
+			UPPER('%'||#{supplierCode}||'%')
+		</if>
+		<if test="supplierName !=null and supplierName !=''">
+			AND UPPER(s.supplier_name) LIKE
+			UPPER('%'||#{supplierName}||'%')
+		</if>
+		<if test="merchandiseDlRoleCode != null and merchandiseDlRoleCode != ''">
+			AND dl.role_code = #{merchandiseDlRoleCode}
+		</if>
+		<if test="merchandiseDxRoleCode != null and merchandiseDxRoleCode != ''">
+			AND dx.role_code = #{merchandiseDxRoleCode}
+		</if>
+		<if test="centreTypeCode != null and centreTypeCode != ''">
+			AND ct.centre_type_code = #{centreTypeCode}
+		</if>
+		<if test="smallTypeCode != null and smallTypeCode != ''">
+			AND sm.small_type_code = #{smallTypeCode}
+		</if>
+		<if test="detailTypeCode != null and detailTypeCode != ''">
+			AND dt.detail_type_code = #{detailTypeCode}
+		</if>
+		<if test="fineTypeCode != null and fineTypeCode != ''">
+			AND ft.fine_type_code = #{fineTypeCode}
+		</if>
+		<if test="purchaseDepartments != null and purchaseDepartments != ''">
+			<if test="purchaseDepartments == 'INLAND'">
+				AND m.purchase_departments = '国内'
+			</if>
+			<if test="purchaseDepartments == 'IMPORT'">
+				AND m.purchase_departments = '国际'
+			</if>
+		</if>
+		<if test="netWeight != null and netWeight != ''">
+			<if test="netWeight == 'GJZ'">
+				AND m.net_weight = 1
+			</if>
+			<if test="netWeight == 'DLZ'">
+				AND m.net_weight != 1
+			</if>
+		</if>
+		<if test="purchaseType != null and purchaseType != ''">
+			AND mi.purchase_type = #{purchaseType}
+		</if>
+		<if test="saleType != null and saleType != ''">
+			AND m.storage_form = #{saleType}
+		</if>
+		</where>
+	</sql>
+
+	<!-- 查询对照品商品意向品 -->
+	<select id="searchReferIntentionList" resultMap="accountingBoMap">
+		SELECT
+		<if test="page_count == null">
+			mi.intention_code intentionCode,
+			mi.intention_name intentionName,
+			DECODE(ac.supplier_code,NULL,ac.intention_supplier_code,ac.supplier_code) supplierCode,
+      		DECODE(ac.supplier_code,NULL,ac.intention_supplier_code,ac.supplier_code) supplierName,
+			
+			(SELECT value_string FROM common_mapping_config WHERE key_type = 'PURCHASE_DEPARTMENTS_TYPE' AND code_string = mi.purchase_departments) purchaseDepartments,
+			(SELECT value_string FROM common_mapping_config WHERE key_type = 'RATIONED_TYPE' AND code_string = mi.rationed) rationed,
+			(SELECT value_string FROM common_mapping_config WHERE key_type='PURCHASE_TYPE' AND code_string = mi.purchase_type) purchaseType,
+			mi.sale_type saleType,
+
+			ct.centre_type_name centreTypeName,
+			st.small_type_name smallTypeName,
+			dt.detail_type_name detailTypeName,
+			ft.fine_type_name fineTypeName,
+
+			ac.accounting_code accountingCode,
+			f.application_code applicationCode,
+			ac.quoted_date quotedDate,
+			ac.updated updated,
+			(SELECT u.real_name FROM pub_user u WHERE u.user_id=ac.updateby) updateby
+
+		</if>
+		<if test="page_count != null">
+			count(1) AS record_count
+		</if>
+		FROM 
+		(
+			SELECT
+		     *
+		    FROM accounting
+		    WHERE merchandise_code IS NULL
+		) ac
+		INNER JOIN merchandise_intention mi ON mi.intention_code = ac.intention_code
+        LEFT JOIN merchandise_intention_supplier mis ON mis.intention_supplier_code = ac.intention_supplier_code
+        LEFT JOIN supplier s ON (s.supplier_code = ac.intention_supplier_code)
+        LEFT JOIN merchandise_centre_type ct ON ct.centre_type_code = mi.centre_type_code
+        LEFT JOIN merchandise_small_type st ON st.small_type_code = mi.small_type_code
+        LEFT JOIN merchandise_detail_type dt ON dt.detail_type_code = mi.detail_type_code
+        LEFT JOIN merchandise_fine_type ft ON ft.fine_type_code = mi.fine_type_code
+        LEFT JOIN
+          (  
+           select 
+            g1.merchandise_code,
+            g1.supplier_code,
+            g2.application_code,
+            g2.application_status,
+            g2.oa_approve_date,
+            g4.accounting_code
+          FROM
+            application_merchandise g1
+            left join oa_application g2 on g2.application_code = g1.application_code
+            left join analysis_reports_m g3 on g3.application_code = g2.application_code
+            left join cost_analysis_merchandise g4 on g4.reports_code = g3.reports_code and g4.merchandise_code = g1.merchandise_code and g4.supplier_code = g1.supplier_code
+          ) f ON f.accounting_code = ac.accounting_code 
+		<where>
+			NVL(f.application_status,'null') != 'SPTG'
+			<if test="supplierCode !=null and supplierCode !=''">
+				AND (
+				UPPER(s.supplier_code) LIKE
+				UPPER('%'||#{supplierCode}||'%')
+				OR
+				UPPER(mis.intention_supplier_code) LIKE
+				UPPER('%'||#{supplierCode}||'%')
+				)
+			</if>
+			<if test="supplierName !=null and supplierName !=''">
+				AND (UPPER(s.supplier_name) LIKE
+				UPPER('%'||#{supplierName}||'%')
+				OR
+				UPPER(mis.intention_supplier_name) LIKE
+				UPPER('%'||#{supplierName}||'%')
+				)
+			</if>
+			<if test="intentionCode !=null and intentionCode != ''">
+				AND UPPER(mi.intention_code) LIKE
+				UPPER('%'||#{intentionCode}||'%')
+			</if>
+			<if test="intentionName !=null and intentionName != ''">
+				AND UPPER(mi.intention_name) LIKE
+				UPPER('%'||#{intentionName}||'%')
+			</if>
+			<if test="centreTypeCode != null and centreTypeCode != ''">
+				AND ct.centre_type_code = #{centreTypeCode}
+			</if>
+			<if test="smallTypeCode != null and smallTypeCode != ''">
+				AND st.small_type_code = #{smallTypeCode}
+			</if>
+			<if test="detailTypeCode != null and detailTypeCode != ''">
+				AND dt.detail_type_code = #{detailTypeCode}
+			</if>
+			<if test="fineTypeCode != null and fineTypeCode != ''">
+				AND ft.fine_type_code= #{fineTypeCode}
+			</if>
+			<if test="purchaseDepartments != null and purchaseDepartments != ''">
+				AND mi.purchase_departments = #{purchaseDepartments}
+			</if>
+			<if test="rationed != null and rationed != ''">
+				AND mi.rationed = #{rationed}
+			</if>
+			<if test="purchaseType != null and purchaseType != ''">
+				AND mi.purchase_type = #{purchaseType}
+			</if>
+			<if test="saleType != null and saleType != ''">
+				AND mi.sale_type = #{saleType}
+			</if>
+			<if test="minQuotedDate != null">
+				AND ac.quoted_date >= #{minQuotedDate}
+			</if>
+			<if test="maxQuotedDate != null">
+				AND ac.quoted_date <![CDATA[<]]>(#{maxQuotedDate}+1)
+			</if>
+			<if test="quotedCurrency != null and quotedCurrency !=''">
+				AND UPPER(ac.quoted_currency) = UPPER(#{quotedCurrency})
+			</if>
+		</where>
+		<if test="page_count == null">
+			<if test="app_orderby !=null">
+				ORDER BY ${app_orderby}
+			</if>
+			<if test="app_orderby ==null">
+				ORDER BY mi.intention_code DESC
+			</if>
+		</if>
+	</select>
+	
+	<!-- 查询虚假的核算表对象,供添加无核算编号的商品做成本分析 -->
+	<resultMap type="com.powere2e.sco.model.merchandisecostanalysis.accountingingredient.accounting.Accounting" id="accountingMap"></resultMap>
+	<select id="loadFalseAccounting" resultMap="accountingMap">
+		SELECT
+		m.merchandise_code merchandiseCode,
+		m.merchandise_name merchandiseName,
+		s.supplier_code supplierCode,
+		s.supplier_name supplierName
+		FROM
+		merchandise m
+		LEFT JOIN supplier s ON m.supplier_code = s.supplier_code
+		<where>
+		1=1
+		<if test="merchandiseCode != null and merchandiseCode != ''">
+		 AND m.merchandise_code = '${merchandiseCode}'
+		</if>
+		<if test="supplierCode != null or supplierCode != ''">
+		 AND m.supplier_code = '${supplierCode}'
+		</if>
+		</where>
+	</select>
+	
+	<!-- 查询虚假的核算表地区对象,供添加无核算编号的商品做成本分析 -->
+	<select id="listFalseAccountingRegion" resultType="com.powere2e.sco.model.merchandisecostanalysis.accountingingredient.accounting.AccountingRegion">
+		SELECT 
+		   r.region region
+		FROM merchandise_contract_price r
+		<where>
+		1=1
+		<if test="applicationCode != null and applicationCode != ''">
+		AND r.application_code = '${applicationCode}'
+		</if>
+		<if test="merchandiseCode != null and merchandiseCode != ''">
+		 AND r.merchandise_code = '${merchandiseCode}'
+		</if>
+		<if test="supplierCode != null or supplierCode != ''">
+		 AND r.supplier_code = '${supplierCode}'
+		</if>
+		</where>
+		order by r.region
+	</select>
+	
+	<!-- 查询对应商品的总价地区 -->
+	<resultMap type="com.powere2e.sco.model.merchandisecostanalysis.totalcostanalogyanalysis.MerchandiseContractPrice" id="merchandiseContractPriceMap">
+	   <result property="region" column="region"/>
+	   <result property="price" column="price"/>
+	</resultMap>
+	<select id="searchMerchandiseContractPrice" resultMap="merchandiseContractPriceMap">
+	  	   SELECT
+	  	   		mcp.region region,
+			   <if test="quantity != null and convertAfterQuantity != null">
+	           ROUND(mcp.price/${quantity}*${convertAfterQuantity},3) price
+	           </if>
+	           <if test="quantity == null or convertAfterQuantity == null">
+			   mcp.price price
+	           </if>
+			FROM MERCHANDISE_CONTRACT_PRICE mcp
+			<if test="accountingCode != null and accountingCode != ''">
+			INNER JOIN analysis_reports_m arm on arm.application_code = mcp.application_code
+			INNER JOIN cost_analysis_merchandise cam ON cam.reports_code = arm.reports_code
+			INNER JOIN accounting ac ON ac.accounting_code = cam.accounting_code
+			</if>
+			<where>
+			1=1
+			<if test="accountingCode != null and accountingCode != ''">
+			 AND ac.accounting_code = #{accountingCode}
+			</if>
+			<if test="accountingCode == null or accountingCode == ''">
+			 AND mcp.application_code = #{applicationCode}
+			 AND mcp.supplier_code = #{supplierCode}
+			 AND mcp.merchandise_code = #{merchandiseCode}
+			</if>
+			
+			
+		  </where>
+			GROUP BY mcp.region,mcp.price
+	  	    ORDER BY mcp.region
+	</select>
+	
+	
+	<select id="searchOAApplicationCode" resultType="String">
+		SELECT 
+		r.application_code
+		FROM merchandise_contract_price r
+		<where> 
+			1=1
+			<if test="applicationCode != null and applicationCode != ''">
+			AND r.application_code = '${applicationCode}'
+			</if>
+			<if test="merchandiseCode != null and merchandiseCode != ''">
+			AND r.merchandise_code = '${merchandiseCode}'
+			</if>
+			<if test="supplierCode != null and supplierCode != ''">
+			AND r.supplier_code = '${supplierCode}'
+			</if>
+		</where>
+	</select>
+	
+</mapper>

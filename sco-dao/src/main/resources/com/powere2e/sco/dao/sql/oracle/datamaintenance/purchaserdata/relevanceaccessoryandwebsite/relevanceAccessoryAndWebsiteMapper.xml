@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.datamaintenance.purchaserdata.relevanceaccessoryandwebsite.RelevanceAccessoryAndWebsiteDao">
+	<resultMap type="com.powere2e.sco.model.datamaintenance.purchaserdata.relevanceaccessoryandwebsite.RelevanceAccessoryAndWebsite" id="relAccAndWebMap">
+		<result property="id" column="id"/>
+		<result property="accessoryCode" column="accessoryCode"/>
+		<result property="accessoryName" column="accessoryName"/>
+		<result property="intentionCode" column="intentionCode"/>
+		<result property="intentionName" column="intentionName"/>
+		<result property="fineTypeCodes" column="fineTypeCodes"/>
+		<result property="fineTypeName" column="fineTypeName"/>
+		
+		<result property="intentionSupplierCode" column="intentionSupplierCode"/>
+		<result property="intentionSupplierName" column="intentionSupplierName"/>
+		<result property="supplierCode" column="supplierCode"/>
+		<result property="supplierName" column="supplierName"/>
+		<result property="websiteMaterialName" column="websiteMaterialName"/>
+		<result property="websiteName" column="websiteName"/>
+		<result property="websiteUrl" column="websiteUrl"/>
+		<result property="priceRegion" column="priceRegion"/>
+		<result property="materialBigTypeName" column="materialBigTypeName"/>
+		<result property="materialSmallTypeName" column="materialSmallTypeName"/>
+		<result property="weight" column="weight"/>
+		
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    
+    <!-- 查询(可分页)-->
+    <select id="listRelevanceAccessoryAndWebsite" resultMap="relAccAndWebMap">
+    	SELECT  
+    	<if test="page_count == null">
+    		wi.intention_code intentionCode,<!-- 辅料意向品编号 -->
+    		ai.intention_name intentionName,<!-- 辅料意向品名称 -->
+    		acc.material_code accessoryCode,<!-- 辅料编码 -->
+	 		acc.material_name accessoryName, <!-- 原材料辅料名称 -->
+			
+    		cs.intention_supplier_code intentionSupplierCode, <!-- 意向供应商编码 -->
+    		cs.intention_supplier_name intentionSupplierName, <!-- 意向供应商名称-->
+    		s.supplier_code	supplierCode, <!-- 供应商编码 -->
+    		s.supplier_name supplierName, <!-- 供应商名称 -->
+    		
+    		ai.fine_type_code fineTypeCodes,
+	 		ft.fine_type_name fineTypeName, <!-- 细分类名称 -->
+	 		am.id,m.material_name websiteMaterialName, <!-- 公示网站原料名称 -->
+	 		am.weight,
+	 		w.website_name websiteName,mr.website_url websiteUrl,mr.material_region_name priceRegion,
+	 		b.material_big_type_name materialBigTypeName,s.material_small_type_name materialSmallTypeName,
+			(SELECT u.real_name FROM pub_user u WHERE u.user_id = am.createby) createby, am.created 
+	    </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count 
+    	</if>
+		FROM 
+			(
+			SELECT  
+				a2.application_code,a2.enquiry_code,a2.intention_supplier_code,
+			  	a2.accessory_code,a2.intention_code,a2.supplier_code 
+            FROM 
+                 ( SELECT 
+            			t.intention_supplier_code,t.intention_code,
+                   		MAX(oa.oa_approve_date)oa_approve_date
+      				FROM 
+       					wl_info t,oa_application oa 
+       				WHERE 
+      					t.application_code = oa.application_code 
+      					AND UPPER(oa.application_status) = 'SPTG' 
+      					AND t.purchase_count IS NOT NULL 
+                      GROUP BY t.intention_code,t.intention_supplier_code
+                  ) a1
+                  INNER JOIN (
+                    SELECT 
+                     oa.application_code,oa.oa_approve_date, t.enquiry_code,
+                     t.accessory_code,t.intention_supplier_code,
+                     t.intention_code,  t.supplier_code
+    				FROM 
+    					wl_info t, oa_application oa 
+    				WHERE 
+    					t.application_code = oa.application_code 
+    					AND UPPER(oa.application_status) = 'SPTG' 
+    					AND t.purchase_count IS NOT NULL  
+                      ) a2 
+                    ON a1.intention_code = a2.intention_code AND a1.intention_supplier_code = a2.intention_supplier_code 
+                        AND a1.oa_approve_date = a2.oa_approve_date
+			)wi <!-- 物料信息 -->
+			LEFT JOIN accessory_enquiry_material acc ON acc.enquiry_code = wi.enquiry_code <!-- 辅料表 -->
+			LEFT JOIN accessory_intention ai ON ai.intention_code = wi.intention_code  <!-- 辅料意向品 -->
+			LEFT JOIN accessory_fine_type ft ON ft.fine_type_code = ai.fine_type_code  <!-- 辅料细分类 -->
+			LEFT JOIN supplier s on wi.supplier_code = s.supplier_code <!-- 供应商编号 -->
+			LEFT JOIN accessory_intention_supplier cs on wi.intention_supplier_code = cs.intention_supplier_code <!-- 意向品供应商编号 -->
+			LEFT JOIN accessory_relevance_materia am ON acc.material_code = am.accessory_material_code 
+				AND ai.intention_code = am.intention_code 
+				AND NVL(wi.supplier_code,wi.intention_supplier_code) = am.intention_supplier_code <!-- 关联公示网站 -->
+			LEFT JOIN material m ON am.material_code = m.material_code <!-- 原料表 -->
+			LEFT JOIN website w ON m.website_code = w.website_code <!-- 公示网站 -->
+			LEFT JOIN material_region mr ON m.material_code = mr.material_code 
+				AND am.material_region_code = mr.material_region_code <!-- 价格地区 -->
+			LEFT JOIN material_big_type b ON m.material_big_type_code = b.material_big_type_code <!-- 原料大类 -->
+   			LEFT JOIN material_small_type s ON m.material_small_type_code = s.material_small_type_code 
+				 AND m.material_big_type_code = s.material_big_type_code   <!-- 原料小类 -->
+    	WHERE 
+    		1 = 1 
+    		<if test="supplierCode != null and supplierCode != ''">
+    			AND 
+    			(
+    				UPPER(s.supplier_code) LIKE UPPER('%'||#{supplierCode}||'%')
+    				OR UPPER(cs.intention_supplier_code) LIKE UPPER('%'||#{supplierCode}||'%')
+    			)
+    		</if>
+    		<if test="supplierName != null and supplierName != ''">
+    			AND 
+    			(
+    				UPPER(s.supplier_name) LIKE UPPER('%'||#{supplierName}||'%')
+    				OR UPPER(cs.intention_supplier_name) LIKE UPPER('%'||#{supplierName}||'%')
+    			)
+    		</if>
+    		<if test="intentionCode != null and intentionCode != ''">
+    			AND UPPER(wi.intention_code) LIKE UPPER('%'||#{intentionCode}||'%')
+    		</if>
+    		<if test="intentionName != null and intentionName != ''">
+    			AND UPPER(ai.intention_name) LIKE UPPER('%'||#{intentionName}||'%')
+    		</if>
+    		<if test="fineTypeCodes != null and fineTypeCodes != '' and fineTypeCodes !='ALL'">
+    			AND UPPER(ft.fine_type_code) LIKE UPPER(#{fineTypeCodes})
+    		</if>
+    		<if test="fineTypeCodes == null or fineTypeCodes == '' or fineTypeCodes =='ALL'">
+    			AND UPPER(ft.fine_type_code) IN ('PS', 'PB', 'PL')
+    		</if>
+    		<if test="accessoryName != null and accessoryName != ''">
+    			AND UPPER(acc.material_name ) LIKE UPPER('%'||#{accessoryName}||'%')
+    		</if>
+    		<if test="ifRelevanced != null and ifRelevanced != '' and ifRelevanced != 'ALL'">
+    			<if test='ifRelevanced == "Y"'>
+    				AND am.material_code IS NOT NULL
+    			</if>
+    			<if test='ifRelevanced == "N"'>
+    				AND am.material_code IS NULL
+    			</if>
+    		</if>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY am.created DESC
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 验证是否存在重复数据 -->
+    <select id="ifExistsReleAccessoryAndWeb" resultType="String">
+    	SELECT 
+    		id 
+    	FROM 
+    		accessory_relevance_materia t
+		WHERE 
+			t.intention_code = #{intentionCode}
+			AND t.accessory_material_code = #{accessoryCode}
+			<if test="intentionSupplierCode != null and intentionSupplierCode != ''">
+				AND t.intention_supplier_code = #{intentionSupplierCode}
+			</if>
+			AND material_code = #{websiteMaterialName}
+			<if test="priceRegion != null and priceRegion != ''">
+	    		AND t.material_region_code = #{priceRegion} 
+    		</if>
+    		AND rownum = 1
+    </select>
+    
+    <!-- 关联原料和网站 --> 
+	<insert id="insertRelevanceAccessoryAndWebsite" parameterType="hashmap">
+		INSERT INTO accessory_relevance_materia(id,intention_code,intention_supplier_code,
+			accessory_material_code,material_code,material_region_code,weight,created,createby) 
+		 VALUES(#{id},#{intentionCode},#{intentionSupplierCode},
+		 	#{accessoryCode},#{websiteMaterialName},#{priceRegion},#{weight},#{app_created},#{app_create_by})
+    </insert>
+    
+    <!-- 取消原料与网站关联 -->
+    <delete id="deleteRelevanceAccessoryAndWebsite" parameterType="hashmap">
+        DELETE FROM 
+			accessory_relevance_materia 
+        WHERE 
+   			id in (${ids})
+    </delete>
+    
+</mapper>

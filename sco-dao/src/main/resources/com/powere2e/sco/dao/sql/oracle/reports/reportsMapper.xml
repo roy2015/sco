@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.powere2e.sco.interfaces.dao.reports.ReportsDao">
+	<resultMap type="com.powere2e.sco.model.reports.Reports" id="reportsMap">
+		<result property="applicationCode" column="applicationCode"/>
+		<result property="reportsCode" column="reportsCode"/>
+		<result property="reportsTypeCode" column="reportsTypeCode"/>
+		<result property="reportsTypeName" column="reportsTypeName"/>
+		<result property="reportsName" column="reportsName"/>
+		<result property="reportsUrl" column="reportsUrl"/>
+		
+		<result property="accountingCode" column="accountingCode"/>
+		<result property="intentionCode" column="intentionCode"/>
+		<result property="intentionSupplierCode" column="intentionSupplierCode"/>
+		<result property="merchandiseCode" column="merchandiseCode"/>
+		<result property="supplierCode" column="supplierCode"/>
+		
+		<result property="oaStatus" column="oaStatus"/>
+		<result property="oaNo" column="oaNo"/>
+		
+		<result property="created" column="created"/>
+		<result property="createby" column="createby"/>
+		<result property="updated" column="updated"/>
+		<result property="updateby" column="updateby"/>
+		<result property="createUserName" column="createUserName"/>
+		<result property="updateUserName" column="updateUserName"/>
+		
+		<result property="recordCount" column="record_count" />
+    </resultMap>
+    <!-- 查询我的报表(可分页)-->
+    <select id="searchReports" resultMap="reportsMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.reports_code reportsCode,t.reports_type_code reportsTypeCode,t.reports_name reportsName,t.reports_url reportsUrl
+       		,t.created,	t.updated ,(r.application_code||r1.application_code) oaNo,o.application_status oaStatus,a.reports_type_name reportsTypeName
+			,(select u.real_name from pub_user u where u.user_id=t.createby) as createUserName,
+           	(select u.real_name from pub_user u where u.user_id=t.updateby) as updateUserName
+           	
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM reports t
+      		left join ANALYSIS_REPORTS_M r on t.reports_code=r.reports_code
+      		left join ANALYSIS_REPORTS_A r1 on t.reports_code=r1.reports_code
+      		left join OA_APPLICATION o on (r.application_code=o.application_code OR r1.application_code=o.application_code)
+      		left join REPORTS_TYPE a on t.reports_type_code=a.reports_type_code
+    	<where>
+    		1=1
+	    	<if test= "reportsCode != null and reportsCode!=''">
+			AND t.reports_code = #{reportsCode}
+			</if>
+	    	<if test= "reportsTypeName != null and reportsTypeName!=''">
+			AND UPPER(a.reports_type_name) LIKE UPPER('%'||#{reportsTypeName}||'%')
+			</if>
+			<if test= "reportsTypeCode != null and reportsTypeCode!=''">
+			AND UPPER(t.reports_type_code) LIKE UPPER(#{reportsTypeCode})
+			</if>
+	    	<if test= "reportsName != null and reportsName!=''">
+			AND UPPER(t.reports_name) LIKE UPPER('%'||#{reportsName}||'%')
+			</if>
+	    	<if test= "reportsUrl != null and reportsUrl!=''">
+			AND UPPER(t.reports_url) LIKE UPPER('%'||#{reportsUrl}||'%')
+			</if>
+	    	<if test= "created != null ">
+			AND	t.created >= #{created}
+			</if>
+			<if test= "createdEnd != null ">
+			AND	t.created<![CDATA[<]]> (#{createdEnd} + 1)
+			</if>
+	    	<if test= "createby != null and createby!=''">
+			AND UPPER(t.createby) LIKE UPPER('%'||#{createby}||'%')
+			</if>
+	    	<if test= "updated != null and updated!=''">
+			AND	convert(varchar,t.updated,120) LIKE (#{updated})
+			</if>
+	    	<if test= "updateby != null and updateby!=''">
+			AND UPPER(t.updateby) LIKE UPPER('%'||#{updateby}||'%')
+			</if>
+			<if test= "oaStatus != null and oaStatus!=''">
+			AND DECODE(o.application_status,null,'W',o.application_status,o.application_status) =#{oaStatus} 
+			</if>
+			<if test= "oaNo != null and oaNo!='' and load ==null" >
+			AND (UPPER(r.application_code) LIKE UPPER('%'||#{oaNo}||'%') or UPPER(r1.application_code) LIKE UPPER('%'||#{oaNo}||'%'))
+			</if>
+			<if test= "oaNo != null and oaNo!='' and load !=null" >
+			AND (r.application_code=#{oaNo} or r1.application_code=#{oaNo})
+			</if>
+			<if test= "userId != null and userId!=''" >
+			AND t.createby=#{userId}
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.created DESC
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 根据主键查询某个我的报表(可分页)-->
+    <select id="loadReports" resultMap="reportsMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.reports_code reportsCode,t.reports_type_code reportsTypeCode,t.reports_name reportsName,t.reports_url reportsUrl
+       		,t.created,	t.updated 
+		   ,(select u.real_name from pub_user u where u.user_id=t.createby) as createUserName,
+           	(select u.real_name from pub_user u where u.user_id=t.updateby) as updateUserName
+    	</if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM reports t
+    	<where>
+    		1=1
+	    	<if test= "reportsCode != null and reportsCode!=''">
+			AND  t.REPORTS_CODE = #{reportsCode}
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.created DESC
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 查询我的报表(未关联其他表)-->
+    <select id="listReportsByParams" resultMap="reportsMap">
+    	SELECT  
+    	<if test="page_count == null">
+       		t.reports_code reportsCode,t.reports_type_code reportsTypeCode,
+       		t.reports_name reportsName,t.reports_url reportsUrl,
+       		t.created, a.reports_type_name reportsTypeName
+			,(select u.real_name from pub_user u where u.user_id=t.createby) as createUserName,
+           	(select u.real_name from pub_user u where u.user_id=t.updateby) as updateUserName
+	   </if>
+    	<if test="page_count != null">
+       		count(1) AS record_count
+    	</if>
+      		FROM reports t
+      		LEFT JOIN reports_type a ON t.reports_type_code = a.reports_type_code
+    	<where>
+    			UPPER(t.createby) LIKE UPPER(#{app_create_by})
+	    	<if test= "reportsCode != null and reportsCode!=''">
+			AND t.reports_code = #{reportsCode}
+			</if>
+	    	<if test= "reportsTypeName != null and reportsTypeName!=''">
+			AND UPPER(a.reports_type_name) LIKE UPPER('%'||#{reportsTypeName}||'%')
+			</if>
+			<if test= "reportsTypeCode != null and reportsTypeCode!=''">
+			AND UPPER(t.reports_type_code) LIKE UPPER(#{reportsTypeCode})
+			</if>
+	    	<if test= "reportsName != null and reportsName!=''">
+			AND UPPER(t.reports_name) LIKE UPPER('%'||#{reportsName}||'%')
+			</if>
+	    	<if test= "reportsUrl != null and reportsUrl!=''">
+			AND UPPER(t.reports_url) LIKE UPPER('%'||#{reportsUrl}||'%')
+			</if>
+	    	<if test= "created != null ">
+			AND	t.created >= #{created}
+			</if>
+			<if test= "createdEnd != null ">
+			AND	t.created<![CDATA[<]]> (#{createdEnd} + 1)
+			</if>
+    	</where>
+    	<if test="page_count == null">
+    		<if test="app_orderby !=null">
+    			ORDER BY ${app_orderby}
+    		</if>
+    		<if test="app_orderby ==null">
+    			ORDER BY t.created DESC
+    		</if>
+    	</if>
+    </select>
+    
+    <!-- 增加我的报表 --> 
+	<insert id="saveReports" parameterType="hashmap">
+		INSERT INTO reports(reports_code,reports_type_code,reports_name,reports_url,created,createby) 
+			 VALUES(s_reports.NEXTVAL,#{reportsTypeCode},#{reportsName},#{reportsUrl},#{app_created},#{app_create_by})
+    </insert>
+    
+	<!-- 新增成本分析-商品 -->
+	<insert id="insertReportAnalysis">
+		INSERT INTO cost_analysis_merchandise(accounting_code, merchandise_code, supplier_code, reports_code)
+		VALUES (#{accountingCode}, #{merchandiseCode}, #{supplierCode}, #{reportsCode})
+	</insert>
+	
+	<!-- 查询当前的sequence -->
+	<select id="searchCurrSequence" resultType="String">
+	 SELECT s_reports.currval FROM dual
+	</select>
+	
+	<!-- 判断文件名称是否存在 -->
+	<select id="ifFileNameExists" resultType="String">
+		SELECT 
+			reports_type_code 
+		FROM 
+			reports 
+		WHERE 
+			UPPER(reports_type_code) = UPPER(#{reportsTypeCode}) 
+			AND UPPER(reports_name) = UPPER(#{reportsName}) 
+			AND ROWNUM = 1
+	</select>
+	
+    <!-- 修改我的报表  -->
+    <update id="updateReports" parameterType="hashmap">
+		UPDATE	
+				reports	
+		   SET	
+		   		reports_type_code=#{reportsTypeCode},
+		   		reports_name=#{reportsName},
+		   		reports_url=#{reportsUrl}		   		
+		 WHERE	
+		 		REPORTS_CODE=#{reportsCode}
+    </update>
+    <!-- 删除我的报表 -->
+    <delete id="deleteReports" parameterType="hashmap">
+        DELETE FROM 
+        			reports 
+        WHERE 
+        			REPORTS_CODE=#{reportsCode} <!--AND client_id=#{app_user_clientID}-->
+    </delete>
+</mapper>
